@@ -3,7 +3,7 @@ from threading import RLock
 from sqlalchemy import MetaData, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
-
+from DAL.Conns.ProjectMember import ProjectMember
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Service.config import engine  # Make sure you have your SQLAlchemy engine defined
 
@@ -92,5 +92,22 @@ class DBAccess:
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
                 return ResponseFailMsg(f"Rolled back, failed to delete from the database: {str(e)}")
+            finally:
+                session.close()  # Close the session
+
+    def load_project_members(self, project_name):
+        with self.lock:
+            session = Session()  # Create a new session
+            try:
+                # Query for all user_name values where org_name matches the given org_name
+                usernames = session.query(ProjectMember.user_name).filter_by(project_name=project_name).all()
+
+                # Extract just the user_name values from the query result (which are tuples)
+                usernames_list = [username[0] for username in usernames]
+                return ResponseSuccessObj("loaded members", usernames_list) if usernames_list else ResponseFailMsg(
+                    "No users found for the given organization.")
+            except SQLAlchemyError as e:
+                session.rollback()
+                return ResponseFailMsg(f"Rolled back, failed to retrieve usernames: {str(e)}")
             finally:
                 session.close()  # Close the session
