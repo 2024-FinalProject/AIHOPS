@@ -1,46 +1,52 @@
-from datetime import datetime
-from threading import RLock
-from DAL.Objects import DBProject
-from DAL.Conns.ProjectMember import ProjectMember
-from DAL.DBAccess import DBAccess
-from Domain.src.DS.IdMaker import IdMaker
-from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
-from Domain.src.ProjectModule.IBinder import IBinder
+class Damage:
+    def __init__(self, damage):
+        ...
 
-class Org(IBinder):
-
-    def __init__(self, name, founder, oid, **kwargs):
-        super().__init__("org", name, founder, oid)
-
-        # Basic fields with defaults
-        self.description = kwargs.get('description') or "No description provided"
-        self.date_created = datetime.now().strftime("%Y-%m-%d")
-        self.is_active = True
-        self.db_access = DBAccess()
-        self.db_access.insert(ProjectMember(name, founder))
-        self.load_project_members_from_db() 
+class Factor:
+    def __init__(self, name, description):
+        self.name = name
+        self.description = description
 
 
-    def load_project_members_from_db(self):
-        res = self.db_access.load_project_members(self.name)
-        if res.result is not None:
-            self.members = res.result
 
-    def addMember(self, requesting, to_add):
-        res = super().addMember(requesting, to_add)
-        if res.success:
-            conn = ProjectMember(self.name, to_add)
-            db_res = self.db_access.insert(conn)
-            if not db_res.success:
-                super().removeMember(requesting, to_add)
-                return db_res
-        return res
-    
-    def removeMember(self, requesting, to_remove):
-        res = super().removeMember(requesting, to_remove)
-        if res.success:
-            db_res = self.db_access.delete_obj_by_query(ProjectMember, {'project_name': self.name, 'user_name': to_remove})
-            if not db_res.success:
-                super().removeMember(requesting, to_remove)
-                return db_res
-        return res
+class Project:
+    def __init__(self, pid, name, description, founder):
+        self.name = name
+        self.description = description
+        self.founder = founder
+        self.pid = pid
+        self.factors_inited = False
+        self.severity_factors_inited = False
+        self.members = {}
+        self.add_member(founder)
+
+
+    def vote(self):
+        if not self.factors_inited or not self.severity_factors_inited:
+            raise Exception("cant vote on not finalized project")
+        # vote
+
+    # expecting a list of factor objects
+    def set_factors(self, factors):
+        self.factors = factors
+        self.factors_inited = True
+
+    # expecting a list of 5 floats
+    def set_severity_factors(self, severity_factors):
+        self.severity_factors = severity_factors
+        self.severity_factors_inited = True
+
+    def add_member(self, user_name):
+        if user_name not in self.members.keys():
+            self.members[user_name] = False
+
+
+    def remove_member(self, asking, user_name):
+        # what happens if the website crashes and a member is removed from the project but the project is not yet
+        # removed from the member -> need to find these inconsistencies in the upload of the site
+        if self.founder != asking:
+            raise Exception("only the founder can remove members from project")
+        mem = self.members.get(user_name)
+        if mem is None:
+            raise Exception(f"member {user_name} is not a member of this project")
+        self.members.pop(user_name)
