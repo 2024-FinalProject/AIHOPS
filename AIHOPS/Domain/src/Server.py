@@ -83,3 +83,11 @@ class Server:
             return res
         session = res.result
         return session.logout()
+    
+    def vote(self, cookie, pid, factors_values, severity_factors_values):
+        res = self.get_session_member(cookie)
+        if not res.success:
+            return res
+        session = res.result
+        session.vote(pid, factors_values, severity_factors_values)
+        return ResponseSuccessObj("vote succeded", session)
