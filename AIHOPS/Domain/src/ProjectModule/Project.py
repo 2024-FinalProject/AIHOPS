@@ -33,8 +33,9 @@ class Project:
 
     # expecting a list of factor objects
     def set_factors(self, factors):
-        self.factors = factors
-        self.factors_inited = True
+        if not self.factors_inited:
+            self.factors = factors
+            self.factors_inited = True
         #insert to factors db
         #get the factors id and update the project_factors db
 
