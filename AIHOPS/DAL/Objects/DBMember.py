@@ -6,11 +6,11 @@ from Service.config import Base
 
 class DBMember(Base):
     __tablename__ = 'members'
-    id = Column(Integer, primary_key=True)
+    email = Column(Integer, primary_key=True)
     name = Column(String(50))
     encrypted_passwd = Column(String)
 
-    def __init__(self, name, encrypted_passwd, uid):
-        self.id = uid
+    def __init__(self, name, encrypted_passwd, email):
+        self.email = email
         self.name = name
         self.encrypted_passwd = encrypted_passwd

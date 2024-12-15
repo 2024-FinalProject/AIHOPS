@@ -20,14 +20,15 @@ class Project:
         self.founder = founder
         self.factors_inited = False
         self.severity_factors_inited = False
-        # map user_name to a pair of two lists: (factors_values, severity_factors_values)
+        self.isActive = False  
+        # maps a user_name to a pair of two lists: (factors_values, severity_factors_values)
         self.members = {}
         self.members[founder] = None
 
 
     def vote(self, user_name, factors_values, severity_factors_values):
         with self.lock:
-            if not self.is_initialized_project():
+            if not self.is_initialized_project() or not self.isActive:
                 raise Exception("cant vote on not finalized project")
             self.members[user_name] = (factors_values, severity_factors_values)
 
@@ -48,7 +49,7 @@ class Project:
     def add_members(self, user_names):
         #TODO:: Need to check if a user exists in the site (registerd) - ?
         existent_members = []
-        if not self.is_initialized_project():
+        if not self.is_initialized_project() or not self.isActive:
             raise Exception("cant add member on not finalized project")
         for user_name in user_names:
             if user_name not in self.members.keys():
@@ -76,3 +77,15 @@ class Project:
 
     def is_initialized_project(self):
         return self.factors_inited and self.severity_factors_inited
+    
+    def get_members(self):
+        with self.lock:
+            return self.members.keys()
+        
+    def publish_project(self):
+        with self.lock:
+            self.isActive = True
+    
+    def hide_project(self):
+        with self.lock:
+            self.isActive = False
