@@ -2,6 +2,7 @@ import random
 import sys
 from threading import RLock
 
+from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
@@ -15,6 +16,7 @@ class Server:
         self.sessions = {}  # map cookies to sessions
         self.enter_lock = RLock()
         self.user_controller = MemberController(self)
+        self.project_manager = ProjectManager()
         self.user_deletion_lock = RLock()
         self.db_access = DBAccess()
         self.project_manager = ProjectManager()
@@ -29,6 +31,8 @@ class Server:
             cookie = random.randrange(min, max)
             if self.sessions.get(cookie) is None:
                 return cookie
+            
+    # ------------- User ------------------
 
     def enter(self):
         # TODO: Should I start a thread for every user?? or does the OS does the scheduling for me?
@@ -86,15 +90,32 @@ class Server:
         session = res.result
         return session.logout()
     
+    # ------------- Project ------------------
+
+    def create_project(self, cookie, name, description, founder):
+        res = self.get_session_member(cookie)
+        if not res.success:
+            return res
+        session = res.result
+        return self.project_manager.create_project(name, description, founder)
+    
     def vote(self, cookie, pid, factors_values, severity_factors_values):
         res = self.get_session_member(cookie)
         if not res.success:
             return res
         session = res.result
         user_name = session.user_name
-        self.project_manager.vote(pid, user_name, factors_values, severity_factors_values)
-        return ResponseSuccessObj("vote succeded", session)
+        return self.project_manager.vote(pid, factors_values, severity_factors_values)
+    
+    def get_pending_requests(self, cookie, email):
+        res = self.get_session_member(cookie)
+        if not res.success:
+            return res
+        res = self.user_controller.get_pending_requests(email)
+        if res.success:
+            return res.result
 
+   
     def get_score(self, cookie, pid):
         res = self.get_session_member(cookie)
         if not res.success:

@@ -1,6 +1,7 @@
 from threading import RLock
 
 from DAL.DBAccess import DBAccess
+from DAL.Objects import DBPendingRequests
 from DAL.Objects.DBMember import DBMember
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg
@@ -56,3 +57,6 @@ class MemberController:
         if member is None:
             return ResponseFailMsg(f'invalid user: {name}')
         return ResponseSuccessMsg(f'member {name} is valid')
+
+    
+

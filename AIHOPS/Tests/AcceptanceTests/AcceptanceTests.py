@@ -1,14 +1,15 @@
 import unittest
 
 from Domain.src.Server import Server
+from DAL.Objects import DBPendingRequests, DBProject
 from Service.config import Base, engine
 
 # How to run the tests:
 #       In a terminal, run the following commands:
 #               cd AIHOPS
-#               python -m unittest AcceptanceTests.AcceptanceTests
+#               python -m unittest Tests.AcceptanceTests.AcceptanceTests
 
-class UserAcceptanceTests(unittest.TestCase):
+class AcceptanceTests(unittest.TestCase):
 
     # ------------- Base ------------------
 
@@ -65,3 +66,27 @@ class UserAcceptanceTests(unittest.TestCase):
         cookie = self.server.enter().result.cookie
         res = self.server.logout(cookie)
         self.assertFalse(res.success, f'logout succeeded when it should have failed - not logged in')
+
+    # ------------- Project ------------------
+
+    def test_Create_Project_Success(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        self.assertTrue(res.success, res.msg)
+
+    def test_Create_Project_Fail_Empty_Cookie(self):
+        res = self.server.create_project(None, "Project1", "Description1", "Alice")
+        self.assertFalse(res.success, f'create project succeeded when it should have failed - empty cookie')
+
+    def test_Create_Project_Fail_Not_Logged_In(self):
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        self.assertFalse(res.success, f'create project succeeded when it should have failed - not logged in')
+
+    def test_Create_Project_Fail_Existing_Project(self):
+        self.server.login(self.cookie1, "Alice", "")
+        self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        self.assertFalse(res.success, f'create project succeeded when it should have failed - existing project')
+    
+
+
