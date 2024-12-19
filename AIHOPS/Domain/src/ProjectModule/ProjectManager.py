@@ -42,7 +42,9 @@ class ProjectManager:
 
 
     def create_project(self, name, description, founder):
-        self.verify_founder_exists(founder)
+        # self.verify_founder_exists(founder)
+        if not self.founder_projects.get(founder):
+            self.founder_projects.insert(founder, [])
     
         temp_projects = self.founder_projects.get(founder)
         prj = Project(-999, name, description, founder)
@@ -189,6 +191,6 @@ class ProjectManager:
         return prjs
 
     def verify_founder_exists(self, founder):
-        if founder not in self.founder_projects.keys():
+        if not self.founder_projects.get(founder):
             raise Exception(f"founder {founder} not found")
         return True

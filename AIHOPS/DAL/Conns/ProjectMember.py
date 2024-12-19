@@ -11,3 +11,4 @@ class ProjectMember(Base):
     def __init__(self, project_name, user_name):
         self.project_name = project_name
         self.user_name = user_name
+

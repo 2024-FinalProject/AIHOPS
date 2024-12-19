@@ -1,7 +1,7 @@
-from Domain.src.DS import ThreadSafeDict
+from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
 
-class ThreadSafeDictWithListValue (ThreadSafeDict):
+class ThreadSafeDictWithListValue(ThreadSafeDict):
     def __init__(self):
         super().__init__()
 
