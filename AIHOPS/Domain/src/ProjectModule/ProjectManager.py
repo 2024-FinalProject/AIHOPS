@@ -1,7 +1,10 @@
+from threading import RLock
+
 from DAL.DBAccess import DBAccess
 from DAL.Objects import DBFactorVotes, DBPendingRequests, DBProject, DBSeverityVotes, DBProjectMembers
 from Domain.src.DS.IdMaker import IdMaker
-from Domain.src.Loggs.Response import ResponseSuccessMsg, ResponseFailMsg
+
+from Domain.src.Loggs.Response import Response, ResponseSuccessMsg, ResponseFailMsg
 from Domain.src.ProjectModule.Project import Project
 from copy import deepcopy as deepCopy
 
@@ -127,14 +130,23 @@ class ProjectManager:
 
     def close_project(self, project_id):
         with self.lock:
-            if self.projects[project_id]:
-                self.projects[project_id].isActive = False
-            else:
-                return ResponseFailMsg(f"project {project_id} not found")
-
+            self.project[project_id].isActive = False
+        if self.projects[project_id]:
+            self.projects[project_id].isActive = False
+        else:
+            return ResponseFailMsg(f"project {project_id} not found")
+          
         # TODO: need to update in DB
         ...
-        return ResponseSuccessMsg(f"project {project_id} has been closed")
+        return ResponseSuccessMsg(f"project {project_id} has been closed") 
+  
+  
+    def get_score(self, requesting_member, pid):
+        with self.lock:
+            project = self.project.get(pid)
+        if project is None:
+            return ResponseFailMsg("invalid project id")
+        return project.get_score(requesting_member)
 
     
     def get_pending_requests(self, email):
