@@ -2,43 +2,53 @@ from DAL.DBAccess import DBAccess
 from DAL.Objects import DBFactorVotes, DBPendingRequests, DBProject, DBSeverityVotes, DBProjectMembers
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.Loggs.Response import ResponseSuccessMsg, ResponseFailMsg
-from Domain.src.ProjectModule import Project
+from Domain.src.ProjectModule.Project import Project
 from copy import deepcopy as deepCopy
 
 
 class ProjectManager:
     def __init__(self):
-        self.project = {}
+        self.projects = {} #project_id -> Project
+        self.founder_projects = {} #founder -> list of projects
         self.pending_requests = {} # email -> list[projects_id ]
         self.id_maker = IdMaker()
         self.user_project_dict = {}
-        self.db_access = DBAccess()
-        self.get_projects_from_db()
-        self.get_pending_requests_from_db()
+        # self.db_access = DBAccess()
+        # self.get_projects_from_db()
+        # self.get_pending_requests_from_db()
 
-    def get_projects_from_db(self):
-        existing_projects = self.db_access.load_all(DBProject)
-        if existing_projects is None:
-            return 1
-        last_id = 0
-        for project_data in existing_projects:
-            project = Project(project_data.id, project_data.name, project_data.description, project_data.founder)
-            last_id = max(last_id, project.id + 1)
-            self.project[project.id] = deepCopy(project)
-        self.id_maker.start_from(last_id)
+    # def get_projects_from_db(self):
+    #     existing_projects = self.db_access.load_all(DBProject)
+    #     if existing_projects is None:
+    #         return 1
+    #     last_id = 0
+    #     for project_data in existing_projects:
+    #         project = Project(project_data.id, project_data.name, project_data.description, project_data.founder)
+    #         last_id = max(last_id, project.id + 1)
+    #         self.project[project.id] = deepCopy(project)
+    #         self.founder_projects[project.founder].append(deepCopy(project))
+    #     self.id_maker.start_from(last_id)
     
-    def get_pending_requests_from_db(self):
-        pending_requests = self.db_access.load_all(DBPendingRequests)
-        if pending_requests is None:
-            return 1
-        for request in pending_requests:
-            self.pending_requests[request[1]].append(request[0])
+    # def get_pending_requests_from_db(self):
+    #     pending_requests = self.db_access.load_all(DBPendingRequests)
+    #     if pending_requests is None:
+    #         return 1
+    #     for request in pending_requests:
+    #         self.pending_requests[request[1]].append(request[0])
 
 
     def create_project(self, name, description, founder):
+        if(founder not in self.founder_projects.keys()):
+            self.founder_projects[founder] = []
+        
+        for project in self.founder_projects[founder]:
+            if(project.name == name and project.description == description and project.founder == founder and project.isActive):
+                return ResponseFailMsg(f"a project wth {name} already exists and is active")
+            
         project_id = self.id_maker.next_id()
         prj = Project(project_id, name, description, founder)
-        
+        self.projects[project_id].append(prj)
+        self.founder_projects[founder].append(prj)
         # TODO: insert to DB
         ...
         return ResponseSuccessMsg(f"project {name} has been created")
@@ -64,7 +74,7 @@ class ProjectManager:
 
     def add_member(self, project_id, users_names):
         existing_members_in_proj = []
-        if not self.project[project_id].isActive or not self.project[project_id].is_initialized_project():
+        if not self.projects[project_id].isActive or not self.projects[project_id].is_initialized_project():
             return ResponseFailMsg(f"cant add member to project {project_id} because it is not finalized")
         for user_name in users_names:
             # check if user is already pending for this project
@@ -84,7 +94,7 @@ class ProjectManager:
             # TODO: need to update in DB pending requests table
             return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
         else:
-            self.project[project_id].remove_member(asking, user_name)
+            self.projects[project_id].remove_member(asking, user_name)
             # TODO: need to update in DB project members table
             return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
         
@@ -93,14 +103,14 @@ class ProjectManager:
 
     def get_member_projects(self, project_id):
         
-        if self.project[project_id].get_members() is not None:
-            return ResponseSuccessMsg(f"list of members in project {project_id} : {self.project[project_id].get_members()}")
+        if self.projects[project_id].get_members() is not None:
+            return ResponseSuccessMsg(f"list of members in project {project_id} : {self.projects[project_id].get_members()}")
         return ResponseFailMsg(f"no members in project {project_id}")
 
 
     def vote(self, project_id, user_name, factors_values, severity_factors_values):
         try:
-            self.project[project_id].vote(user_name, factors_values, severity_factors_values)
+            self.projects[project_id].vote(user_name, factors_values, severity_factors_values)
         except Exception as e:
             return ResponseFailMsg(e)
         # with self.lock:
@@ -111,14 +121,14 @@ class ProjectManager:
 
     def get_project(self, project_id):
         with self.lock:
-            if self.project[project_id]:
-                return ResponseSuccessMsg(f"project {self.project[project_id]}")
+            if self.projects[project_id]:
+                return ResponseSuccessMsg(f"project {self.projects[project_id]}")
             return ResponseFailMsg(f"project {project_id} not found")
 
     def close_project(self, project_id):
         with self.lock:
-            if self.project[project_id]:
-                self.project[project_id].isActive = False
+            if self.projects[project_id]:
+                self.projects[project_id].isActive = False
             else:
                 return ResponseFailMsg(f"project {project_id} not found")
 
@@ -134,8 +144,8 @@ class ProjectManager:
     
     def approve_member(self, project_id, user_name):
         self.pending_requests[user_name].remove(project_id)
-        if self.project[project_id].isActive:
-            self.project[project_id].approved_member(user_name)
+        if self.projects[project_id].isActive:
+            self.projects[project_id].approved_member(user_name)
             # TODO: need to update in DB
             return ResponseSuccessMsg(f"member {user_name} has been approved in project {project_id}")
         else:
