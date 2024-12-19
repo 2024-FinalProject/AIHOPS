@@ -91,3 +91,13 @@ class Server:
         session = res.result
         session.vote(pid, factors_values, severity_factors_values)
         return ResponseSuccessObj("vote succeded", session)
+    
+    def get_pending_requests(self, cookie, email):
+        res = self.get_session_member(cookie)
+        if not res.success:
+            return res
+        res = self.user_controller.get_pending_requests(email)
+        if res.success:
+            return res.result
+
+    

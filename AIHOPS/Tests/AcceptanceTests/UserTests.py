@@ -6,9 +6,9 @@ from Service.config import Base, engine
 # How to run the tests:
 #       In a terminal, run the following commands:
 #               cd AIHOPS
-#               python -m unittest AcceptanceTests.AcceptanceTests
+#               python -m unittest AcceptanceTests.UserTests
 
-class UserAcceptanceTests(unittest.TestCase):
+class UserTests(unittest.TestCase):
 
     # ------------- Base ------------------
 
