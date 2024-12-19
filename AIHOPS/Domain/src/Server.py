@@ -4,6 +4,7 @@ from threading import RLock
 
 from DAL.DBAccess import DBAccess
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj
+from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from Domain.src.Session import Session
 from Domain.src.Users.MemberController import MemberController
 
@@ -16,6 +17,7 @@ class Server:
         self.user_controller = MemberController(self)
         self.user_deletion_lock = RLock()
         self.db_access = DBAccess()
+        self.project_manager = ProjectManager()
 
     def clear_db(self):
         self.db_access.clear_db()
@@ -89,5 +91,15 @@ class Server:
         if not res.success:
             return res
         session = res.result
-        session.vote(pid, factors_values, severity_factors_values)
+        user_name = session.user_name
+        self.project_manager.vote(pid, user_name, factors_values, severity_factors_values)
         return ResponseSuccessObj("vote succeded", session)
+
+    def get_score(self, cookie, pid):
+        res = self.get_session_member(cookie)
+        if not res.success:
+            return res
+        session = res.result
+        user_name = session.user_name
+        res = self.project_manager.get_score(user_name, pid)
+        return res

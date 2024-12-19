@@ -1,6 +1,9 @@
+from threading import RLock
+
 from DAL.DBAccess import DBAccess
 from DAL.Objects import DBFactorVotes, DBSeverityVotes, DBProjectMembers
 from Domain.src.DS.IdMaker import IdMaker
+from Domain.src.Loggs.Response import Response, ResponseFailMsg
 
 
 class ProjectManager:
@@ -9,6 +12,7 @@ class ProjectManager:
         self.id_maker = IdMaker()
         self.user_project_dict = {}
         self.db_access = DBAccess()
+        self.lock = RLock()
 
     def create_project(self):
         ...
@@ -33,7 +37,8 @@ class ProjectManager:
     def get_member_projects(self, project_id):
         self.project[project_id].get_members()
 
-    def vote(self, project_id, proj_name, user_name, factors_values, severity_factors_values):
+    def vote(self, project_id, user_name, factors_values, severity_factors_values):
+        # not safe access to project
         self.project[project_id].vote(user_name, factors_values, severity_factors_values)
         with self.lock:
             for factor in factors_values:
@@ -48,6 +53,13 @@ class ProjectManager:
     def close_project(self, project_id):
         with self.lock:
             self.project[project_id].isActive = False
+
+    def get_score(self, requesting_member, pid):
+        with self.lock:
+            project = self.project.get(pid)
+        if project is None:
+            return ResponseFailMsg("invalid project id")
+        return project.get_score(requesting_member)
         
 
 

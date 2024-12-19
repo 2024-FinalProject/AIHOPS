@@ -20,11 +20,11 @@ class Project:
         self.founder = founder
         self.factors_inited = False
         self.severity_factors_inited = False
-        self.isActive = False  
+        self.isActive = False
+        self.severity_factors = []
+        self.factors = []
         # maps a user_name to a pair of two lists: (factors_values, severity_factors_values)
-        self.members = {}
-        self.members[founder] = None
-
+        self.members = {founder: None}
 
     def vote(self, user_name, factors_values, severity_factors_values):
         with self.lock:
@@ -40,8 +40,11 @@ class Project:
         #insert to factors db
         #get the factors id and update the project_factors db
 
-    # expecting a list of 5 floats
+    # expecting a list of 5 floats (non negatives)
     def set_severity_factors(self, severity_factors):
+        for sf in severity_factors:
+            if sf < 0:
+                raise Exception("negative severity factor")
         self.severity_factors = severity_factors
         self.severity_factors_inited = True
 
@@ -89,3 +92,54 @@ class Project:
     def hide_project(self):
         with self.lock:
             self.isActive = False
+
+    def get_score(self, requesting_member):
+        if self.founder != requesting_member:
+            raise Exception("only the founder can get a score")
+        # check if someone voted, if not return error
+        if self.isActive:
+            raise Exception("cant get score on active project")
+        # calc
+        d_assessors = self.get_d_assessors()
+        s_assessors = self.get_s_assessors()
+        m = len(self.members)
+        N = sum(s_assessors)
+        S_max = 4
+        D = S_max * m
+        d = sum(d_assessors) / m
+
+        return (N/D)**d
+
+    def get_s_assessors(self):
+        s_assessors = []
+        n = len(self.factors)
+        for _, (factor_votes, _) in self.members.items():
+            ass_total = 0
+            for ass in factor_votes:
+                ass_total += ass
+            s_assessors.append(ass_total / n)
+        return s_assessors
+
+    def get_d_assessors(self):
+        d_assessors = []
+        for _, (_, severity_probs) in self.members.items():
+            # calc d_assessor
+            d_ass = 0
+            for i in range(len(self.severity_factors)):
+                d_ass += self.severity_factors[i] * severity_probs[i]
+                d_assessors.append(d_ass)
+        return d_assessors
+
+
+
+
+
+
+
+
+
+
+
+
+
+
