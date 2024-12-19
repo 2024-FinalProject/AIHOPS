@@ -14,7 +14,7 @@ class Factor:
 #TODO:: need to add the db logic and implementation
 
 class Project:
-    def __init__(self, id, name, description, founder):
+    def __init__(self, id, name, description, founder, commit = False):
         self.lock = RLock()
         self.id = id
         self.name = name
@@ -48,9 +48,6 @@ class Project:
                 proj_factors.append(Factor(factor[0], factor[1]))
             self.factors = factors
             self.factors_inited = True
-        return proj_factors
-        #insert to factors db
-        #get the factors id and update the project_factors db
 
     # expecting a list of 5 floats (non negatives)
     def set_severity_factors(self, severity_factors):
@@ -133,6 +130,15 @@ class Project:
                 d_ass += self.severity_factors[i] * severity_probs[i]
                 d_assessors.append(d_ass)
         return d_assessors
+    
+    def __eq__ (self, other):
+        if not (isinstance (other, Project)):
+            return False
+        if(self.name == other.name and self.description == other.description and self.founder == other.founder):
+            return True
+        return False
+
+             
 
 
 
