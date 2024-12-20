@@ -81,6 +81,9 @@ class ProjectManager:
         if(len(severity_factors) == 0):
             return ResponseFailMsg("severity factors can't be empty")
         
+        if(len(severity_factors) != 5):
+            return ResponseFailMsg("there should be 5 severity factors")
+        
         for sf in severity_factors:
             if sf < 0:
                 return ResponseFailMsg("severity factor can't be negative")
@@ -152,8 +155,20 @@ class ProjectManager:
             return ResponseFailMsg(e)
 
     def vote(self, project_id, user_name, factors_values, severity_factors_values):
+        if(factors_values == [] or severity_factors_values == []):
+            return ResponseFailMsg("factors and severity factors can't be empty")
         try:
             temp_project = self.find_Project(project_id)
+            severity_amount = 0
+            for factor in factors_values:
+                if factor < 0 or factor > 4:
+                    return ResponseFailMsg("factor needs to be between 0 and 4")
+            for severity in severity_factors_values:
+                if severity < 0 or severity > 1:
+                    return ResponseFailMsg("severity factor needs to be between 0 and 1")
+                severity_amount += severity
+            if severity_amount != 1:
+                return ResponseFailMsg("severity factors sum needs to be excaly 1") 
             temp_project.vote(user_name, factors_values, severity_factors_values)
         except Exception as e:
             return ResponseFailMsg(e)

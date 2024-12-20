@@ -136,6 +136,20 @@ class ProjectTests(unittest.TestCase):
         res = self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, -5])
         self.assertFalse(res.success, f'Set project severity factors succeeded when it should have failed - negative severity factors')
 
+    def test_set_project_severity_factors_fail_less_than_5_severity_factors(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        res = self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4])
+        self.assertFalse(res.success, f'Set project severity factors succeeded when it should have failed - less than 5 severity factors')
+
+    def test_set_project_severity_factors_fail_more_than_5_severity_factors(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        res = self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5, 6])
+        self.assertFalse(res.success, f'Set project severity factors succeeded when it should have failed - more than 5 severity factors')
+
     def test_add_member_success(self):
         self.server.login(self.cookie1, "Alice", "")
         res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
@@ -367,6 +381,86 @@ class ProjectTests(unittest.TestCase):
         res = self.server.get_projects(self.cookie1, "Alice")
         self.assertFalse(res.success, f'Get projects succeeded when it should have failed - no projects')
 
-    
+    def test_vote_success(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        res = self.server.vote(self.cookie1, project_id, "Alice", [2, 3, 4, 1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        self.assertTrue(res.success, res.msg)
 
-    
+    #Should update the vote of the user
+    def test_vote_success_double_vote_same_project_same_user(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        self.server.vote(self.cookie1, project_id, "Alice", [2, 3, 4, 1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        res = self.server.vote(self.cookie1, project_id, "Alice", [2, 1, 2, 1], [0.2, 0.1, 0.1, 0.1, 0.5])
+        self.assertTrue(res.success, res.msg)
+
+    def test_vote_fail_empty_cookie(self):
+        res = self.server.vote(None, 1, "Alice", [2, 3, 4, 1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, f'Vote succeeded when it should have failed - empty cookie')
+
+    def test_vote_fail_not_logged_in(self):
+        res = self.server.vote(self.cookie1, 1, "Alice", [2, 3, 4, 1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, f'Vote succeeded when it should have failed - not logged in')
+
+    def test_vote_fail_project_not_found(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.vote(self.cookie1, -999, "Alice", [2, 3, 4, 1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, f'Vote succeeded when it should have failed - project not found')
+
+    def test_vote_fail_project_not_published(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        res = self.server.vote(self.cookie1, project_id, "Alice", [2, 3, 4, 1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, f'Vote succeeded when it should have failed - project not published')
+
+    def test_vote_fail_factor_values_not_in_range_value_of_5(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        res = self.server.vote(self.cookie1, project_id, "Alice", [5, 3, 4, 1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, res.msg)
+
+    def test_vote_fail_factor_values_not_in_range_value_of_minues_1(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        res = self.server.vote(self.cookie1, project_id, "Alice", [1, 3, 4, -1], [0.15, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, res.msg)
+
+    def test_vote_fail_severity_factor_values_not_in_range_value_of_bigger_than_1(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        res = self.server.vote(self.cookie1, project_id, "Alice", [1, 3, 4, 2], [1.01, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, res.msg)
+
+    def test_vote_fail_severity_factor_values_not_in_range_value_of_smaller_than_1(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        res = self.server.vote(self.cookie1, project_id, "Alice", [1, 3, 4, 2], [-0.01, 0.15, 0.1, 0.1, 0.5])
+        self.assertFalse(res.success, res.msg)
