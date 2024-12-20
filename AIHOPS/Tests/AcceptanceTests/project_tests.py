@@ -612,6 +612,8 @@ class ProjectTests(unittest.TestCase):
         self.server.login(self.cookie2, "Bob", "")
         res = self.server.get_pending_requests(self.cookie2)
         pending_requests = res.result
-        res = self.server.approve_member(self.cookie2, "Bob", pending_requests[0])
+        res = self.server.approve_member(self.cookie2, project_id, "Bob")
         self.assertTrue(res.success, res.msg)
         self.server.logout(self.cookie2)
+
+

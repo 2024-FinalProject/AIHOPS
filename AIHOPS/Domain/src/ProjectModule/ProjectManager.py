@@ -6,7 +6,7 @@ from DAL.Objects import DBFactorVotes, DBPendingRequests, DBProject, DBSeverityV
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
-from Domain.src.Loggs.Response import Response, ResponseSuccessMsg, ResponseFailMsg
+from Domain.src.Loggs.Response import Response, ResponseSuccessMsg, ResponseFailMsg, ResponseSuccessObj
 from Domain.src.ProjectModule.Project import Project
 from copy import deepcopy as deepCopy
 
@@ -114,7 +114,7 @@ class ProjectManager:
             try:
                 temp_pending_requests = self.find_pending_requests(user_name)
                 if project_id in temp_pending_requests:
-                    existing_members_in_proj.append(user_name)
+                    existing_members_in_proj.append(user_name) 
             except Exception as e:
                     self.pending_requests.insert(user_name, project_id)
                 # with self.lock:
@@ -209,12 +209,16 @@ class ProjectManager:
 
     
     def get_pending_requests(self, email):
-        temp_pending_requests = self.find_pending_requests(email)
-        return Response(True, f"got pending requests", {temp_pending_requests}, False)
+        try:
+            temp_pending_requests = self.find_pending_requests(email) 
+            return ResponseSuccessObj(f"pending requests for email {email} : {temp_pending_requests}", temp_pending_requests)
+            
+        except Exception as e:
+            return ResponseSuccessMsg(True, f"no pending requests", {[]})
     
     def approve_member(self, project_id, user_name):
         pending_requests = self.pending_requests.get(user_name)
-        pending_requests.pop(user_name, project_id)
+        self.pending_requests.pop(user_name, project_id)
         project = self.find_Project(project_id)
         if project.isActive:
             project.approved_member(user_name)
