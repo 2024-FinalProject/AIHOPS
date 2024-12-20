@@ -74,10 +74,10 @@ class Project:
             raise Exception("only the founder can remove members from project")
         mem = self.members.get(user_name)
         if mem is None:
-            return ResponseFailMsg(f"user {user_name} is not a member of this project")
+            raise Exception(f"user {user_name} is not a member of this project")
         else:
             self.members.pop(user_name)
-            return ResponseSuccessObj(f"user {user_name} has been removed from project {self.id}")
+            return ResponseSuccessObj(f"user {user_name} has been removed from project {self.id} and mem {mem}")
 
     def is_initialized_project(self):
         return self.factors_inited and self.severity_factors_inited

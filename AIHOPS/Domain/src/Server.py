@@ -163,6 +163,26 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove member: {e}")
         
+    def get_members_of_project(self, cookie, asking, pid):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.project_manager.get_members_of_project(asking, pid)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get member projects: {e}")
+        
+    def get_projects(self, cookie, asking):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.project_manager.get_projects(asking)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get projects: {e}")
+        
     def publish_project(self, cookie, pid, founder):
         try:
             res = self.get_session_member(cookie)

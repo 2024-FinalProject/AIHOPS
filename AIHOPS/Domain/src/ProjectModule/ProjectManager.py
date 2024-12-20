@@ -133,16 +133,23 @@ class ProjectManager:
                 # TODO: need to update in DB pending requests table
                 return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
         except Exception as e:
-            temp_project = self.find_Project(project_id)
             temp_project.remove_member(asking, user_name)
             # TODO: need to update in DB project members table
             return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
         
 
-    def get_member_projects(self, project_id):
+    def get_members_of_project(self, asking, project_id):
         temp_project = self.find_Project(project_id)
+        if(asking != temp_project.founder):
+            return ResponseFailMsg(f"only founder {temp_project.founder} can get members")
         return ResponseSuccessMsg(f"list of members in project {project_id} : {temp_project.get_members()}")
-
+    
+    def get_projects(self, founder):
+        try:
+            temp_projects = self.find_Projects(founder)
+            return ResponseSuccessMsg(f"list of projects for founder {founder} : {temp_projects}")
+        except Exception as e:
+            return ResponseFailMsg(e)
 
     def vote(self, project_id, user_name, factors_values, severity_factors_values):
         try:

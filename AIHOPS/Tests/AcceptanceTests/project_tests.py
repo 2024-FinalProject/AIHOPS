@@ -290,3 +290,83 @@ class ProjectTests(unittest.TestCase):
         self.server.add_members(self.cookie1, "Alice", project_id, ["Bob"])
         res = self.server.remove_member(self.cookie1, "Alice", project_id, "Bob")
         self.assertTrue(res.success, res.msg)
+
+    def test_remove_member_fail_empty_cookie(self):
+        res = self.server.remove_member(None, "Alice", 1, "Bob")
+        self.assertFalse(res.success, f'Remove member succeeded when it should have failed - empty cookie')
+
+    def test_remove_member_fail_not_logged_in(self):
+        res = self.server.remove_member(self.cookie1, "Alice", 1, "Bob")
+        self.assertFalse(res.success, f'Remove member succeeded when it should have failed - not logged in')
+
+    def test_remove_member_fail_project_not_found(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.remove_member(self.cookie1, "Alice", -999, "Bob")
+        self.assertFalse(res.success, f'Remove member succeeded when it should have failed - project not found')
+
+    def test_remove_member_fail_non_existent_member(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        res = self.server.remove_member(self.cookie1, "Alice", project_id, "Bob")
+        self.assertFalse(res.success, res.msg)
+
+    def test_remove_member_fail_empty_asking(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.remove_member(self.cookie1, "", 1, "Bob")
+        self.assertFalse(res.success, f'Remove member succeeded when it should have failed - empty asking')
+
+    def test_remove_member_fail_asking_not_found(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.remove_member(self.cookie1, "Alice", 1, "Bob")
+        self.assertFalse(res.success, f'Remove member succeeded when it should have failed - asking not found')
+    
+    def test_get_members_of_project_success(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        self.server.add_members(self.cookie1, "Alice", project_id, ["Bob"])
+        res = self.server.get_members_of_project(self.cookie1, "Alice", project_id)
+        self.assertTrue(res.success, res.msg)
+
+    def test_get_members_of_project_fail_empty_cookie(self):
+        res = self.server.get_members_of_project(None, "Alice", 1)
+        self.assertFalse(res.success, f'Get members of project succeeded when it should have failed - empty cookie')
+
+    def test_get_members_of_project_fail_not_logged_in(self):
+        res = self.server.get_members_of_project(self.cookie1, "Alice", 1)
+        self.assertFalse(res.success, f'Get members of project succeeded when it should have failed - not logged in')
+
+    def test_get_members_of_project_fail_project_not_found(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.get_members_of_project(self.cookie1, "Alice", -999)
+        self.assertFalse(res.success, f'Get members of project succeeded when it should have failed - project not found')
+
+    def test_get_projects_success(self):
+        self.server.login(self.cookie1, "Alice", "")
+        self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        res = self.server.get_projects(self.cookie1, "Alice")
+        self.assertTrue(res.success, res.msg)
+
+    def test_get_projects_fail_empty_cookie(self):
+        res = self.server.get_projects(None, "Alice")
+        self.assertFalse(res.success, f'Get projects succeeded when it should have failed - empty cookie')
+
+    def test_get_projects_fail_not_logged_in(self):
+        res = self.server.get_projects(self.cookie1, "Alice")
+        self.assertFalse(res.success, f'Get projects succeeded when it should have failed - not logged in')
+
+    def test_get_projects_fail_no_projects(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.get_projects(self.cookie1, "Alice")
+        self.assertFalse(res.success, f'Get projects succeeded when it should have failed - no projects')
+
+    
+
+    
