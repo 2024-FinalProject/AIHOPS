@@ -3,8 +3,10 @@ from threading import RLock
 from sqlalchemy import MetaData, text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+# from DAL.Objects import DBProjectMembers
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Service.config import engine  # Make sure you have your SQLAlchemy engine defined
+
 
 # Create a session factory
 Session = sessionmaker(bind=engine)
@@ -94,12 +96,12 @@ class DBAccess:
             finally:
                 session.close()  # Close the session
 
-    # def load_project_members(self, project_name):
+    # def load_project_members(self, project_id):
     #     with self.lock:
     #         session = Session()  # Create a new session
     #         try:
     #             # Query for all user_name values where org_name matches the given org_name
-    #             usernames = session.query(ProjectMember.user_name).filter_by(project_name=project_name).all()
+    #             usernames = session.query(DBProjectMembers.member_email).filter_by(project_id=project_id).all()
 
     #             # Extract just the user_name values from the query result (which are tuples)
     #             usernames_list = [username[0] for username in usernames]

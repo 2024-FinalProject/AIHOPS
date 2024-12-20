@@ -7,9 +7,9 @@
 #     __tablename__ = 'project_memebers'
 
 #     project_id = Column(Integer, ForeignKey('projects.id'), primary_key=True)
-#     memeber_email = Column(String,ForeignKey('members.email'), primary_key=True)
+#     member_email = Column(String,ForeignKey('members.email'), primary_key=True)
 
-#     def __init__(self, project_id, memeber_email):
+#     def __init__(self, project_id, member_email):
 #         self.project_id = project_id
-#         self.memeber_email = memeber_email
+#         self.member_email = member_email
         

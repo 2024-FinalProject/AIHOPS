@@ -4,5 +4,7 @@ import sys
 
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
+    print("Created tables:", Base.metadata.tables.keys())
+
     server = Server()
 

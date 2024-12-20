@@ -1,5 +1,4 @@
-# from datetime import datetime
-# from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey
+# from sqlalchemy import Column, Float, Integer, ForeignKey
 # from sqlalchemy.ext.declarative import declarative_base
 # from Service.config import Base
 
@@ -7,11 +6,11 @@
 #     __tablename__ = 'project_severity_factors'
 
 #     project_id = Column(Integer, ForeignKey('projects.id'), primary_key=True)
-#     severity_level1 = Column(float)
-#     severity_level2 = Column(float)
-#     severity_level3 = Column(float)
-#     severity_level4 = Column(float)
-#     severity_level5 = Column(float)
+#     severity_level1 = Column(Float)
+#     severity_level2 = Column(Float)
+#     severity_level3 = Column(Float)
+#     severity_level4 = Column(Float)
+#     severity_level5 = Column(Float)
 
 
 

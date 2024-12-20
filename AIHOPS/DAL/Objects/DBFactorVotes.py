@@ -7,8 +7,8 @@
 #     __tablename__ = 'factor_votes'
 
 #     project_id = Column(Integer, ForeignKey('projects.id'), primary_key=True)
-#     memeber_email = Column(String,ForeignKey('members.email'), primary_key=True)
-#     factor_id = Column(Integer,ForeignKey('factors.id'), primary_key=True)
+#     memeber_email = Column(String, ForeignKey('members.email'), primary_key=True)
+#     factor_id = Column(Integer, ForeignKey('factors.id'), primary_key=True)
 #     value = Column(Integer)
 
 
