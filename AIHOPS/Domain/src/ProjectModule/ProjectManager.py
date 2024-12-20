@@ -179,11 +179,11 @@ class ProjectManager:
         return ResponseSuccessMsg(f"user {user_name} has voted in project {project_id}")
 
     def get_project(self, project_id):
-        temp_project = self.projects.get(project_id)
-        return ResponseSuccessMsg(f"project {self.projects[project_id]}")
+        temp_project = self.find_Project(project_id)
+        return ResponseSuccessMsg(f"project {temp_project}")
 
     def publish_project(self, project_id, founder):
-        temp_project = self.projects.get(project_id)
+        temp_project = self.find_Project(project_id)
         temp_projects = self.find_Projects(founder)
         for project in temp_projects:
             if project == temp_project and project.isActive:
@@ -194,7 +194,7 @@ class ProjectManager:
         return ResponseSuccessMsg(f"project {project_id} has been published") 
 
     def close_project(self, project_id):
-        temp_project = self.projects.get(project_id)
+        temp_project = self.find_Project(project_id)
         temp_project.hide_project()
           
         # TODO: need to update in DB
@@ -204,12 +204,13 @@ class ProjectManager:
   
     def get_score(self, requesting_member, pid):
         project = self.find_Project(pid)
-        return project.get_score(requesting_member)
+        score = project.get_score(requesting_member)
+        return ResponseSuccessMsg(f"score of project {pid} is {score}")
 
     
     def get_pending_requests(self, email):
-        pending_requests = self.pending_requests.get(email)
-        return ResponseSuccessMsg(f"list of pending request {pending_requests}")
+        temp_pending_requests = self.find_pending_requests(email)
+        return Response(True, f"got pending requests", {temp_pending_requests}, False)
     
     def approve_member(self, project_id, user_name):
         pending_requests = self.pending_requests.get(user_name)

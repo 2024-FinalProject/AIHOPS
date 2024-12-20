@@ -1,1 +1,11 @@
-{}
+{
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./AIHOPS",
+        "-p",
+        "*test*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
+}

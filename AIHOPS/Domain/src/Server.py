@@ -183,6 +183,16 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get projects: {e}")
         
+    def get_project(self, cookie, pid):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.project_manager.get_project(pid)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get project: {e}")
+        
     def publish_project(self, cookie, pid, founder):
         try:
             res = self.get_session_member(cookie)
@@ -203,7 +213,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to close project: {e}")
     
-    def vote(self, cookie, pid, user_name, factors_values, severity_factors_values):
+    def vote(self, cookie, pid, factors_values, severity_factors_values):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -214,14 +224,14 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to vote: {e}")
     
-    def get_pending_requests(self, cookie, email):
+    def get_pending_requests(self, cookie):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            res = self.user_controller.get_pending_requests(email)
-            if res.success:
-                return res.result
+            session = res.result
+            user_name = session.user_name
+            return self.project_manager.get_pending_requests(user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get pending requests: {e}")
 
@@ -237,3 +247,13 @@ class Server:
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to get score: {e}")
+        
+    def approve_member(self, cookie, pid, user_name):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.project_manager.approve_member(pid, user_name)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to approve member: {e}")
