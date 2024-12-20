@@ -87,10 +87,16 @@ class Project:
             return self.members.keys()
         
     def publish_project(self):
+        if(not self.is_initialized_project()):
+            raise Exception("cant publish project without initializing factors and severity factors")
+        if(self.isActive):
+            raise Exception("project has already been published")
         with self.lock:
             self.isActive = True
     
     def hide_project(self):
+        if(not self.isActive):
+            raise Exception("project is not published, can't close it")
         with self.lock:
             self.isActive = False
 

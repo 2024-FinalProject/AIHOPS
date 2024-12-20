@@ -15,7 +15,7 @@ class ProjectManager:
     def __init__(self):
         self.projects = ThreadSafeDict() #project_id -> Project
         self.founder_projects = ThreadSafeDictWithListValue() #founder -> list of projects
-        self.pending_requests = ThreadSafeDictWithListValue() # email -> list[projects_id ]
+        self.pending_requests = ThreadSafeDictWithListValue() # email -> list of projects_id's
         self.id_maker = IdMaker()
         # self.db_access = DBAccess()
         # self.get_projects_from_db()
@@ -42,14 +42,21 @@ class ProjectManager:
 
 
     def create_project(self, name, description, founder):
+        if(name == "" or description == ""):
+            return ResponseFailMsg("name and description can't be empty")
+        
+        if(founder == ""):
+            return ResponseFailMsg("founder can't be empty")
+        
         # self.verify_founder_exists(founder)
         if not self.founder_projects.get(founder):
             self.founder_projects.insert(founder, [])
     
         temp_projects = self.founder_projects.get(founder)
         prj = Project(-999, name, description, founder)
-        if prj in temp_projects:
-            return ResponseFailMsg(f"project with {name} already exists and is active for this founder.")
+        for project in temp_projects:
+            if project == prj and project.isActive:
+                return ResponseFailMsg(f"project with {name} already exists and is active for this founder.")
              
         project_id = self.id_maker.next_id()
         prj = Project(project_id, name, description, founder)
@@ -57,58 +64,79 @@ class ProjectManager:
         self.founder_projects.insert(founder, prj)
         # TODO: insert to DB
         ...
-        return ResponseSuccessMsg(f"project {name} has been created")
+        return Response(True, f"project {name} has been created", project_id, False)
 
     def set_project_factors(self, project_id, factors):
-        with self.lock:
-            self.get_project(project_id).set_factors(factors)
+        if(len(factors) == 0):
+            return ResponseFailMsg("factors can't be empty")
+
+        project = self.find_Project(project_id)
+        project.set_factors(factors)
 
         # TODO: insert to DB
         ...
         return ResponseSuccessMsg(f"project {project_id} factors has been set")
 
     def set_project_severity_factors(self, project_id, severity_factors):
-        with self.lock:
-            self.get_project(project_id).set_severity_factors(severity_factors)
+        if(len(severity_factors) == 0):
+            return ResponseFailMsg("severity factors can't be empty")
+        
+        for sf in severity_factors:
+            if sf < 0:
+                return ResponseFailMsg("severity factor can't be negative")
+
+        project = self.find_Project(project_id)
+        project.set_severity_factors(severity_factors)
     
         #TODO: insert to DB
         ...
         return ResponseSuccessMsg(f"project {project_id} severity factors has been set")
-    
 
 
-
-    def add_member(self, project_id, users_names):
+    def add_members(self, asking, project_id, users_names):
         existing_members_in_proj = []
         temp_project = self.find_Project(project_id)
+
+        if asking != temp_project.founder:
+            return ResponseFailMsg(f"only founder {temp_project.founder} can add members")
+
+        if users_names == []:
+            return ResponseFailMsg("users names can't be empty")
+
         if not temp_project.isActive or not temp_project.is_initialized_project():
             return ResponseFailMsg(f"cant add member to project {project_id} because it is not finalized")
+        
         for user_name in users_names:
             # check if user is already pending for this project
-            temp_pending_requests = self.find_pending_requests(user_name)
-            if temp_pending_requests.contains(project_id):
-                existing_members_in_proj.append(user_name)
-            else:
-                self.pending_requests.insert(user_name, project_id)
+            try:
+                temp_pending_requests = self.find_pending_requests(user_name)
+                if project_id in temp_pending_requests:
+                    existing_members_in_proj.append(user_name)
+            except Exception as e:
+                    self.pending_requests.insert(user_name, project_id)
                 # with self.lock:
                 #     self.db_access.insert(DBPendingRequests(project_id, user_name
                 #     return ResponseSuccessMsg(f"user {user_name} has invation to {project_id}")
 
-        return ResponseFailMsg(f"users waiting for approval to project {project_id} except {existing_members_in_proj}") if len(existing_members_in_proj) > 0 else ResponseSuccessMsg(f"users waiting for approval to project :{project_id}")
+        if(len(existing_members_in_proj) > 0):
+            return ResponseFailMsg(f"users waiting for approval to project: {project_id}, except {existing_members_in_proj}")
+        return ResponseSuccessMsg(f"users waiting for approval to project :{project_id}")
 
     def remove_member(self, asking, project_id, user_name):
-        temp_pending_requests = self.find_pending_requests(user_name)
-        if temp_pending_requests.contains(project_id):
-            self.pending_requests.pop(user_name, project_id)
-            # TODO: need to update in DB pending requests table
-            return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
-        else:
+        temp_project = self.find_Project(project_id)
+        if(asking != temp_project.founder):
+            return ResponseFailMsg(f"only founder {temp_project.founder} can remove members")
+        try: 
+            temp_pending_requests = self.find_pending_requests(user_name)
+            if project_id in temp_pending_requests:
+                self.pending_requests.pop(user_name, project_id)
+                # TODO: need to update in DB pending requests table
+                return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
+        except Exception as e:
             temp_project = self.find_Project(project_id)
             temp_project.remove_member(asking, user_name)
             # TODO: need to update in DB project members table
             return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
-        
-
         
 
     def get_member_projects(self, project_id):
@@ -132,9 +160,20 @@ class ProjectManager:
         temp_project = self.projects.get(project_id)
         return ResponseSuccessMsg(f"project {self.projects[project_id]}")
 
+    def publish_project(self, project_id, founder):
+        temp_project = self.projects.get(project_id)
+        temp_projects = self.find_Projects(founder)
+        for project in temp_projects:
+            if project == temp_project and project.isActive:
+                return ResponseFailMsg(f"project with {temp_project.name} already exists and is active for this founder.")
+        temp_project.publish_project()
+        # TODO: need to update in DB
+        ...
+        return ResponseSuccessMsg(f"project {project_id} has been published") 
+
     def close_project(self, project_id):
         temp_project = self.projects.get(project_id)
-        temp_project.isActive = False
+        temp_project.hide_project()
           
         # TODO: need to update in DB
         ...

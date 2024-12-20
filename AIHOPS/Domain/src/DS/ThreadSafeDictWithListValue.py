@@ -9,7 +9,8 @@ class ThreadSafeDictWithListValue(ThreadSafeDict):
         with self.lock:
             if key not in self.dict:
                 self.dict[key] = []
-            self.dict[key].append(value)
+            if value not in self.dict[key]:  # Prevent duplicates
+                self.dict[key].append(value)
 
     def pop(self, key, value):
         with self.lock:
