@@ -254,6 +254,6 @@ class Server:
             if not res.success:
                 return res
             session = res
-            return self.project_manager.approve_member(pid, res)
+            return self.project_manager.approve_member(pid, session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to approve member: {e}")
