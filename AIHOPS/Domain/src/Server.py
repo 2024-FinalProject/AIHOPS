@@ -248,12 +248,12 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get score: {e}")
         
-    def approve_member(self, cookie, pid, user_name):
+    def approve_member(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.project_manager.approve_member(pid, user_name)
+            session = res
+            return self.project_manager.approve_member(pid, res)
         except Exception as e:
             return ResponseFailMsg(f"Failed to approve member: {e}")
