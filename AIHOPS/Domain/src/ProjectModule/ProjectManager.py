@@ -18,8 +18,8 @@ class ProjectManager:
         self.pending_requests = ThreadSafeDictWithListValue() # email -> list of projects_id's
         self.id_maker = IdMaker()
         self.db_access = DBAccess()
-        self.get_projects_from_db()
-        self.get_pending_requests_from_db()
+        #self.get_projects_from_db()
+        #self.get_pending_requests_from_db()
 
     def get_projects_from_db(self):
         existing_projects = self.db_access.load_all(DBProject)
