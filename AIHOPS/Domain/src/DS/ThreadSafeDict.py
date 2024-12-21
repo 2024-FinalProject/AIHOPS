@@ -18,4 +18,7 @@ class ThreadSafeDict:
     def get(self, key):
         with self.lock:
             return self.dict.get(key, None)
+    def getKeys(self):
+        with self.lock:
+            return self.dict.keys()
 

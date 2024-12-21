@@ -6,11 +6,12 @@ from DAL.Objects.DBMember import DBMember
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg
 from Domain.src.Users.Member import Member
+from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
 
 class MemberController:
     def __init__(self, server):
-        self.members = {}     # name: user
+        self.members = ThreadSafeDict()     # name: user
         self.register_lock = RLock()
         self.id_maker = IdMaker()
         self.db_access = DBAccess()
@@ -24,7 +25,7 @@ class MemberController:
         for member_data in registered_users:
             member = Member(member_data.name, member_data.encrypted_passwd, member_data.id, True)
             last_id = max(last_id, member.id + 1)
-            self.members[member.name] = member
+            self.members.insert(member.name, member)
         self.id_maker.start_from(last_id)
 
     def register(self, name, passwd):
@@ -39,7 +40,7 @@ class MemberController:
             res = self.db_access.insert(DBMember(member.name, member.encrypted_passwd, member.id))
             if not res.success:
                 return res
-            self.members[name] = member
+            self.members.insert(name, member)
         return Response(True, f'new member {name} has been registered', member, False)
 
     def login(self, name, encrypted_passwd):
