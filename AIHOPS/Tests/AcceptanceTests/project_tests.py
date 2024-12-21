@@ -323,7 +323,7 @@ class ProjectTests(unittest.TestCase):
         self.assertFalse(res.success, f'Close project succeeded when it should have failed - project already closed')
         self.server.logout(self.cookie1)
     
-    def test_remove_member_success(self):
+    def test_remove_member_success_in_pending_requests(self):
         self.server.login(self.cookie1, "Alice", "")
         res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
         project_id = res.result
@@ -613,7 +613,24 @@ class ProjectTests(unittest.TestCase):
         res = self.server.get_pending_requests(self.cookie2)
         pending_requests = res.result
         res = self.server.approve_member(self.cookie2, pending_requests[0])
-        self.assertFalse(res.success, pending_requests)
+        self.assertTrue(res.success, res.msg)
         self.server.logout(self.cookie2)
 
+    def test_remove_member_success_after_added_member_approved(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        self.server.add_members(self.cookie1, "Alice", project_id, ["Bob"])
+        self.server.logout(self.cookie1)
+        self.server.login(self.cookie2, "Bob", "")
+        pending_requests = self.server.get_pending_requests(self.cookie2)
+        self.server.approve_member(self.cookie2, pending_requests.result[0])
+        self.server.logout(self.cookie2)
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.remove_member(self.cookie1, "Alice", project_id, "Bob")
+        self.assertTrue(res.success, res.msg)
+        self.server.logout(self.cookie1)
 
