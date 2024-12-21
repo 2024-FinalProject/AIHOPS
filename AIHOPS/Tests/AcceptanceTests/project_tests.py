@@ -616,6 +616,20 @@ class ProjectTests(unittest.TestCase):
         self.assertTrue(res.success, res.msg)
         self.server.logout(self.cookie2)
 
+    def test_approve_member_fail_empty_cookie(self):
+        res = self.server.approve_member(None, 1)
+        self.assertFalse(res.success, f'Approve member succeeded when it should have failed - empty cookie')
+    
+    def test_approve_member_fail_not_logged_in(self):
+        res = self.server.approve_member(self.cookie1, 1)
+        self.assertFalse(res.success, f'Approve member succeeded when it should have failed - not logged in')
+    
+    def test_approve_member_fail_request_not_found(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.approve_member(self.cookie1, -999)
+        self.assertFalse(res.success, f'Approve member succeeded when it should have failed - request not found')
+        self.server.logout(self.cookie1)
+
     def test_remove_member_success_after_added_member_approved(self):
         self.server.login(self.cookie1, "Alice", "")
         res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
@@ -634,3 +648,31 @@ class ProjectTests(unittest.TestCase):
         self.assertTrue(res.success, res.msg)
         self.server.logout(self.cookie1)
 
+    def test_reject_memeber_success(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", "Alice")
+        project_id = res.result
+        self.server.set_project_factors(self.cookie1, project_id, ["factor1, factor2, factor3, factor4"])
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.publish_project(self.cookie1, project_id, "Alice")
+        self.server.add_members(self.cookie1, "Alice", project_id, ["Bob"])
+        self.server.logout(self.cookie1)
+        self.server.login(self.cookie2, "Bob", "")
+        pending_requests = self.server.get_pending_requests(self.cookie2)
+        self.server.reject_member(self.cookie2, pending_requests.result[0])
+        self.assertTrue(res.success, res.msg)
+        self.server.logout(self.cookie2)
+
+    def test_reject_member_fail_empty_cookie(self):
+        res = self.server.reject_member(None, 1)
+        self.assertFalse(res.success, f'Reject member succeeded when it should have failed - empty cookie')
+    
+    def test_reject_member_fail_not_logged_in(self):
+        res = self.server.reject_member(self.cookie1, 1)
+        self.assertFalse(res.success, f'Reject member succeeded when it should have failed - not logged in')
+
+    def test_reject_member_fail_request_not_found(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.reject_member(self.cookie1, -999)
+        self.assertFalse(res.success, f'Reject member succeeded when it should have failed - request not found')
+        self.server.logout(self.cookie1)

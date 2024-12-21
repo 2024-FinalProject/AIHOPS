@@ -257,3 +257,13 @@ class Server:
             return self.project_manager.approve_member(pid, session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to approve member: {e}")
+        
+    def reject_member(self, cookie, pid):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res
+            return self.project_manager.reject_member(pid, session.result.user_name)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to reject member: {e}")

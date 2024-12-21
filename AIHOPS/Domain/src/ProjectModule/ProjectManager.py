@@ -217,7 +217,7 @@ class ProjectManager:
             return ResponseSuccessMsg(True, f"no pending requests", {[]})
     
     def approve_member(self, project_id, user_name):
-        pending_requests = self.pending_requests.get(user_name)
+        pending_requests = self.find_pending_requests(user_name)
         self.pending_requests.pop(user_name, project_id)
         project = self.find_Project(project_id)
         if project.isActive:
@@ -230,7 +230,7 @@ class ProjectManager:
             return ResponseFailMsg(f"cant approve member {user_name} in project {project_id} because it is not active")
         
     def reject_member(self, project_id, user_name):
-        pending_requests = self.pending_requests.get(user_name)
+        pending_requests = self.find_pending_requests(user_name)
         if pending_requests.remove(project_id):
             # TODO: need to update in DB
             ...
