@@ -1,5 +1,5 @@
 from threading import RLock
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 
 class Damage:
     def __init__(self, damage):
@@ -72,12 +72,11 @@ class Project:
         # TODO:: removed from the member -> need to find these inconsistencies in the upload of the site
         if self.founder != asking:
             raise Exception("only the founder can remove members from project")
-        mem = self.members.get(user_name)
-        if mem is None:
+        if user_name not in self.members.keys():
             raise Exception(f"user {user_name} is not a member of this project")
         else:
             self.members.pop(user_name)
-            return ResponseSuccessObj(f"user {user_name} has been removed from project {self.id} and mem {mem}")
+            return ResponseSuccessMsg(f"user {user_name} has been removed from project {self.id} and mem {user_name}" )
 
     def is_initialized_project(self):
         return self.factors_inited and self.severity_factors_inited

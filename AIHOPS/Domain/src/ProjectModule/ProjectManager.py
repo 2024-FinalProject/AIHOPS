@@ -240,19 +240,19 @@ class ProjectManager:
         
     def find_Project (self, project_id):
         prj = self.projects.get(project_id)
-        if prj is None:
+        if prj is None or prj == []:
             raise Exception(f"project {project_id} not found")
         return prj
 
     def find_Projects (self, founder):
         prjs =  self.founder_projects.get(founder)
-        if prjs is None:
+        if prjs is None or prjs == []:
             raise Exception(f"no projects found for founder {founder}")
         return prjs
 
     def find_pending_requests(self, email):
         prjs = self.pending_requests.get(email)
-        if prjs is None:
+        if prjs is None or prjs == []:
             raise Exception(f"no pending requests found for email {email}")
         return prjs
 
