@@ -113,13 +113,13 @@ class Server:
     
     # ------------- Project ------------------
 
-    def create_project(self, cookie, name, description, founder):
+    def create_project(self, cookie, name, description):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.project_manager.create_project(name, description, founder)
+            session = res
+            return self.project_manager.create_project(name, description, session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to create project: {e}")
     
@@ -143,43 +143,43 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project severity factors: {e}")
         
-    def add_members(self, cookie, asking, pid, users_names):
+    def add_members(self, cookie, pid, users_names):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.project_manager.add_members(asking, pid, users_names)
+            session = res
+            return self.project_manager.add_members(session.result.user_name, pid, users_names)
         except Exception as e:
             return ResponseFailMsg(f"Failed to add member: {e}")
         
-    def remove_member(self, cookie, asking, pid, user_name):
+    def remove_member(self, cookie, pid, user_name):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.project_manager.remove_member(asking, pid, user_name)
+            session = res
+            return self.project_manager.remove_member(session.result.user_name, pid, user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove member: {e}")
         
-    def get_members_of_project(self, cookie, asking, pid):
+    def get_members_of_project(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.project_manager.get_members_of_project(asking, pid)
+            session = res
+            return self.project_manager.get_members_of_project(session.result.user_name, pid)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get member projects: {e}")
         
-    def get_projects(self, cookie, asking):
+    def get_projects(self, cookie):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.project_manager.get_projects(asking)
+            session = res
+            return self.project_manager.get_projects(session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get projects: {e}")
         
@@ -193,13 +193,13 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get project: {e}")
         
-    def publish_project(self, cookie, pid, founder):
+    def publish_project(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.project_manager.publish_project(pid, founder)
+            session = res
+            return self.project_manager.publish_project(pid, session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to publish project: {e}")
         
