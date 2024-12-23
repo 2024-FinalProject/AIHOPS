@@ -1,22 +1,27 @@
-# from datetime import datetime
-# from sqlalchemy import Column, Integer, String, DateTime, Boolean
-# from sqlalchemy.ext.declarative import declarative_base
-# from Service.config import Base
+from datetime import datetime
+from sqlalchemy import Column, Index, Integer, String, DateTime, Boolean
+from sqlalchemy.ext.declarative import declarative_base
+from Service.config import Base
 
-# class DBProject(Base):
-#     __tablename__ = 'projects'
+class DBProject(Base):
+    __tablename__ = 'projects'
 
-#     id = Column(Integer, primary_key=True, autoincrement = True)
-#     name = Column(String, unique=True, nullable=False)
-#     founder = Column(String, nullable=False)
-#     description = Column(String)
-#     date_created = Column(DateTime)
-#     is_active = Column(Boolean, default=True)
+    id = Column(Integer, primary_key=True, autoincrement = True)
+    name = Column(String(255), unique=True, nullable=False)
+    founder = Column(String(255), nullable=False)
+    description = Column(String(1000))
+    date_created = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(Boolean, default=False)
 
-#     def __init__(self, name, founder, **kwargs):
-#         self.name = name
-#         self.founder = founder
-#         self.description = kwargs.get('description')
-#         self.date_created = datetime.now()
-#         self.is_active = False
+    _table_args__ = (
+        Index('idx_project_name', 'name'),
+        Index('idx_project_founder', 'founder'),
+    )
+
+    def __init__(self, name, founder, **kwargs):
+        self.name = name
+        self.founder = founder
+        self.description = kwargs.get('description')
+        self.date_created = datetime.now()
+        self.is_active = False
        

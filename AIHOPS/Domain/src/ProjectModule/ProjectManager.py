@@ -1,5 +1,8 @@
 from threading import RLock
 
+from DAL.Objects.DBFactors import DBFactors
+from DAL.Objects.DBProjectFactors import DBProjectFactors
+from DAL.Objects.DBProjectSevrityFactors import DBProjectSeverityFactor
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
 from DAL.DBAccess import DBAccess
 from DAL.Objects import DBFactorVotes, DBPendingRequests, DBProject, DBSeverityVotes, DBProjectMembers
@@ -62,8 +65,9 @@ class ProjectManager:
         prj = Project(project_id, name, description, founder)
         self.projects.insert(project_id, prj)
         self.founder_projects.insert(founder, prj)
-        # TODO: insert to DB
-        ...
+        # Add DB insert
+        db_project = DBProject(name, founder, description=description)
+        self.db_access.insert(db_project)
         return Response(True, f"project {name} has been created", project_id, False)
 
     def set_project_factors(self, project_id, factors):
@@ -73,8 +77,12 @@ class ProjectManager:
         project = self.find_Project(project_id)
         project.set_factors(factors)
 
-        # TODO: insert to DB
-        ...
+        # insert to DB
+        for factor in factors:
+            db_factor = DBFactors(factor[0], factor[1])
+            self.db_access.insert(db_factor)
+            db_project_factor = DBProjectFactors(db_factor.id, project_id)
+            self.db_access.insert(db_project_factor)
         return ResponseSuccessMsg(f"project {project_id} factors has been set")
 
     def set_project_severity_factors(self, project_id, severity_factors):
@@ -91,8 +99,9 @@ class ProjectManager:
         project = self.find_Project(project_id)
         project.set_severity_factors(severity_factors)
     
-        #TODO: insert to DB
-        ...
+        #insert to DB
+        db_severity = DBProjectSeverityFactor(project_id, *severity_factors)
+        self.db_access.insert(db_severity)
         return ResponseSuccessMsg(f"project {project_id} severity factors has been set")
 
 
@@ -117,6 +126,9 @@ class ProjectManager:
                     existing_members_in_proj.append(user_name) 
             except Exception as e:
                     self.pending_requests.insert(user_name, project_id)
+                    # insert into DB
+                    db_pending = DBPendingRequests(project_id, user_name)
+                    self.db_access.insert(db_pending)
                 # with self.lock:
                 #     self.db_access.insert(DBPendingRequests(project_id, user_name
                 #     return ResponseSuccessMsg(f"user {user_name} has invation to {project_id}")
@@ -133,11 +145,15 @@ class ProjectManager:
             temp_pending_requests = self.find_pending_requests(user_name)
             if project_id in temp_pending_requests:
                 self.pending_requests.pop(user_name, project_id)
-                # TODO: need to update in DB pending requests table
+                # Delete member from pending requests
+                self.db_access.delete_obj_by_query(DBPendingRequests, 
+                    {"project_id": project_id, "email": user_name})
                 return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
         except Exception as e:
             temp_project.remove_member(asking, user_name)
-            # TODO: need to update in DB project members table
+            # Delete member from project
+            self.db_access.delete_obj_by_query(DBProjectMembers, 
+                {"project_id": project_id, "member_email": user_name})
             return ResponseSuccessMsg(f"user {user_name} has been removed from project {project_id}")
         
 
@@ -158,7 +174,7 @@ class ProjectManager:
         if(factors_values == [] or severity_factors_values == []):
             return ResponseFailMsg("factors and severity factors can't be empty")
         try:
-            temp_project = self.find_Project(project_id)
+            project = self.find_Project(project_id)
             severity_amount = 0
             for factor in factors_values:
                 if factor < 0 or factor > 4:
@@ -169,7 +185,16 @@ class ProjectManager:
                 severity_amount += severity
             if severity_amount != 1:
                 return ResponseFailMsg("severity factors sum needs to be excaly 1") 
-            temp_project.vote(user_name, factors_values, severity_factors_values)
+            project.vote(user_name, factors_values, severity_factors_values)
+
+            # Save factor votes
+            for i, value in enumerate(factors_values):
+                db_vote = DBFactorVotes(i, user_name, project_id, value)
+                self.db_access.insert(db_vote)
+
+            # Save severity votes
+            db_severity_vote = DBSeverityVotes(user_name, project_id, *severity_factors_values)
+            self.db_access.insert(db_severity_vote)
         except Exception as e:
             return ResponseFailMsg(e)
         # with self.lock:
@@ -189,16 +214,16 @@ class ProjectManager:
             if project == temp_project and project.isActive:
                 return ResponseFailMsg(f"project with {temp_project.name} already exists and is active for this founder.")
         temp_project.publish_project()
-        # TODO: need to update in DB
-        ...
+        # Update project status to active
+        self.update_project_status(project_id, True)
         return ResponseSuccessMsg(f"project {project_id} has been published") 
 
     def close_project(self, project_id):
         temp_project = self.find_Project(project_id)
         temp_project.hide_project()
           
-        # TODO: need to update in DB
-        ...
+        # Update project status to non active
+        self.update_project_status(project_id, False)
         return ResponseSuccessMsg(f"project {project_id} has been closed") 
   
   
@@ -222,18 +247,25 @@ class ProjectManager:
         project = self.find_Project(project_id)
         if project.isActive:
             project.approved_member(user_name)
-            # TODO: need to update in DB
+            # insert into DB approved member
+            db_member = DBProjectMembers(project_id, user_name)
+            self.db_access.insert(db_member)
+            # Remove member from pending requests
+            self.db_access.delete_obj_by_query(DBPendingRequests, 
+                {"project_id": project_id, "email": user_name})
             return ResponseSuccessMsg(f"member {user_name} has been approved in project {project_id}")
         else:
-            # TODO: need to update in DB
-            ...
+            # Remove member from pending requests
+            self.db_access.delete_obj_by_query(DBPendingRequests, 
+                {"project_id": project_id, "email": user_name})
             return ResponseFailMsg(f"cant approve member {user_name} in project {project_id} because it is not active")
         
     def reject_member(self, project_id, user_name):
         pending_requests = self.find_pending_requests(user_name)
         if pending_requests.remove(project_id):
-            # TODO: need to update in DB
-            ...
+            # Delete member from pending requests
+            self.db_access.delete_obj_by_query(DBPendingRequests, 
+                {"project_id": project_id, "email": user_name})
             return ResponseSuccessMsg(f"member {user_name} has been rejected from project {project_id}")
         return ResponseFailMsg(f"member {user_name} is not pending in project {project_id}")
             
@@ -260,3 +292,12 @@ class ProjectManager:
         if not self.founder_projects.get(founder):
             raise Exception(f"founder {founder} not found")
         return True
+
+    def update_project_status(self, project_id, is_active):
+        session = self.db_access.Session()
+        try:
+            project = self.find_Project(project_id)
+            project.isActive = is_active
+            return self.db_access.update()
+        finally:
+            session.close()
