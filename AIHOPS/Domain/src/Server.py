@@ -132,6 +132,7 @@ class Server:
             return self.project_manager.set_project_factors(pid, factors)
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project factors: {e}")
+
         
     def set_project_severity_factors(self, cookie, pid, severity_factors):
         try:

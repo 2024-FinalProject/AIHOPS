@@ -28,6 +28,7 @@ class ProjectManager:
         self.get_projects_from_db()
         self.get_pending_requests_from_db()
         self.factors_lock = RLock()
+        self.factor_id_maker = IdMaker()
 
     def get_projects_from_db(self):
         existing_projects = self.db_access.load_all(DBProject)
@@ -92,11 +93,11 @@ class ProjectManager:
 
         # insert to DB
         for factor in factors:
-            with self.factors_lock:
-                db_factor = DBFactors(factor[0], factor[1])
-                self.db_access.insert(db_factor, False)
-                db_project_factor = DBProjectFactors(db_factor.id, project_id)
-                self.db_access.insert(db_project_factor)
+            next_id = self.factor_id_maker.next_id()
+            db_factor = DBFactors(factor[0], factor[1], next_id)
+            self.db_access.insert(db_factor)
+            db_project_factor = DBProjectFactors(next_id, project_id)
+            self.db_access.insert(db_project_factor)
         return ResponseSuccessMsg(f"project {project_id} factors has been set")
 
     def set_project_severity_factors(self, project_id, severity_factors):

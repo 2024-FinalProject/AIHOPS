@@ -6,10 +6,11 @@ from Service.config import Base
 
 class DBFactors(Base):
     __tablename__ = 'factors'
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(100))
     description = Column(String(500))
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, f_id):
+        self.id = f_id
         self.name = name
         self.description = description
