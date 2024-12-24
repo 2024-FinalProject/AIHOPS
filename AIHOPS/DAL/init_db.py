@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Service.config import Base, engine
 from DAL.Objects.DBMember import DBMember
 from DAL.Objects.DBProject import DBProject

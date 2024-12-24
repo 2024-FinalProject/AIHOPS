@@ -48,18 +48,20 @@ class DBAccess:
         finally:
             session.close()  # Close the session
 
-    def insert(self, obj):
+    def insert(self, obj, closeSession = True):
         with self.lock:
             session = Session()  # Create a new session
             try:
                 session.add(obj)
-                session.commit()
+                if closeSession:
+                    session.commit()
                 return ResponseSuccessMsg("Successfully added to the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
                 return ResponseFailMsg(f"Rolled back, failed to add to the database: {str(e)}")
             finally:
-                session.close()  # Close the session
+                if closeSession:
+                    session.close()  # Close the session
 
     def update(self):
         with self.lock:
