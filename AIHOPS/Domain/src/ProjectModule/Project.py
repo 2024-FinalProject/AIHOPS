@@ -1,4 +1,15 @@
+from collections import defaultdict
 from threading import RLock
+
+from sqlalchemy.orm import aliased
+
+from DAL.DBAccess import DBAccess
+from DAL.Objects.DBFactorVotes import DBFactorVotes
+from DAL.Objects.DBFactors import DBFactors
+from DAL.Objects.DBPendingRequests import DBPendingRequests
+from DAL.Objects.DBProject import DBProject
+from DAL.Objects.DBProjectFactors import DBProjectFactors
+from DAL.Objects.DBProjectMembers import DBProjectMembers
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.ThreadSafeDictWithListPairValue import ThreadSafeDictWithListPairValue
@@ -13,9 +24,9 @@ class Factor:
         self.description = description
 
 # TODO: need to add the DB logic and implementation
-
+# TODO change the factors instead of a lost to a dict so we can identify the -1 factor and its value wont be calculated in the formula!!
 class Project:
-    def __init__(self, id, name, description, founder, commit=False):
+    def __init__(self, id, name, description, founder, fromDB=False):
         self.lock = RLock()
         self.id = id
         self.name = name
@@ -29,6 +40,83 @@ class Project:
         self.severity_factors = ThreadSafeList()  # Thread-safe list of severity factors
         self.members = ThreadSafeDictWithListPairValue()  # Maps user_name to (factors_values, severity_factors_values)
         self.members.insert(founder, None)
+
+        self.db_access = DBAccess()
+
+        if fromDB:
+            self._load_inner_data()
+
+    def _load_inner_data(self):
+        self.load_project_members_from_db()
+        self.load_factors()
+
+        # get_votes_from_db
+            # severity votes
+        severities = self.load_severity_votes()
+            # factor votes
+        factor_votes, black_list = self.load_factor_votes()
+
+        for member in self.members.getKeys():
+            if factor_votes[member] is not None and member not in black_list:
+                # TODO: msg to member if hes in the black list meaning hes vote was unregistered
+                self.members.insert(member, [factor_votes[member], severities[member]])
+
+    def load_severity_votes(self):
+        query_obj = {"project_id": self.id}
+        votes_data = self.db_access.load_by_query(DBFactorVotes, query_obj)
+        if isinstance(votes_data, ResponseFailMsg):
+            return votes_data
+
+        votes = {}
+
+        for vote in votes_data:
+            votes[vote.member_email] = [vote.severity_level1, vote.severity_level2, vote.severity_level3, vote.severity_level4, vote.severity_level5]
+        return votes
+
+    def load_factor_votes(self):
+        query_obj = {"project_id": self.id}
+        votes_data = self.db_access.load_by_query(DBFactorVotes, query_obj)
+
+        if isinstance(votes_data, ResponseFailMsg):
+            return votes_data
+
+        # Group the votes by member_email and factor_id
+        grouped_votes = defaultdict(lambda: defaultdict(int))
+
+        black_list = set()
+        for vote in votes_data:
+            if vote.factor_id == -1 and vote.value == -1:
+                black_list.add(vote.member_email)
+            grouped_votes[vote.member_email][vote.factor_id] = vote.value
+
+        return grouped_votes, black_list
+
+
+    def load_factors(self):
+        join_condition = DBProjectFactors.factor_id == DBFactors.id
+        factors_data = self.db_access.load_by_join_query(DBProjectFactors, DBFactors, join_condition,
+                                                         {"project_id": self.id})
+
+        if not factors_data:
+            self.isActive = False
+            self.factors_inited = False
+        else:
+            for project_factor_data, factor_data in factors_data:
+                self.factors.append(Factor(factor_data.name, factor_data.description))
+            self.factors_inited = True
+
+    def load_project_members_from_db(self):
+        members_data = self.db_access.load_by_query(DBProjectMembers, {"project_id": self.id})
+        for member_data in members_data:
+            self.members.insert(member_data["member_id"], None)
+
+
+
+
+    def is_member(self, email):
+        if email in self.members.getKeys():
+            return True
+        return False
 
     # factors_values and severity_factors_values are both lists
     def vote(self, user_name, factors_values, severity_factors_values):

@@ -99,19 +99,23 @@ class DBAccess:
             finally:
                 session.close()  # Close the session
 
-    # def load_project_members(self, project_id):
-    #     with self.lock:
-    #         session = Session()  # Create a new session
-    #         try:
-    #             # Query for all user_name values where org_name matches the given org_name
-    #             usernames = session.query(DBProjectMembers.member_email).filter_by(project_id=project_id).all()
+    def load_by_query(self, Obj, query_obj):
+        session = Session()  # Create a new session
+        try:
+            return session.query(Obj).filter_by(**query_obj).all()
+        except SQLAlchemyError as e:
+            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+        finally:
+            session.close()  # Close the session
 
-    #             # Extract just the user_name values from the query result (which are tuples)
-    #             usernames_list = [username[0] for username in usernames]
-    #             return ResponseSuccessObj("loaded members", usernames_list) if usernames_list else ResponseFailMsg(
-    #                 "No users found for the given organization.")
-    #         except SQLAlchemyError as e:
-    #             session.rollback()
-    #             return ResponseFailMsg(f"Rolled back, failed to retrieve usernames: {str(e)}")
-    #         finally:
-    #             session.close()  # Close the session
+    def load_by_join_query(self, primary_obj, join_obj, join_condition, filter_obj=None):
+        session = Session()  # Create a new session
+        try:
+            query = session.query(primary_obj, join_obj).join(join_obj, join_condition)
+            if filter_obj:
+                query = query.filter_by(**filter_obj)
+            return query.all()
+        except SQLAlchemyError as e:
+            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+        finally:
+            session.close()  # Close the session

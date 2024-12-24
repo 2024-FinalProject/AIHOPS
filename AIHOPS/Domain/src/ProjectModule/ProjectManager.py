@@ -40,6 +40,10 @@ class ProjectManager:
             self.projects.insert(project.id, project)
             self.founder_projects.insert(project.founder, project)
         self.id_maker.start_from(last_id)
+
+
+
+
     
     def get_pending_requests_from_db(self):
         pending_requests = self.db_access.load_all(DBPendingRequests)
@@ -48,7 +52,9 @@ class ProjectManager:
         for request in pending_requests:
             if not self.pending_requests.get(request.email):
                 self.pending_requests.insert(request.email, [])
-            self.pending_requests.insert(request.email, request.project_id)
+            project = self.projects.get(request.project_id)
+            if not project.is_member(request.email):
+                self.pending_requests.insert(request.email, request.project_id)
 
 
     def create_project(self, name, description, founder):
@@ -78,7 +84,7 @@ class ProjectManager:
         return Response(True, f"project {name} has been created", project_id, False)
 
     def set_project_factors(self, project_id, factors):
-        if(len(factors) == 0):
+        if len(factors) == 0:
             return ResponseFailMsg("factors can't be empty")
 
         project = self.find_Project(project_id)
@@ -147,7 +153,7 @@ class ProjectManager:
 
     def remove_member(self, asking, project_id, user_name):
         temp_project = self.find_Project(project_id)
-        if(asking != temp_project.founder):
+        if asking != temp_project.founder:
             return ResponseFailMsg(f"only founder {temp_project.founder} can remove members")
         try: 
             temp_pending_requests = self.find_pending_requests(user_name)

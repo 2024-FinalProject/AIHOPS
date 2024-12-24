@@ -18,6 +18,6 @@ class DBFactorVotes(Base):
 
     def __init__(self, factor_id, email, project_id, value):
         self.factor_id = factor_id
-        self.memeber_email = email
+        self.member_email = email
         self.project_id = project_id
         self.value = value
