@@ -300,10 +300,15 @@ class ProjectManager:
         return True
 
     def update_project_status(self, project_id, is_active):
-        session = self.db_access.Session()
         try:
             project = self.find_Project(project_id)
             project.isActive = is_active
-            return self.db_access.update()
-        finally:
-            session.close()
+            
+            # Update the project status in the database
+            db_project = DBProject(project.name, project.founder, description=project.description)
+            db_project.id = project_id
+            db_project.is_active = is_active
+            
+            return self.db_access.insert(db_project)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to update project status: {str(e)}")

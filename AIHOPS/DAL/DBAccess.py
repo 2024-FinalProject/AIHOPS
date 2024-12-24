@@ -63,7 +63,7 @@ class DBAccess:
 
     def update(self):
         with self.lock:
-            session = Session()  # Create a new session
+            session = self.Session()  # Create a new session
             try:
                 session.commit()  # Assuming you're updating within the session
                 return ResponseSuccessMsg("Successfully updated the database.")
