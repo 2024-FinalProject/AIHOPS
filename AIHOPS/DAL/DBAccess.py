@@ -40,7 +40,7 @@ class DBAccess:
             # For PostgreSQL, we use TRUNCATE with CASCADE
             for table in reversed(metadata.sorted_tables):
                 print(f"Truncating {table.name}...")
-                session.execute(text(f'TRUNCATE TABLE {table.name} CASCADE;'))
+                session.execute(text(f'DELETE FROM {table.name}'))
             session.commit()  # Commit the changes
         except Exception as e:
             session.rollback()  # Rollback in case of error
