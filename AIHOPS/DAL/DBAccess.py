@@ -37,9 +37,10 @@ class DBAccess:
 
         try:
             # Execute a raw SQL TRUNCATE command
+            # For PostgreSQL, we use TRUNCATE with CASCADE
             for table in reversed(metadata.sorted_tables):
                 print(f"Truncating {table.name}...")
-                session.execute(text(f'DELETE FROM {table.name};'))
+                session.execute(text(f'DELETE FROM {table.name}'))
             session.commit()  # Commit the changes
         except Exception as e:
             session.rollback()  # Rollback in case of error
@@ -47,22 +48,24 @@ class DBAccess:
         finally:
             session.close()  # Close the session
 
-    def insert(self, obj):
+    def insert(self, obj, closeSession = True):
         with self.lock:
             session = Session()  # Create a new session
             try:
                 session.add(obj)
-                session.commit()
+                if closeSession:
+                    session.commit()
                 return ResponseSuccessMsg("Successfully added to the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
                 return ResponseFailMsg(f"Rolled back, failed to add to the database: {str(e)}")
             finally:
-                session.close()  # Close the session
+                if closeSession:
+                    session.close()  # Close the session
 
     def update(self):
         with self.lock:
-            session = Session()  # Create a new session
+            session = self.Session()  # Create a new session
             try:
                 session.commit()  # Assuming you're updating within the session
                 return ResponseSuccessMsg("Successfully updated the database.")

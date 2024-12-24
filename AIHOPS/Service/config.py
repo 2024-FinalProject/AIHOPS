@@ -12,7 +12,7 @@ CORS(app)
 # ----------- later for db -----------
 Base = declarative_base()
 DATABASE_URL = "sqlite:///mydatabase.db"
-
+# DATABASE_URL = "postgresql://postgres:wxj2bbhDD!@localhost:5432/aihops_db"
 # PostgreSQL: 'postgresql://user:password@localhost/dbname'
 # MySQL:' mysql+pymysql://user:password@localhost/dbname'
 
