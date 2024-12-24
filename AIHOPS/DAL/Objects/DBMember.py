@@ -6,7 +6,7 @@ from Service.config import Base
 
 class DBMember(Base):
     __tablename__ = 'members'
-    id = Column(String(255), primary_key=True)
+    id = Column(Integer, primary_key=True)
     email = Column(String(255), unique=True, nullable=False)
     name = Column(String(50))
     encrypted_passwd = Column(String(255), nullable=False)

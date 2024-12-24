@@ -34,7 +34,7 @@ class MemberController:
         with self.register_lock:
             if self.members.get(email) is not None:
                 return Response(False, f'username {email} is taken', None, False)
-            uid = str(self.id_maker.next_id())
+            uid = self.id_maker.next_id()
             member = Member(email, passwd, uid)
             # insert to db:
             res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd))

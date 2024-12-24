@@ -36,8 +36,8 @@ class ProjectManager:
         for project_data in existing_projects:
             project = Project(project_data.id, project_data.name, project_data.description, project_data.founder)
             last_id = max(last_id, project.id + 1)
-            self.projects[project.id] = deepCopy(project)
-            self.founder_projects[project.founder].append(deepCopy(project))
+            self.projects.insert(project.id, project)
+            self.founder_projects.insert(project.founder, project)
         self.id_maker.start_from(last_id)
     
     def get_pending_requests_from_db(self):
@@ -47,7 +47,7 @@ class ProjectManager:
         for request in pending_requests:
             if not self.pending_requests.get(request.email):
                 self.pending_requests.insert(request.email, [])
-            self.pending_requests[request.email].append(request.project_id)
+            self.pending_requests.insert(request.email, request.project_id)
 
 
     def create_project(self, name, description, founder):
