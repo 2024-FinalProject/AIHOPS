@@ -1,14 +1,14 @@
 import unittest
-
-from Domain.src.Server import Server
 from Service.config import Base, engine
+from Domain.src.Server import Server
+
 
 # How to run the tests:
 #       In a terminal, run the following commands:
 #               cd AIHOPS
-#               python -m unittest AcceptanceTests.AcceptanceTests
+#               python3 -m unittest Tests.AcceptanceTests.user_tests
 
-class UserAcceptanceTests(unittest.TestCase):
+class UserTests(unittest.TestCase):
 
     # ------------- Base ------------------
 
@@ -65,3 +65,6 @@ class UserAcceptanceTests(unittest.TestCase):
         cookie = self.server.enter().result.cookie
         res = self.server.logout(cookie)
         self.assertFalse(res.success, f'logout succeeded when it should have failed - not logged in')
+
+   
+
