@@ -80,7 +80,7 @@ class ProjectManager:
         self.projects.insert(project_id, prj)
         self.founder_projects.insert(founder, prj)
         # Add DB insert
-        db_project = DBProject(name, founder, description=description)
+        db_project = DBProject(name, founder, description, project_id)
         self.db_access.insert(db_project)
         return Response(True, f"project {name} has been created", project_id, False)
 

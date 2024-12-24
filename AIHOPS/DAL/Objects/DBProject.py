@@ -6,7 +6,7 @@ from Service.config import Base
 class DBProject(Base):
     __tablename__ = 'projects'
 
-    id = Column(Integer, primary_key=True, autoincrement = True)
+    id = Column(Integer, primary_key=True)
     name = Column(String(255), unique=True, nullable=False)
     founder = Column(String(255), nullable=False)
     description = Column(String(1000))
@@ -18,10 +18,11 @@ class DBProject(Base):
         Index('idx_project_founder', 'founder'),
     )
 
-    def __init__(self, name, founder, **kwargs):
+    def __init__(self, name, founder, description, project_id):
         self.name = name
         self.founder = founder
-        self.description = kwargs.get('description')
+        self.description = description
+        self.id = project_id
         self.date_created = datetime.now()
         self.is_active = False
        
