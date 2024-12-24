@@ -1,11 +1,15 @@
 from threading import RLock
 
+from DAL.Objects.DBFactorVotes import DBFactorVotes
 from DAL.Objects.DBFactors import DBFactors
+from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProjectFactors import DBProjectFactors
+from DAL.Objects.DBProjectMembers import DBProjectMembers
 from DAL.Objects.DBProjectSevrityFactors import DBProjectSeverityFactor
+from DAL.Objects.DBProject import DBProject
+from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
 from DAL.DBAccess import DBAccess
-from DAL.Objects import DBFactorVotes, DBPendingRequests, DBProject, DBSeverityVotes, DBProjectMembers
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
@@ -21,8 +25,8 @@ class ProjectManager:
         self.pending_requests = ThreadSafeDictWithListValue() # email -> list of projects_id's
         self.id_maker = IdMaker()
         self.db_access = DBAccess()
-        #self.get_projects_from_db()
-        #self.get_pending_requests_from_db()
+        self.get_projects_from_db()
+        self.get_pending_requests_from_db()
 
     def get_projects_from_db(self):
         existing_projects = self.db_access.load_all(DBProject)
@@ -32,7 +36,7 @@ class ProjectManager:
         for project_data in existing_projects:
             project = Project(project_data.id, project_data.name, project_data.description, project_data.founder)
             last_id = max(last_id, project.id + 1)
-            self.project[project.id] = deepCopy(project)
+            self.projects[project.id] = deepCopy(project)
             self.founder_projects[project.founder].append(deepCopy(project))
         self.id_maker.start_from(last_id)
     
@@ -41,7 +45,9 @@ class ProjectManager:
         if pending_requests is None:
             return 1
         for request in pending_requests:
-            self.pending_requests[request[1]].append(request[0])
+            if not self.pending_requests.get(request.email):
+                self.pending_requests.insert(request.email, [])
+            self.pending_requests[request.email].append(request.project_id)
 
 
     def create_project(self, name, description, founder):
