@@ -36,7 +36,7 @@ class ProjectManager:
             return 1
         last_id = 0
         for project_data in existing_projects:
-            project = Project(project_data.id, project_data.name, project_data.description, project_data.founder)
+            project = Project(project_data.id, project_data.name, project_data.description, project_data.founder, fromDB=True)
             last_id = max(last_id, project.id + 1)
             self.projects.insert(project.id, project)
             self.founder_projects.insert(project.founder, project)

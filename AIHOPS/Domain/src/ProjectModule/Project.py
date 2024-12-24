@@ -57,7 +57,7 @@ class Project:
         factor_votes, black_list = self.load_factor_votes()
 
         for member in self.members.getKeys():
-            if factor_votes[member] is not None and member not in black_list:
+            if factor_votes[member] is not None and member not in black_list and severities.get(member) is not None:
                 # TODO: msg to member if hes in the black list meaning hes vote was unregistered
                 self.members.insert(member, [factor_votes[member], severities[member]])
 
@@ -94,14 +94,15 @@ class Project:
 
     def load_factors(self):
         join_condition = DBProjectFactors.factor_id == DBFactors.id
-        factors_data = self.db_access.load_by_join_query(DBProjectFactors, DBFactors, join_condition,
+        factors_data_res = self.db_access.load_by_join_query(DBProjectFactors, DBFactors, join_condition,
                                                          {"project_id": self.id})
 
-        if not factors_data:
+        if not factors_data_res or not factors_data_res.result:
             self.isActive = False
             self.factors_inited = False
         else:
-            for project_factor_data, factor_data in factors_data:
+            factors_data = factors_data_res.result
+            for factor_data in factors_data:
                 self.factors.append(Factor(factor_data.name, factor_data.description))
             self.factors_inited = True
 
