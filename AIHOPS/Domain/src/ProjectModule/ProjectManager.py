@@ -89,7 +89,6 @@ class ProjectManager:
             return ResponseFailMsg("factors can't be empty")
 
         project = self.find_Project(project_id)
-        project.set_factors(factors)
 
         # insert to DB
         for factor in factors:
@@ -98,13 +97,16 @@ class ProjectManager:
             self.db_access.insert(db_factor)
             db_project_factor = DBProjectFactors(next_id, project_id)
             self.db_access.insert(db_project_factor)
+        # cache changes only after db persistance
+        project.set_factors(factors)
         return ResponseSuccessMsg(f"project {project_id} factors has been set")
 
     def set_project_severity_factors(self, project_id, severity_factors):
-        if(len(severity_factors) == 0):
+        # TODO: redundant??
+        if len(severity_factors) == 0:
             return ResponseFailMsg("severity factors can't be empty")
         
-        if(len(severity_factors) != 5):
+        if len(severity_factors) != 5:
             return ResponseFailMsg("there should be 5 severity factors")
         
         for sf in severity_factors:
@@ -112,11 +114,13 @@ class ProjectManager:
                 return ResponseFailMsg("severity factor can't be negative")
 
         project = self.find_Project(project_id)
-        project.set_severity_factors(severity_factors)
-    
+
         #insert to DB
         db_severity = DBProjectSeverityFactor(project_id, *severity_factors)
-        self.db_access.insert(db_severity)
+        res = self.db_access.insert(db_severity)
+
+        # cache changes only after db persistance
+        project.set_severity_factors(severity_factors)
         return ResponseSuccessMsg(f"project {project_id} severity factors has been set")
 
 
