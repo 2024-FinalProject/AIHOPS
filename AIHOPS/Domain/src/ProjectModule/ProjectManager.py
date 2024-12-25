@@ -195,10 +195,22 @@ class ProjectManager:
                 return ResponseFailMsg("severity factors sum needs to be excaly 1") 
             project.vote(user_name, factors_values, severity_factors_values)
 
+             # Save initial placeholder row with -1 id and -1 value
+            db_vote = DBFactorVotes(-1, user_name, project_id, -1)
+            self.db_access.insert(db_vote)
+
             # Save factor votes
             for i, value in enumerate(factors_values):
                 db_vote = DBFactorVotes(i, user_name, project_id, value)
                 self.db_access.insert(db_vote)
+
+            temp_factor = DBFactorVotes(-1, user_name, project_id, -1)
+            temp_factor.value = 1
+            # Update the object
+            update_result = self.db_access.update(temp_factor)
+
+            if not update_result.success:
+                return update_result
 
             # Save severity votes
             db_severity_vote = DBSeverityVotes(user_name, project_id, *severity_factors_values)
@@ -310,7 +322,7 @@ class ProjectManager:
             db_project = DBProject(project.name, project.founder, description=project.description)
             db_project.id = project_id
             db_project.is_active = is_active
-            
+        
             return self.db_access.insert(db_project)
         except Exception as e:
             return ResponseFailMsg(f"Failed to update project status: {str(e)}")

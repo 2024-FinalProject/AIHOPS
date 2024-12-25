@@ -63,10 +63,12 @@ class DBAccess:
                 if closeSession:
                     session.close()  # Close the session
 
-    def update(self):
+    def update(self, obj):
         with self.lock:
-            session = self.Session()  # Create a new session
+            session = Session()  # Create a new session
             try:
+                # Merge the object into the session
+                session.merge(obj)
                 session.commit()  # Assuming you're updating within the session
                 return ResponseSuccessMsg("Successfully updated the database.")
             except SQLAlchemyError as e:
