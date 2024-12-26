@@ -94,7 +94,7 @@ class ProjectManager:
         for factor in factors:
             next_id = self.factor_id_maker.next_id()
             db_factor = DBFactors(factor[0], factor[1], next_id)
-            self.db_access.insert(db_factor)
+            self.db_access.insert(db_factor, closeSession=False)
             db_project_factor = DBProjectFactors(next_id, project_id)
             self.db_access.insert(db_project_factor)
         
