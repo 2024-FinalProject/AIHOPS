@@ -37,6 +37,10 @@ class ProjectManager:
         last_id = 0
         for project_data in existing_projects:
             project = Project(project_data.id, project_data.name, project_data.description, project_data.founder, project_data.factors_num, fromDB=True)
+            # Verify factors count matches the stored factors_num
+            factors_count = len(project.factors)
+            if factors_count != project_data.factors_num:
+                raise Exception(f"Factors count mismatch for project {project_data.id}: expected {project_data.factors_num}, got {factors_count}")
             last_id = max(last_id, project.id + 1)
             self.projects.insert(project.id, project)
             self.founder_projects.insert(project.founder, project)
