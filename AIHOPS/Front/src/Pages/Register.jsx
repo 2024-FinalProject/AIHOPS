@@ -1,27 +1,40 @@
 import React, { useState } from "react";
 import { startSession, register } from "../api/AuthApi";
-import "./Register.css";  // Create a separate CSS file for your styles
+import { useNavigate } from "react-router-dom";
+
+import "./Register.css";
 
 const Register = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(null); // null means no message initially
+
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    
+    // Reset state before making the request
+    setMsg("");
+    setIsSuccess(null);  // Reset before starting the registration attempt
+
     try {
       const session = await startSession();
       const cookie = session.data.cookie;
 
       const response = await register(cookie, userName, password);
-      if (response.data.sucess) {
+      
+      // Check if registration is successful
+      if (response.data.success) {
         setMsg(response.data.message);
         setIsSuccess(true);
+        navigate("/login");
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);
       }
+      
     } catch (error) {
       setMsg("Failed to register");
       setIsSuccess(false);
@@ -59,13 +72,8 @@ const Register = () => {
         </form>
 
         {/* Display Success or Failure Message */}
-        {isSuccess && (
-          <div className={`register-alert success`}>
-            {msg}
-          </div>
-        )}
-        {!isSuccess && (
-          <div className={`register-alert danger`}>
+        {msg && (
+          <div className={`register-alert ${isSuccess === true ? "success" : isSuccess === false ? "danger" : ""}`}>
             {msg}
           </div>
         )}

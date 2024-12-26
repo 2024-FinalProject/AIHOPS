@@ -23,6 +23,8 @@ html, body {
   margin-bottom: 5%;
   height: 100%;
   width: 100%;
+  font-family: 'Courier New', Courier, monospace;
+  
 }
 
 .welcome-title {
@@ -33,6 +35,7 @@ html, body {
 .welcome-subtitle {
   font-size: 200%; /* Adjusted font size to percentage */
   margin-top: 2%;
+  
 }
 
 .upper-subtitle-container {
@@ -48,4 +51,6 @@ html, body {
   max-width: 60%; /* Using percentages to control max-width */
   color: #666;
   padding-bottom: 10%;
+  font-family: 'Courier New', Courier, monospace;
+
 }
