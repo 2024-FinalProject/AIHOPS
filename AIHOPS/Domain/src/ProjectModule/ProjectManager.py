@@ -5,7 +5,7 @@ from DAL.Objects.DBFactors import DBFactors
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
-from DAL.Objects.DBProjectSevrityFactors import DBProjectSeverityFactor
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue

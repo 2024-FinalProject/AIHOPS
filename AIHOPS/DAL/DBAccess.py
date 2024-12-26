@@ -108,12 +108,17 @@ class DBAccess:
         finally:
             session.close()  # Close the session
 
-    def load_by_join_query(self, primary_obj, join_obj, join_condition, filter_obj=None):
+    def load_by_join_query(self, primary_obj, join_obj, select_attrs, join_condition, filter_obj=None):
         session = Session()  # Create a new session
         try:
-            query = session.query(primary_obj, join_obj).join(join_obj, join_condition)
+            # Explicitly specify the primary table using select_from
+            query = session.query(*select_attrs).select_from(primary_obj).join(join_obj, join_condition)
+
             if filter_obj:
-                query = query.filter_by(**filter_obj)
+                # Dynamically build filter conditions
+                for key, value in filter_obj.items():
+                    query = query.filter(getattr(primary_obj, key) == value)
+
             return query.all()
         except SQLAlchemyError as e:
             return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")

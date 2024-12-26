@@ -10,6 +10,7 @@ from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.ThreadSafeDictWithListPairValue import ThreadSafeDictWithListPairValue
@@ -49,7 +50,7 @@ class Project:
     def _load_inner_data(self):
         self.load_project_members_from_db()
         self.load_factors()
-
+        self.load_severity_factors_from_db()
         # get_votes_from_db
             # severity votes
         severities = self.load_severity_votes()
@@ -60,6 +61,17 @@ class Project:
             if factor_votes[member] is not None and member not in black_list and severities.get(member) is not None:
                 # TODO: msg to member if hes in the black list meaning hes vote was unregistered
                 self.members.insert(member, [factor_votes[member], severities[member]])
+
+    def load_severity_factors_from_db(self):
+        query_obj = {"project_id": self.id}
+        s_f_data = self.db_access.load_by_query(DBProjectSeverityFactor, query_obj)
+        if isinstance(s_f_data, ResponseFailMsg):
+            self.severity_factors_inited = False
+            self.isActive = False
+        s_f_data = s_f_data[0]
+        severity_factors = [s_f_data.severity_level1, s_f_data.severity_level2, s_f_data.severity_level3,
+                            s_f_data.severity_level4, s_f_data.severity_level5]
+        self.set_severity_factors(severity_factors)
 
     def load_severity_votes(self):
         query_obj = {"project_id": self.id}
@@ -94,16 +106,16 @@ class Project:
 
     def load_factors(self):
         join_condition = DBProjectFactors.factor_id == DBFactors.id
-        factors_data_res = self.db_access.load_by_join_query(DBProjectFactors, DBFactors, join_condition,
+        factors_data_res = self.db_access.load_by_join_query(DBProjectFactors, DBFactors,[DBFactors.name, DBFactors.description]
+                                                            ,join_condition,
                                                          {"project_id": self.id})
 
-        if not factors_data_res or not factors_data_res.result:
+        if not factors_data_res or factors_data_res is None:
             self.isActive = False
             self.factors_inited = False
         else:
-            factors_data = factors_data_res.result
-            for factor_data in factors_data:
-                self.factors.append(Factor(factor_data.name, factor_data.description))
+            for factor_data in factors_data_res:
+                self.factors.append(Factor(factor_data[0], factor_data[1]))
             self.factors_inited = True
 
     def load_project_members_from_db(self):
