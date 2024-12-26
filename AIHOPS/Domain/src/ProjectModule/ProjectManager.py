@@ -342,3 +342,22 @@ class ProjectManager:
             return self.db_access.insert(db_project)
         except Exception as e:
             return ResponseFailMsg(f"Failed to update project status: {str(e)}")
+        
+def delete_project(self, project_id):
+    try:
+        # Delete all related data (factors, votes, pending requests, members, etc.)
+        self.db_access.delete_obj_by_query(DBProjectFactors, {"project_id": project_id})
+        self.db_access.delete_obj_by_query(DBFactorVotes, {"project_id": project_id})
+        self.db_access.delete_obj_by_query(DBSeverityVotes, {"project_id": project_id})
+        self.db_access.delete_obj_by_query(DBPendingRequests, {"project_id": project_id})
+        self.db_access.delete_obj_by_query(DBProjectMembers, {"project_id": project_id})
+        self.db_access.delete_obj_by_query(DBProject, {"id": project_id})
+
+        # Remove the project from the in-memory data structures
+        self.projects.pop(project_id, None)
+        for founder, projects in self.founder_projects.items():
+            self.founder_projects[founder] = [p for p in projects if p.id != project_id]
+
+        return ResponseSuccessMsg(f"Project {project_id} and all related data have been deleted.")
+    except Exception as e:
+        return ResponseFailMsg(f"Failed to delete project {project_id}: {str(e)}")
