@@ -1,13 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import NavBar from "../components/NavBar";
 import "./WelcomePage.css";
 
 const WelcomePage = () => {
   const { user: currentUser } = useAuth();
 
   return (
-    <div className="welcome-container">
+    <div>
+      <NavBar />
+      <div className="welcome-container">
       <header className="welcome-header">
         <h1 className="welcome-title">AIHOPS</h1>
         <p className="welcome-subtitle">Create a survey or take one :)</p>
@@ -19,7 +22,11 @@ const WelcomePage = () => {
         </span>
       </div>
     </div>
+    </div>
+   
   );
 };
 
 export default WelcomePage;
+
+
