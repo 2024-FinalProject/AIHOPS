@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Importing the pages
 import WelcomePage from "./pages/WelcomePage";
+import Register from "./pages/Register";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -26,17 +27,10 @@ const AppContent = () => {
   }, [login]);
 
   return (
-    // <div className="App">
-    //   <header className="App-header">
-    //     <h1>AIHOPS</h1>
-    //   </header>
-    //   <Main />
-    // </div>
       <Routes>
         <Route path="/" element={<WelcomePage />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
-
-
   );
 }
 
