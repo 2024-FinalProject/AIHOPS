@@ -9,7 +9,6 @@ const WelcomePage = () => {
 
   return (
     <div>
-      <NavBar />
       <div className="welcome-container">
         <header className="welcome-header">
           <h1 className="welcome-title">AIHOPS</h1>

@@ -67,15 +67,17 @@ body {
     font-size: 1rem;
   }
   
-  .register-alert.success {
+  .success {
     background-color: #28a745;
     color: white;
   }
   
-  .register-alert.danger {
+  .danger {
     background-color: #dc3545;
     color: white;
   }
+  
+  
 
   .text-center.mb-4 {
     text-align: center;
