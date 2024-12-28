@@ -29,6 +29,14 @@ class ProjectManager:
         self.get_pending_requests_from_db()
         self.factors_lock = RLock()
         self.factor_id_maker = IdMaker()
+        self.set_project_id_maker()
+
+    def set_project_id_maker(self):
+        # get highest factor id from db
+        highest = self.db_access.get_highest_factor_id()
+        # set id_maker next id to retrieved value+1
+        self.factor_id_maker.start_from(highest+1)
+
 
     def get_projects_from_db(self):
         existing_projects = self.db_access.load_all(DBProject)
@@ -41,6 +49,7 @@ class ProjectManager:
             self.projects.insert(project.id, project)
             self.founder_projects.insert(project.founder, project)
         self.id_maker.start_from(last_id)
+
 
 
 

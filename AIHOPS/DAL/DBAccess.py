@@ -1,8 +1,10 @@
 from threading import RLock
 
-from sqlalchemy import MetaData, text
+from sqlalchemy import MetaData, text, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+
+from DAL.Objects.DBFactors import DBFactors
 # from DAL.Objects import DBProjectMembers
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Service.config import engine  # Make sure you have your SQLAlchemy engine defined
@@ -122,5 +124,16 @@ class DBAccess:
             return query.all()
         except SQLAlchemyError as e:
             return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+        finally:
+            session.close()  # Close the session
+
+    def get_highest_factor_id(self):
+        session = Session()  # Create a new session
+        try:
+            # Retrieve the maximum ID from the Factor table
+            highest_id = session.query(func.max(DBFactors.id)).scalar()
+            return highest_id
+        except SQLAlchemyError as e:
+            return ResponseFailMsg(f"Failed to retrieve the highest Factor ID: {str(e)}")
         finally:
             session.close()  # Close the session
