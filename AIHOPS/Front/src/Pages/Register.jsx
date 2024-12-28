@@ -29,7 +29,7 @@ const Register = () => {
       if (response.data.success) {
         setMsg(response.data.message);
         setIsSuccess(true);
-        navigate("/login");
+        //navigate("/login");
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);
@@ -53,6 +53,7 @@ const Register = () => {
               placeholder="Enter username"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
+              required
             />
           </div>
 
@@ -63,6 +64,7 @@ const Register = () => {
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
