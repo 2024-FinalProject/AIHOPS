@@ -11,6 +11,7 @@ from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
 from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
+from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.ThreadSafeDictWithListPairValue import ThreadSafeDictWithListPairValue
@@ -36,7 +37,6 @@ class Project:
         self.factors_inited = False
         self.severity_factors_inited = False
 
-        self.isActive = False  
         self.factors = ThreadSafeList()  # Thread-safe list of project factors
         self.severity_factors = ThreadSafeList()  # Thread-safe list of severity factors
         self.members = ThreadSafeDictWithListPairValue()  # Maps user_name to (factors_values, severity_factors_values)
@@ -44,8 +44,12 @@ class Project:
 
         self.db_access = DBAccess()
 
+        activate = False
         if fromDB:
             self._load_inner_data()
+            if self.factors_inited and self.severity_factors_inited:
+                activate = True
+        self.isActive = activate
 
     def _load_inner_data(self):
         self.load_project_members_from_db()
@@ -68,6 +72,9 @@ class Project:
         if isinstance(s_f_data, ResponseFailMsg):
             self.severity_factors_inited = False
             self.isActive = False
+        if not s_f_data:
+            self.factors_inited = False
+            return
         s_f_data = s_f_data[0]
         severity_factors = [s_f_data.severity_level1, s_f_data.severity_level2, s_f_data.severity_level3,
                             s_f_data.severity_level4, s_f_data.severity_level5]
@@ -75,7 +82,7 @@ class Project:
 
     def load_severity_votes(self):
         query_obj = {"project_id": self.id}
-        votes_data = self.db_access.load_by_query(DBFactorVotes, query_obj)
+        votes_data = self.db_access.load_by_query(DBSeverityVotes, query_obj)
         if isinstance(votes_data, ResponseFailMsg):
             return votes_data
 
@@ -121,7 +128,8 @@ class Project:
     def load_project_members_from_db(self):
         members_data = self.db_access.load_by_query(DBProjectMembers, {"project_id": self.id})
         for member_data in members_data:
-            self.members.insert(member_data["member_id"], None)
+            # member =
+            self.members.insert(member_data.member_email, None)
 
 
 

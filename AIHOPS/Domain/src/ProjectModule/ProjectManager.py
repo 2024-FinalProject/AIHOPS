@@ -35,7 +35,8 @@ class ProjectManager:
         # get highest factor id from db
         highest = self.db_access.get_highest_factor_id()
         # set id_maker next id to retrieved value+1
-        self.factor_id_maker.start_from(highest+1)
+        if highest is not None:
+            self.factor_id_maker.start_from(highest+1)
 
 
     def get_projects_from_db(self):
@@ -208,10 +209,10 @@ class ProjectManager:
                 if factor < 0 or factor > 4:
                     return ResponseFailMsg("factor needs to be between 0 and 4")
             for severity in severity_factors_values:
-                if severity < 0 or severity > 1:
+                if severity < 0 or severity > 100:
                     return ResponseFailMsg("severity factor needs to be between 0 and 1")
                 severity_amount += severity
-            if severity_amount != 1:
+            if severity_amount != 100:
                 return ResponseFailMsg("severity factors sum needs to be excaly 1") 
             project.vote(user_name, factors_values, severity_factors_values)
 
