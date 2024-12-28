@@ -29,7 +29,7 @@ const Register = () => {
       if (response.data.success) {
         setMsg(response.data.message);
         setIsSuccess(true);
-        navigate("/login");
+        //navigate("/login");
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);
