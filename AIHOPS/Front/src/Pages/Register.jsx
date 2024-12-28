@@ -53,6 +53,7 @@ const Register = () => {
               placeholder="Enter username"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
+              required
             />
           </div>
 
@@ -63,6 +64,7 @@ const Register = () => {
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 

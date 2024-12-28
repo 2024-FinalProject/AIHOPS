@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { startSession, loginUser } from "../api/AuthApi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
-
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("");
@@ -23,19 +30,24 @@ const Login = () => {
 
       if (response.data.success) {
         setMsg(response.data.message);
+        
+        // Store auth data in localStorage
+        localStorage.setItem('authToken', cookie);
+        localStorage.setItem('userName', userName);
+        
+        // Update auth context
         login(cookie, userName);
-        navigate(`/`);
-
+        navigate('/');
       } else {
         setMsg(response.data.message);
       }
     } catch (error) {
-        console.log(error);
+      console.error('Login error:', error);
       setMsg("Login failed: Invalid credentials");
     }
   };
+
   return (
-    // <h1 Login></h1>
     <section>
       <div className="auth-container">
         <h2>Login</h2>
@@ -48,6 +60,7 @@ const Login = () => {
             onChange={(e) => setUserName(e.target.value)}
             value={userName}
             placeholder="Enter username"
+            required
           />
 
           <input
@@ -55,6 +68,7 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             placeholder="Enter password"
+            required
           />
 
           <button type="submit">Login</button>
