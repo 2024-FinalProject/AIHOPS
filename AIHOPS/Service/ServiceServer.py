@@ -119,10 +119,9 @@ def reject_member():
 @app.route("/projects", methods=["GET"])
 def get_projects():
     try:
-        cookie = request.args.get("cookie")
-        cookie_int = int(cookie)
+        cookie = request.args.get("cookie", type = int)
         
-        res = server.get_projects(cookie_int)
+        res = server.get_projects(cookie)
         
         # Make sure we're only sending serializable data
         return jsonify({

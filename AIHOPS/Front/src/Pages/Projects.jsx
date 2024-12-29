@@ -42,28 +42,29 @@ const Projects = () => {
         });
 }, []);
   
-    return (
-      <div>
-        {/* Render your projects or message here */}
-        {isSuccess === true ? (
-          <div>
-            <h2>Projects</h2>
-            <ul>
-              {projects.map((project) => (
-                <li key={project.id}>{project.name}</li>
-              ))}
-            </ul>
-          </div>
-        ) : isSuccess === false ? (
-          <div>
-            <h2>Error occured:</h2>
-            <p>{msg}</p>
-          </div>
-        ) : (
-          <p>Loading...</p>
-        )}
-      </div>
+return (
+    <section>
+        <div className="projects-container">
+            {isSuccess === true ? (
+                <div>
+                    <h2>Projects</h2>
+                    <ul>
+                        {projects.map((project) => (
+                            <li key={project.id}>{project.name}</li>
+                        ))}
+                    </ul>
+                </div>
+            ) : isSuccess === false ? (
+                <div>
+                    <h2>Error occurred:</h2>
+                    <p className="error-message">{msg}</p>
+                </div>
+            ) : (
+                <p>Loading...</p>
+            )}
+        </div>
+    </section>
     );
-  };
+};
 
-  export default Projects;
+export default Projects;
