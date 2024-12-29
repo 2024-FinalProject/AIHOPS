@@ -4,12 +4,12 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 // Importing the components
-import NavBar from "./Components/NavBar";
+import NavBar from "./components/NavBar";
 
 // Importing the pages
-import WelcomePage from "./Pages/WelcomePage";
-import Register from "./Pages/Register";
-import Login from "./Pages/Login";
+import WelcomePage from "./pages/WelcomePage";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();

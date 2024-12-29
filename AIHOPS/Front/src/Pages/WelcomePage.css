@@ -1,56 +1,111 @@
-/* WelcomePage.css */
-
-/* Make sure the html and body elements take up the full height */
-html, body {
-  height: 100%;
-  width: 100%;
-  margin: 0; /* Remove default margin */
-}
-
-.welcome-container {
-  display: 100%;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%; /* Full height of the screen */
-  width: 100%;
-  background-color: #f5f5f5;
-  padding-top: 10%; /* Add padding to move the content below the navbar */
-}
-
-.welcome-header {
-  text-align: center;
-  margin-bottom: 5%;
-  height: 100%;
-  width: 100%;
-  font-family: 'Courier New', Courier, monospace;
-  
-}
-
-.welcome-title {
-  font-size: 300%; /* Adjusted font size to percentage */
-  font-weight: bold;
-}
-
-.welcome-subtitle {
-  font-size: 200%; /* Adjusted font size to percentage */
-  margin-top: 2%;
-  
-}
-
-.upper-subtitle-container {
-  display: flex;
-  justify-content: center;
+/* Content container */
+.content-container {
   margin-top: 5%;
+  margin-left: 20%;
+  display: flex;
+  align-items: flex-start; /* Align items to the top */
+  justify-content: space-between;
+  width: 100%;
+  max-width: 900px; /* Limit the width */
 }
 
-.lower-subtitle {
-  font-size: 100%; /* Adjusted font size to percentage */
+/* Large Button Container (Wrapper for alignment) */
+.large-button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically if needed */
+  gap: 10px; /* Space between the buttons */
+  width: 100%;
+  margin-right: 20px; /* Space between large button and other content */
+}
+
+/* Large Button */
+.large-button {
+  display: inline-block;
+  padding: 50px 130px; /* Increased the horizontal padding for more width */
+  font-size: 3rem;
+  color: #000; /* Black text for clarity */
+  background-color: #f5f5f5; /* Transparent background */
+  text-decoration: none;
+  border: 2px solid #000; /* Black border */
+  border-radius: 0;
   text-align: center;
-  width: 80%;
-  max-width: 60%; /* Using percentages to control max-width */
-  color: #666;
-  padding-bottom: 10%;
-  font-family: 'Courier New', Courier, monospace;
-
+  width: auto; /* Ensure it is not stretched too much */
+  box-sizing: border-box;
+  font-family: 'Courier New', Courier, monospace; /* Apply font to button */
 }
+
+/* Title in the large button */
+.button-title {
+  font-size: 3.5rem; /* Adjust size of the title */
+  font-weight: bold; /* Make the title bold */
+  display: block; /* Make it a block element to stack it */
+  font-family: 'Courier New', Courier, monospace; /* Apply font to title */
+}
+
+/* Subtitle in the large button */
+.button-subtitle {
+  font-size: 1.2rem; /* Adjust size of the subtitle */
+  color: #555; /* Slightly darker color for subtitle */
+  display: block; /* Make it a block element to stack it */
+  font-family: 'Courier New', Courier, monospace; /* Apply font to subtitle */
+}
+
+.large-button:hover {
+  background-color: #23272b;
+}
+
+/* Small Button - Centered Below the Large Button */
+.small-button {
+  display: inline-block;
+  font-size: 0.9rem;
+  color: #000;
+  background-color: #f5f5f5;
+  text-decoration: none;
+  border: 2px solid #000; /* Black border */
+  border-radius: 0;
+  padding: 1px 20px;
+  text-decoration: none;
+  text-align: center;
+  margin-top: 150px; /* Space from the large button */
+  width: auto; /* Fit to content */
+  align-self: center; /* Center the small button horizontally */
+  font-family: 'Courier New', Courier, monospace; /* Apply font to button */
+}
+
+.small-button:hover {
+  background-color: #5a6268;
+}
+
+/* Button container (vertical stack for login, register, about, accessibility) */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 70%; /* Take up half of the content area */
+}
+
+/* Style for all buttons */
+.button {
+  display: inline-block;
+  padding: 20px 0px;
+  font-size: 4vw; /* Font size scales with the width of the viewport */
+  text-decoration: none;
+  color: #000;
+  background-color: #f5f5f5;
+  text-decoration: none;
+  border: 2px solid #000; /* Black border */
+  border-radius: 0;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Courier New', Courier, monospace; /* Apply font to buttons */
+}
+
+.button:hover {
+  opacity: 0.9;
+}
+
+/* Specific styles for each button */
