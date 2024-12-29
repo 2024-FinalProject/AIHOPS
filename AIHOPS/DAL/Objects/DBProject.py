@@ -12,17 +12,19 @@ class DBProject(Base):
     description = Column(String(1000))
     date_created = Column(DateTime, default=datetime.utcnow)
     is_active = Column(Boolean, default=False)
+    factors_num = Column(Integer, default=7)
 
     _table_args__ = (
         Index('idx_project_name', 'name'),
         Index('idx_project_founder', 'founder'),
     )
 
-    def __init__(self, name, founder, description, project_id):
+    def __init__(self, name, founder, description, project_id, factors_num = 7):
         self.name = name
         self.founder = founder
         self.description = description
         self.id = project_id
         self.date_created = datetime.now()
         self.is_active = False
+        self.factors_num = factors_num
        
