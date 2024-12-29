@@ -1,7 +1,12 @@
 from Domain.src.Server import Server
 from Service.config import app
-from flask import request, jsonify
+from flask import Flask, request, jsonify
 from Service.config import Base, engine
+
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5173", "http://localhost:5173"]}})
 
 # --------  init session and user management ---------------
 
@@ -111,14 +116,31 @@ def reject_member():
     return jsonify({"message": res.msg, "success": res.success})
 
 # -------- Project Information ---------------
-
 @app.route("/projects", methods=["GET"])
-# expecting query param: cookie
 def get_projects():
-    cookie = request.args.get("cookie", type=int)
-    res = server.get_projects(cookie)
-    return jsonify({"message": res.msg, "success": res.success, "projects": res.result if res.success else None})
-
+    try:
+        cookie = request.args.get("cookie")
+        cookie_int = int(cookie)
+        
+        res = server.get_projects(cookie_int)
+        
+        # Make sure we're only sending serializable data
+        return jsonify({
+            "message": str(res.msg),  # Convert message to string explicitly
+            "success": bool(res.success),  # Convert to bool explicitly
+            "projects": res.result if res.success else None
+        })
+    except ValueError as e:
+        return jsonify({
+            "message": f"Invalid cookie format: {str(e)}", 
+            "success": False
+        }), 400
+    except Exception as e:
+        return jsonify({
+            "message": f"Server error: {str(e)}", 
+            "success": False
+        }), 500
+    
 @app.route("/project/<int:pid>", methods=["GET"])
 # expecting query param: cookie
 def get_project(pid):

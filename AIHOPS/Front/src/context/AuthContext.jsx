@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }) => {
 
       try {
         // Add your token validation logic here
-        // const isValid = await validateAuthToken(token);
-        // if (!isValid) logout();
+        const isValid = await validateAuthToken(token);
+        if (!isValid) logout();
       } catch (error) {
         console.error('Token validation error:', error);
         logout();
