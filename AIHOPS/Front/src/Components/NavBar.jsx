@@ -27,7 +27,11 @@ const NavBar = () => {
 
                 {/* Notification button */}
                 <li className="nav-item">
-                  <Link to="/notification" className="nav-link nav-button">
+                  <Link
+                    to="/notification"
+                    className="nav-link nav-button"
+                    state={{ triggerFetch: true }} // Passing state to trigger the fetch
+                  >
                     Notification
                   </Link>
                 </li>

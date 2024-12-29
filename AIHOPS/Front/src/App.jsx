@@ -7,9 +7,10 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import NavBar from "./Components/NavBar";
 
 // Importing the pages
-import WelcomePage from "./Pages/WelcomePage";
-import Register from "./Pages/Register";
-import Login from "./Pages/Login";
+import WelcomePage from "./pages/WelcomePage";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import Notification from "./pages/PendingRequests";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -31,14 +32,14 @@ const AppContent = () => {
 
   return (
     <>
-    <NavBar />
-    <Routes>
-      <Route path="/" element={<WelcomePage />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/login" element={<Login />} />
-    </Routes>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<WelcomePage />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/notification" element={<Notification />} />
+      </Routes>
     </>
-    
   );
 };
 
