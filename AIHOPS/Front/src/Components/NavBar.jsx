@@ -27,8 +27,8 @@ const NavBar = () => {
 
                 {/* Projects button */}
                 <li className="nav-item">
-                  <Link to="/projects" className="nav-link nav-button">
-                    Projects
+                  <Link to="/projectsmanagement" className="nav-link nav-button">
+                    Projects Management
                   </Link>
                 </li>
 

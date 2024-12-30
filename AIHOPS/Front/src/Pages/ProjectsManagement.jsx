@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { getProjects } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
-import "./Projects.css";
+import "./ProjectsManagement.css";
 
-const Projects = () => {
+const ProjectsManagement = () => {
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
+  const [factorUpdates, setFactorUpdates] = useState({});
+  const [severityUpdates, setSeverityUpdates] = useState({});
 
   const getProject_dummy = [
     {
@@ -75,6 +77,8 @@ const Projects = () => {
   const closePopup = () => {
     setShowPopup(false);
     setSelectedProject(null);
+    setFactorUpdates({});
+    setSeverityUpdates({});
   };
 
   const handleDelete = (projectName) => {
@@ -105,24 +109,31 @@ const Projects = () => {
     alert('Handle add member logic here.');
   };
 
+  const handleUpdateProject = () => {
+    if (window.confirm("Are you sure you want to update this project? This will update both factors and severity levels.")) {
+      // Implement the backend call here
+      alert("TODO: Implement the backend logic here!");
+    }
+  };
+
   return (
     <section>
-      <div className="projects-container">
+      <div className="projects-management-container">
         {isSuccess === true ? (
           <div>
             <h2 style={{ textAlign: 'center' }}>Existing Projects</h2>
             {projects.map((project, index) => (
-                <div key={index} className="project-card">
+              <div key={index} className="project-card">
                 <div className="project-info">
-                <span style={{ display: 'block' }}>
+                  <span style={{ display: 'block' }}>
                     <strong>Name:</strong> {project.name}
-                </span>
-                <span style={{ display: 'block' }}>
+                  </span>
+                  <span style={{ display: 'block' }}>
                     <strong>Description:</strong> {project.description}
-                </span>
-                <span style={{ display: 'block' }}>
+                  </span>
+                  <span style={{ display: 'block' }}>
                     <strong>Active:</strong> {project.isActive ? "Yes" : "No"}
-                </span>
+                  </span>
                 </div>
                 <div className="project-actions">
                   <button
@@ -184,64 +195,128 @@ const Projects = () => {
               <strong>Active:</strong> {selectedProject.isActive ? "Yes" : "No"}
             </p>
 
-            <p>
-              <strong>Factors:</strong>
-            </p>
-            {selectedProject.isActive ? (
-              selectedProject.factors.map((factor, index) => (
-                <div key={index} className="factor-item">
-                  <span className="factor-name">{factor.name}: {factor.description}</span>
+            {/* Active Project Factors */}
+            {selectedProject.isActive && selectedProject.factors.length > 0 && (
+              <>
+                <p>
+                  <strong>Factors:</strong>
+                </p>
+                <div className="factors-list">
+                  {selectedProject.factors.map((factor, index) => (
+                    <div key={index} className="factor-item">
+                      <span className="factor-name">{factor.name}: {factor.description}</span>
+                    </div>
+                  ))}
                 </div>
-              ))
-            ) : (
-              selectedProject.factors.map((factor, index) => (
-                <div key={index} className="factor-item">
-                  <input
-                    type="text"
-                    defaultValue={factor.name}
-                    className="factor-name-input"
-                  />
-                  <input
-                    type="text"
-                    defaultValue={factor.description}
-                    className="factor-desc-input"
-                  />
-                  <button
-                    className="action-btn update-factor-btn"
-                    onClick={() => window.confirm("Are you sure you want to update this factor?")}
-                  >
-                    Update
-                  </button>
-                </div>
-              ))
+              </>
             )}
 
+            {/* Inactive Project Factors */}
+            {!selectedProject.isActive && selectedProject.factors.length > 0 && (
+              <>
+                <p>
+                  <strong>Factors:</strong>
+                </p>
+                <div className="factors-list">
+                  {selectedProject.factors.map((factor, index) => (
+                    <div key={index} className="factor-item">
+                      <div className="factor-inputs">
+                        <input
+                          type="text"
+                          defaultValue={factor.name}
+                          className="factor-name-input"
+                          placeholder="Factor Name"
+                          onChange={(e) => {
+                            const updates = { ...factorUpdates };
+                            if (!updates[index]) updates[index] = {};
+                            updates[index].name = e.target.value;
+                            setFactorUpdates(updates);
+                          }}
+                        />
+                        <input
+                          type="text"
+                          defaultValue={factor.description}
+                          className="factor-desc-input"
+                          placeholder="Factor Description"
+                          onChange={(e) => {
+                            const updates = { ...factorUpdates };
+                            if (!updates[index]) updates[index] = {};
+                            updates[index].description = e.target.value;
+                            setFactorUpdates(updates);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Severity Factors Section */}
             <p>
               <strong>Severity Factors:</strong>
             </p>
-            {selectedProject.isActive ? (
-              selectedProject.severity_factors.map((severity, index) => (
-                <div key={index} className="severity-item">
-                  <span className="severity-value">{severity}</span>
-                </div>
-              ))
-            ) : (
-              selectedProject.severity_factors.map((severity, index) => (
-                <div key={index} className="severity-item">
-                  <input
-                    type="number"
-                    defaultValue={severity}
-                    className="severity-input"
-                  />
-                </div>
-              ))
-            )}
+            <div className="severity-factors-container">
+              <div className="severity-factors-row">
+                {selectedProject.severity_factors.slice(0, 3).map((severity, index) => (
+                  <div key={index} className="severity-item">
+                    <label className="severity-label">Level {index + 1}:</label>
+                    {selectedProject.isActive ? (
+                      <span className="severity-value">{severity}</span>
+                    ) : (
+                      <input
+                        type="number"
+                        defaultValue={severity}
+                        className="severity-input"
+                        onChange={(e) => {
+                          const updates = { ...severityUpdates };
+                          updates[index] = e.target.value;
+                          setSeverityUpdates(updates);
+                        }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="severity-factors-row">
+                {selectedProject.severity_factors.slice(3, 5).map((severity, index) => (
+                  <div key={index + 3} className="severity-item">
+                    <label className="severity-label">Level {index + 4}:</label>
+                    {selectedProject.isActive ? (
+                      <span className="severity-value">{severity}</span>
+                    ) : (
+                      <input
+                        type="number"
+                        defaultValue={severity}
+                        className="severity-input"
+                        onChange={(e) => {
+                          const updates = { ...severityUpdates };
+                          updates[index + 3] = e.target.value;
+                          setSeverityUpdates(updates);
+                        }}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
             {!selectedProject.isActive && (
               <div className="severity-factors-warning">
                 <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
               </div>
             )}
 
+            {/* Update Button for Inactive Projects */}
+            {!selectedProject.isActive && (
+              <button
+                className="action-btn update-project-btn"
+                onClick={handleUpdateProject}
+              >
+                Update Project
+              </button>
+            )}
+
+            {/* Members Section */}
             <p>
               <strong>Members:</strong>
             </p>
@@ -264,7 +339,7 @@ const Projects = () => {
             ) : (
               <p>No members added yet.</p>
             )}
-            {selectedProject.isActive && (
+            {selectedProject.isActive ? (
               <div className="add-member-container">
                 <input
                   type="text"
@@ -278,8 +353,11 @@ const Projects = () => {
                   Add Member
                 </button>
               </div>
+            ) : (
+              <div className="members-warning">
+                <p>Note: You cannot add or remove members while the project isn't active. You need to publish it first.</p>
+              </div>
             )}
-
           </div>
         </div>
       )}
@@ -287,4 +365,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default ProjectsManagement;
