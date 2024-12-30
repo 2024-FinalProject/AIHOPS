@@ -389,3 +389,44 @@ body {
 .members-warning p {
   margin: 0;
 }
+
+.project-edit-container {
+  margin-bottom: 20px;
+}
+
+.edit-field {
+  margin-bottom: 15px;
+}
+
+.edit-field label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.project-input {
+  width: 50%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s ease;
+}
+
+.project-textarea {
+  width: 95%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  min-height: 80px;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.project-input:focus,
+.project-textarea:focus {
+  border-color: #2196F3;
+  outline: none;
+}

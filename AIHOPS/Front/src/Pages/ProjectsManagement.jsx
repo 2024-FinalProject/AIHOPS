@@ -11,6 +11,7 @@ const ProjectsManagement = () => {
   const [showPopup, setShowPopup] = useState(false);
   const [factorUpdates, setFactorUpdates] = useState({});
   const [severityUpdates, setSeverityUpdates] = useState({});
+  const [projectUpdates, setProjectUpdates] = useState({});
 
   const getProject_dummy = [
     {
@@ -177,7 +178,7 @@ const ProjectsManagement = () => {
           <p>Loading...</p>
         )}
       </div>
-
+      
       {showPopup && selectedProject && (
         <div className="popup-overlay">
           <div className="popup-content">
@@ -185,12 +186,47 @@ const ProjectsManagement = () => {
               &times;
             </span>
             <h3>Project Details</h3>
-            <p>
-              <strong>Name:</strong> {selectedProject.name}
-            </p>
-            <p>
-              <strong>Description:</strong> {selectedProject.description}
-            </p>
+            {selectedProject.isActive ? (
+              <>
+                <p>
+                  <strong>Name:</strong> {selectedProject.name}
+                </p>
+                <p>
+                  <strong>Description:</strong> {selectedProject.description}
+                </p>
+              </>
+            ) : (
+              <div className="project-edit-container">
+                <div className="edit-field">
+                  <label>Name:</label>
+                  <input
+                    type="text"
+                    defaultValue={selectedProject.name}
+                    className="project-input"
+                    onChange={(e) => {
+                      setProjectUpdates(prev => ({
+                        ...prev,
+                        name: e.target.value
+                      }));
+                    }}
+                  />
+                </div>
+                <div className="edit-field">
+                  <label>Description:</label>
+                  <textarea
+                    defaultValue={selectedProject.description}
+                    className="project-textarea"
+                    onChange={(e) => {
+                      setProjectUpdates(prev => ({
+                        ...prev,
+                        description: e.target.value
+                      }));
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            
             <p>
               <strong>Active:</strong> {selectedProject.isActive ? "Yes" : "No"}
             </p>
