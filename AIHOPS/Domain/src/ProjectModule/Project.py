@@ -28,7 +28,7 @@ class Factor:
 # TODO: need to add the DB logic and implementation
 # TODO change the factors instead of a lost to a dict so we can identify the -1 factor and its value wont be calculated in the formula!!
 class Project:
-    def __init__(self, id, name, description, founder, fromDB=False):
+    def __init__(self, id, name, description, founder, factors_num=-1, fromDB=False):
         self.lock = RLock()
         self.id = id
         self.name = name
@@ -36,6 +36,7 @@ class Project:
         self.founder = founder
         self.factors_inited = False
         self.severity_factors_inited = False
+        self.factors_num = factors_num
 
         self.factors = ThreadSafeList()  # Thread-safe list of project factors
         self.severity_factors = ThreadSafeList()  # Thread-safe list of severity factors
@@ -52,13 +53,10 @@ class Project:
         self.isActive = activate
 
     def _load_inner_data(self):
-        self.load_project_members_from_db()
-        self.load_factors()
         self.load_severity_factors_from_db()
-        # get_votes_from_db
-            # severity votes
+        self.load_factors()
+        self.load_project_members_from_db()
         severities = self.load_severity_votes()
-            # factor votes
         factor_votes, black_list = self.load_factor_votes()
 
         for member in self.members.getKeys():
@@ -123,6 +121,7 @@ class Project:
         else:
             for factor_data in factors_data_res:
                 self.factors.append(Factor(factor_data[0], factor_data[1]))
+            self.factors_num = len(factors_data_res)
             self.factors_inited = True
 
     def load_project_members_from_db(self):
@@ -140,13 +139,13 @@ class Project:
         return False
 
     # factors_values and severity_factors_values are both lists
-    def vote(self, user_name, factors_values, severity_factors_values):
+    def vote(self, user_name, factor_votes, severity_factors_values):
         with self.lock:
             if not self.is_initialized_project() or not self.isActive:
                 raise Exception("Can't vote on an unfinalized project")
-            if len(factors_values) != self.factors.size() or len(severity_factors_values) != self.severity_factors.size():
+            if len(factor_votes.keys()) != self.factors.size() or len(severity_factors_values) != self.severity_factors.size():
                 raise Exception("Invalid vote - count mismatch with factors or severity factors")
-            self.members.insert(user_name, (factors_values, severity_factors_values))
+            self.members.insert(user_name, (factor_votes, severity_factors_values))
 
     # Expecting a list of factor objects
     def set_factors(self, factors):
@@ -155,6 +154,7 @@ class Project:
                 for factor in factors:
                     self.factors.append(Factor(factor[0], factor[1]))
                 self.factors_inited = True
+        self.factors_num = self.factors.size()
 
     # Expecting a list of 5 non-negative floats
     def set_severity_factors(self, severity_factors):
