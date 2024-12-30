@@ -175,7 +175,9 @@ const ProjectsManagement = () => {
             <p className="error-message">{msg}</p>
           </div>
         ) : (
-          <p>Loading...</p>
+          <div class="loading-container">
+            <div class="loading-text">Loading...</div>
+          </div>
         )}
       </div>
       
