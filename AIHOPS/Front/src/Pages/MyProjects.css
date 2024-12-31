@@ -1,0 +1,49 @@
+/* Severity Factors - Two lines, 3 in first, 2 in second */
+.severity-factors-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.severity-item {
+    width: 30%;
+    margin-bottom: 10px;
+}
+
+.severity-item.second-line {
+    width: 45%; /* Adjust for the second line */
+}
+
+/* Factor description button - transparent until hover */
+.factor-description-btn {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: transparent;
+    transition: color 0.3s;
+}
+
+.factor-description-btn:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+/* Range inputs - make them smaller */
+input[type="range"] {
+    width: 100%;
+    margin-top: 5px;
+}
+
+/* Button appearance for hover and active states */
+button {
+    background-color: #70a1ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #468ff3;
+}
