@@ -14,6 +14,18 @@ const ProjectsManagement = () => {
   const [projectUpdates, setProjectUpdates] = useState({});
   const [newFactorName, setNewFactorName] = useState("");
   const [newFactorDescription, setNewFactorDescription] = useState("");
+  const [showCreatePopup, setShowCreatePopup] = useState(false);
+  const [newProject, setNewProject] = useState({
+    name: "",
+    description: "",
+    factors: [],
+    severity_factors: [0, 0, 0, 0, 0]
+  });
+  const [newProjectFactor, setNewProjectFactor] = useState({
+    name: "",
+    description: ""
+  });
+
 
   const getProject_dummy = [
     {
@@ -131,11 +143,71 @@ const ProjectsManagement = () => {
     }
   };
 
+  const handleCreateProject = () => {
+    if (window.confirm("Are you sure you want to create this project?")) {
+      alert("TODO: Implement create project logic");
+      // setShowCreatePopup(false);
+      // setNewProject({
+      //   name: "",
+      //   description: "",
+      //   factors: [],
+      //   severity_factors: [0, 0, 0, 0, 0]
+      // });
+    }
+  };
+
+  const handleAddFactorToNewProject = () => {
+    if (newProjectFactor.name && newProjectFactor.description) {
+      setNewProject(prev => ({
+        ...prev,
+        factors: [...prev.factors, { ...newProjectFactor }]
+      }));
+      setNewProjectFactor({ name: "", description: "" });
+    }
+  };
+
+  const handleDeleteFactorFromNewProject = (index) => {
+    if (window.confirm("Are you sure you want to delete this factor?")) {
+      setNewProject(prev => ({
+        ...prev,
+        factors: prev.factors.filter((_, idx) => idx !== index)
+      }));
+    }
+  };
+
   return (
     <section>
       <div className="projects-management-container">
         {isSuccess === true ? (
           <div>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              marginBottom: '20px' 
+            }}>
+              <button
+                className="action-btn"
+                onClick={() => setShowCreatePopup(true)}
+                style={{
+                  backgroundColor: '#4CAF50',
+                  padding: '12px 24px',
+                  fontSize: '16px',
+                  fontWeight: 'bold',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  transition: 'all 0.3s ease',
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+                }}
+              >
+                Create New Project
+              </button>
+            </div>
             <h2 style={{ textAlign: 'center' }}>Existing Projects</h2>
             {projects.map((project, index) => (
               <div key={index} className="project-card">
@@ -189,11 +261,197 @@ const ProjectsManagement = () => {
             <p className="error-message">{msg}</p>
           </div>
         ) : (
-          <div class="loading-container">
-            <div class="loading-text">Loading...</div>
+          <div className="loading-container">
+            <div className="loading-text">Loading...</div>
           </div>
         )}
       </div>
+
+      {/* Create Project Popup */}
+      {showCreatePopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <span className="close-popup" onClick={() => setShowCreatePopup(false)}>
+              &times;
+            </span>
+            <h3>Create New Project</h3>
+            
+            <div className="project-edit-container">
+              <div className="edit-field">
+                <label>Name:</label>
+                <input
+                  type="text"
+                  value={newProject.name}
+                  className="project-input"
+                  onChange={(e) => setNewProject(prev => ({
+                    ...prev,
+                    name: e.target.value
+                  }))}
+                />
+              </div>
+              <div className="edit-field">
+                <label>Description:</label>
+                <textarea
+                  value={newProject.description}
+                  className="project-textarea"
+                  onChange={(e) => setNewProject(prev => ({
+                    ...prev,
+                    description: e.target.value
+                  }))}
+                />
+              </div>
+            </div>
+
+            <p>
+              <strong>Factors:</strong>
+            </p>
+            <div className="factors-list">
+              {newProject.factors.map((factor, index) => (
+                <div key={index} className="factor-item" style={{
+                  display: 'flex',
+                  gap: '10px',
+                  marginBottom: '10px',
+                  alignItems: 'center'
+                }}>
+                  <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                    <input
+                      type="text"
+                      value={factor.name}
+                      className="factor-name-input"
+                      placeholder="Factor Name"
+                      readOnly
+                      style={{ flex: '1' }}
+                    />
+                    <input
+                      type="text"
+                      value={factor.description}
+                      className="factor-desc-input"
+                      placeholder="Factor Description"
+                      readOnly
+                      style={{ flex: '2' }}
+                    />
+                    <button
+                      className="action-btn delete-btn"
+                      onClick={() => handleDeleteFactorFromNewProject(index)}
+                      style={{
+                        padding: '5px 15px',
+                        backgroundColor: '#ff4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {/* Add New Factor Form */}
+              <div className="factor-item" style={{
+                display: 'flex',
+                gap: '10px',
+                marginBottom: '10px',
+                alignItems: 'center'
+              }}>
+                <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                  <input
+                    type="text"
+                    value={newProjectFactor.name}
+                    onChange={(e) => setNewProjectFactor(prev => ({
+                      ...prev,
+                      name: e.target.value
+                    }))}
+                    className="factor-name-input"
+                    placeholder="New factor name"
+                    style={{ flex: '1' }}
+                  />
+                  <input
+                    type="text"
+                    value={newProjectFactor.description}
+                    onChange={(e) => setNewProjectFactor(prev => ({
+                      ...prev,
+                      description: e.target.value
+                    }))}
+                    className="factor-desc-input"
+                    placeholder="New factor description"
+                    style={{ flex: '2' }}
+                  />
+                  <button
+                    className="action-btn view-edit-btn"
+                    onClick={handleAddFactorToNewProject}
+                    style={{
+                      padding: '5px 15px',
+                      backgroundColor: '#88cd8d',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Add Factor
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Severity Factors Section */}
+            <p>
+              <strong>Severity Factors:</strong>
+            </p>
+            <div className="severity-factors-container">
+              <div className="severity-factors-row">
+                {newProject.severity_factors.slice(0, 3).map((severity, index) => (
+                  <div key={index} className="severity-item">
+                    <label className="severity-label">Level {index + 1}:</label>
+                    <input
+                      type="number"
+                      value={severity}
+                      className="severity-input"
+                      onChange={(e) => {
+                        const newSeverityFactors = [...newProject.severity_factors];
+                        newSeverityFactors[index] = Number(e.target.value);
+                        setNewProject(prev => ({
+                          ...prev,
+                          severity_factors: newSeverityFactors
+                        }));
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="severity-factors-row">
+                {newProject.severity_factors.slice(3, 5).map((severity, index) => (
+                  <div key={index + 3} className="severity-item">
+                    <label className="severity-label">Level {index + 4}:</label>
+                    <input
+                      type="number"
+                      value={severity}
+                      className="severity-input"
+                      onChange={(e) => {
+                        const newSeverityFactors = [...newProject.severity_factors];
+                        newSeverityFactors[index + 3] = Number(e.target.value);
+                        setNewProject(prev => ({
+                          ...prev,
+                          severity_factors: newSeverityFactors
+                        }));
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              className="action-btn update-project-btn"
+              onClick={handleCreateProject}
+            >
+              Create Project
+            </button>
+          </div>
+        </div>
+      )}
       
       {showPopup && selectedProject && (
         <div className="popup-overlay">
