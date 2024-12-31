@@ -60,7 +60,7 @@ const ProjectsManagement = () => {
     let cookie = localStorage.getItem("authToken");
 
     if (!cookie) {
-      setMsg("No authentication token found");
+      setMsg("No authentication token found. Please log in again.");
       setIsSuccess(false);
       return;
     }
