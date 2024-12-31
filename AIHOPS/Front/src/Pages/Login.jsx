@@ -25,6 +25,8 @@ const Login = () => {
     try {
       const session = await startSession();
       const cookie = session.data.cookie;
+      
+      console.log('Cookie received from startSession:', cookie); // Debug log
 
       const response = await loginUser(cookie, userName, password);
 
@@ -33,9 +35,9 @@ const Login = () => {
         
         // Store auth data in localStorage
         localStorage.setItem('authToken', cookie);
-        localStorage.setItem('userName', userName);
+        console.log('Cookie stored in localStorage:', localStorage.getItem('authToken')); // Debug log
         
-        // Update auth context
+        localStorage.setItem('userName', userName);
         login(cookie, userName);
         navigate('/');
       } else {
@@ -45,7 +47,7 @@ const Login = () => {
       console.error('Login error:', error);
       setMsg("Login failed: Invalid credentials");
     }
-  };
+};
 
   return (
     <section>

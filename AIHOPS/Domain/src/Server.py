@@ -44,7 +44,7 @@ class Server:
             return Response(True, f"session: {cookie} has been added", new_session, False)
         except Exception as e:
             return Response(False, f"Failed to enter: {e}", None, False)
-
+        
     def get_session(self, cookie):
         try:
             session = self.sessions.get(cookie)
@@ -52,7 +52,7 @@ class Server:
                 return ResponseFailMsg("invalid cookie")
             return ResponseSuccessObj("session found", session)
         except Exception as e:
-            return ResponseFailMsg(f"Failed to get session: {e}")
+            return ResponseFailMsg(str(e))  #Convert exception to string
 
     def get_session_not_member(self, cookie):
         try:

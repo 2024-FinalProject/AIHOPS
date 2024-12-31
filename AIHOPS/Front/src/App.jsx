@@ -10,6 +10,7 @@ import NavBar from "./Components/NavBar";
 import WelcomePage from "./Pages/WelcomePage";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
+import ProjectsManagement from "./Pages/ProjectsManagement";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -36,6 +37,7 @@ const AppContent = () => {
       <Route path="/" element={<WelcomePage />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/projectsmanagement" element={<ProjectsManagement />} />
     </Routes>
     </>
     
