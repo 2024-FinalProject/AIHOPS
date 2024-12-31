@@ -12,6 +12,8 @@ const ProjectsManagement = () => {
   const [factorUpdates, setFactorUpdates] = useState({});
   const [severityUpdates, setSeverityUpdates] = useState({});
   const [projectUpdates, setProjectUpdates] = useState({});
+  const [newFactorName, setNewFactorName] = useState("");
+  const [newFactorDescription, setNewFactorDescription] = useState("");
 
   const getProject_dummy = [
     {
@@ -114,6 +116,18 @@ const ProjectsManagement = () => {
     if (window.confirm("Are you sure you want to update this project? This will update both factors and severity levels.")) {
       // Implement the backend call here
       alert("TODO: Implement the backend logic here!");
+    }
+  };
+
+  const handleAddFactor = () => {
+    if (window.confirm("Are you sure you want to add this factor?")) {
+      alert("TODO: Implement add factor logic");
+    }
+  };
+
+  const handleDeleteFactor = (factorName) => {
+    if (window.confirm(`Are you sure you want to delete the factor "${factorName}"?`)) {
+      alert("TODO: Implement delete factor logic");
     }
   };
 
@@ -250,15 +264,21 @@ const ProjectsManagement = () => {
             )}
 
             {/* Inactive Project Factors */}
-            {!selectedProject.isActive && selectedProject.factors.length > 0 && (
+              {!selectedProject.isActive && (
               <>
                 <p>
                   <strong>Factors:</strong>
                 </p>
                 <div className="factors-list">
-                  {selectedProject.factors.map((factor, index) => (
-                    <div key={index} className="factor-item">
-                      <div className="factor-inputs">
+                  {/* Existing Factors */}
+                  {selectedProject.factors.length > 0 && selectedProject.factors.map((factor, index) => (
+                    <div key={index} className="factor-item" style={{
+                      display: 'flex',
+                      gap: '10px',
+                      marginBottom: '10px',
+                      alignItems: 'center'
+                    }}>
+                      <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
                         <input
                           type="text"
                           defaultValue={factor.name}
@@ -270,6 +290,7 @@ const ProjectsManagement = () => {
                             updates[index].name = e.target.value;
                             setFactorUpdates(updates);
                           }}
+                          style={{ flex: '1' }}
                         />
                         <input
                           type="text"
@@ -282,10 +303,66 @@ const ProjectsManagement = () => {
                             updates[index].description = e.target.value;
                             setFactorUpdates(updates);
                           }}
+                          style={{ flex: '2' }}
                         />
+                        <button
+                          className="action-btn delete-btn"
+                          onClick={() => handleDeleteFactor(factor.name)}
+                          style={{
+                            padding: '5px 15px',
+                            backgroundColor: '#ff4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Delete
+                        </button>
                       </div>
                     </div>
                   ))}
+
+                  {/* Add New Factor - matching the same style as existing factors */}
+                  <div className="factor-item" style={{
+                    display: 'flex',
+                    gap: '10px',
+                    marginBottom: '10px',
+                    alignItems: 'center'
+                  }}>
+                    <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                      <input
+                        type="text"
+                        value={newFactorName}
+                        onChange={(e) => setNewFactorName(e.target.value)}
+                        className="factor-name-input"
+                        placeholder="New factor name"
+                        style={{ flex: '1' }}
+                      />
+                      <input
+                        type="text"
+                        value={newFactorDescription}
+                        onChange={(e) => setNewFactorDescription(e.target.value)}
+                        className="factor-desc-input"
+                        placeholder="New factor description"
+                        style={{ flex: '2' }}
+                      />
+                      <button
+                        className="action-btn view-edit-btn"
+                        onClick={handleAddFactor}
+                        style={{
+                          padding: '5px 15px',
+                          backgroundColor: '#88cd8d',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '4px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Add Factor
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </>
             )}
