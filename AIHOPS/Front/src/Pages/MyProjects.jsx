@@ -232,7 +232,7 @@ const MyProjects = () => {
       )}
 
       {factorDescription && (
-        <div className="description-popup">
+        <div className="description-popup-overlay">
           <div className="description-popup-content">
             <button
               className="close-description-popup"
