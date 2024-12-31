@@ -3,6 +3,7 @@ import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+import "./MyProjects.css";
 
 const dummyProjects = [
   {
@@ -33,20 +34,56 @@ const dummyProjects = [
       { id: 1, name: "Factor A", description: "Description of Factor A" },
       { id: 2, name: "Factor B", description: "Description of Factor B" }
     ]
+  },
+
+  {
+    id: 3,
+    name: "Project Delta",
+    description: "Description of Project Beta.",
+    founder: "Jane Doe",
+    members: [
+      { userId: 1, name: "John Doe", hasVoted: false },
+      { userId: 2, name: "Jane Doe", hasVoted: false }
+    ],
+    factors: [
+      { id: 1, name: "Factor A", description: "Description of Factor A" },
+      { id: 2, name: "Factor B", description: "Description of Factor B" }
+    ]
+  },
+
+  {
+    id: 4,
+    name: "Project Gama",
+    description: "Description of Project Beta.",
+    founder: "Jane Doe",
+    members: [
+      { userId: 1, name: "John Doe", hasVoted: false },
+      { userId: 2, name: "Jane Doe", hasVoted: false }
+    ],
+    factors: [
+      { id: 1, name: "Factor A", description: "Description of Factor A" },
+      { id: 2, name: "Factor B", description: "Description of Factor B" }
+    ]
   }
 ];
 
-const MyProjectsPage = () => {
+const MyProjects = () => {
   const [projects, setProjects] = useState([]);
-  const [userVotes, setUserVotes] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
   const [voteProgress, setVoteProgress] = useState("");
   const [severityVotes, setSeverityVotes] = useState([0, 0, 0, 0, 0]);
   const [factorVotes, setFactorVotes] = useState({});
+  const [totalSeverity, setTotalSeverity] = useState(0);
+  const [factorDescription, setFactorDescription] = useState(null);
 
   useEffect(() => {
     setProjects(dummyProjects);
   }, []);
+
+  useEffect(() => {
+    const sum = severityVotes.reduce((acc, curr) => acc + Number(curr), 0);
+    setTotalSeverity(sum);
+  }, [severityVotes]);
 
   const handleVoteClick = (project) => {
     setCurrentProject(project);
@@ -55,26 +92,25 @@ const MyProjectsPage = () => {
   };
 
   const handleFactorVoteChange = (factorId, value) => {
-    setFactorVotes(prev => ({ ...prev, [factorId]: value }));
+    setFactorVotes(prev => ({ ...prev, [factorId]: Number(value) }));
   };
 
   const handleSeverityVoteChange = (level, value) => {
-    const updatedSeverityVotes = [...severityVotes];
-    updatedSeverityVotes[level - 1] = value;
-    setSeverityVotes(updatedSeverityVotes);
+    setSeverityVotes(prev => {
+      const newVotes = [...prev];
+      newVotes[level - 1] = Number(value);
+      return newVotes;
+    });
   };
 
   const handleSubmitVote = () => {
-    const totalSeverity = severityVotes.reduce((sum, val) => sum + val, 0);
     if (totalSeverity === 100) {
-      alert("Vote submitted!");
+      console.log("Vote submitted:", { severityVotes, factorVotes });
+      alert("Vote submitted successfully!");
+      setCurrentProject(null);
     } else {
-      alert("Severity votes must sum to 100.");
+      alert(`Total severity must equal 100. Current total: ${totalSeverity}`);
     }
-  };
-
-  const handleCheckScore = () => {
-    alert("Current score: 0"); // Placeholder for current score
   };
 
   const severityData = {
@@ -89,24 +125,20 @@ const MyProjectsPage = () => {
     ],
   };
 
+  const handleFactorDescription = (description) => {
+    setFactorDescription(description);
+  };
+
   return (
-    <div className="container">
+    <div className="my-projects-container">
       <h1 className="page-heading">My Projects</h1>
+
       <div className="projects-list">
         {projects.map(project => (
-          <div key={project.id} className="project-card">
-            <div className="project-info">
-              <h3>{project.name}</h3>
-              <p>{project.description}</p>
-              <p><strong>Founder: </strong>{project.founder}</p>
-            </div>
-            <div className="project-actions">
-              {project.members.some(member => member.userId === 1) && (
-                <button className="vote-btn" onClick={() => handleVoteClick(project)}>
-                  Vote
-                </button>
-              )}
-            </div>
+          <div key={project.id} className="project-card" onClick={() => handleVoteClick(project)}>
+            <h3 className="text-xl font-semibold">{project.name}:</h3>
+            <p>{project.description}</p>
+            <p>Founder: {project.founder}</p>
           </div>
         ))}
       </div>
@@ -114,16 +146,27 @@ const MyProjectsPage = () => {
       {currentProject && (
         <div className="popup-overlay">
           <div className="popup-content">
-            <span className="close-popup" onClick={() => setCurrentProject(null)}>&times;</span>
-            <h2>Vote on {currentProject.name}</h2>
-            <p className="progress-text">{voteProgress}</p>
+            <button
+              className="close-popup"
+              onClick={() => setCurrentProject(null)}
+            >
+              ×
+            </button>
 
-            <h3>Factor Votes</h3>
+            <h2 className="text-2xl font-bold mb-4">Vote on {currentProject.name}</h2>
+            <p className="text-green-600 font-medium mb-6">{voteProgress}</p>
+
+            <h3 className="text-xl font-semibold mb-4">Factor Votes</h3>
             {currentProject.factors.map(factor => (
               <div key={factor.id} className="factor-item">
                 <div className="factor-name">
                   <span>{factor.name}</span>
-                  <span className="factor-description-btn" title={factor.description}>?</span>
+                  <button
+                    className="factor-description-btn"
+                    onClick={() => handleFactorDescription(factor.description)}
+                  >
+                    ?
+                  </button>
                 </div>
                 <input
                   type="range"
@@ -131,36 +174,73 @@ const MyProjectsPage = () => {
                   max="4"
                   value={factorVotes[factor.id] || 0}
                   onChange={(e) => handleFactorVoteChange(factor.id, e.target.value)}
+                  className="factor-range"
                 />
-                <span>{factorVotes[factor.id]}</span>
+                <span>{factorVotes[factor.id] || 0}</span>
               </div>
             ))}
 
-            <h3>Severity Votes</h3>
+            <h3 className="text-xl font-semibold mb-4">Severity Votes (Total: {totalSeverity}%)</h3>
             <div className="severity-graph">
               <Line data={severityData} />
             </div>
 
             <div className="severity-factors-container">
-              {Array.from({ length: 5 }, (_, i) => (
-                <div key={i} className={`severity-item ${i < 3 ? 'first-line' : 'second-line'}`}>
-                  <span>Level {i + 1}</span>
+              {severityVotes.slice(0, 3).map((vote, index) => (
+                <div key={index} className="severity-item">
+                  <label>Level {index + 1}</label>
                   <input
                     type="range"
                     min="0"
                     max="100"
-                    value={severityVotes[i]}
-                    onChange={(e) => handleSeverityVoteChange(i + 1, e.target.value)}
+                    value={vote}
+                    onChange={(e) => handleSeverityVoteChange(index + 1, e.target.value)}
+                    className="severity-range"
                   />
-                  <span>{severityVotes[i]}%</span>
+                  <span>{vote}%</span>
                 </div>
               ))}
             </div>
 
-            <div className="actions">
-              <button onClick={handleSubmitVote}>Submit Vote</button>
-              <button onClick={handleCheckScore}>Check Current Score</button>
+            <div className="severity-factors-container">
+              {severityVotes.slice(3).map((vote, index) => (
+                <div key={index + 3} className="severity-item second-line">
+                  <label>Level {index + 4}</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={vote}
+                    onChange={(e) => handleSeverityVoteChange(index + 4, e.target.value)}
+                    className="severity-range"
+                  />
+                  <span>{vote}%</span>
+                </div>
+              ))}
             </div>
+
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={handleSubmitVote}
+                className="submit-vote-btn"
+              >
+                Submit Vote
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {factorDescription && (
+        <div className="description-popup">
+          <div className="description-popup-content">
+            <button
+              className="close-description-popup"
+              onClick={() => setFactorDescription(null)}
+            >
+              ×
+            </button>
+            <p>{factorDescription}</p>
           </div>
         </div>
       )}
@@ -168,4 +248,4 @@ const MyProjectsPage = () => {
   );
 };
 
-export default MyProjectsPage;
+export default MyProjects;
