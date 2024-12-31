@@ -16,10 +16,6 @@ from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccess
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.ThreadSafeDictWithListPairValue import ThreadSafeDictWithListPairValue
 
-class Damage:
-    def __init__(self, damage):
-        self.damage = damage
-
 class Factor:
     def __init__(self, name, description):
         self.name = name
@@ -62,6 +58,7 @@ class Project:
         for member in self.members.getKeys():
             if factor_votes[member] is not None and member not in black_list and severities.get(member) is not None:
                 # TODO: msg to member if hes in the black list meaning hes vote was unregistered
+                factor_votes[member].pop(-1)
                 self.members.insert(member, [factor_votes[member], severities[member]])
 
     def load_severity_factors_from_db(self):
@@ -162,9 +159,10 @@ class Project:
             for sf in severity_factors:
                 if sf < 0:
                     raise Exception("Negative severity factor not allowed")
+            # TODO: cant change severity factors???
             if not self.severity_factors_inited:
-                for level in severity_factors:
-                    self.severity_factors.append(Damage(level))
+                for severity_factor in severity_factors:
+                    self.severity_factors.append(severity_factor)
                 self.severity_factors_inited = True
 
     def approved_member(self, user_name):
@@ -231,7 +229,7 @@ class Project:
     def get_d_assessors(self):
         d_assessors = []
         for _, (_, severity_probs) in self.members.getItems():
-            d_ass = sum(self.severity_factors.get(i).damage * severity_probs[i] for i in range(self.severity_factors.size()))
+            d_ass = sum(self.severity_factors.get(i) * severity_probs[i] for i in range(self.severity_factors.size()))
             d_assessors.append(d_ass)
         return d_assessors
 

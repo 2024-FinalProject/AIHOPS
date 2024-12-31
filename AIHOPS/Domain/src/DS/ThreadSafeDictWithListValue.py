@@ -20,3 +20,6 @@ class ThreadSafeDictWithListValue(ThreadSafeDict):
     def get(self, key):
         with self.lock:
             return self.dict.get(key, None)
+
+    def size(self):
+        return len(self.dict.keys())

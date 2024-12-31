@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Index, Integer, String, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+
 from Service.config import Base
 
 class DBProject(Base):
@@ -12,7 +13,7 @@ class DBProject(Base):
     description = Column(String(1000))
     date_created = Column(DateTime, default=datetime.utcnow)
     is_active = Column(Boolean, default=False)
-    factors_num = Column(Integer, default=-1)
+    factors_num = Column(Integer)
 
     _table_args__ = (
         Index('idx_project_name', 'name'),

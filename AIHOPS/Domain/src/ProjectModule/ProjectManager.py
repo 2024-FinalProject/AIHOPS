@@ -17,14 +17,17 @@ from Domain.src.Loggs.Response import Response, ResponseSuccessMsg, ResponseFail
 from Domain.src.ProjectModule.Project import Project
 from copy import deepcopy as deepCopy
 
+DEFAULT_FACTORS_COUNT = 0
+
 
 class ProjectManager:
-    def __init__(self):
+
+    def __init__(self, db_access):
         self.projects = ThreadSafeDict() #project_id -> Project
         self.founder_projects = ThreadSafeDictWithListValue() #founder -> list of projects
         self.pending_requests = ThreadSafeDictWithListValue() # email -> list of projects_id's
         self.id_maker = IdMaker()
-        self.db_access = DBAccess()
+        self.db_access = db_access
         self.get_projects_from_db()
         self.get_pending_requests_from_db()
         self.factors_lock = RLock()
@@ -62,8 +65,6 @@ class ProjectManager:
         if pending_requests is None:
             return 1
         for request in pending_requests:
-            if not self.pending_requests.get(request.email):
-                self.pending_requests.insert(request.email, [])
             project = self.projects.get(request.project_id)
             if not project.is_member(request.email):
                 self.pending_requests.insert(request.email, request.project_id)
@@ -90,7 +91,7 @@ class ProjectManager:
         prj = Project(project_id, name, description, founder)
 
         # Add DB insert
-        db_project = DBProject(name, founder, description, project_id, -1)
+        db_project = DBProject(name, founder, description, project_id, DEFAULT_FACTORS_COUNT)
         self.db_access.insert(db_project)
 
         self.projects.insert(project_id, prj)
