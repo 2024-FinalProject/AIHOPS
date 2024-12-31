@@ -167,7 +167,7 @@ const MyProjects = () => {
                   >
                     ?
                   </button>
-                </div>
+                </div> Score:
                 <input
                   type="range"
                   min="0"

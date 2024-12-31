@@ -126,8 +126,10 @@ input[type="range"] {
 }
 
 .severity-graph {
-    margin-bottom: 20px;
-    height: 300px;
+    margin-bottom: 0.5px;
+    height: 400px;
+    justify-content: center;
+    align-items: center;
 }
 
 .severity-factors-container {
@@ -137,12 +139,13 @@ input[type="range"] {
 }
 
 .severity-item {
-    margin-bottom: 10px;
-    width: 30%;
+    margin-bottom: 0.5px;
+    margin-left: 5px;
+    width: 20%;
 }
 
 .severity-item.second-line {
-    margin-top: 10px;
+    margin-top: 0.5px;
 }
 
 .actions {
