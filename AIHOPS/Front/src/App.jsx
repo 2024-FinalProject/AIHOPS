@@ -11,6 +11,7 @@ import WelcomePage from "./Pages/WelcomePage";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
 import ProjectsManagement from "./Pages/ProjectsManagement";
+import MyProjects from "./Pages/MyProjects";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -38,6 +39,7 @@ const AppContent = () => {
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/projectsmanagement" element={<ProjectsManagement />} />
+      <Route path="/myprojects" element={<MyProjects />} />
     </Routes>
     </>
     
