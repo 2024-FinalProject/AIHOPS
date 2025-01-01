@@ -217,3 +217,101 @@ button:hover {
     font-size: 1.5rem;
     cursor: pointer;
 }
+
+.vote-progress-container {
+    width: 100%;
+    margin: 20px 0;
+  }
+  
+  .vote-progress {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+    line-height: 2rem; /* Center text vertically */
+    background: linear-gradient(90deg, #71db98, #61d1bb);
+    height: 100%; /* Matches the container's height */
+    border-radius: 8px 0 0 8px; /* Rounded corners on the left */
+    transition: width 0.4s ease-in-out; /* Smooth animation on width change */
+    position: relative;
+  }
+  
+  .vote-progress:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -100%;
+    }
+    100% {
+      background-position: 200%;
+    }
+  }
+  
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #4caf50;
+    transition: width 0.5s ease-in-out;
+  }
+  
+.vote-progress-text {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 16px;
+    color: #333;
+  }
+
+.get-score-btn {
+    background-color: #70a1ff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.7s;
+}
+
+.score-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.score-popup-content {
+    background-color: #fff;
+    padding: 25px;
+    max-width: 700px;
+    width: 30%;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    max-height: 85vh;
+    position: relative;
+}
+
+.close-score-popup {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    cursor: pointer;
+}

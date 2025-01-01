@@ -75,6 +75,7 @@ const MyProjects = () => {
   const [factorVotes, setFactorVotes] = useState({});
   const [totalSeverity, setTotalSeverity] = useState(0);
   const [factorDescription, setFactorDescription] = useState(null);
+  const [currentScore, setCurrentScore] = useState(null);
 
   useEffect(() => {
     setProjects(dummyProjects);
@@ -88,7 +89,7 @@ const MyProjects = () => {
   const handleVoteClick = (project) => {
     setCurrentProject(project);
     const votedMembers = project.members.filter(member => member.hasVoted).length;
-    setVoteProgress(`${votedMembers} of ${project.members.length} have voted`);
+    setVoteProgress(`${votedMembers}/${project.members.length} have voted`);
   };
 
   const handleFactorVoteChange = (factorId, value) => {
@@ -129,6 +130,11 @@ const MyProjects = () => {
     setFactorDescription(description);
   };
 
+  const handleGetCurrentScore = (score) => {
+    //TODO:: Get the current score of the project here (from the backend)
+    setCurrentScore(score);
+  };
+
   return (
     <div className="my-projects-container">
       <h1 className="page-heading">My Projects</h1>
@@ -154,7 +160,28 @@ const MyProjects = () => {
             </button>
 
             <h2 className="text-2xl font-bold mb-4">Vote on {currentProject.name}</h2>
-            <p className="text-green-600 font-medium mb-6">{voteProgress}</p>
+
+            <div className="vote-progress-container">
+              <div className="progress-bar">
+                <div
+                  className="progress-bar-fill"
+                  style={{
+                    width: `${(currentProject.members.filter((m) => m.hasVoted).length / currentProject.members.length) * 100}%`,
+                  }}
+                ></div>
+              </div>
+              <p className="vote-progress-text">
+                {voteProgress}
+              </p>
+            </div>
+
+            <h3 className="text-xl font-semibold mb-4">Project's Score:</h3>
+            {/*TODO: Check here that the current user is the founder of the project && */<button
+                    className="get-score-btn"
+                    onClick={() => handleGetCurrentScore(0)}
+                  >
+                    Get current score
+            </button>}
 
             <h3 className="text-xl font-semibold mb-4">Factor Votes</h3>
             {currentProject.factors.map(factor => (
@@ -167,7 +194,7 @@ const MyProjects = () => {
                   >
                     ?
                   </button>
-                </div> Score:
+                </div> Factor vote:
                 <input
                   type="range"
                   min="0"
@@ -241,6 +268,20 @@ const MyProjects = () => {
               ×
             </button>
             <p>{factorDescription}</p>
+          </div>
+        </div>
+      )}
+
+      {currentScore !== null && (
+        <div className="score-popup-overlay">
+          <div className="score-popup-content">
+            <button
+              className="close-score-popup"
+              onClick={() => setCurrentScore(null)}
+            >
+              ×
+            </button>
+            <p>Current Score: {currentScore}</p>
           </div>
         </div>
       )}
