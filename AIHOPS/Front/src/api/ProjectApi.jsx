@@ -26,15 +26,14 @@ export const createProject = async (cookie, project_name, project_desc) => {
 export const publishProject = async (cookie, project_id) => {
     return await axios.post(`${API_URL}/project/publish`, {
         cookie: cookie,
-        project_id: project_id
+        pid: project_id
     });
 }
 
-///project/factors
 export const setProjectFactors = async(cookie, project_id, factors) => {
     return await axios.post(`${API_URL}/project/factors`, {
         cookie: cookie,
-        project_id: project_id,
+        pid: project_id,
         factors: factors
     });
 }

@@ -223,9 +223,6 @@ class ProjectManager:
     def get_projects(self, founder):
         try:
             projects = self.find_Projects(founder)
-            
-            if not projects:
-                raise Exception(f"No projects found for founder {founder}")
                 
             temp_projects = []
             for project in projects:
@@ -374,11 +371,10 @@ class ProjectManager:
         raise Exception(f"founder {founder} has no project with the provide details")
 
     def find_Projects(self, founder):
-        print(f"Finding projects for founder: {founder}")  # Debug
-        print(f"founder_projects: {self.founder_projects}")  # Debug
-        projects = self.founder_projects.get(founder)
-        print(f"Retrieved projects: {projects}")  # Debug
-        return projects
+        prjs = self.founder_projects.get(founder)
+        if prjs is None or prjs == []:
+            raise Exception(f"founder {founder} has no projects")
+        return prjs
 
     def find_pending_requests(self, email):
         prjs = self.pending_requests.get(email)

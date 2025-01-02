@@ -21,6 +21,15 @@ class Factor:
         self.name = name
         self.description = description
 
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "description": self.description
+        }
+    
+    def __str__(self):
+        return f"Factor Name: {self.name}, Factor Description: {self.description}"
+
 # TODO: need to add the DB logic and implementation
 # TODO change the factors instead of a lost to a dict so we can identify the -1 factor and its value wont be calculated in the formula!!
 class Project:
@@ -130,9 +139,6 @@ class Project:
             # member =
             self.members.insert(member_data.member_email, None)
 
-
-
-
     def is_member(self, email):
         if email in self.members.getKeys():
             return True
@@ -150,7 +156,7 @@ class Project:
     # Expecting a list of factor objects
     def set_factors(self, factors):
         with self.lock:
-            if not self.factors_inited:
+            if not self.isActive:
                 for factor in factors:
                     self.factors.append(Factor(factor[0], factor[1]))
                 self.factors_inited = True
@@ -163,7 +169,7 @@ class Project:
                 if sf < 0:
                     raise Exception("Negative severity factor not allowed")
             # TODO: cant change severity factors???
-            if not self.severity_factors_inited:
+            if not self.isActive:
                 for severity_factor in severity_factors:
                     self.severity_factors.append(severity_factor)
                 self.severity_factors_inited = True
@@ -244,14 +250,14 @@ class Project:
             and self.founder == other.founder
         )
     
-    def to_dict(self):    
+    def to_dict(self): 
         return {
-            "pid": self.id,
+            "id": self.id,
             "name": self.name,
             "description": self.description,
             "founder": self.founder,
             "isActive": self.isActive,
-            "factors": self.factors.to_list() if self.factors else [],
+            "factors": [f.to_dict() if hasattr(f, 'to_dict') else str(f) for f in self.factors.to_list()],
             "factors_inited": self.factors_inited,
             "severity_factors_inited": self.severity_factors_inited,
             "severity_factors": self.severity_factors.to_list() if self.severity_factors else [],

@@ -52,7 +52,7 @@ const ProjectsManagement = () => {
         setMsg(`Error fetching projects: ${errorMessage}`);
         setIsSuccess(false);
       });
-  }, []);
+  }, [projects]);
 
   const openPopup = (project) => {
     setSelectedProject(project);
@@ -139,10 +139,16 @@ const ProjectsManagement = () => {
           return;
         }
 
-        setProjectFactors(cookie, selectedProject.id, newFactorName, newFactorDescription)
+        let tempFactorList = [[newFactorName, newFactorDescription]]; 
+        setProjectFactors(cookie, selectedProject.id, tempFactorList)
         .then((response) => {
           if (response.data.success) {
             alert(`Factor ${newFactorName} has been added successfully.`);
+        
+            // Clear the input fields after adding
+            setNewFactorName('');
+            setNewFactorDescription('');
+
             setIsSuccess(true);
           } else {
             setMsg(response.data.message);
