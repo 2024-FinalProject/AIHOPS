@@ -94,6 +94,10 @@ class ProjectManager:
         db_project = DBProject(name, founder, description, project_id, DEFAULT_FACTORS_COUNT)
         self.db_access.insert(db_project)
 
+        # Add DB insert for founder
+        db_project_member = DBProjectMembers(project_id, founder)
+        self.db_access.insert(db_project_member)
+
         self.projects.insert(project_id, prj)
         self.founder_projects.insert(founder, prj)
 
@@ -218,8 +222,11 @@ class ProjectManager:
     
     def get_projects(self, founder):
         try:
-            temp_projects = self.find_Projects(founder)
-            return ResponseSuccessMsg(f"list of projects for founder {founder} : {temp_projects}")
+            temp_projects = []
+            for project in self.find_Projects(founder):
+                if hasattr(project, 'to_dict'):  # Check if the object has the 'to_dict' method
+                    temp_projects.append(project.to_dict())
+            return ResponseSuccessObj(f"list of projects for founder {founder} : {temp_projects}", list(temp_projects))
         except Exception as e:
             return ResponseFailMsg(e)
 

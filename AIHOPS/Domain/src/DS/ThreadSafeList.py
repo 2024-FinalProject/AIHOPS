@@ -51,3 +51,4 @@ class ThreadSafeList:
         """Return a shallow copy of the list."""
         with self.lock:
             return self.list[:]
+        

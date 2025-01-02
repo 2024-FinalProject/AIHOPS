@@ -37,7 +37,7 @@ class Project:
         self.factors = ThreadSafeList()  # Thread-safe list of project factors
         self.severity_factors = ThreadSafeList()  # Thread-safe list of severity factors
         self.members = ThreadSafeDictWithListPairValue()  # Maps user_name to (factors_values, severity_factors_values)
-        self.members.insert(founder, None)
+        self.members.insert(founder, ([], []))
 
         self.db_access = DBAccess()
 
@@ -240,3 +240,14 @@ class Project:
             and self.description == other.description
             and self.founder == other.founder
         )
+    
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "founder": self.founder,
+            "isActive": self.isActive,
+            "factors": self.factors.to_list(),
+            "severity_factors": self.severity_factors.to_list(),
+            "members": self.members.to_list(),
+        }

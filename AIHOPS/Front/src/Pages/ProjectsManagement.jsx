@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProjects } from "../api/ProjectApi";
+import { createProject, getProjects } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -18,14 +18,7 @@ const ProjectsManagement = () => {
   const [newProject, setNewProject] = useState({
     name: "",
     description: "",
-    factors: [],
-    severity_factors: [0, 0, 0, 0, 0]
   });
-  const [newProjectFactor, setNewProjectFactor] = useState({
-    name: "",
-    description: ""
-  });
-
 
   const getProject_dummy = [
     {
@@ -71,7 +64,7 @@ const ProjectsManagement = () => {
           setProjects(response.data.projects);
           setIsSuccess(true);
         } else {
-          setProjects(getProject_dummy);
+          setMsg(response.data.message);
           setIsSuccess(true);
         }
       })
@@ -79,8 +72,7 @@ const ProjectsManagement = () => {
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
         setMsg(`Error fetching projects: ${errorMessage}`);
-        setProjects(getProject_dummy);
-        setIsSuccess(true);
+        setIsSuccess(false);
       });
   }, []);
 
@@ -145,35 +137,35 @@ const ProjectsManagement = () => {
 
   const handleCreateProject = () => {
     if (window.confirm("Are you sure you want to create this project?")) {
-      alert("TODO: Implement create project logic");
-      // setShowCreatePopup(false);
-      // setNewProject({
-      //   name: "",
-      //   description: "",
-      //   factors: [],
-      //   severity_factors: [0, 0, 0, 0, 0]
-      // });
+      let cookie = localStorage.getItem("authToken");
+
+      if (!cookie) {
+        setMsg("No authentication token found. Please log in again.");
+        setIsSuccess(false);
+        return;
+      }
+
+      createProject(cookie, newProject.name, newProject.description)
+      .then((response) => {
+        if (response.data.success) {
+          alert(response.data.message);
+          setNewProject({ name: "", description: ""});
+          setIsSuccess(true);
+        } else {
+          setMsg(response.data.message);
+          setIsSuccess(true);
+        }
+      })
+      .catch((error) => {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error("Error:", errorMessage);
+        setMsg(`Error fetching projects: ${errorMessage}`);
+        setProjects(getProject_dummy);
+        setIsSuccess(false);
+      });
     }
   };
 
-  const handleAddFactorToNewProject = () => {
-    if (newProjectFactor.name && newProjectFactor.description) {
-      setNewProject(prev => ({
-        ...prev,
-        factors: [...prev.factors, { ...newProjectFactor }]
-      }));
-      setNewProjectFactor({ name: "", description: "" });
-    }
-  };
-
-  const handleDeleteFactorFromNewProject = (index) => {
-    if (window.confirm("Are you sure you want to delete this factor?")) {
-      setNewProject(prev => ({
-        ...prev,
-        factors: prev.factors.filter((_, idx) => idx !== index)
-      }));
-    }
-  };
 
   return (
     <section>
@@ -208,7 +200,7 @@ const ProjectsManagement = () => {
                 Create New Project
               </button>
             </div>
-            <h2 style={{ textAlign: 'center' }}>Existing Projects</h2>
+            {projects.length > 0 && <h2 style={{ textAlign: 'center' }}>Existing Projects</h2>}
             {projects.map((project, index) => (
               <div key={index} className="project-card">
                 <div className="project-info">
@@ -302,146 +294,10 @@ const ProjectsManagement = () => {
               </div>
             </div>
 
-            <p>
-              <strong>Factors:</strong>
-            </p>
-            <div className="factors-list">
-              {newProject.factors.map((factor, index) => (
-                <div key={index} className="factor-item" style={{
-                  display: 'flex',
-                  gap: '10px',
-                  marginBottom: '10px',
-                  alignItems: 'center'
-                }}>
-                  <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                    <input
-                      type="text"
-                      value={factor.name}
-                      className="factor-name-input"
-                      placeholder="Factor Name"
-                      readOnly
-                      style={{ flex: '1' }}
-                    />
-                    <input
-                      type="text"
-                      value={factor.description}
-                      className="factor-desc-input"
-                      placeholder="Factor Description"
-                      readOnly
-                      style={{ flex: '2' }}
-                    />
-                    <button
-                      className="action-btn delete-btn"
-                      onClick={() => handleDeleteFactorFromNewProject(index)}
-                      style={{
-                        padding: '5px 15px',
-                        backgroundColor: '#ff4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {/* Add New Factor Form */}
-              <div className="factor-item" style={{
-                display: 'flex',
-                gap: '10px',
-                marginBottom: '10px',
-                alignItems: 'center'
-              }}>
-                <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                  <input
-                    type="text"
-                    value={newProjectFactor.name}
-                    onChange={(e) => setNewProjectFactor(prev => ({
-                      ...prev,
-                      name: e.target.value
-                    }))}
-                    className="factor-name-input"
-                    placeholder="New factor name"
-                    style={{ flex: '1' }}
-                  />
-                  <input
-                    type="text"
-                    value={newProjectFactor.description}
-                    onChange={(e) => setNewProjectFactor(prev => ({
-                      ...prev,
-                      description: e.target.value
-                    }))}
-                    className="factor-desc-input"
-                    placeholder="New factor description"
-                    style={{ flex: '2' }}
-                  />
-                  <button
-                    className="action-btn view-edit-btn"
-                    onClick={handleAddFactorToNewProject}
-                    style={{
-                      padding: '5px 15px',
-                      backgroundColor: '#88cd8d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Add Factor
-                  </button>
-                </div>
+            <div className="severity-factors-warning">
+                <p>Note: You'll be able to add Factors & Severity Factors after the creation of the project,
+                   in the edit/view window</p>
               </div>
-            </div>
-
-            {/* Severity Factors Section */}
-            <p>
-              <strong>Severity Factors:</strong>
-            </p>
-            <div className="severity-factors-container">
-              <div className="severity-factors-row">
-                {newProject.severity_factors.slice(0, 3).map((severity, index) => (
-                  <div key={index} className="severity-item">
-                    <label className="severity-label">Level {index + 1}:</label>
-                    <input
-                      type="number"
-                      value={severity}
-                      className="severity-input"
-                      onChange={(e) => {
-                        const newSeverityFactors = [...newProject.severity_factors];
-                        newSeverityFactors[index] = Number(e.target.value);
-                        setNewProject(prev => ({
-                          ...prev,
-                          severity_factors: newSeverityFactors
-                        }));
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="severity-factors-row">
-                {newProject.severity_factors.slice(3, 5).map((severity, index) => (
-                  <div key={index + 3} className="severity-item">
-                    <label className="severity-label">Level {index + 4}:</label>
-                    <input
-                      type="number"
-                      value={severity}
-                      className="severity-input"
-                      onChange={(e) => {
-                        const newSeverityFactors = [...newProject.severity_factors];
-                        newSeverityFactors[index + 3] = Number(e.target.value);
-                        setNewProject(prev => ({
-                          ...prev,
-                          severity_factors: newSeverityFactors
-                        }));
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
 
             <button
               className="action-btn update-project-btn"
@@ -695,19 +551,19 @@ const ProjectsManagement = () => {
             </p>
             {Object.keys(selectedProject.members).length > 0 ? (
               <ul className="members-list">
-                {Object.keys(selectedProject.members).map((member) => (
-                  <li key={member} className="member-item">
-                    <span className="member-name">{member}</span>
-                    {selectedProject.isActive && (
-                      <button
-                        className="remove-btn"
-                        onClick={() => handleRemoveMember(member)}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </li>
-                ))}
+              {selectedProject.members.map((memberItem, index) => (
+                <li key={index} className="member-item">
+                  <span className="member-name">{memberItem.key}</span>
+                  {selectedProject.isActive && (
+                    <button
+                      className="remove-btn"
+                      onClick={() => handleRemoveMember(memberItem.key)}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </li>
+              ))}
               </ul>
             ) : (
               <p>No members added yet.</p>

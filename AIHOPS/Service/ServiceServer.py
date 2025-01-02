@@ -127,7 +127,7 @@ def get_projects():
         return jsonify({
             "message": str(res.msg),  # Convert message to string explicitly
             "success": bool(res.success),  # Convert to bool explicitly
-            "projects": res.result if res.success else None
+            "projects": list(res.result) if res.success and res.result else None,
         })
     except ValueError as e:
         return jsonify({
