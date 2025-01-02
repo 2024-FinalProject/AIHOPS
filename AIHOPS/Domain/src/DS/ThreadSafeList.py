@@ -50,5 +50,7 @@ class ThreadSafeList:
     def to_list(self):
         """Return a shallow copy of the list."""
         with self.lock:
+            if(self.list == None):
+                return []
             return self.list[:]
         

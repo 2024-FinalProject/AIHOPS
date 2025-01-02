@@ -193,6 +193,16 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get project: {e}")
         
+    def get_project_by_name_and_desc(self, cookie, name, description):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.project_manager.get_project_by_name_and_desc(session.result.user_name, name, description)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get project by name and description: {e}")
+        
     def publish_project(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)

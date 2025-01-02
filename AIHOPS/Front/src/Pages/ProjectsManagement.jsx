@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createProject, getProjects } from "../api/ProjectApi";
+import { createProject, getProjects, publishProject, setProjectFactors } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -20,34 +20,12 @@ const ProjectsManagement = () => {
     description: "",
   });
 
-  const getProject_dummy = [
-    {
-      name: "Project 1",
-      description: "This is a description for Project 1.",
-      founder: "Alice",
-      isActive: true,
-      factors: [
-        { name: "Factor1", description: "Factor1Desc" },
-        { name: "Factor2", description: "Factor2Desc" },
-      ],
-      severity_factors: [1, 5, 56, 102, 256],
-      members: {
-        Alice: [2, 4],
-        Bob: [25, 25],
-      },
-    },
-    {
-      name: "Project 2",
-      description: "This is a description for Project 2.",
-      founder: "Bob",
-      isActive: false,
-      factors: [{ name: "Factor3", description: "Factor3Desc" }],
-      severity_factors: [0, 0, 0, 0, 0],
-      members: {},
-    },
-  ];
-
   const navigate = useNavigate();
+
+  const findProjectByName = (name) => {
+    const foundProject = projects.find((project) => project.name === name);
+    return foundProject; // It will return the project if found, or undefined if not found
+  };
 
   useEffect(() => {
     let cookie = localStorage.getItem("authToken");
@@ -102,7 +80,35 @@ const ProjectsManagement = () => {
 
   const handlePublish = (projectName) => {
     if (window.confirm(`Are you sure you want to publish the project "${projectName}"?`)) {
-      alert(`Published project: "${projectName}". Implement the backend call.`);
+      if(findProjectByName(projectName).severity_factors_inited && findProjectByName(projectName).factors_inited){
+        let cookie = localStorage.getItem("authToken");
+
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+
+        publishProject(cookie, findProjectByName(projectName).id)
+        .then((response) => {
+          if (response.data.success) {
+            alert(`Published project: "${findProjectByName(projectName).name}".`);
+            setIsSuccess(true);
+          } else {
+            setMsg(response.data.message);
+            setIsSuccess(true);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error in publishing project: ${errorMessage}`);
+          setIsSuccess(false);
+        });
+      }
+      else{
+        alert(`Please initialize factors and severity factors first.`);
+      }
     }
   };
 
@@ -125,7 +131,30 @@ const ProjectsManagement = () => {
 
   const handleAddFactor = () => {
     if (window.confirm("Are you sure you want to add this factor?")) {
-      alert("TODO: Implement add factor logic");
+      let cookie = localStorage.getItem("authToken");
+
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+
+        setProjectFactors(cookie, selectedProject.id, newFactorName, newFactorDescription)
+        .then((response) => {
+          if (response.data.success) {
+            alert(`Factor ${newFactorName} has been added successfully.`);
+            setIsSuccess(true);
+          } else {
+            setMsg(response.data.message);
+            setIsSuccess(true);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error in adding factor: ${errorMessage}`);
+          setIsSuccess(false);
+        });
     }
   };
 
@@ -149,8 +178,8 @@ const ProjectsManagement = () => {
       .then((response) => {
         if (response.data.success) {
           alert(response.data.message);
-          setNewProject({ name: "", description: ""});
           setIsSuccess(true);
+          setNewProject({ name: "", description: ""});
         } else {
           setMsg(response.data.message);
           setIsSuccess(true);
@@ -160,7 +189,6 @@ const ProjectsManagement = () => {
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
         setMsg(`Error fetching projects: ${errorMessage}`);
-        setProjects(getProject_dummy);
         setIsSuccess(false);
       });
     }

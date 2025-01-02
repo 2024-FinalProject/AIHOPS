@@ -36,6 +36,9 @@ class Project:
 
         self.factors = ThreadSafeList()  # Thread-safe list of project factors
         self.severity_factors = ThreadSafeList()  # Thread-safe list of severity factors
+        # Initialize with 5 zeros
+        for _ in range(5):
+            self.severity_factors.append(0)
         self.members = ThreadSafeDictWithListPairValue()  # Maps user_name to (factors_values, severity_factors_values)
         self.members.insert(founder, ([], []))
 
@@ -241,13 +244,16 @@ class Project:
             and self.founder == other.founder
         )
     
-    def to_dict(self):
+    def to_dict(self):    
         return {
+            "pid": self.id,
             "name": self.name,
             "description": self.description,
             "founder": self.founder,
             "isActive": self.isActive,
-            "factors": self.factors.to_list(),
-            "severity_factors": self.severity_factors.to_list(),
-            "members": self.members.to_list(),
+            "factors": self.factors.to_list() if self.factors else [],
+            "factors_inited": self.factors_inited,
+            "severity_factors_inited": self.severity_factors_inited,
+            "severity_factors": self.severity_factors.to_list() if self.severity_factors else [],
+            "members": self.members.to_list() if self.members else [],
         }

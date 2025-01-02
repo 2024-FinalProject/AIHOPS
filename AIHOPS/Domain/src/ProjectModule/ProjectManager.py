@@ -219,16 +219,23 @@ class ProjectManager:
         if(asking != temp_project.founder):
             return ResponseFailMsg(f"only founder {temp_project.founder} can get members")
         return ResponseSuccessMsg(f"list of members in project {project_id} : {temp_project.get_members()}")
-    
+
     def get_projects(self, founder):
         try:
+            projects = self.find_Projects(founder)
+            
+            if not projects:
+                raise Exception(f"No projects found for founder {founder}")
+                
             temp_projects = []
-            for project in self.find_Projects(founder):
-                if hasattr(project, 'to_dict'):  # Check if the object has the 'to_dict' method
+            for project in projects:
+                if hasattr(project, 'to_dict'):
                     temp_projects.append(project.to_dict())
-            return ResponseSuccessObj(f"list of projects for founder {founder} : {temp_projects}", list(temp_projects))
+                    
+            return ResponseSuccessObj(f"List of projects for founder {founder}", temp_projects)
         except Exception as e:
-            return ResponseFailMsg(e)
+            return ResponseFailMsg(str(e))
+
 
     def vote(self, project_id, user_name, factors_values, severity_factors_values):
         if(factors_values == [] or severity_factors_values == []):
@@ -280,6 +287,10 @@ class ProjectManager:
     def get_project(self, project_id):
         temp_project = self.find_Project(project_id)
         return ResponseSuccessMsg(f"project {temp_project}")
+    
+    def get_project_by_name_and_desc(self, founder, project_name, project_desc):
+        temp_project = self.find_Project_By_Name_And_Desc(founder, project_name, project_desc)
+        return ResponseSuccessMsg(f"project {temp_project.to_dict()}")
 
     def publish_project(self, project_id, founder):
         temp_project = self.find_Project(project_id)
@@ -352,12 +363,22 @@ class ProjectManager:
         if prj is None or prj == []:
             raise Exception(f"project {project_id} not found")
         return prj
-
-    def find_Projects (self, founder):
-        prjs =  self.founder_projects.get(founder)
+    
+    def find_Project_By_Name_And_Desc (self, project_name, project_desc, founder):
+        prjs = self.founder_projects.get(founder)
         if prjs is None or prjs == []:
-            raise Exception(f"no projects found for founder {founder}")
-        return prjs
+            raise Exception(f"founder {founder} has no projects")
+        for prj in prjs:
+            if prj.name == project_name and prj.description == project_desc:
+                return prj
+        raise Exception(f"founder {founder} has no project with the provide details")
+
+    def find_Projects(self, founder):
+        print(f"Finding projects for founder: {founder}")  # Debug
+        print(f"founder_projects: {self.founder_projects}")  # Debug
+        projects = self.founder_projects.get(founder)
+        print(f"Retrieved projects: {projects}")  # Debug
+        return projects
 
     def find_pending_requests(self, email):
         prjs = self.pending_requests.get(email)
