@@ -177,4 +177,5 @@ if __name__ == "__main__":
 
     server = Server()
     # running the server
-    app.run(debug=True, port=5555)
+    app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    # app.run(threaded=True, port=5555)  # runs multithreaded

@@ -13,13 +13,12 @@ from Domain.src.Users.MemberController import MemberController
 class Server:
 
     def __init__(self):
+        self.db_access = DBAccess()
         self.sessions = {}  # map cookies to sessions
         self.enter_lock = RLock()
-        self.user_controller = MemberController(self)
-        self.project_manager = ProjectManager()
         self.user_deletion_lock = RLock()
-        self.db_access = DBAccess()
-        self.project_manager = ProjectManager()
+        self.user_controller = MemberController(self, self.db_access)
+        self.project_manager = ProjectManager(self.db_access)
 
     def clear_db(self):
         self.db_access.clear_db()
@@ -132,6 +131,7 @@ class Server:
             return self.project_manager.set_project_factors(pid, factors)
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project factors: {e}")
+
         
     def set_project_severity_factors(self, cookie, pid, severity_factors):
         try:

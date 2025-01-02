@@ -10,11 +10,11 @@ from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
 
 class MemberController:
-    def __init__(self, server):
+    def __init__(self, server, db_access):
         self.members = ThreadSafeDict()     # name: user
         self.register_lock = RLock()
         self.id_maker = IdMaker()
-        self.db_access = DBAccess()
+        self.db_access = db_access
         self.get_users_from_db()
 
     def get_users_from_db(self):
