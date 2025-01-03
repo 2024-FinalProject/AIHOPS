@@ -145,17 +145,17 @@ class ProjectManager:
             return ResponseFailMsg("severity factors can't be empty")
         
         if len(severity_factors) != 5:
-            return ResponseFailMsg("there should be 5 severity factors")
+            return ResponseFailMsg("there should be exactly 5 severity factors, but there were " + str(len(severity_factors)))
         
         for sf in severity_factors:
             if sf < 0:
-                return ResponseFailMsg("severity factor can't be negative")
+                return ResponseFailMsg("severity factor can't be a negative")
 
         project = self.find_Project(project_id)
 
         #insert to DB
         db_severity = DBProjectSeverityFactor(project_id, *severity_factors)
-        res = self.db_access.insert(db_severity)
+        res = self.db_access.update(db_severity)
 
         # cache changes only after db persistance
         project.set_severity_factors(severity_factors)

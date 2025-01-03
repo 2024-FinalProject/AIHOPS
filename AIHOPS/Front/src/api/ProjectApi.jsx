@@ -37,3 +37,11 @@ export const setProjectFactors = async(cookie, project_id, factors) => {
         factors: factors
     });
 }
+
+export const setSeverityFactors = async(cookie, project_id, severity_factors) => {
+    return await axios.post(`${API_URL}/project/severity-factors`, {
+        cookie: cookie,
+        pid: project_id,
+        severityFactors: severity_factors
+    });
+}

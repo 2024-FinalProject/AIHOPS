@@ -52,7 +52,7 @@ class Project:
         self.members.insert(founder, ([], []))
 
         self.db_access = DBAccess()
-
+        
         activate = False
         if fromDB:
             self._load_inner_data()
@@ -85,7 +85,9 @@ class Project:
         s_f_data = s_f_data[0]
         severity_factors = [s_f_data.severity_level1, s_f_data.severity_level2, s_f_data.severity_level3,
                             s_f_data.severity_level4, s_f_data.severity_level5]
-        self.set_severity_factors(severity_factors)
+        for severity_factor_data in severity_factors:
+            self.factors.append(severity_factor_data)
+            self.severity_factors_inited = True
 
     def load_severity_votes(self):
         query_obj = {"project_id": self.id}
@@ -170,8 +172,8 @@ class Project:
                     raise Exception("Negative severity factor not allowed")
             # TODO: cant change severity factors???
             if not self.isActive:
-                for severity_factor in severity_factors:
-                    self.severity_factors.append(severity_factor)
+                for i in range(self.severity_factors.size()):
+                    self.severity_factors[i] = severity_factors[i]
                 self.severity_factors_inited = True
 
     def approved_member(self, user_name):

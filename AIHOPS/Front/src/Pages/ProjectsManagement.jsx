@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createProject, getProjects, publishProject, setProjectFactors } from "../api/ProjectApi";
+import { createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -52,10 +52,15 @@ const ProjectsManagement = () => {
         setMsg(`Error fetching projects: ${errorMessage}`);
         setIsSuccess(false);
       });
-  }, [projects]);
+  }, []);
 
   const openPopup = (project) => {
     setSelectedProject(project);
+    let initialSeverityUpdates = {};
+    for (let i = 1; i <= 5; i++) {
+      initialSeverityUpdates[i] = project.severity_factors[i - 1];
+    }
+    setSeverityUpdates(initialSeverityUpdates);
     setShowPopup(true);
   };
 
@@ -63,7 +68,11 @@ const ProjectsManagement = () => {
     setShowPopup(false);
     setSelectedProject(null);
     setFactorUpdates({});
-    setSeverityUpdates({});
+    let initialSeverityUpdates = {};
+    for (let i = 1; i <= 5; i++) {
+      initialSeverityUpdates[i] = 0;
+    }
+    setSeverityUpdates(initialSeverityUpdates);
   };
 
   const handleDelete = (projectName) => {
@@ -124,8 +133,48 @@ const ProjectsManagement = () => {
 
   const handleUpdateProject = () => {
     if (window.confirm("Are you sure you want to update this project? This will update both factors and severity levels.")) {
-      // Implement the backend call here
-      alert("TODO: Implement the backend logic here!");
+      let cookie = localStorage.getItem("authToken");
+
+      if (!cookie) {
+        setMsg("No authentication token found. Please log in again.");
+        setIsSuccess(false);
+        return;
+      }
+
+      //TODO: Perform all of the checks here - before sending it to update the DB!!!
+      /* This includes: project's name, project's description, project's factors, project's severity factors */
+
+      let tempSeverityFactors = [];
+      for (let level = 1; level <= Object.keys(severityUpdates).length; level++) {
+        if (severityUpdates[level] < 0) {
+          alert("Severity factors cannot be negative. Please enter a valid number for all levels.");
+          return;
+        }
+        tempSeverityFactors.push(severityUpdates[level]);
+      }
+
+      //TODO: Update the project's name. - Implement the backend call as well.
+
+      //TODO: Update the project's description. - Implement the backend call as well.
+
+      //TODO: Update the project's factors - if not empty. - Implement the backend call as well.
+
+      setSeverityFactors(cookie, selectedProject.id, tempSeverityFactors)
+      .then((response) => {
+        if (response.data.success) {
+          setIsSuccess(true);
+        } else {
+          setMsg(response.data.message);
+          setIsSuccess(true);
+        }
+      })
+      .catch((error) => {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error("Error:", errorMessage);
+        setMsg(`Error in updating the severity factors: ${errorMessage}`);
+        setIsSuccess(false);
+      });
+      alert(`Project: "${selectedProject.name}" has been updated successfully.`);
     }
   };
 
@@ -533,7 +582,7 @@ const ProjectsManagement = () => {
                         className="severity-input"
                         onChange={(e) => {
                           const updates = { ...severityUpdates };
-                          updates[index] = e.target.value;
+                          updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1, 2, 3
                           setSeverityUpdates(updates);
                         }}
                       />
@@ -554,7 +603,7 @@ const ProjectsManagement = () => {
                         className="severity-input"
                         onChange={(e) => {
                           const updates = { ...severityUpdates };
-                          updates[index + 3] = e.target.value;
+                          updates[index + 4] = Number(e.target.value); // Map to dictionary keys 4, 5
                           setSeverityUpdates(updates);
                         }}
                       />
