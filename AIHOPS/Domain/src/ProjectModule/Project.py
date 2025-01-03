@@ -85,9 +85,11 @@ class Project:
         s_f_data = s_f_data[0]
         severity_factors = [s_f_data.severity_level1, s_f_data.severity_level2, s_f_data.severity_level3,
                             s_f_data.severity_level4, s_f_data.severity_level5]
+        i = 0
         for severity_factor_data in severity_factors:
-            self.factors.append(severity_factor_data)
-            self.severity_factors_inited = True
+            self.severity_factors[i] = severity_factor_data
+            i += 1
+        self.severity_factors_inited = True
 
     def load_severity_votes(self):
         query_obj = {"project_id": self.id}
