@@ -13,14 +13,14 @@ class DBSeverityVotes(Base):
     severity_level4 = Column(Float, nullable=False)
     severity_level5 = Column(Float, nullable=False)
 
-    __table_args__ = (
-        CheckConstraint('severity_level1 >= 0 AND severity_level1 <= 1'),
-        CheckConstraint('severity_level2 >= 0 AND severity_level2 <= 1'),
-        CheckConstraint('severity_level3 >= 0 AND severity_level3 <= 1'),
-        CheckConstraint('severity_level4 >= 0 AND severity_level4 <= 1'),
-        CheckConstraint('severity_level5 >= 0 AND severity_level5 <= 1'),
-        Index('idx_severity_votes', 'project_id', 'member_email'),
-    )
+    # __table_args__ = (
+    #     CheckConstraint('severity_level1 >= 0 AND severity_level1 <= 1'),
+    #     CheckConstraint('severity_level2 >= 0 AND severity_level2 <= 1'),
+    #     CheckConstraint('severity_level3 >= 0 AND severity_level3 <= 1'),
+    #     CheckConstraint('severity_level4 >= 0 AND severity_level4 <= 1'),
+    #     CheckConstraint('severity_level5 >= 0 AND severity_level5 <= 1'),
+    #     Index('idx_severity_votes', 'project_id', 'member_email'),
+    # )
 
 
 

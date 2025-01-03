@@ -10,6 +10,8 @@ class DBFactors(Base):
     name = Column(String(100))
     description = Column(String(500))
 
-    def __init__(self, name, description):
+    def __init__(self, name, description, factor_id = None):
         self.name = name
         self.description = description
+        if factor_id is not None:
+            self.id = factor_id

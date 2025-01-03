@@ -9,7 +9,7 @@ from DAL.Objects.DBFactorVotes import DBFactorVotes
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
-from DAL.Objects.DBProjectSevrityFactors import DBProjectSeverityFactor
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 
 def init_database():

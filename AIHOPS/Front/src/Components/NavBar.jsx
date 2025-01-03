@@ -25,6 +25,20 @@ const NavBar = () => {
                   </Link>
                 </li>
 
+                {/* Projects Management button */}
+                <li className="nav-item">
+                  <Link to="/projectsmanagement" className="nav-link nav-button">
+                    Projects Management
+                  </Link>
+                </li>
+
+                {/* MyProjects button */}
+                <li className="nav-item">
+                  <Link to="/myprojects" className="nav-link nav-button">
+                    MyProjects
+                  </Link>
+                </li>
+
                 {/* Notification button */}
                 <li className="nav-item">
                   <Link

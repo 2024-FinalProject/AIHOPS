@@ -22,3 +22,6 @@ class ThreadSafeDict:
         with self.lock:
             return self.dict.keys()
 
+    def size(self):
+        return self.dict.__len__()
+

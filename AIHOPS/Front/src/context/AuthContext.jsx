@@ -2,6 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AuthContext = createContext(null);
 
+const validateAuthToken = async (token) => {
+  // Simple validation: Check if the token is not null and not empty
+  // Replace this with an actual API request if needed
+  if (!token) return false;
+  // For now, we're assuming if the token exists, it's valid
+  return true;
+};
+
 export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
   const [userName, setUserName] = useState(localStorage.getItem('userName') || null);
@@ -23,22 +31,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('userName');
   };
 
-  // Optional: Verify token validity on mount and after storage changes
   useEffect(() => {
     const validateToken = async () => {
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        logout();
-        return;
-      }
-
-      try {
-        // Add your token validation logic here
-        // const isValid = await validateAuthToken(token);
-        // if (!isValid) logout();
-      } catch (error) {
-        console.error('Token validation error:', error);
-        logout();
+      if (!token || !(await validateAuthToken(token))) {
+        logout();  // If no token or invalid token, logout
+      } else {
+        setIsAuthenticated(true);  // If valid, stay authenticated
       }
     };
 

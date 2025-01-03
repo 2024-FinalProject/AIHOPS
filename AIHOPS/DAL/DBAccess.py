@@ -1,8 +1,10 @@
 from threading import RLock
 
-from sqlalchemy import MetaData, text
+from sqlalchemy import MetaData, text, func
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+
+from DAL.Objects.DBFactors import DBFactors
 # from DAL.Objects import DBProjectMembers
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Service.config import engine  # Make sure you have your SQLAlchemy engine defined
@@ -63,10 +65,11 @@ class DBAccess:
                 if closeSession:
                     session.close()  # Close the session
 
-    def update(self):
+    def update(self, obj):
         with self.lock:
-            session = self.Session()  # Create a new session
+            session = Session()  # Create a new session
             try:
+                session.merge(obj)
                 session.commit()  # Assuming you're updating within the session
                 return ResponseSuccessMsg("Successfully updated the database.")
             except SQLAlchemyError as e:
@@ -99,19 +102,39 @@ class DBAccess:
             finally:
                 session.close()  # Close the session
 
-    # def load_project_members(self, project_id):
-    #     with self.lock:
-    #         session = Session()  # Create a new session
-    #         try:
-    #             # Query for all user_name values where org_name matches the given org_name
-    #             usernames = session.query(DBProjectMembers.member_email).filter_by(project_id=project_id).all()
+    def load_by_query(self, Obj, query_obj):
+        session = Session()  # Create a new session
+        try:
+            return session.query(Obj).filter_by(**query_obj).all()
+        except SQLAlchemyError as e:
+            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+        finally:
+            session.close()  # Close the session
 
-    #             # Extract just the user_name values from the query result (which are tuples)
-    #             usernames_list = [username[0] for username in usernames]
-    #             return ResponseSuccessObj("loaded members", usernames_list) if usernames_list else ResponseFailMsg(
-    #                 "No users found for the given organization.")
-    #         except SQLAlchemyError as e:
-    #             session.rollback()
-    #             return ResponseFailMsg(f"Rolled back, failed to retrieve usernames: {str(e)}")
-    #         finally:
-    #             session.close()  # Close the session
+    def load_by_join_query(self, primary_obj, join_obj, select_attrs, join_condition, filter_obj=None):
+        session = Session()  # Create a new session
+        try:
+            # Explicitly specify the primary table using select_from
+            query = session.query(*select_attrs).select_from(primary_obj).join(join_obj, join_condition)
+
+            if filter_obj:
+                # Dynamically build filter conditions
+                for key, value in filter_obj.items():
+                    query = query.filter(getattr(primary_obj, key) == value)
+
+            return query.all()
+        except SQLAlchemyError as e:
+            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+        finally:
+            session.close()  # Close the session
+
+    def get_highest_factor_id(self):
+        session = Session()  # Create a new session
+        try:
+            # Retrieve the maximum ID from the Factor table
+            highest_id = session.query(func.max(DBFactors.id)).scalar()
+            return highest_id
+        except SQLAlchemyError as e:
+            return ResponseFailMsg(f"Failed to retrieve the highest Factor ID: {str(e)}")
+        finally:
+            session.close()  # Close the session

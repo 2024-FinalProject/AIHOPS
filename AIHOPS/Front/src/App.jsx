@@ -11,6 +11,8 @@ import WelcomePage from "./pages/WelcomePage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Notification from "./pages/PendingRequests";
+import ProjectsManagement from "./Pages/ProjectsManagement";
+import MyProjects from "./Pages/MyProjects";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -38,6 +40,8 @@ const AppContent = () => {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/notification" element={<Notification />} />
+        <Route path="/projectsmanagement" element={<ProjectsManagement />} />
+        <Route path="/myprojects" element={<MyProjects />} />
       </Routes>
     </>
   );

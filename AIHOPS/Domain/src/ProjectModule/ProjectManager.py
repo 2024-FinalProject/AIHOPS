@@ -5,7 +5,7 @@ from DAL.Objects.DBFactors import DBFactors
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
-from DAL.Objects.DBProjectSevrityFactors import DBProjectSeverityFactor
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
@@ -17,25 +17,44 @@ from Domain.src.Loggs.Response import Response, ResponseSuccessMsg, ResponseFail
 from Domain.src.ProjectModule.Project import Project
 from copy import deepcopy as deepCopy
 
+DEFAULT_FACTORS_COUNT = 0
+
 
 class ProjectManager:
-    def __init__(self):
+
+    def __init__(self, db_access):
         self.projects = ThreadSafeDict() #project_id -> Project
         self.founder_projects = ThreadSafeDictWithListValue() #founder -> list of projects
         self.pending_requests = ThreadSafeDictWithListValue() # email -> list of projects_id's
         self.id_maker = IdMaker()
-        self.db_access = DBAccess()
+        self.db_access = db_access
         self.get_projects_from_db()
         self.get_pending_requests_from_db()
         self.factors_lock = RLock()
+        self.factor_id_maker = IdMaker()
+        self.set_project_id_maker()
+
+    def set_project_id_maker(self):
+        # get highest factor id from db
+        highest = self.db_access.get_highest_factor_id()
+        # set id_maker next id to retrieved value+1
+        if highest is not None:
+            self.factor_id_maker.start_from(highest+1)
+
 
     def get_projects_from_db(self):
         existing_projects = self.db_access.load_all(DBProject)
-        if existing_projects is None:
+        if existing_projects is None or len(existing_projects) == 0:
             return 1
         last_id = 0
         for project_data in existing_projects:
-            project = Project(project_data.id, project_data.name, project_data.description, project_data.founder)
+            project = Project(project_data.id, project_data.name, project_data.description, project_data.founder, project_data.factors_num, fromDB=True)
+             # Verify factors count matches the stored factors_num
+            factors_count = project.factors.size()
+            if factors_count != project_data.factors_num:
+                # Delete the project and all related data if the factors count is wrong
+                self.delete_project(project_data.id)
+                continue
             last_id = max(last_id, project.id + 1)
             self.projects.insert(project.id, project)
             self.founder_projects.insert(project.founder, project)
@@ -46,9 +65,9 @@ class ProjectManager:
         if pending_requests is None:
             return 1
         for request in pending_requests:
-            if not self.pending_requests.get(request.email):
-                self.pending_requests.insert(request.email, [])
-            self.pending_requests.insert(request.email, request.project_id)
+            project = self.projects.get(request.project_id)
+            if not project.is_member(request.email):
+                self.pending_requests.insert(request.email, request.project_id)
 
 
     def create_project(self, name, description, founder):
@@ -70,34 +89,58 @@ class ProjectManager:
              
         project_id = self.id_maker.next_id()
         prj = Project(project_id, name, description, founder)
+
+        # Add DB insert
+        db_project = DBProject(name, founder, description, project_id, DEFAULT_FACTORS_COUNT)
+        self.db_access.insert(db_project)
+
         self.projects.insert(project_id, prj)
         self.founder_projects.insert(founder, prj)
-        # Add DB insert
-        db_project = DBProject(name, founder, description=description)
-        self.db_access.insert(db_project)
+
         return Response(True, f"project {name} has been created", project_id, False)
 
     def set_project_factors(self, project_id, factors):
-        if(len(factors) == 0):
+        if len(factors) == 0:
             return ResponseFailMsg("factors can't be empty")
 
         project = self.find_Project(project_id)
-        project.set_factors(factors)
+
+        # insert -1 factors num for project to db
+        db_project = self.db_access.load_by_query(DBProject, {"id": project_id})
+        if isinstance(db_project, ResponseFailMsg):
+            return db_project
+
+        db_project = db_project[0]
+        db_project.factors_num = -1
+        update_result = self.db_access.update(db_project)
+        if not update_result.success:
+            return update_result
 
         # insert to DB
         for factor in factors:
-            with self.factors_lock:
-                db_factor = DBFactors(factor[0], factor[1])
-                self.db_access.insert(db_factor, False)
-                db_project_factor = DBProjectFactors(db_factor.id, project_id)
-                self.db_access.insert(db_project_factor)
+            next_id = self.factor_id_maker.next_id()
+            db_factor = DBFactors(factor[0], factor[1], next_id)
+            self.db_access.insert(db_factor)
+            db_project_factor = DBProjectFactors(next_id, project_id)
+            self.db_access.insert(db_project_factor)
+
+        db_project.factors_num = len(factors)
+        update_result = self.db_access.update(db_project)
+        if not update_result.success:
+            return update_result
+        # cache changes only after db persistance
+        project.set_factors(factors)
+
+        # insert correct factors num for project to db
+
         return ResponseSuccessMsg(f"project {project_id} factors has been set")
 
     def set_project_severity_factors(self, project_id, severity_factors):
-        if(len(severity_factors) == 0):
+        # TODO: redundant??
+        if len(severity_factors) == 0:
             return ResponseFailMsg("severity factors can't be empty")
         
-        if(len(severity_factors) != 5):
+        if len(severity_factors) != 5:
             return ResponseFailMsg("there should be 5 severity factors")
         
         for sf in severity_factors:
@@ -105,11 +148,13 @@ class ProjectManager:
                 return ResponseFailMsg("severity factor can't be negative")
 
         project = self.find_Project(project_id)
-        project.set_severity_factors(severity_factors)
-    
+
         #insert to DB
         db_severity = DBProjectSeverityFactor(project_id, *severity_factors)
-        self.db_access.insert(db_severity)
+        res = self.db_access.insert(db_severity)
+
+        # cache changes only after db persistance
+        project.set_severity_factors(severity_factors)
         return ResponseSuccessMsg(f"project {project_id} severity factors has been set")
 
 
@@ -147,7 +192,7 @@ class ProjectManager:
 
     def remove_member(self, asking, project_id, user_name):
         temp_project = self.find_Project(project_id)
-        if(asking != temp_project.founder):
+        if asking != temp_project.founder:
             return ResponseFailMsg(f"only founder {temp_project.founder} can remove members")
         try: 
             temp_pending_requests = self.find_pending_requests(user_name)
@@ -188,21 +233,35 @@ class ProjectManager:
                 if factor < 0 or factor > 4:
                     return ResponseFailMsg("factor needs to be between 0 and 4")
             for severity in severity_factors_values:
-                if severity < 0 or severity > 1:
+                if severity < 0 or severity > 100:
                     return ResponseFailMsg("severity factor needs to be between 0 and 1")
                 severity_amount += severity
-            if severity_amount != 1:
-                return ResponseFailMsg("severity factors sum needs to be excaly 1") 
-            project.vote(user_name, factors_values, severity_factors_values)
+            if severity_amount != 100:
+                return ResponseFailMsg("severity factors sum needs to be excaly 1")
 
+            # Save initial placeholder row with -1 id and -1 value
+            db_vote = DBFactorVotes(-1, user_name, project_id, -1)
+            self.db_access.insert(db_vote)
+
+            factor_votes = {}
             # Save factor votes
             for i, value in enumerate(factors_values):
                 db_vote = DBFactorVotes(i, user_name, project_id, value)
                 self.db_access.insert(db_vote)
+                factor_votes[i] = value
 
             # Save severity votes
             db_severity_vote = DBSeverityVotes(user_name, project_id, *severity_factors_values)
             self.db_access.insert(db_severity_vote)
+
+            temp_factor = DBFactorVotes(-1, user_name, project_id, -1)
+            temp_factor.value = 1
+            # Update the object
+            update_result = self.db_access.update(temp_factor)
+            if not update_result.success:
+                return update_result
+
+            project.vote(user_name, factor_votes, severity_factors_values)
         except Exception as e:
             return ResponseFailMsg(e)
         # with self.lock:
@@ -217,6 +276,9 @@ class ProjectManager:
 
     def publish_project(self, project_id, founder):
         temp_project = self.find_Project(project_id)
+        # Check if project is initialized
+        if not temp_project.is_initialized_project():
+            return ResponseFailMsg("Can't publish project without initializing factors and severity factors")
         temp_projects = self.find_Projects(founder)
         for project in temp_projects:
             if project == temp_project and project.isActive:
@@ -244,7 +306,7 @@ class ProjectManager:
     def get_pending_requests(self, email):
         try:
             temp_pending_requests = self.find_pending_requests(email) 
-            return ResponseSuccessObj(f"pending requests for email {email} : {temp_pending_requests}", temp_pending_requests)
+            return ResponseSuccessObj(f"pending requests for email {email} : {temp_pending_requests}", list(temp_pending_requests))
             
         except Exception as e:
             return ResponseSuccessObj(f"no pending requests", [])
@@ -314,3 +376,22 @@ class ProjectManager:
             return self.db_access.insert(db_project)
         except Exception as e:
             return ResponseFailMsg(f"Failed to update project status: {str(e)}")
+
+    def delete_project(self, project_id):
+        try:
+            # Delete all related data (factors, votes, pending requests, members, etc.)
+            self.db_access.delete_obj_by_query(DBProjectFactors, {"project_id": project_id})
+            self.db_access.delete_obj_by_query(DBFactorVotes, {"project_id": project_id})
+            self.db_access.delete_obj_by_query(DBSeverityVotes, {"project_id": project_id})
+            self.db_access.delete_obj_by_query(DBPendingRequests, {"project_id": project_id})
+            self.db_access.delete_obj_by_query(DBProjectMembers, {"project_id": project_id})
+            self.db_access.delete_obj_by_query(DBProject, {"id": project_id})
+
+            # Remove the project from the in-memory data structures
+            self.projects.pop(project_id, None)
+            for founder, projects in self.founder_projects.items():
+                self.founder_projects[founder] = [p for p in projects if p.id != project_id]
+
+            return ResponseSuccessMsg(f"Project {project_id} and all related data have been deleted.")
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to delete project {project_id}: {str(e)}")
