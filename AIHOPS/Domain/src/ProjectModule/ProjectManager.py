@@ -303,7 +303,7 @@ class ProjectManager:
         self.update_project_status(project_id, True)
         return ResponseSuccessMsg(f"project {project_id} has been published") 
 
-    def close_project(self, project_id):
+    def archive_project(self, project_id):
         temp_project = self.find_Project(project_id)
         temp_project.hide_project()
           
@@ -393,11 +393,12 @@ class ProjectManager:
             project.isActive = is_active
             
             # Update the project status in the database
-            db_project = DBProject(project.name, project.founder, description=project.description)
+            db_project = DBProject(project.name, project.founder, description=project.description,
+                                    project_id=project_id, factors_num=project.factors.size())
             db_project.id = project_id
             db_project.is_active = is_active
             
-            return self.db_access.insert(db_project)
+            return self.db_access.update(db_project)
         except Exception as e:
             return ResponseFailMsg(f"Failed to update project status: {str(e)}")
 

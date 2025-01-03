@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors } from "../api/ProjectApi";
+import { archiveProject, createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -83,7 +83,35 @@ const ProjectsManagement = () => {
 
   const handleArchive = (projectName) => {
     if (window.confirm(`Are you sure you want to archive the project "${projectName}"?`)) {
-      alert(`Archived project: "${projectName}". Implement the backend call.`);
+      if(findProjectByName(projectName).severity_factors_inited && findProjectByName(projectName).factors_inited){
+        let cookie = localStorage.getItem("authToken");
+
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+
+        archiveProject(cookie, findProjectByName(projectName).id)
+        .then((response) => {
+          if (response.data.success) {
+            alert(`Archived project: "${findProjectByName(projectName).name}".`);
+            setIsSuccess(true);
+          } else {
+            setMsg(response.data.message);
+            setIsSuccess(true);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error in archiving project: ${errorMessage}`);
+          setIsSuccess(false);
+        });
+      }
+      else{
+        alert(`Please initialize factors and severity factors first.`);
+      }
     }
   };
 
