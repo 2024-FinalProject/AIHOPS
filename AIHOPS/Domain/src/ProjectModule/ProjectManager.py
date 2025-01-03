@@ -309,7 +309,7 @@ class ProjectManager:
             return ResponseSuccessObj(f"pending requests for email {email} : {temp_pending_requests}", list(temp_pending_requests))
             
         except Exception as e:
-            return ResponseSuccessMsg(True, f"no pending requests", {[]})
+            return ResponseSuccessObj(f"no pending requests", [])
     
     def approve_member(self, project_id, user_name):
         pending_requests = self.find_pending_requests(user_name)
