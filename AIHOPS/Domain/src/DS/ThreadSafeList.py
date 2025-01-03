@@ -50,4 +50,16 @@ class ThreadSafeList:
     def to_list(self):
         """Return a shallow copy of the list."""
         with self.lock:
-            return self.list[:]
+            try:
+                return self.list[:] if self.list else []
+            except Exception as e:
+                return []
+            
+    def __setitem__(self, index, value):
+        """Set the item at the specified index."""
+        with self.lock:
+            if -len(self.list) <= index < len(self.list):
+                self.list[index] = value
+            else:
+                raise IndexError("Index out of range")
+        

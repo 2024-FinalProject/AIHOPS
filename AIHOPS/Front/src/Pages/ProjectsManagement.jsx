@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getProjects } from "../api/ProjectApi";
+import { createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -18,43 +18,14 @@ const ProjectsManagement = () => {
   const [newProject, setNewProject] = useState({
     name: "",
     description: "",
-    factors: [],
-    severity_factors: [0, 0, 0, 0, 0]
   });
-  const [newProjectFactor, setNewProjectFactor] = useState({
-    name: "",
-    description: ""
-  });
-
-
-  const getProject_dummy = [
-    {
-      name: "Project 1",
-      description: "This is a description for Project 1.",
-      founder: "Alice",
-      isActive: true,
-      factors: [
-        { name: "Factor1", description: "Factor1Desc" },
-        { name: "Factor2", description: "Factor2Desc" },
-      ],
-      severity_factors: [1, 5, 56, 102, 256],
-      members: {
-        Alice: [2, 4],
-        Bob: [25, 25],
-      },
-    },
-    {
-      name: "Project 2",
-      description: "This is a description for Project 2.",
-      founder: "Bob",
-      isActive: false,
-      factors: [{ name: "Factor3", description: "Factor3Desc" }],
-      severity_factors: [0, 0, 0, 0, 0],
-      members: {},
-    },
-  ];
 
   const navigate = useNavigate();
+
+  const findProjectByName = (name) => {
+    const foundProject = projects.find((project) => project.name === name);
+    return foundProject; // It will return the project if found, or undefined if not found
+  };
 
   useEffect(() => {
     let cookie = localStorage.getItem("authToken");
@@ -71,7 +42,7 @@ const ProjectsManagement = () => {
           setProjects(response.data.projects);
           setIsSuccess(true);
         } else {
-          setProjects(getProject_dummy);
+          setMsg(response.data.message);
           setIsSuccess(true);
         }
       })
@@ -79,13 +50,17 @@ const ProjectsManagement = () => {
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
         setMsg(`Error fetching projects: ${errorMessage}`);
-        setProjects(getProject_dummy);
-        setIsSuccess(true);
+        setIsSuccess(false);
       });
   }, []);
 
   const openPopup = (project) => {
     setSelectedProject(project);
+    let initialSeverityUpdates = {};
+    for (let i = 1; i <= 5; i++) {
+      initialSeverityUpdates[i] = project.severity_factors[i - 1];
+    }
+    setSeverityUpdates(initialSeverityUpdates);
     setShowPopup(true);
   };
 
@@ -93,7 +68,11 @@ const ProjectsManagement = () => {
     setShowPopup(false);
     setSelectedProject(null);
     setFactorUpdates({});
-    setSeverityUpdates({});
+    let initialSeverityUpdates = {};
+    for (let i = 1; i <= 5; i++) {
+      initialSeverityUpdates[i] = 0;
+    }
+    setSeverityUpdates(initialSeverityUpdates);
   };
 
   const handleDelete = (projectName) => {
@@ -110,7 +89,35 @@ const ProjectsManagement = () => {
 
   const handlePublish = (projectName) => {
     if (window.confirm(`Are you sure you want to publish the project "${projectName}"?`)) {
-      alert(`Published project: "${projectName}". Implement the backend call.`);
+      if(findProjectByName(projectName).severity_factors_inited && findProjectByName(projectName).factors_inited){
+        let cookie = localStorage.getItem("authToken");
+
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+
+        publishProject(cookie, findProjectByName(projectName).id)
+        .then((response) => {
+          if (response.data.success) {
+            alert(`Published project: "${findProjectByName(projectName).name}".`);
+            setIsSuccess(true);
+          } else {
+            setMsg(response.data.message);
+            setIsSuccess(true);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error in publishing project: ${errorMessage}`);
+          setIsSuccess(false);
+        });
+      }
+      else{
+        alert(`Please initialize factors and severity factors first.`);
+      }
     }
   };
 
@@ -126,14 +133,83 @@ const ProjectsManagement = () => {
 
   const handleUpdateProject = () => {
     if (window.confirm("Are you sure you want to update this project? This will update both factors and severity levels.")) {
-      // Implement the backend call here
-      alert("TODO: Implement the backend logic here!");
+      let cookie = localStorage.getItem("authToken");
+
+      if (!cookie) {
+        setMsg("No authentication token found. Please log in again.");
+        setIsSuccess(false);
+        return;
+      }
+
+      //TODO: Perform all of the checks here - before sending it to update the DB!!!
+      /* This includes: project's name, project's description, project's factors, project's severity factors */
+
+      let tempSeverityFactors = [];
+      for (let level = 1; level <= Object.keys(severityUpdates).length; level++) {
+        if (severityUpdates[level] < 0) {
+          alert("Severity factors cannot be negative. Please enter a valid number for all levels.");
+          return;
+        }
+        tempSeverityFactors.push(severityUpdates[level]);
+      }
+
+      //TODO: Update the project's name. - Implement the backend call as well.
+
+      //TODO: Update the project's description. - Implement the backend call as well.
+
+      //TODO: Update the project's factors - if not empty. - Implement the backend call as well.
+
+      setSeverityFactors(cookie, selectedProject.id, tempSeverityFactors)
+      .then((response) => {
+        if (response.data.success) {
+          setIsSuccess(true);
+        } else {
+          setMsg(response.data.message);
+          setIsSuccess(true);
+        }
+      })
+      .catch((error) => {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error("Error:", errorMessage);
+        setMsg(`Error in updating the severity factors: ${errorMessage}`);
+        setIsSuccess(false);
+      });
+      alert(`Project: "${selectedProject.name}" has been updated successfully.`);
     }
   };
 
   const handleAddFactor = () => {
     if (window.confirm("Are you sure you want to add this factor?")) {
-      alert("TODO: Implement add factor logic");
+      let cookie = localStorage.getItem("authToken");
+
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+
+        let tempFactorList = [[newFactorName, newFactorDescription]]; 
+        setProjectFactors(cookie, selectedProject.id, tempFactorList)
+        .then((response) => {
+          if (response.data.success) {
+            alert(`Factor ${newFactorName} has been added successfully.`);
+        
+            // Clear the input fields after adding
+            setNewFactorName('');
+            setNewFactorDescription('');
+
+            setIsSuccess(true);
+          } else {
+            setMsg(response.data.message);
+            setIsSuccess(true);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error in adding factor: ${errorMessage}`);
+          setIsSuccess(false);
+        });
     }
   };
 
@@ -145,35 +221,34 @@ const ProjectsManagement = () => {
 
   const handleCreateProject = () => {
     if (window.confirm("Are you sure you want to create this project?")) {
-      alert("TODO: Implement create project logic");
-      // setShowCreatePopup(false);
-      // setNewProject({
-      //   name: "",
-      //   description: "",
-      //   factors: [],
-      //   severity_factors: [0, 0, 0, 0, 0]
-      // });
+      let cookie = localStorage.getItem("authToken");
+
+      if (!cookie) {
+        setMsg("No authentication token found. Please log in again.");
+        setIsSuccess(false);
+        return;
+      }
+
+      createProject(cookie, newProject.name, newProject.description)
+      .then((response) => {
+        if (response.data.success) {
+          alert(response.data.message);
+          setIsSuccess(true);
+          setNewProject({ name: "", description: ""});
+        } else {
+          setMsg(response.data.message);
+          setIsSuccess(true);
+        }
+      })
+      .catch((error) => {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error("Error:", errorMessage);
+        setMsg(`Error fetching projects: ${errorMessage}`);
+        setIsSuccess(false);
+      });
     }
   };
 
-  const handleAddFactorToNewProject = () => {
-    if (newProjectFactor.name && newProjectFactor.description) {
-      setNewProject(prev => ({
-        ...prev,
-        factors: [...prev.factors, { ...newProjectFactor }]
-      }));
-      setNewProjectFactor({ name: "", description: "" });
-    }
-  };
-
-  const handleDeleteFactorFromNewProject = (index) => {
-    if (window.confirm("Are you sure you want to delete this factor?")) {
-      setNewProject(prev => ({
-        ...prev,
-        factors: prev.factors.filter((_, idx) => idx !== index)
-      }));
-    }
-  };
 
   return (
     <section>
@@ -208,7 +283,7 @@ const ProjectsManagement = () => {
                 Create New Project
               </button>
             </div>
-            <h2 style={{ textAlign: 'center' }}>Existing Projects</h2>
+            {projects.length > 0 && <h2 style={{ textAlign: 'center' }}>Existing Projects</h2>}
             {projects.map((project, index) => (
               <div key={index} className="project-card">
                 <div className="project-info">
@@ -302,146 +377,10 @@ const ProjectsManagement = () => {
               </div>
             </div>
 
-            <p>
-              <strong>Factors:</strong>
-            </p>
-            <div className="factors-list">
-              {newProject.factors.map((factor, index) => (
-                <div key={index} className="factor-item" style={{
-                  display: 'flex',
-                  gap: '10px',
-                  marginBottom: '10px',
-                  alignItems: 'center'
-                }}>
-                  <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                    <input
-                      type="text"
-                      value={factor.name}
-                      className="factor-name-input"
-                      placeholder="Factor Name"
-                      readOnly
-                      style={{ flex: '1' }}
-                    />
-                    <input
-                      type="text"
-                      value={factor.description}
-                      className="factor-desc-input"
-                      placeholder="Factor Description"
-                      readOnly
-                      style={{ flex: '2' }}
-                    />
-                    <button
-                      className="action-btn delete-btn"
-                      onClick={() => handleDeleteFactorFromNewProject(index)}
-                      style={{
-                        padding: '5px 15px',
-                        backgroundColor: '#ff4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-
-              {/* Add New Factor Form */}
-              <div className="factor-item" style={{
-                display: 'flex',
-                gap: '10px',
-                marginBottom: '10px',
-                alignItems: 'center'
-              }}>
-                <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                  <input
-                    type="text"
-                    value={newProjectFactor.name}
-                    onChange={(e) => setNewProjectFactor(prev => ({
-                      ...prev,
-                      name: e.target.value
-                    }))}
-                    className="factor-name-input"
-                    placeholder="New factor name"
-                    style={{ flex: '1' }}
-                  />
-                  <input
-                    type="text"
-                    value={newProjectFactor.description}
-                    onChange={(e) => setNewProjectFactor(prev => ({
-                      ...prev,
-                      description: e.target.value
-                    }))}
-                    className="factor-desc-input"
-                    placeholder="New factor description"
-                    style={{ flex: '2' }}
-                  />
-                  <button
-                    className="action-btn view-edit-btn"
-                    onClick={handleAddFactorToNewProject}
-                    style={{
-                      padding: '5px 15px',
-                      backgroundColor: '#88cd8d',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Add Factor
-                  </button>
-                </div>
+            <div className="severity-factors-warning">
+                <p>Note: You'll be able to add Factors & Severity Factors after the creation of the project,
+                   in the edit/view window</p>
               </div>
-            </div>
-
-            {/* Severity Factors Section */}
-            <p>
-              <strong>Severity Factors:</strong>
-            </p>
-            <div className="severity-factors-container">
-              <div className="severity-factors-row">
-                {newProject.severity_factors.slice(0, 3).map((severity, index) => (
-                  <div key={index} className="severity-item">
-                    <label className="severity-label">Level {index + 1}:</label>
-                    <input
-                      type="number"
-                      value={severity}
-                      className="severity-input"
-                      onChange={(e) => {
-                        const newSeverityFactors = [...newProject.severity_factors];
-                        newSeverityFactors[index] = Number(e.target.value);
-                        setNewProject(prev => ({
-                          ...prev,
-                          severity_factors: newSeverityFactors
-                        }));
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="severity-factors-row">
-                {newProject.severity_factors.slice(3, 5).map((severity, index) => (
-                  <div key={index + 3} className="severity-item">
-                    <label className="severity-label">Level {index + 4}:</label>
-                    <input
-                      type="number"
-                      value={severity}
-                      className="severity-input"
-                      onChange={(e) => {
-                        const newSeverityFactors = [...newProject.severity_factors];
-                        newSeverityFactors[index + 3] = Number(e.target.value);
-                        setNewProject(prev => ({
-                          ...prev,
-                          severity_factors: newSeverityFactors
-                        }));
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
 
             <button
               className="action-btn update-project-btn"
@@ -643,7 +582,7 @@ const ProjectsManagement = () => {
                         className="severity-input"
                         onChange={(e) => {
                           const updates = { ...severityUpdates };
-                          updates[index] = e.target.value;
+                          updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1, 2, 3
                           setSeverityUpdates(updates);
                         }}
                       />
@@ -664,7 +603,7 @@ const ProjectsManagement = () => {
                         className="severity-input"
                         onChange={(e) => {
                           const updates = { ...severityUpdates };
-                          updates[index + 3] = e.target.value;
+                          updates[index + 4] = Number(e.target.value); // Map to dictionary keys 4, 5
                           setSeverityUpdates(updates);
                         }}
                       />
@@ -695,19 +634,19 @@ const ProjectsManagement = () => {
             </p>
             {Object.keys(selectedProject.members).length > 0 ? (
               <ul className="members-list">
-                {Object.keys(selectedProject.members).map((member) => (
-                  <li key={member} className="member-item">
-                    <span className="member-name">{member}</span>
-                    {selectedProject.isActive && (
-                      <button
-                        className="remove-btn"
-                        onClick={() => handleRemoveMember(member)}
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </li>
-                ))}
+              {selectedProject.members.map((memberItem, index) => (
+                <li key={index} className="member-item">
+                  <span className="member-name">{memberItem.key}</span>
+                  {selectedProject.isActive && (
+                    <button
+                      className="remove-btn"
+                      onClick={() => handleRemoveMember(memberItem.key)}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </li>
+              ))}
               </ul>
             ) : (
               <p>No members added yet.</p>

@@ -94,6 +94,10 @@ class ProjectManager:
         db_project = DBProject(name, founder, description, project_id, DEFAULT_FACTORS_COUNT)
         self.db_access.insert(db_project)
 
+        # Add DB insert for founder
+        db_project_member = DBProjectMembers(project_id, founder)
+        self.db_access.insert(db_project_member)
+
         self.projects.insert(project_id, prj)
         self.founder_projects.insert(founder, prj)
 
@@ -141,17 +145,17 @@ class ProjectManager:
             return ResponseFailMsg("severity factors can't be empty")
         
         if len(severity_factors) != 5:
-            return ResponseFailMsg("there should be 5 severity factors")
+            return ResponseFailMsg("there should be exactly 5 severity factors, but there were " + str(len(severity_factors)))
         
         for sf in severity_factors:
             if sf < 0:
-                return ResponseFailMsg("severity factor can't be negative")
+                return ResponseFailMsg("severity factor can't be a negative")
 
         project = self.find_Project(project_id)
 
         #insert to DB
         db_severity = DBProjectSeverityFactor(project_id, *severity_factors)
-        res = self.db_access.insert(db_severity)
+        res = self.db_access.update(db_severity)
 
         # cache changes only after db persistance
         project.set_severity_factors(severity_factors)
@@ -215,13 +219,20 @@ class ProjectManager:
         if(asking != temp_project.founder):
             return ResponseFailMsg(f"only founder {temp_project.founder} can get members")
         return ResponseSuccessMsg(f"list of members in project {project_id} : {temp_project.get_members()}")
-    
+
     def get_projects(self, founder):
         try:
-            temp_projects = self.find_Projects(founder)
-            return ResponseSuccessMsg(f"list of projects for founder {founder} : {temp_projects}")
+            projects = self.find_Projects(founder)
+                
+            temp_projects = []
+            for project in projects:
+                if hasattr(project, 'to_dict'):
+                    temp_projects.append(project.to_dict())
+                    
+            return ResponseSuccessObj(f"List of projects for founder {founder}", temp_projects)
         except Exception as e:
-            return ResponseFailMsg(e)
+            return ResponseFailMsg(str(e))
+
 
     def vote(self, project_id, user_name, factors_values, severity_factors_values):
         if(factors_values == [] or severity_factors_values == []):
@@ -273,6 +284,10 @@ class ProjectManager:
     def get_project(self, project_id):
         temp_project = self.find_Project(project_id)
         return ResponseSuccessMsg(f"project {temp_project}")
+    
+    def get_project_by_name_and_desc(self, founder, project_name, project_desc):
+        temp_project = self.find_Project_By_Name_And_Desc(founder, project_name, project_desc)
+        return ResponseSuccessMsg(f"project {temp_project.to_dict()}")
 
     def publish_project(self, project_id, founder):
         temp_project = self.find_Project(project_id)
@@ -345,11 +360,20 @@ class ProjectManager:
         if prj is None or prj == []:
             raise Exception(f"project {project_id} not found")
         return prj
-
-    def find_Projects (self, founder):
-        prjs =  self.founder_projects.get(founder)
+    
+    def find_Project_By_Name_And_Desc (self, project_name, project_desc, founder):
+        prjs = self.founder_projects.get(founder)
         if prjs is None or prjs == []:
-            raise Exception(f"no projects found for founder {founder}")
+            raise Exception(f"founder {founder} has no projects")
+        for prj in prjs:
+            if prj.name == project_name and prj.description == project_desc:
+                return prj
+        raise Exception(f"founder {founder} has no project with the provide details")
+
+    def find_Projects(self, founder):
+        prjs = self.founder_projects.get(founder)
+        if prjs is None or prjs == []:
+            raise Exception(f"founder {founder} has no projects")
         return prjs
 
     def find_pending_requests(self, email):

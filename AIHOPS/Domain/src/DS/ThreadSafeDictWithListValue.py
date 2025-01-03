@@ -23,3 +23,7 @@ class ThreadSafeDictWithListValue(ThreadSafeDict):
 
     def size(self):
         return len(self.dict.keys())
+    
+    def to_list(self):
+        with self.lock:
+            return [{"key": key, "value": value} for key, value in self.dict.items()]

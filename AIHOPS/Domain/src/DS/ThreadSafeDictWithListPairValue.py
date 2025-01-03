@@ -36,3 +36,18 @@ class ThreadSafeDictWithListPairValue(ThreadSafeDict):
                 return value
             else:
                 raise KeyError(f"Key '{key}' not found in the dictionary.")
+
+    def to_list(self):
+        with self.lock:
+            try:
+                result = []
+                for key, value in self.dict.items():
+                    if value is None or not isinstance(value, tuple) or len(value) != 2:
+                        continue
+                    result.append({
+                        "key": key,
+                        "value": {"list1": value[0], "list2": value[1]}
+                    })
+                return result
+            except Exception as e:
+                return []

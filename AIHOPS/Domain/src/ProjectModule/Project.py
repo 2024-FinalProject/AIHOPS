@@ -21,6 +21,15 @@ class Factor:
         self.name = name
         self.description = description
 
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "description": self.description
+        }
+    
+    def __str__(self):
+        return f"Factor Name: {self.name}, Factor Description: {self.description}"
+
 # TODO: need to add the DB logic and implementation
 # TODO change the factors instead of a lost to a dict so we can identify the -1 factor and its value wont be calculated in the formula!!
 class Project:
@@ -36,11 +45,14 @@ class Project:
 
         self.factors = ThreadSafeList()  # Thread-safe list of project factors
         self.severity_factors = ThreadSafeList()  # Thread-safe list of severity factors
+        # Initialize with 5 zeros
+        for _ in range(5):
+            self.severity_factors.append(0)
         self.members = ThreadSafeDictWithListPairValue()  # Maps user_name to (factors_values, severity_factors_values)
-        self.members.insert(founder, None)
+        self.members.insert(founder, ([], []))
 
         self.db_access = DBAccess()
-
+        
         activate = False
         if fromDB:
             self._load_inner_data()
@@ -73,7 +85,11 @@ class Project:
         s_f_data = s_f_data[0]
         severity_factors = [s_f_data.severity_level1, s_f_data.severity_level2, s_f_data.severity_level3,
                             s_f_data.severity_level4, s_f_data.severity_level5]
-        self.set_severity_factors(severity_factors)
+        i = 0
+        for severity_factor_data in severity_factors:
+            self.severity_factors[i] = severity_factor_data
+            i += 1
+        self.severity_factors_inited = True
 
     def load_severity_votes(self):
         query_obj = {"project_id": self.id}
@@ -127,9 +143,6 @@ class Project:
             # member =
             self.members.insert(member_data.member_email, None)
 
-
-
-
     def is_member(self, email):
         if email in self.members.getKeys():
             return True
@@ -147,7 +160,7 @@ class Project:
     # Expecting a list of factor objects
     def set_factors(self, factors):
         with self.lock:
-            if not self.factors_inited:
+            if not self.isActive:
                 for factor in factors:
                     self.factors.append(Factor(factor[0], factor[1]))
                 self.factors_inited = True
@@ -160,9 +173,9 @@ class Project:
                 if sf < 0:
                     raise Exception("Negative severity factor not allowed")
             # TODO: cant change severity factors???
-            if not self.severity_factors_inited:
-                for severity_factor in severity_factors:
-                    self.severity_factors.append(severity_factor)
+            if not self.isActive:
+                for i in range(self.severity_factors.size()):
+                    self.severity_factors[i] = severity_factors[i]
                 self.severity_factors_inited = True
 
     def approved_member(self, user_name):
@@ -240,3 +253,17 @@ class Project:
             and self.description == other.description
             and self.founder == other.founder
         )
+    
+    def to_dict(self): 
+        return {
+            "id": self.id,
+            "name": self.name,
+            "description": self.description,
+            "founder": self.founder,
+            "isActive": self.isActive,
+            "factors": [f.to_dict() if hasattr(f, 'to_dict') else str(f) for f in self.factors.to_list()],
+            "factors_inited": self.factors_inited,
+            "severity_factors_inited": self.severity_factors_inited,
+            "severity_factors": self.severity_factors.to_list() if self.severity_factors else [],
+            "members": self.members.to_list() if self.members else [],
+        }

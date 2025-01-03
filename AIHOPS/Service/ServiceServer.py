@@ -127,7 +127,7 @@ def get_projects():
         return jsonify({
             "message": str(res.msg),  # Convert message to string explicitly
             "success": bool(res.success),  # Convert to bool explicitly
-            "projects": res.result if res.success else None
+            "projects": list(res.result) if res.success and res.result else [],
         })
     except ValueError as e:
         return jsonify({
@@ -147,7 +147,32 @@ def get_project(pid):
     res = server.get_project(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "project": res.result if res.success else None})
 
-@app.route("/pending-requests", methods=["GET"])  
+@app.route("/project", methods=["GET"])
+def get_project_by_name_and_desc():
+    try:
+        cookie = request.args.get("cookie", type = int)
+        name = request.args.get("name")
+        desc = request.args.get("desc")
+        res = server.get_project_by_name_and_desc(cookie, name, desc)
+        
+        # Make sure we're only sending serializable data
+        return jsonify({
+            "message": str(res.msg),  # Convert message to string explicitly
+            "success": bool(res.success),  # Convert to bool explicitly
+            "project": res.result if res.success and res.result else None,
+        })
+    except ValueError as e:
+        return jsonify({
+            "message": f"Invalid cookie format: {str(e)}", 
+            "success": False
+        }), 400
+    except Exception as e:
+        return jsonify({
+            "message": f"Server error: {str(e)}", 
+            "success": False
+        }), 500
+
+@app.route("/project/pending-requests", methods=["GET"])
 # expecting query param: cookie TODO
 def get_pending_requests(): 
     cookie = request.args.get("cookie", type=int)
