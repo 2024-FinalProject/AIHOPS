@@ -105,7 +105,7 @@ def get_members_of_project():
 # expecting json with {cookie, pid}
 def approve_member():
     data = request.json
-    res = server.approve_member(int(data["cookie"]), int(data["pid"]))
+    res = server.approve_member(int(data["cookie"]), int(data["projId"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/members/reject", methods=["POST"])
@@ -173,8 +173,8 @@ def get_project_by_name_and_desc():
         }), 500
 
 @app.route("/project/pending-requests", methods=["GET"])
-# expecting query param: cookie
-def get_pending_requests():
+# expecting query param: cookie TODO
+def get_pending_requests(): 
     cookie = request.args.get("cookie", type=int)
     res = server.get_pending_requests(cookie)
     return jsonify({"message": res.msg, "success": res.success, "requests": res.result if res.success else None})
