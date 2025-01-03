@@ -77,6 +77,13 @@ def close_project():
     res = server.archive_project(int(data["cookie"]), int(data["pid"]))
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/project/update-name-and-desc", methods=["POST"])
+# expecting json with {cookie, pid, name, description}
+def update_project_name_and_desc():
+    data = request.json
+    res = server.update_project_name_and_desc(int(data["cookie"]), int(data["pid"]), data["name"], data["description"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 # -------- Project Members Management ---------------
 
 @app.route("/project/members/add", methods=["POST"])

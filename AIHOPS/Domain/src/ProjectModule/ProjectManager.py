@@ -386,6 +386,18 @@ class ProjectManager:
         if not self.founder_projects.get(founder):
             raise Exception(f"founder {founder} not found")
         return True
+    
+    def update_project_name_and_desc(self, project_id, name, description):
+        try:
+            project = self.find_Project(project_id)
+            
+            # Update the project name and description in the database
+            db_project = DBProject(name, project.founder, description, project_id, project.factors.size())
+            db_project.id = project_id
+            project.update_project_name_and_desc(name, description)
+            return self.db_access.update(db_project)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to update project name and description: {str(e)}")
 
     def update_project_status(self, project_id, is_active):
         try:

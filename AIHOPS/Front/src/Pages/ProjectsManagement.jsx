@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { archiveProject, createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors } from "../api/ProjectApi";
+import { archiveProject, createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors, update_project_name_and_desc } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -181,11 +181,22 @@ const ProjectsManagement = () => {
         tempSeverityFactors.push(severityUpdates[level]);
       }
 
-      //TODO: Update the project's name. - Implement the backend call as well.
-
-      //TODO: Update the project's description. - Implement the backend call as well.
-
-      //TODO: Update the project's factors - if not empty. - Implement the backend call as well.
+      update_project_name_and_desc(cookie, selectedProject.id, projectUpdates.name || selectedProject.name,
+         projectUpdates.description || selectedProject.description)
+      .then((response) => {
+        if (response.data.success) {
+          setIsSuccess(true);
+        } else {
+          setMsg(response.data.message);
+          setIsSuccess(true);
+        }
+      })
+      .catch((error) => {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error("Error:", errorMessage);
+        setMsg(`Error in updating the project: ${errorMessage}`);
+        setIsSuccess(false);
+      });
 
       setSeverityFactors(cookie, selectedProject.id, tempSeverityFactors)
       .then((response) => {
@@ -665,7 +676,7 @@ const ProjectsManagement = () => {
               {selectedProject.members.map((memberItem, index) => (
                 <li key={index} className="member-item">
                   <span className="member-name">{memberItem.key}</span>
-                  {selectedProject.isActive && (
+                  {selectedProject.founder != memberItem.key && selectedProject.isActive && (
                     <button
                       className="remove-btn"
                       onClick={() => handleRemoveMember(memberItem.key)}
