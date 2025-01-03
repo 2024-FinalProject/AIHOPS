@@ -213,15 +213,25 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to publish project: {e}")
         
-    def close_project(self, cookie, pid):
+    def archive_project(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res.result
-            return self.project_manager.close_project(pid)
+            return self.project_manager.archive_project(pid)
         except Exception as e:
             return ResponseFailMsg(f"Failed to close project: {e}")
+        
+    def update_project_name_and_desc(self, cookie, pid, name, description):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res
+            return self.project_manager.update_project_name_and_desc(pid, name, description)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to update project name and description: {e}")
     
     def vote(self, cookie, pid, factors_values, severity_factors_values):
         try:

@@ -141,7 +141,7 @@ class Project:
         members_data = self.db_access.load_by_query(DBProjectMembers, {"project_id": self.id})
         for member_data in members_data:
             # member =
-            self.members.insert(member_data.member_email, None)
+            self.members.insert(member_data.member_email, ([], []))
 
     def is_member(self, email):
         if email in self.members.getKeys():
@@ -214,6 +214,11 @@ class Project:
             raise Exception("Project is not published; can't hide it")
         with self.lock:
             self.isActive = False
+
+    def update_project_name_and_desc(self, new_name, new_description):
+        with self.lock:
+            self.name = new_name
+            self.description = new_description
 
     def get_score(self, requesting_member):
         if self.founder != requesting_member:

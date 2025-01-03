@@ -30,6 +30,22 @@ export const publishProject = async (cookie, project_id) => {
     });
 }
 
+export const archiveProject = async (cookie, project_id) => {
+    return await axios.post(`${API_URL}/project/archive`, {
+        cookie: cookie,
+        pid: project_id
+    });
+}
+
+export const update_project_name_and_desc = async(cookie, project_id, project_name, project_desc) => {
+    return await axios.post(`${API_URL}/project/update-name-and-desc`, {
+        cookie: cookie,
+        pid: project_id,
+        name: project_name,
+        description: project_desc
+    });
+}
+
 export const setProjectFactors = async(cookie, project_id, factors) => {
     return await axios.post(`${API_URL}/project/factors`, {
         cookie: cookie,

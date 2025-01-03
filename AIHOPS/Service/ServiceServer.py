@@ -70,11 +70,18 @@ def publish_project():
     res = server.publish_project(int(data["cookie"]), int(data["pid"]))
     return jsonify({"message": res.msg, "success": res.success})
 
-@app.route("/project/close", methods=["POST"])
+@app.route("/project/archive", methods=["POST"])
 # expecting json with {cookie, pid}
 def close_project():
     data = request.json
-    res = server.close_project(int(data["cookie"]), int(data["pid"]))
+    res = server.archive_project(int(data["cookie"]), int(data["pid"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/project/update-name-and-desc", methods=["POST"])
+# expecting json with {cookie, pid, name, description}
+def update_project_name_and_desc():
+    data = request.json
+    res = server.update_project_name_and_desc(int(data["cookie"]), int(data["pid"]), data["name"], data["description"])
     return jsonify({"message": res.msg, "success": res.success})
 
 # -------- Project Members Management ---------------
