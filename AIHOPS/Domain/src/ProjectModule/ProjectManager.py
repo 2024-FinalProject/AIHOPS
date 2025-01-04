@@ -324,10 +324,23 @@ class ProjectManager:
     def get_pending_requests(self, email):
         try:
             temp_pending_requests = self.find_pending_requests(email) 
-            return ResponseSuccessObj(f"pending requests for email {email} : {temp_pending_requests}", list(temp_pending_requests))
+            to_return_pending_requests = []
+            for pending_requests in temp_pending_requests:
+                if hasattr(pending_requests, 'to_dict'):
+                    to_return_pending_requests.append(pending_requests.to_dict())
+            return ResponseSuccessObj(f"pending requests for email {email} : {to_return_pending_requests}", list(to_return_pending_requests))
             
         except Exception as e:
             return ResponseSuccessObj(f"no pending requests", [])
+    
+    def get_pending_emails_for_project(self, project_id, founder):
+        if(self.find_Project(project_id).founder != founder):
+            return ResponseFailMsg(f"only founder {founder} can get pending requests")
+        emails = []
+        for email, projects in self.pending_requests.dict.items(): 
+            if project_id in projects:  #Check if the project_id exists in the list of project_ids
+                emails.append(email)  #If so, add the email to the result list
+        return ResponseSuccessObj(f"pending requests for project {project_id} : {emails}", list(emails))
     
     def approve_member(self, project_id, user_name):
         pending_requests = self.find_pending_requests(user_name)

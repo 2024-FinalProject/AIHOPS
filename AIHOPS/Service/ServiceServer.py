@@ -186,6 +186,30 @@ def get_pending_requests():
     res = server.get_pending_requests(cookie)
     return jsonify({"message": res.msg, "success": res.success, "requests": res.result if res.success else None})
 
+@app.route("/project/pending-requests-project", methods=["GET"])
+def get_pending_requests_for_project():
+    try:
+        cookie = request.args.get("cookie", type = int)
+        pid = request.args.get("pid", type = int)
+        res = server.get_pending_emails_for_project(cookie, pid)
+        
+        # Make sure we're only sending serializable data
+        return jsonify({
+            "message": str(res.msg),  # Convert message to string explicitly
+            "success": bool(res.success),  # Convert to bool explicitly
+            "emails": res.result if res.success and res.result else [],
+        })
+    except ValueError as e:
+        return jsonify({
+            "message": f"Invalid cookie format: {str(e)}", 
+            "success": False
+        }), 400
+    except Exception as e:
+        return jsonify({
+            "message": f"Server error: {str(e)}", 
+            "success": False
+        }), 500
+
 # -------- Voting and Scoring ---------------
 
 @app.route("/project/vote", methods=["POST"])

@@ -77,3 +77,18 @@ export const removeMember = async(cookie, project_id, member) => {
         member: member
     });
 }
+
+
+export const get_pending_requests_for_project = async(cookie, project_id) => {
+    return await axios.get(`${API_URL}/project/pending-requests-project`, {
+        params: { 
+            cookie: cookie, 
+            pid: project_id
+        },
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    });
+};
+
