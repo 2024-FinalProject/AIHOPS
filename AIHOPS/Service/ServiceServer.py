@@ -93,11 +93,11 @@ def add_members():
     res = server.add_members(int(data["cookie"]), int(data["pid"]), data["members"])
     return jsonify({"message": res.msg, "success": res.success})
 
-@app.route("/project/members/remove", methods=["POST"])
+@app.route("/project/remove-member", methods=["POST"])
 # expecting json with {cookie, pid, userName}
 def remove_member():
     data = request.json
-    res = server.remove_member(int(data["cookie"]), int(data["pid"]), data["userName"])
+    res = server.remove_member(int(data["cookie"]), int(data["pid"]), data["member"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/members", methods=["GET"])

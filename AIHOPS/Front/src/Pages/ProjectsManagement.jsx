@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { archiveProject, createProject, getProjects, publishProject, setProjectFactors,
-         setSeverityFactors, update_project_name_and_desc, addMembers } from "../api/ProjectApi";
+         setSeverityFactors, update_project_name_and_desc, addMembers, removeMember } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -152,9 +152,31 @@ const ProjectsManagement = () => {
   };
 
   const handleRemoveMember = (member) => {
-    if (window.confirm(`Are you sure you want to remove "${member}"?`)) {
-      alert(`Removed member: "${member}". Implement the backend call.`);
+    let cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
     }
+
+    removeMember(cookie, selectedProject.id, member)
+    .then((response) => {
+      if (response.data.success) {
+        alert(`The member ${member} has been removed from the project.`);
+    
+        setIsSuccess(true);
+      } else {
+        setMsg(response.data.message);
+        alert(response.data.message);
+        setIsSuccess(true);
+      }
+    })
+    .catch((error) => {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error in removing member: ${errorMessage}`);
+      setIsSuccess(false);
+    });
   };
 
   const handleAddMember = () => {

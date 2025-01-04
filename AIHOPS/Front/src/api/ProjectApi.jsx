@@ -69,3 +69,11 @@ export const addMembers = async(cookie, project_id, members) => {
         members: members
     });
 }
+
+export const removeMember = async(cookie, project_id, member) => {
+    return await axios.post(`${API_URL}/project/remove-member`, {
+        cookie: cookie,
+        pid: project_id,
+        member: member
+    });
+}
