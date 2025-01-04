@@ -16,6 +16,7 @@ const ProjectsManagement = () => {
   const [newFactorName, setNewFactorName] = useState("");
   const [newFactorDescription, setNewFactorDescription] = useState("");
   const [newMemberName, setNewMemberName] = useState("");
+  const [toRemovePendingMemberName, setToRemovePendingMemberName] = useState("");
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [newProject, setNewProject] = useState({
     name: "",
@@ -160,6 +161,34 @@ const ProjectsManagement = () => {
     }
 
     removeMember(cookie, selectedProject.id, member)
+    .then((response) => {
+      if (response.data.success) {
+        alert(`The member ${member} has been removed from the project.`);
+    
+        setIsSuccess(true);
+      } else {
+        setMsg(response.data.message);
+        alert(response.data.message);
+        setIsSuccess(true);
+      }
+    })
+    .catch((error) => {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error in removing member: ${errorMessage}`);
+      setIsSuccess(false);
+    });
+  };
+
+  const handleRemovePendingMember = () => {
+    let cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
+    }
+
+    removeMember(cookie, selectedProject.id, toRemovePendingMemberName)
     .then((response) => {
       if (response.data.success) {
         alert(`The member ${member} has been removed from the project.`);
@@ -740,7 +769,7 @@ const ProjectsManagement = () => {
                       className="remove-btn"
                       onClick={() => handleRemoveMember(memberItem.key)}
                     >
-                      Remove
+                      Remove Member
                     </button>
                   )}
                 </li>
@@ -749,6 +778,25 @@ const ProjectsManagement = () => {
             ) : (
               <p>No members added yet.</p>
             )}
+
+            {/* Remove pending members section: */}
+            <div className="remove-pending-member-container">
+                <input
+                  type="text"
+                  className="remove-pending-member-input"
+                  placeholder="To remove pending member's name"
+                  value={toRemovePendingMemberName}
+                  onChange={(e) => setToRemovePendingMemberName(e.target.value)}
+                  style={{ flex: '1' }}
+                />
+                <button
+                  className="action-btn remove-btn"
+                  onClick={() => handleRemoveMember(toRemovePendingMemberName)}
+                >
+                  Remove a pending member
+                </button>
+              </div>
+
             {selectedProject.isActive ? (
               <div className="add-member-container">
                 <input
