@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { archiveProject, createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors, update_project_name_and_desc } from "../api/ProjectApi";
+import { archiveProject, createProject, getProjects, publishProject, setProjectFactors,
+         setSeverityFactors, update_project_name_and_desc, addMembers } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -14,6 +15,7 @@ const ProjectsManagement = () => {
   const [projectUpdates, setProjectUpdates] = useState({});
   const [newFactorName, setNewFactorName] = useState("");
   const [newFactorDescription, setNewFactorDescription] = useState("");
+  const [newMemberName, setNewMemberName] = useState("");
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [newProject, setNewProject] = useState({
     name: "",
@@ -156,7 +158,41 @@ const ProjectsManagement = () => {
   };
 
   const handleAddMember = () => {
-    alert('Handle add member logic here.');
+    const memberKeys = selectedProject.members.map(memberItem => memberItem.key);
+    if (!memberKeys.includes(newMemberName)) {
+      let cookie = localStorage.getItem("authToken");
+
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+
+        let tempMembersList = [newMemberName];
+        addMembers(cookie, selectedProject.id, tempMembersList)
+        .then((response) => {
+          if (response.data.success) {
+            alert(`An invitation has been sent to member ${newMemberName}.`);
+        
+            // Clear the input fields after adding
+            setNewMemberName('');
+            setIsSuccess(true);
+          } else {
+            setMsg(response.data.message);
+            alert(response.data.message);
+            setIsSuccess(true);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error in adding member: ${errorMessage}`);
+          setIsSuccess(false);
+        });
+    }
+    else{
+      alert(`Member already exists.`);
+    }
   };
 
   const handleUpdateProject = () => {
@@ -240,6 +276,7 @@ const ProjectsManagement = () => {
             setIsSuccess(true);
           } else {
             setMsg(response.data.message);
+            alert(response.data.message);
             setIsSuccess(true);
           }
         })
@@ -696,6 +733,9 @@ const ProjectsManagement = () => {
                   type="text"
                   className="add-member-input"
                   placeholder="New member's name"
+                  value={newMemberName}
+                  onChange={(e) => setNewMemberName(e.target.value)}
+                  style={{ flex: '1' }}
                 />
                 <button
                   className="action-btn add-member-btn"

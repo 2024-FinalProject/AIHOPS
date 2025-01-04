@@ -170,7 +170,7 @@ class ProjectManager:
             return ResponseFailMsg(f"only founder {temp_project.founder} can add members")
 
         if users_names == []:
-            return ResponseFailMsg("users names can't be empty")
+            return ResponseFailMsg("user names can't be empty")
 
         if not temp_project.isActive or not temp_project.is_initialized_project():
             return ResponseFailMsg(f"cant add member to project {project_id} because it is not finalized")
@@ -186,6 +186,9 @@ class ProjectManager:
                     # insert into DB
                     db_pending = DBPendingRequests(project_id, user_name)
                     self.db_access.insert(db_pending)
+
+                    # TODO: What happens if the insert fails? f.e: if the user is already in the pending requests
+                
                 # with self.lock:
                 #     self.db_access.insert(DBPendingRequests(project_id, user_name
                 #     return ResponseSuccessMsg(f"user {user_name} has invation to {project_id}")

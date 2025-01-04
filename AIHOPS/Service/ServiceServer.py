@@ -86,11 +86,11 @@ def update_project_name_and_desc():
 
 # -------- Project Members Management ---------------
 
-@app.route("/project/members/add", methods=["POST"])
+@app.route("/project/add-members", methods=["POST"])
 # expecting json with {cookie, pid, userNames}
 def add_members():
     data = request.json
-    res = server.add_members(int(data["cookie"]), int(data["pid"]), data["userNames"])
+    res = server.add_members(int(data["cookie"]), int(data["pid"]), data["members"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/members/remove", methods=["POST"])

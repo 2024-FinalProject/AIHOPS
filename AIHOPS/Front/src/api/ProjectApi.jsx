@@ -61,3 +61,11 @@ export const setSeverityFactors = async(cookie, project_id, severity_factors) =>
         severityFactors: severity_factors
     });
 }
+
+export const addMembers = async(cookie, project_id, members) => {
+    return await axios.post(`${API_URL}/project/add-members`, {
+        cookie: cookie,
+        pid: project_id,
+        members: members
+    });
+}
