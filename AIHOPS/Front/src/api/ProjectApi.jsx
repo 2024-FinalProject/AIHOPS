@@ -61,3 +61,34 @@ export const setSeverityFactors = async(cookie, project_id, severity_factors) =>
         severityFactors: severity_factors
     });
 }
+
+export const addMembers = async(cookie, project_id, members) => {
+    return await axios.post(`${API_URL}/project/add-members`, {
+        cookie: cookie,
+        pid: project_id,
+        members: members
+    });
+}
+
+export const removeMember = async(cookie, project_id, member) => {
+    return await axios.post(`${API_URL}/project/remove-member`, {
+        cookie: cookie,
+        pid: project_id,
+        member: member
+    });
+}
+
+
+export const get_pending_requests_for_project = async(cookie, project_id) => {
+    return await axios.get(`${API_URL}/project/pending-requests-project`, {
+        params: { 
+            cookie: cookie, 
+            pid: project_id
+        },
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+        }
+    });
+};
+

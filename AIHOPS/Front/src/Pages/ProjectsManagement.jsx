@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { archiveProject, createProject, getProjects, publishProject, setProjectFactors, setSeverityFactors, update_project_name_and_desc } from "../api/ProjectApi";
+import { archiveProject, createProject, getProjects, publishProject, setProjectFactors,
+         setSeverityFactors, update_project_name_and_desc, addMembers, removeMember,
+         get_pending_requests_for_project } from "../api/ProjectApi";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -14,6 +16,9 @@ const ProjectsManagement = () => {
   const [projectUpdates, setProjectUpdates] = useState({});
   const [newFactorName, setNewFactorName] = useState("");
   const [newFactorDescription, setNewFactorDescription] = useState("");
+  const [newMemberName, setNewMemberName] = useState("");
+  const [toRemovePendingMemberName, setToRemovePendingMemberName] = useState("");
+  const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [newProject, setNewProject] = useState({
     name: "",
@@ -54,13 +59,30 @@ const ProjectsManagement = () => {
       });
   }, []);
 
-  const openPopup = (project) => {
+  const openPopup = async (project) => {
     setSelectedProject(project);
     let initialSeverityUpdates = {};
     for (let i = 1; i <= 5; i++) {
       initialSeverityUpdates[i] = project.severity_factors[i - 1];
     }
     setSeverityUpdates(initialSeverityUpdates);
+
+    let cookie = localStorage.getItem("authToken");
+
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
+    }
+
+    const response = await get_pending_requests_for_project(cookie, project.id);
+    //Extract the emails array and set the state
+    if (response?.data?.emails) {
+      setProjectsPendingRequests(response.data.emails);
+    } else {
+      setProjectsPendingRequests([]); //Set empty array if no emails found
+    }
+
     setShowPopup(true);
   };
 
@@ -73,6 +95,7 @@ const ProjectsManagement = () => {
       initialSeverityUpdates[i] = 0;
     }
     setSeverityUpdates(initialSeverityUpdates);
+    setProjectsPendingRequests([]);
   };
 
   const handleDelete = (projectName) => {
@@ -150,13 +173,79 @@ const ProjectsManagement = () => {
   };
 
   const handleRemoveMember = (member) => {
-    if (window.confirm(`Are you sure you want to remove "${member}"?`)) {
-      alert(`Removed member: "${member}". Implement the backend call.`);
+    if(member == selectedProject.founder){
+      alert(`You cannot remove the founder of the project.`);
+      return;
     }
+
+    let cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
+    }
+
+    removeMember(cookie, selectedProject.id, member)
+    .then((response) => {
+      if (response.data.success) {
+        alert(`The member ${member} has been removed from the project.`);
+    
+        setIsSuccess(true);
+      } else {
+        setMsg(response.data.message);
+        alert(response.data.message);
+        setIsSuccess(true);
+      }
+    })
+    .catch((error) => {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error in removing member: ${errorMessage}`);
+      setIsSuccess(false);
+    });
   };
 
   const handleAddMember = () => {
-    alert('Handle add member logic here.');
+    if(newMemberName == selectedProject.founder){
+      alert(`You cannot add the founder of the project, as he already exists.`);
+      return;
+    }
+
+    const memberKeys = selectedProject.members.map(memberItem => memberItem.key);
+    if (!memberKeys.includes(newMemberName)) {
+      let cookie = localStorage.getItem("authToken");
+
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+
+        let tempMembersList = [newMemberName];
+        addMembers(cookie, selectedProject.id, tempMembersList)
+        .then((response) => {
+          if (response.data.success) {
+            alert(`An invitation has been sent to member ${newMemberName}.`);
+        
+            // Clear the input fields after adding
+            setNewMemberName('');
+            setIsSuccess(true);
+          } else {
+            setMsg(response.data.message);
+            alert(response.data.message);
+            setIsSuccess(true);
+          }
+        })
+        .catch((error) => {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error in adding member: ${errorMessage}`);
+          setIsSuccess(false);
+        });
+    }
+    else{
+      alert(`Member already exists.`);
+    }
   };
 
   const handleUpdateProject = () => {
@@ -240,6 +329,7 @@ const ProjectsManagement = () => {
             setIsSuccess(true);
           } else {
             setMsg(response.data.message);
+            alert(response.data.message);
             setIsSuccess(true);
           }
         })
@@ -681,7 +771,7 @@ const ProjectsManagement = () => {
                       className="remove-btn"
                       onClick={() => handleRemoveMember(memberItem.key)}
                     >
-                      Remove
+                      Remove Member
                     </button>
                   )}
                 </li>
@@ -690,12 +780,36 @@ const ProjectsManagement = () => {
             ) : (
               <p>No members added yet.</p>
             )}
+            
+            {/* Remove pending members section: */}
+            <p>
+            <strong>Pending Members:</strong>
+            </p>
+            {projectsPendingRequests.length > 0 && (
+                <ul className="members-list">
+                  {projectsPendingRequests.map((pendingMember, index) => (
+                    <li key={index} className="member-item">
+                      <span className="member-name">{pendingMember}</span>
+                      {<button
+                        className="remove-btn"
+                        onClick={() => handleRemoveMember(pendingMember)}
+                      >
+                      Remove Pending Member
+                      </button>}
+                    </li>
+                  ))}
+                </ul>
+            )}
+
             {selectedProject.isActive ? (
               <div className="add-member-container">
                 <input
                   type="text"
                   className="add-member-input"
                   placeholder="New member's name"
+                  value={newMemberName}
+                  onChange={(e) => setNewMemberName(e.target.value)}
+                  style={{ flex: '1' }}
                 />
                 <button
                   className="action-btn add-member-btn"
