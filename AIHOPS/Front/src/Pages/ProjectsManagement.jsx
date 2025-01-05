@@ -27,12 +27,12 @@ const ProjectsManagement = () => {
 
   const navigate = useNavigate();
 
-  const findProjectByName = (name) => {
-    const foundProject = projects.find((project) => project.name === name);
+  const findProjectByID = (id) => {
+    const foundProject = projects.find((project) => project.id === id);
     return foundProject; // It will return the project if found, or undefined if not found
   };
 
-  useEffect(() => {
+  const fetchProjects = async () => {
     let cookie = localStorage.getItem("authToken");
 
     if (!cookie) {
@@ -41,25 +41,66 @@ const ProjectsManagement = () => {
       return;
     }
 
-    getProjects(cookie)
-      .then((response) => {
-        if (response.data.success) {
-          setProjects(response.data.projects);
-          setIsSuccess(true);
-        } else {
-          setMsg(response.data.message);
-          setIsSuccess(true);
-        }
-      })
-      .catch((error) => {
-        const errorMessage = error.response?.data?.message || error.message;
-        console.error("Error:", errorMessage);
-        setMsg(`Error fetching projects: ${errorMessage}`);
-        setIsSuccess(false);
-      });
+    try {
+      const response = await getProjects(cookie);
+      if (response.data.success) {
+        setProjects([...response.data.projects]); // Spread to ensure a new reference
+        setIsSuccess(true);
+      } else {
+        setMsg(response.data.message);
+        setIsSuccess(true);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error fetching projects: ${errorMessage}`);
+      setIsSuccess(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
   }, []);
 
+  const fetch_pending_requests = async (cookie, projectId) => {
+    try {
+      const response = await get_pending_requests_for_project(cookie, projectId);
+  
+      if (response?.data?.emails) {
+        setProjectsPendingRequests(response.data.emails);
+      } else {
+        setProjectsPendingRequests([]); // Set empty array if no emails found
+      }
+    } catch (error) {
+      console.error("Error fetching pending requests:", error);
+      setProjectsPendingRequests([]); // Set empty array in case of error
+    }
+  };
+
+  const fetch_selected_project = async (project) => {
+    let cookie = localStorage.getItem("authToken");
+
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
+    }
+
+    try {
+      {
+        setSelectedProject(project);
+        setIsSuccess(true);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error fetching project: ${errorMessage}`);
+      setIsSuccess(false);
+    }
+  };
+
   const openPopup = async (project) => {
+    fetchProjects();
     setSelectedProject(project);
     let initialSeverityUpdates = {};
     for (let i = 1; i <= 5; i++) {
@@ -75,14 +116,7 @@ const ProjectsManagement = () => {
       return;
     }
 
-    const response = await get_pending_requests_for_project(cookie, project.id);
-    //Extract the emails array and set the state
-    if (response?.data?.emails) {
-      setProjectsPendingRequests(response.data.emails);
-    } else {
-      setProjectsPendingRequests([]); //Set empty array if no emails found
-    }
-
+    fetch_pending_requests(cookie, project.id);
     setShowPopup(true);
   };
 
@@ -96,6 +130,7 @@ const ProjectsManagement = () => {
     }
     setSeverityUpdates(initialSeverityUpdates);
     setProjectsPendingRequests([]);
+    fetchProjects();
   };
 
   const handleDelete = (projectName) => {
@@ -104,163 +139,176 @@ const ProjectsManagement = () => {
     }
   };
 
-  const handleArchive = (projectName) => {
+  const handleArchive = async (projectID, projectName) => {
     if (window.confirm(`Are you sure you want to archive the project "${projectName}"?`)) {
-      if(findProjectByName(projectName).severity_factors_inited && findProjectByName(projectName).factors_inited){
-        let cookie = localStorage.getItem("authToken");
-
+      const project = findProjectByID(projectID);
+  
+      if (project.severity_factors_inited && project.factors_inited) {
+        const cookie = localStorage.getItem("authToken");
+  
         if (!cookie) {
           setMsg("No authentication token found. Please log in again.");
           setIsSuccess(false);
           return;
         }
-
-        archiveProject(cookie, findProjectByName(projectName).id)
-        .then((response) => {
+  
+        try {
+          const response = await archiveProject(cookie, project.id);
+  
           if (response.data.success) {
-            alert(`Archived project: "${findProjectByName(projectName).name}".`);
+            alert(`Archived project: "${project.name}".`);
             setIsSuccess(true);
+            await fetchProjects(); // Ensure the projects list is refreshed
           } else {
             setMsg(response.data.message);
-            setIsSuccess(true);
+            setIsSuccess(false);
           }
-        })
-        .catch((error) => {
+        } catch (error) {
           const errorMessage = error.response?.data?.message || error.message;
           console.error("Error:", errorMessage);
           setMsg(`Error in archiving project: ${errorMessage}`);
           setIsSuccess(false);
-        });
-      }
-      else{
-        alert(`Please initialize factors and severity factors first.`);
+        }
+      } else {
+        alert("Please initialize factors and severity factors first.");
       }
     }
   };
-
-  const handlePublish = (projectName) => {
+  
+  const handlePublish = async (projectID, projectName) => {
     if (window.confirm(`Are you sure you want to publish the project "${projectName}"?`)) {
-      if(findProjectByName(projectName).severity_factors_inited && findProjectByName(projectName).factors_inited){
-        let cookie = localStorage.getItem("authToken");
-
+      const project = findProjectByID(projectID);
+  
+      if (project.severity_factors_inited && project.factors_inited) {
+        const cookie = localStorage.getItem("authToken");
+  
         if (!cookie) {
           setMsg("No authentication token found. Please log in again.");
           setIsSuccess(false);
           return;
         }
-
-        publishProject(cookie, findProjectByName(projectName).id)
-        .then((response) => {
+  
+        try {
+          const response = await publishProject(cookie, project.id);
+  
           if (response.data.success) {
-            alert(`Published project: "${findProjectByName(projectName).name}".`);
+            alert(`Published project: "${project.name}".`);
             setIsSuccess(true);
+            await fetchProjects(); // Refresh project list after publishing
           } else {
             setMsg(response.data.message);
-            setIsSuccess(true);
+            setIsSuccess(false);
           }
-        })
-        .catch((error) => {
+        } catch (error) {
           const errorMessage = error.response?.data?.message || error.message;
           console.error("Error:", errorMessage);
           setMsg(`Error in publishing project: ${errorMessage}`);
           setIsSuccess(false);
-        });
-      }
-      else{
-        alert(`Please initialize factors and severity factors first.`);
+        }
+      } else {
+        alert("Please initialize factors and severity factors first.");
       }
     }
   };
-
-  const handleRemoveMember = (member) => {
-    if(member == selectedProject.founder){
+  
+  const handleRemoveMember = async (member) => {
+    if (member === selectedProject.founder) {
       alert(`You cannot remove the founder of the project.`);
       return;
     }
-
-    let cookie = localStorage.getItem("authToken");
+  
+    const cookie = localStorage.getItem("authToken");
+  
     if (!cookie) {
       setMsg("No authentication token found. Please log in again.");
       setIsSuccess(false);
       return;
     }
-
-    removeMember(cookie, selectedProject.id, member)
-    .then((response) => {
+  
+    try {
+      const response = await removeMember(cookie, selectedProject.id, member);
+  
       if (response.data.success) {
         alert(`The member ${member} has been removed from the project.`);
-    
+        await fetchProjects(); // Refresh the project data after removal
+        await fetch_pending_requests(cookie, selectedProject.id);
         setIsSuccess(true);
       } else {
         setMsg(response.data.message);
         alert(response.data.message);
         setIsSuccess(true);
       }
-    })
-    .catch((error) => {
+    } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
       console.error("Error:", errorMessage);
       setMsg(`Error in removing member: ${errorMessage}`);
       setIsSuccess(false);
-    });
+    }
   };
-
-  const handleAddMember = () => {
-    if(newMemberName == selectedProject.founder){
-      alert(`You cannot add the founder of the project, as he already exists.`);
+  
+  const handleAddMember = async () => {
+    if (newMemberName === selectedProject.founder) {
+      alert(`You cannot add the founder of the project, as they already exist.`);
       return;
     }
 
-    const memberKeys = selectedProject.members.map(memberItem => memberItem.key);
+    if(newMemberName === "") {
+      alert(`Please enter a valid member name.`);
+      return;
+    }
+  
+    const memberKeys = selectedProject.members.map((memberItem) => memberItem.key);
+  
     if (!memberKeys.includes(newMemberName)) {
-      let cookie = localStorage.getItem("authToken");
-
-        if (!cookie) {
-          setMsg("No authentication token found. Please log in again.");
-          setIsSuccess(false);
-          return;
-        }
-
-        let tempMembersList = [newMemberName];
-        addMembers(cookie, selectedProject.id, tempMembersList)
-        .then((response) => {
-          if (response.data.success) {
-            alert(`An invitation has been sent to member ${newMemberName}.`);
-        
-            // Clear the input fields after adding
-            setNewMemberName('');
-            setIsSuccess(true);
-          } else {
-            setMsg(response.data.message);
-            alert(response.data.message);
-            setIsSuccess(true);
-          }
-        })
-        .catch((error) => {
-          const errorMessage = error.response?.data?.message || error.message;
-          console.error("Error:", errorMessage);
-          setMsg(`Error in adding member: ${errorMessage}`);
-          setIsSuccess(false);
-        });
-    }
-    else{
-      alert(`Member already exists.`);
-    }
-  };
-
-  const handleUpdateProject = () => {
-    if (window.confirm("Are you sure you want to update this project? This will update both factors and severity levels.")) {
-      let cookie = localStorage.getItem("authToken");
-
+      const cookie = localStorage.getItem("authToken");
+  
       if (!cookie) {
         setMsg("No authentication token found. Please log in again.");
         setIsSuccess(false);
         return;
       }
-
-      //TODO: Perform all of the checks here - before sending it to update the DB!!!
+  
+      const tempMembersList = [newMemberName];
+  
+      try {
+        const response = await addMembers(cookie, selectedProject.id, tempMembersList);
+  
+        if (response.data.success) {
+          alert(`An invitation has been sent to member ${newMemberName}.`);
+          await fetchProjects(); // Refresh projects after adding the member
+          await fetch_pending_requests(cookie, selectedProject.id);
+          // Clear the input fields after adding
+          setNewMemberName('');
+          setIsSuccess(true);
+        } else {
+          setMsg(response.data.message);
+          alert(response.data.message);
+          setIsSuccess(true);
+        }
+      } catch (error) {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error("Error:", errorMessage);
+        setMsg(`Error in adding member: ${errorMessage}`);
+        setIsSuccess(false);
+      }
+    } else {
+      alert(`Member already exists.`);
+    }
+  };
+  
+  const handleUpdateProject = async () => {
+    if (window.confirm("Are you sure you want to update this project? This will update both factors and severity levels.")) {
+      const cookie = localStorage.getItem("authToken");
+  
+      if (!cookie) {
+        setMsg("No authentication token found. Please log in again.");
+        setIsSuccess(false);
+        return;
+      }
+  
+      // Perform all of the checks here - before sending it to update the DB!!!
       /* This includes: project's name, project's description, project's factors, project's severity factors */
-
+      
       let tempSeverityFactors = [];
       for (let level = 1; level <= Object.keys(severityUpdates).length; level++) {
         if (severityUpdates[level] < 0) {
@@ -269,115 +317,126 @@ const ProjectsManagement = () => {
         }
         tempSeverityFactors.push(severityUpdates[level]);
       }
-
-      update_project_name_and_desc(cookie, selectedProject.id, projectUpdates.name || selectedProject.name,
-         projectUpdates.description || selectedProject.description)
-      .then((response) => {
-        if (response.data.success) {
+  
+      try {
+        // Update project name and description
+        const updateResponse = await update_project_name_and_desc(cookie, selectedProject.id, 
+          projectUpdates.name || selectedProject.name,
+          projectUpdates.description || selectedProject.description);
+  
+        if (!updateResponse.data.success) {
+          setMsg(updateResponse.data.message);
           setIsSuccess(true);
-        } else {
-          setMsg(response.data.message);
-          setIsSuccess(true);
+          return;
         }
-      })
-      .catch((error) => {
+  
+        // Update severity factors
+        const severityResponse = await setSeverityFactors(cookie, selectedProject.id, tempSeverityFactors);
+  
+        if (!severityResponse.data.success) {
+          setMsg(severityResponse.data.message);
+          setIsSuccess(true);
+          return;
+        }
+  
+        setIsSuccess(true);
+        await fetchProjects();
+        await fetch_selected_project(findProjectByID(selectedProject.id));
+        alert(`Project: "${selectedProject.name}" has been updated successfully.`);
+      } catch (error) {
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
         setMsg(`Error in updating the project: ${errorMessage}`);
         setIsSuccess(false);
-      });
-
-      setSeverityFactors(cookie, selectedProject.id, tempSeverityFactors)
-      .then((response) => {
-        if (response.data.success) {
-          setIsSuccess(true);
-        } else {
-          setMsg(response.data.message);
-          setIsSuccess(true);
-        }
-      })
-      .catch((error) => {
-        const errorMessage = error.response?.data?.message || error.message;
-        console.error("Error:", errorMessage);
-        setMsg(`Error in updating the severity factors: ${errorMessage}`);
-        setIsSuccess(false);
-      });
-      alert(`Project: "${selectedProject.name}" has been updated successfully.`);
+      }
     }
-  };
+  };  
 
-  const handleAddFactor = () => {
-    if (window.confirm("Are you sure you want to add this factor?")) {
-      let cookie = localStorage.getItem("authToken");
-
-        if (!cookie) {
-          setMsg("No authentication token found. Please log in again.");
-          setIsSuccess(false);
-          return;
-        }
-
-        let tempFactorList = [[newFactorName, newFactorDescription]]; 
-        setProjectFactors(cookie, selectedProject.id, tempFactorList)
-        .then((response) => {
-          if (response.data.success) {
-            alert(`Factor ${newFactorName} has been added successfully.`);
+  const handleAddFactor = async () => {
+    if (!window.confirm("Are you sure you want to add this factor?")) {
+      return;
+    }
+  
+    const cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
+    }
+  
+    const factorToAdd = [newFactorName, newFactorDescription];
+    setNewFactorName('');
+    setNewFactorDescription('');
+  
+    try {
+      const response = await setProjectFactors(cookie, selectedProject.id, [factorToAdd]);
+  
+      if (response.data.success) {
+        setIsSuccess(true);
         
-            // Clear the input fields after adding
-            setNewFactorName('');
-            setNewFactorDescription('');
-
-            setIsSuccess(true);
-          } else {
-            setMsg(response.data.message);
-            alert(response.data.message);
-            setIsSuccess(true);
+        //Get fresh project data
+        const projectResponse = await getProjects(cookie);
+        if (projectResponse.data.success) {
+          setProjects([...projectResponse.data.projects]);
+          // Find and set the updated project directly from the response
+          const updatedProject = projectResponse.data.projects.find(
+            p => p.id === selectedProject.id
+          );
+          if (updatedProject) {
+            setSelectedProject(updatedProject);
           }
-        })
-        .catch((error) => {
-          const errorMessage = error.response?.data?.message || error.message;
-          console.error("Error:", errorMessage);
-          setMsg(`Error in adding factor: ${errorMessage}`);
-          setIsSuccess(false);
-        });
+        }
+        
+        alert(`Factor ${factorToAdd[0]} has been added successfully.`);
+      } else {
+        setMsg(response.data.message);
+        alert(response.data.message);
+        setIsSuccess(true);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error in adding factor: ${errorMessage}`);
+      setIsSuccess(false);
     }
   };
-
+  
   const handleDeleteFactor = (factorName) => {
     if (window.confirm(`Are you sure you want to delete the factor "${factorName}"?`)) {
       alert("TODO: Implement delete factor logic");
     }
   };
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (window.confirm("Are you sure you want to create this project?")) {
-      let cookie = localStorage.getItem("authToken");
-
+      const cookie = localStorage.getItem("authToken");
+  
       if (!cookie) {
         setMsg("No authentication token found. Please log in again.");
         setIsSuccess(false);
         return;
       }
-
-      createProject(cookie, newProject.name, newProject.description)
-      .then((response) => {
+  
+      try {
+        const response = await createProject(cookie, newProject.name, newProject.description);
+  
         if (response.data.success) {
           alert(response.data.message);
           setIsSuccess(true);
-          setNewProject({ name: "", description: ""});
+          setNewProject({ name: "", description: "" });
+          await fetchProjects();
         } else {
           setMsg(response.data.message);
           setIsSuccess(true);
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
         setMsg(`Error fetching projects: ${errorMessage}`);
         setIsSuccess(false);
-      });
+      }
     }
   };
-
 
   return (
     <section>
@@ -442,7 +501,7 @@ const ProjectsManagement = () => {
                   {project.isActive && (
                     <button
                       className="action-btn archive-btn"
-                      onClick={() => handleArchive(project.name)}
+                      onClick={() => handleArchive(project.id, project.name)}
                     >
                       Archive
                     </button>
@@ -450,7 +509,7 @@ const ProjectsManagement = () => {
                   {!project.isActive && (
                     <button
                       className="action-btn publish-btn"
-                      onClick={() => handlePublish(project.name)}
+                      onClick={() => handlePublish(project.id, project.name)}
                     >
                       Publish
                     </button>
