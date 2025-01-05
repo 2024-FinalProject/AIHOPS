@@ -181,6 +181,11 @@ class ProjectManager:
                 temp_pending_requests = self.find_pending_requests(user_name)
                 if project_id in temp_pending_requests:
                     existing_members_in_proj.append(user_name) 
+                else:
+                    self.pending_requests.insert(user_name, project_id)
+                    # insert into DB
+                    db_pending = DBPendingRequests(project_id, user_name)
+                    self.db_access.insert(db_pending)
             except Exception as e:
                     self.pending_requests.insert(user_name, project_id)
                     # insert into DB
