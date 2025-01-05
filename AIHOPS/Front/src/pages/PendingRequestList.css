@@ -124,23 +124,127 @@
   background-color: #d32f2f;
 }
 
+/* Sort Button Container */
 .sort-container {
   position: absolute;
-  right: 450px; /* Align the sort button to the right side of the container */
-  top: 90%;
-  transform: translateY(-50%); /* Center the sort icon vertically */
+  right: 80px; /* Align to the far right */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+/* Sort Button Styling */
 .sort-button {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 20px;
   color: #333;
+  transition: color 0.3s;
 }
 
-.sort-status {
-  margin-left: 10px; /* Space between the button and status */
-  font-size: 16px;
-  color: #333;
+.sort-button:hover {
+  color: #0078d7; /* Highlight on hover */
 }
+
+/* Sort Status Text */
+.sort-status {
+  font-size: 16px;
+  color: #555;
+}
+
+
+
+.email-list-container {
+  width: 80%;
+  margin: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  margin-top: 20px;
+}
+
+.email-item {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.email-item:last-child {
+  border-bottom: none;
+}
+
+.email-item:hover {
+  background-color: #f9f9f9;
+}
+
+.email-item.selected {
+  background-color: #e6f7ff;
+}
+
+.email-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.email-subject {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.email-status {
+  font-size: 14px;
+  color: #888;
+}
+
+.email-body {
+  margin-top: 5px;
+}
+
+.email-description {
+  font-size: 14px;
+  color: #555;
+}
+
+.email-footer {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #777;
+}
+
+.email-actions button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.email-button.accept {
+  background-color: #4caf50;
+  color: white;
+}
+
+.email-button.reject {
+  background-color: #f44336;
+  color: white;
+}
+
+.email-button.accept:hover {
+  background-color: #388e3c;
+}
+
+.email-button.reject:hover {
+  background-color: #d32f2f;
+}
+

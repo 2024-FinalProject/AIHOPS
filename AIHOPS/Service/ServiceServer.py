@@ -119,7 +119,7 @@ def approve_member():
 # expecting json with {cookie, pid}
 def reject_member():
     data = request.json
-    res = server.reject_member(int(data["cookie"]), int(data["pid"]))
+    res = server.reject_member(int(data["cookie"]), int(data["projId"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 # -------- Project Information ---------------

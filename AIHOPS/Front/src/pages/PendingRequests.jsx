@@ -5,7 +5,6 @@ import {
   acceptProjByUser,
   rejectProjByUser,
 } from "../api/PollApi";
-import { ListGroup } from "react-bootstrap";
 import { FaSort } from "react-icons/fa"; // Importing sort icon
 import "./PendingRequestList.css";
 
@@ -18,9 +17,9 @@ const PendingRequestList = () => {
   const [isNewFirst, setIsNewFirst] = useState(false);
 
   const requestListTest = [
-    { title: "Request 1", description: "Description 1", projId: 1 },
-    { title: "Request 2", description: "Description 2", projId: 2 },
-    { title: "Request 3", description: "Description 3", projId: 3 },
+    { title: "Request 1", description: "Description 1", id: 1 },
+    { title: "Request 2", description: "Description 2", id: 2 },
+    { title: "Request 3", description: "Description 3", id: 3 },
   ];
 
   // Fetch Pending Requests
@@ -42,7 +41,8 @@ const PendingRequestList = () => {
       const response = await getPendingRequest(cookie);
 
       if (response.data.success) {
-        setRequestList(requestListTest); // Use the fetched request list here
+        // setRequestList(requestListTest); // Use the fetched request list here
+        setRequestList(response.data.requests);
       } else {
         setError(response.data.message || "Failed to fetch pending requests");
         console.error(response.data.message);
@@ -62,27 +62,26 @@ const PendingRequestList = () => {
 
   const handleAccept = async (e, request) => {
     e.stopPropagation(); // Stop the click from triggering ListGroup.Item's onClick
-    // Logic to accept the request
-
     console.log("Accepted request:", request);
     try {
       const cookie = localStorage.getItem("authToken");
-
+  
       if (!cookie) {
         setError("Authentication token not found");
         console.error("authToken not found in localStorage");
         return;
       }
-      // Ensure the request object contains projId
-      if (!request?.projId) {
+      // Ensure the request object contains id
+      if (!request?.id == undefined || request?.id == null) {
         setError("Project ID is missing");
         console.error("Project ID is missing");
         return;
       }
-
-      const response = await acceptProjByUser(cookie, request.projId);
+  
+      const response = await acceptProjByUser(cookie, request.id);
       if (response.data.success) {
         console.log("Project accepted");
+        fetchPendingRequest(); // Refresh the list after successful acceptance
       } else {
         alert("Failed to accept project");
         setError(response.data.message || "Failed to accept project");
@@ -90,34 +89,33 @@ const PendingRequestList = () => {
       }
     } catch (error) {
       alert("Failed to accept project");
-      // setError("Failed to accept project");
       console.error(error);
     }
   };
-
+  
   const handleReject = async (e, request) => {
     e.stopPropagation(); // Stop the click from triggering ListGroup.Item's onClick
-    // Logic to reject the request
     console.log("Rejected request:", request);
-
+  
     try {
       const cookie = localStorage.getItem("authToken");
-
+  
       if (!cookie) {
         setError("Authentication token not found");
         console.error("authToken not found in localStorage");
         return;
       }
-      // Ensure the request object contains projId
-      if (!request?.projId) {
+      // Ensure the request object contains id
+      if (!request?.id == undefined || request?.id == null) {
         setError("Project ID is missing");
         console.error("Project ID is missing");
         return;
       }
-
-      const response = await rejectProjByUser(cookie, request.projId);
+  
+      const response = await rejectProjByUser(cookie, request.id);
       if (response.data.success) {
         console.log("Project rejected");
+        fetchPendingRequest(); // Refresh the list after successful rejection
       } else {
         alert("Failed to reject project");
         setError(response.data.message || "Failed to reject project");
@@ -125,10 +123,10 @@ const PendingRequestList = () => {
       }
     } catch (error) {
       alert("Failed to reject project");
-      // setError("Failed to accept project");
       console.error(error);
     }
   };
+  
 
   const toggleSort = () => {
     setIsNewFirst((prevState) => !prevState);
@@ -150,15 +148,10 @@ const PendingRequestList = () => {
       <div className="center-container">
         <h1 className="pending-request-title"> All Pending Requests </h1>
         <div className="sort-container">
-          <button
-            className="sort-button"
-            onClick={toggleSort}
-          >
-            {/* Use the sort icon */}
-            <FaSort size={20} />
+          <button className="sort-button" onClick={toggleSort}>
+            {/* Use the sort icon */}⇅
           </button>
-            {isNewFirst ? "New-Old" : "Old-New"}
-
+          {isNewFirst ? "Newest First" : "Oldest First"}
         </div>
       </div>
       {/* Loading State */}
@@ -174,38 +167,48 @@ const PendingRequestList = () => {
 
       {/* Display Pending Requests */}
       {!isLoading && !error && requestList.length > 0 && (
-        <div className="request-list-container">
-          {sortRequestList.map((request, index) => (
-            <ListGroup.Item
-              key={index}
+        <div className="email-list-container">
+          {sortRequestList.map((request) => (
+            <div
+              key={request.id} // Prefer id if available
+              className={`email-item ${
+                request === selectedElement ? "selected" : ""
+              }`}
               onClick={(e) => handleSelectRequest(e, request)}
-              className={request === selectedElement ? "active" : ""}
             >
-              <div className="request-box">
-                <div className="request-content">
-                  <h3 className="request-title">
-                    {request.title || "No Title"}
-                  </h3>
-                  <p className="request-description">
-                    {request.description || "No Description"}
-                  </p>
-                </div>
-                <div className="request-actions">
+              <div className="email-header">
+                <h4 className="email-subject">
+                  {request.name || "No Subject"}
+                </h4>
+                <span className="email-status">
+                  {request.isActive ? "🟢 Active" : "🔴 Inactive"}
+                </span>
+              </div>
+              <div className="email-body">
+                <p className="email-description">
+                  {request.description || "No Description"}
+                </p>
+              </div>
+              <div className="email-footer">
+                <span className="email-founder">
+                  From: {request.founder || "Unknown"}
+                </span>
+                <div className="email-actions">
                   <button
-                    className="request-button"
+                    className="email-button accept"
                     onClick={(e) => handleAccept(e, request)}
                   >
-                    Accept
+                    ✅ Accept
                   </button>
                   <button
-                    className="request-button"
+                    className="email-button reject"
                     onClick={(e) => handleReject(e, request)}
                   >
-                    Reject
+                    ❌ Reject
                   </button>
                 </div>
               </div>
-            </ListGroup.Item>
+            </div>
           ))}
         </div>
       )}
