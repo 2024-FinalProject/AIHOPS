@@ -144,7 +144,7 @@ const PendingRequestList = () => {
   return (
     <div>
       <div className="center-container">
-        <h1 className="pending-request-title"> All Pending Requests </h1>
+        <h1 className="pending-request-title"> You have been invited to projects: </h1>
         <div className="sort-container">
           <button className="sort-button" onClick={toggleSort}>
             {/* Use the sort icon */}⇅
@@ -179,13 +179,18 @@ const PendingRequestList = () => {
                 </span>
               <div className="email-header">
                 <h4 className="email-subject">
-                You have been invited to project: {" "}
-                  {/* <span className="underline ">Project Name:</span> */}
+                  <span className="underline ">Project Name:</span>
                   <span className="underline ">{request.name}</span>
                   {", "} {request.description}
-                 {" "} by <span className="underline ">{request.founder}</span>
                 </h4>
-                
+                <h4 className="email-subject">
+                  <span className="underline ">Project Description:</span>{" "}
+                  {request.description}
+                </h4>
+                <h5 className="email-sender">
+                  <span className="underline ">Founder:</span> {request.founder}
+                </h5>
+            
               </div>
               <div className="email-footer">
                 <div className="email-actions">
