@@ -4,8 +4,7 @@ import {
   getPendingRequest,
   acceptProjByUser,
   rejectProjByUser,
-} from "../api/PollApi";
-import { FaSort } from "react-icons/fa"; // Importing sort icon
+} from "../api/ProjectApi";
 import "./PendingRequestList.css";
 
 const PendingRequestList = () => {
@@ -65,7 +64,7 @@ const PendingRequestList = () => {
     console.log("Accepted request:", request);
     try {
       const cookie = localStorage.getItem("authToken");
-  
+
       if (!cookie) {
         setError("Authentication token not found");
         console.error("authToken not found in localStorage");
@@ -77,7 +76,7 @@ const PendingRequestList = () => {
         console.error("Project ID is missing");
         return;
       }
-  
+
       const response = await acceptProjByUser(cookie, request.id);
       if (response.data.success) {
         console.log("Project accepted");
@@ -92,14 +91,14 @@ const PendingRequestList = () => {
       console.error(error);
     }
   };
-  
+
   const handleReject = async (e, request) => {
     e.stopPropagation(); // Stop the click from triggering ListGroup.Item's onClick
     console.log("Rejected request:", request);
-  
+
     try {
       const cookie = localStorage.getItem("authToken");
-  
+
       if (!cookie) {
         setError("Authentication token not found");
         console.error("authToken not found in localStorage");
@@ -111,7 +110,7 @@ const PendingRequestList = () => {
         console.error("Project ID is missing");
         return;
       }
-  
+
       const response = await rejectProjByUser(cookie, request.id);
       if (response.data.success) {
         console.log("Project rejected");
@@ -126,7 +125,6 @@ const PendingRequestList = () => {
       console.error(error);
     }
   };
-  
 
   const toggleSort = () => {
     setIsNewFirst((prevState) => !prevState);
@@ -176,23 +174,20 @@ const PendingRequestList = () => {
               }`}
               onClick={(e) => handleSelectRequest(e, request)}
             >
-              <div className="email-header">
-                <h4 className="email-subject">
-                  {request.name || "No Subject"}
-                </h4>
-                <span className="email-status">
+              <span className="email-status">
                   {request.isActive ? "🟢 Active" : "🔴 Inactive"}
                 </span>
-              </div>
-              <div className="email-body">
-                <p className="email-description">
-                  {request.description || "No Description"}
-                </p>
+              <div className="email-header">
+                <h4 className="email-subject">
+                You have been invited to project: {" "}
+                  {/* <span className="underline ">Project Name:</span> */}
+                  <span className="underline ">{request.name}</span>
+                  {", "} {request.description}
+                 {" "} by <span className="underline ">{request.founder}</span>
+                </h4>
+                
               </div>
               <div className="email-footer">
-                <span className="email-founder">
-                  From: {request.founder || "Unknown"}
-                </span>
                 <div className="email-actions">
                   <button
                     className="email-button accept"
