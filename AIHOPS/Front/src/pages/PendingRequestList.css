@@ -1,19 +1,12 @@
-/* Style for the title */
-.pending-requests-title {
-  font-size: 2.5em; /* Larger font size */
+.pending-request-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
   font-family: 'Courier New', Courier, monospace;
-
-  font-weight: bold; /* Make it bold */
-  color: #333; /* Dark color for the text */
-  text-align: center; /* Center the title */
-  margin-bottom: 20px; /* Add some space below the title */
-  text-transform: uppercase; /* Transform the text to uppercase */
-  letter-spacing: 2px; /* Increase letter spacing for a cleaner look */
-  font-family: 'Arial', sans-serif; /* Change the font to Arial */
-  padding: 10px; /* Add some padding around the title */
-  background-color: #f4f4f4; /* Light background color */
-  border-radius: 5px; /* Rounded corners for the background */
+  padding-top: 3cqw;
 }
+
 
 /* Container to center the content */
 .center-container {
@@ -24,123 +17,131 @@
   position: relative;
 }
 
-.pending-request-title {
-  text-align: center; /* Center the title */
-  margin-right: 40px; /* Ensure some space for the sort icon on the right */
-}
 
-/* Container for the request list to allow flexbox layout */
-.request-list-container {
-  display: flex;
-  flex-wrap: wrap; /* Allow items to wrap into new rows */
-  gap: 20px; /* Add space between items */
-  justify-content: center; /* Center the items horizontally */
-  align-items: flex-start; /* Align items to the top */
-  margin: 0 auto; /* Center the container horizontally */
-  max-width: 1200px; /* Limit the width of the container */
-  padding: 20px; /* Add some padding around the container */
-}
-
-/* Each request item */
-.request-box {
-  flex: 1 1 22%; /* Adjust percentage to fit 4 items per row */
-  max-width: 350px; /* Increase max-width for larger items */
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  margin: 15px 0; /* Add vertical space between each request */
-  padding: 20px; /* Increase padding for larger content area */
-  background-color: #f9f9f9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-/* Hover effect for the request item */
-.request-box:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  transform: scale(1.05); /* Slightly enlarge the box on hover */
-}
-
-/* Content inside each request item */
-.request-content {
-  display: flex;
-  flex-direction: column; /* Stack title and description vertically */
-  gap: 12px; /* Add space between title and description */
-}
-
-/* Title of the request */
-.request-title {
-  font-size: 1.4em; /* Increase font size for the title */
-  font-weight: bold;
-  margin: 0;
-  margin-right: 20px;
-}
-
-/* Description of the request */
-.request-description {
-  font-size: 1.1em; /* Increase font size for the description */
-  color: #666;
-  margin: 0;
-}
-
-/* Actions (Accept/Reject) buttons container */
-.request-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
-}
-
-/* Style for the buttons */
-.request-button {
-  padding: 8px 15px; /* Increase button padding */
-  font-size: 1em; /* Increase button font size */
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-  transition: background-color 0.3s;
-}
-
-/* Accept button */
-.request-button:first-child {
-  background-color: #4CAF50; /* Green for accept */
-  color: white;
-}
-
-/* Hover effect for Accept button */
-.request-button:first-child:hover {
-  background-color: #45a049;
-}
-
-/* Reject button */
-.request-button:nth-child(2) {
-  background-color: #f44336; /* Red for reject */
-  color: white;
-}
-
-/* Hover effect for Reject button */
-.request-button:nth-child(2):hover {
-  background-color: #d32f2f;
-}
-
+/* Sort Button Container */
 .sort-container {
   position: absolute;
-  right: 450px; /* Align the sort button to the right side of the container */
-  top: 90%;
-  transform: translateY(-50%); /* Center the sort icon vertically */
+  right: 80px; /* Align to the far right */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+/* Sort Button Styling */
 .sort-button {
   background: none;
   border: none;
   cursor: pointer;
   font-size: 20px;
   color: #333;
+  transition: color 0.3s;
 }
 
+.sort-button:hover {
+  color: #0078d7; /* Highlight on hover */
+}
+
+/* Sort Status Text */
 .sort-status {
-  margin-left: 10px; /* Space between the button and status */
   font-size: 16px;
+  color: #555;
+}
+
+
+.email-list-container {
+  width: 40%;
+  margin: auto;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  margin-top: 20px;
+}
+
+.email-subject {
+  font-size: 1.2em;
+  font-weight: bold;
   color: #333;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.email-sender {
+  font-size: 1em;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+
+.email-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.email-item:last-child {
+  border-bottom: none;
+}
+
+.email-item:hover {
+  background-color: #f9f9f9;
+}
+
+.email-item.selected {
+  background-color: #e6f7ff;
+}
+
+.email-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between; /* This ensures the buttons are aligned on opposite sides */
+  align-items: center;
+  font-size: 12px;
+  color: #777;
+}
+
+.email-actions {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%; /* Make sure it takes up the full width */
+}
+
+.email-actions button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.email-button.accept {
+  background-color: #4caf50;
+  color: white;
+}
+
+.email-button.reject {
+  background-color: #f44336;
+  color: white;
+}
+
+.email-button.accept:hover {
+  background-color: #388e3c;
+  zoom: 1.2;
+}
+
+.email-button.reject:hover {
+  background-color: #d32f2f;
+  zoom: 1.2;
 }

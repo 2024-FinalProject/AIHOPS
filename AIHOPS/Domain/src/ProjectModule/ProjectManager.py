@@ -325,19 +325,19 @@ class ProjectManager:
         score = project.get_score(requesting_member)
         return ResponseSuccessMsg(f"score of project {pid} is {score}")
 
-    
     def get_pending_requests(self, email):
         try:
             temp_pending_requests = self.find_pending_requests(email) 
             to_return_pending_requests = []
             for pending_requests in temp_pending_requests:
-                if hasattr(pending_requests, 'to_dict'):
-                    to_return_pending_requests.append(pending_requests.to_dict())
+                to_return_pending_requests.append(self.projects.get(pending_requests).to_dict())
+
             return ResponseSuccessObj(f"pending requests for email {email} : {to_return_pending_requests}", list(to_return_pending_requests))
             
         except Exception as e:
             return ResponseSuccessObj(f"no pending requests", [])
-    
+
+
     def get_pending_emails_for_project(self, project_id, founder):
         if(self.find_Project(project_id).founder != founder):
             return ResponseFailMsg(f"only founder {founder} can get pending requests")
@@ -348,7 +348,7 @@ class ProjectManager:
         return ResponseSuccessObj(f"pending requests for project {project_id} : {emails}", list(emails))
     
     def approve_member(self, project_id, user_name):
-        pending_requests = self.find_pending_requests(user_name)
+        # pending_requests = self.find_pending_requests(user_name)
         self.pending_requests.pop(user_name, project_id)
         project = self.find_Project(project_id)
         if project.isActive:
@@ -368,10 +368,13 @@ class ProjectManager:
         
     def reject_member(self, project_id, user_name):
         pending_requests = self.find_pending_requests(user_name)
-        if pending_requests.remove(project_id):
+        if pending_requests is not None and project_id in pending_requests:
+            pending_requests.remove(project_id)
+            print("remove")
             # Delete member from pending requests
             self.db_access.delete_obj_by_query(DBPendingRequests, 
                 {"project_id": project_id, "email": user_name})
+            print
             return ResponseSuccessMsg(f"member {user_name} has been rejected from project {project_id}")
         return ResponseFailMsg(f"member {user_name} is not pending in project {project_id}")
             
