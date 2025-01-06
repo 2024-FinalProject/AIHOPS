@@ -106,7 +106,6 @@ class ProjectManager:
     def set_project_factors(self, project_id, factors):
         if len(factors) == 0:
             return ResponseFailMsg("factors can't be empty")
-
         project = self.find_Project(project_id)
 
         # insert -1 factors num for project to db

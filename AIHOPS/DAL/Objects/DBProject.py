@@ -8,7 +8,7 @@ class DBProject(Base):
     __tablename__ = 'projects'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(255), unique=True, nullable=False)
+    name = Column(String(255), nullable=False)
     founder = Column(String(255), nullable=False)
     description = Column(String(1000))
     date_created = Column(DateTime, default=datetime.utcnow)
