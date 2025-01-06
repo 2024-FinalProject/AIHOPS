@@ -20,6 +20,7 @@ const ProjectsManagement = () => {
   const [toRemovePendingMemberName, setToRemovePendingMemberName] = useState("");
   const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
   const [showCreatePopup, setShowCreatePopup] = useState(false);
+  const [isNewFirst, setIsNewFirst] = useState(false);
   const [newProject, setNewProject] = useState({
     name: "",
     description: "",
@@ -65,7 +66,6 @@ const ProjectsManagement = () => {
   const fetch_pending_requests = async (cookie, projectId) => {
     try {
       const response = await get_pending_requests_for_project(cookie, projectId);
-  
       if (response?.data?.emails) {
         setProjectsPendingRequests(response.data.emails);
       } else {
@@ -98,6 +98,12 @@ const ProjectsManagement = () => {
       setIsSuccess(false);
     }
   };
+
+  const toggleSort = () => {
+    setIsNewFirst((prevState) => !prevState);
+  };
+
+  const sortProjects = isNewFirst ? [...(projects || [])].reverse() : projects || [];
 
   const openPopup = async (project) => {
     fetchProjects();
@@ -197,7 +203,8 @@ const ProjectsManagement = () => {
             await fetchProjects(); // Refresh project list after publishing
           } else {
             setMsg(response.data.message);
-            setIsSuccess(false);
+            alert(response.data.message);
+            setIsSuccess(true);
           }
         } catch (error) {
           const errorMessage = error.response?.data?.message || error.message;
@@ -416,6 +423,11 @@ const ProjectsManagement = () => {
         setIsSuccess(false);
         return;
       }
+
+      if(newProject.name === "" || newProject.description === "") {
+        alert("Please enter a valid project name and description.");
+        return;
+      }
   
       try {
         const response = await createProject(cookie, newProject.name, newProject.description);
@@ -471,9 +483,15 @@ const ProjectsManagement = () => {
                 Create New Project
               </button>
             </div>
+            {projects.length > 0 && <div className="sort-container">
+            <button className="sort-button" onClick={toggleSort}>
+              {/* Use the sort icon */}⇅
+            </button>
+            {isNewFirst ? "Newest First" : "Oldest First"}
+            </div>}
             {projects.length > 0 && <h2 style={{ textAlign: 'center' }}>Existing Projects</h2>}
-            {projects.map((project, index) => (
-              <div key={index} className="project-card">
+            {sortProjects.map((project) => (
+              <div key={project.id} className="project-card">
                 <div className="project-info">
                   <span style={{ display: 'block' }}>
                     <strong>Name:</strong> {project.name}
