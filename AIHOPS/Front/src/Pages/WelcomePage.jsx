@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import NavBar from "../components/NavBar";
+import aihops_article from "../assets/AIHOPS.pdf";
 import "./WelcomePage.css";
 
 const WelcomePage = () => {
@@ -12,20 +12,29 @@ const WelcomePage = () => {
       <div className="welcome-container">
         <header className="welcome-header">
           <h1 className="welcome-title">AIHOPS</h1>
-          <p className="welcome-subtitle">Create a survey or take one :)</p>
+          <p className="welcome-subtitle">
+            Adoption of Innovation by Healthcare Organizations Prerequisites
+            Scale
+          </p>
         </header>
         <div className="upper-subtitle-container">
-          <span className="lower-subtitle">
-            AIHOPS is a survey platform that allows you to create and take
-            surveys and helps you to make better decisions for your
-            organization.
-          </span>
+          <span className="lower-subtitle">About: .....</span>
         </div>
-       
+        {/* PDF Link */}
+        <div className="pdf-link-container">
+          <h2 className="pdf-headline">
+            <a
+              href={aihops_article}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pdf-link"
+            >
+              AIHOPS article
+            </a>
+          </h2>
+        </div>
       </div>
     </div>
-
-    
   );
 };
 
