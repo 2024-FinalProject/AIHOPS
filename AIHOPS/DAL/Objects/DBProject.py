@@ -15,7 +15,7 @@ class DBProject(Base):
     is_active = Column(Boolean, default=False)
     factors_num = Column(Integer)
 
-    _table_args__ = (
+    __table_args__ = (
         Index('idx_project_name', 'name'),
         Index('idx_project_founder', 'founder'),
     )
