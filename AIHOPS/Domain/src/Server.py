@@ -207,6 +207,8 @@ class Server:
             return ResponseFailMsg(f"Failed to remove member: {e}")
         
     def get_members_of_project(self, cookie, pid):
+        """if projects is published gets the approved members
+            else gets the members that are planned to be invited once the project is published"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -216,14 +218,13 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get member projects: {e}")
 
-    # TODO: remove?
-    def get_projects(self, cookie):
+    def get_projects_of_owner(self, cookie):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res
-            return self.project_manager.get_projects(session.result.user_name)
+            return self.project_manager.get_projects_by_owner(session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get projects: {e}")
 
@@ -352,8 +353,8 @@ class Server:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res
-            return self.project_manager.approve_member(pid, session.result.user_name)
+            session = res.result
+            return self.project_manager.approve_member(pid, session.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to approve member: {e}")
         
@@ -362,7 +363,37 @@ class Server:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res
+            session = res.result
             return self.project_manager.reject_member(pid, session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to reject member: {e}")
+
+    def confirm_project_factors(self, cookie, pid):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.confirm_factors(pid, actor)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to confirm factors : {e}")
+
+    def confirm_project_severity_factors(self, cookie, pid):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.confirm_severity_factors(pid, actor)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to confirm severity factors: {e}")
+
+    def get_project_factors(self, cookie, pid):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.get_project_factors(pid, actor)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to confirm severity factors: {e}")

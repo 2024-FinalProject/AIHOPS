@@ -22,6 +22,8 @@ class ThreadSafeDictWithListValue(ThreadSafeDict):
             if key not in self.dict:
                 raise KeyError(f"Key {key} not found")
             self.dict[key].remove(value)
+            if len(self.dict[key]) == 0:
+                self.dict.pop(key)
 
 
 

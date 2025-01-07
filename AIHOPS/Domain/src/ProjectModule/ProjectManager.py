@@ -1,3 +1,6 @@
+from DAL.Objects.DBPendingRequests import DBPendingRequests
+from DAL.Objects.DBProject import DBProject
+from DAL.Objects.DBProjectMembers import DBProjectMembers
 from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
@@ -9,20 +12,21 @@ from Domain.src.ProjectModule.Project import Project
 
 class ProjectManager():
     def __init__(self, db_access):
+        self.db_access = db_access
         self.projects = ThreadSafeDict()                  # {p_id: Project}
         self.owners = ThreadSafeDictWithListValue()         # {email: [projects]}
         self.pending_requests = ThreadSafeDictWithListValue()           # {email: [projects]}
         self.project_id_maker = IdMaker()
-        self.factor_pool = FactorsPool()
+        self.factor_pool = FactorsPool(self.db_access)
+        self.load_from_db()
 
     def _verify_unique_project(self, actor, name, desc):
         """raises error if there is active project with same name and description"""
         projects = self.owners.get(actor)
         if projects is None:
             return
-        tmp = Project(-999, name, desc, actor)
         for proj in projects:
-            if proj.is_published() and proj == tmp:
+            if proj.is_published() and [proj.name, proj.desc] == [name, desc]:
                 raise NameError("Duplicate Project")
 
     def _verify_owner(self, pid, actor):
@@ -45,7 +49,7 @@ class ProjectManager():
         self._verify_unique_project(owner, name, description)
         # create Project
         pid = self.project_id_maker.next_id()
-        project = Project(pid, name, description, owner, is_default_factors)
+        project = Project(pid, name, description, owner, self.db_access, is_default_factors)
         # add to lists
         self.projects.insert(pid, project)
         self.owners.insert(owner, project)
@@ -112,17 +116,38 @@ class ProjectManager():
         project = self._verify_owner(pid, actor)
         return project.get_progress_for_owner()
 
+    def confirm_factors(self, pid, actor):
+        project = self._verify_owner(pid, actor)
+        project.confirm_factors()
+        return ResponseSuccessMsg(f"{actor}: confirmed factors to {project.name}")
+
+    def confirm_severity_factors(self, pid, actor):
+        project = self._verify_owner(pid, actor)
+        project.confirm_severity_factors()
+        return ResponseSuccessMsg(f"{actor}: confirmed severity factors to {project.name}")
+
     # ----------------  Member Control ----------------
 
-    def _add_member_after_verifying_owner(self, project, member):
-        if project.is_published():
-            self.pending_requests.insert(member, project.id)
-        else:
-            project.add_member_to_invite(member)
+    def _add_member_after_verifying_owner(self, project, member, persist=True):
+        db_instance = DBPendingRequests(project.pid, member)
+        if persist:
+            res = self.db_access.insert(db_instance)
+            if not res.success:
+                return res
+        if not persist or res.success:
+            try:
+                if project.is_published():
+                    self.pending_requests.insert(member, project.pid)
+                else:
+                    project.add_member_to_invite(member)
+            except Exception as e:
+                if persist:
+                    self.db_access.delete(db_instance)
 
     def add_member(self, actor, pid, member):
         """adds project to member pendings"""
         project = self._verify_owner(pid, actor)
+        self._add_member_after_verifying_owner(project, member)
         return ResponseSuccessMsg(f"members: {member} pending request added for project {pid}: {project.name}")
 
 
@@ -135,6 +160,13 @@ class ProjectManager():
 
     def remove_member(self, actor, pid, member):
         project = self._verify_owner(pid, actor)
+
+        res1 = self.db_access.delete_obj_by_query(DBPendingRequests, {"project_id": pid, "email": member})
+        res2 = self.db_access.delete_obj_by_query(DBProjectMembers, {"project_id": pid, "member_email": member})
+
+        if not res1.success and not res2.success:
+            return ResponseFailMsg(res1.msg + res2.msg)
+
         res = project.remove_member(member)
         if not res.success:
             # then member maybe in pendings
@@ -151,7 +183,6 @@ class ProjectManager():
             raise NameError(f"project {pid} is not found")
         return project
 
-    # TODO: add to server
     def get_project_factors(self, pid, actor):
         project = self._find_project(pid)
         return project.get_factors(actor)
@@ -195,9 +226,12 @@ class ProjectManager():
     def get_projects_by_owner(self, actor):
         """returns all projects founded by actor"""
         projects = self.owners.get(actor)
+        ret = []
         if projects is None:
             projects = []
-        return ResponseSuccessObj(f"projects for actor {actor} : {projects}", projects)
+        for proj in projects:
+            ret.append(proj.to_dict())
+        return ResponseSuccessObj(f"projects for actor {actor} : {ret}", ret)
 
     # TODO: add to server
     def get_projects_of_member(self, actor):
@@ -223,12 +257,29 @@ class ProjectManager():
         self._verify_member_in_pending(pid, actor)
         project = self._find_project(pid)
         project.add_member(actor)
-        self.pending_requests.remove(pid, actor)
+
+        db_project_member = DBProjectMembers(pid, actor)
+        res = self.db_access.insert(db_project_member)
+        if not res.success:
+            project.remove_member(actor)
+            self.db_access.delete(db_project_member)
+            return res
+
+        self.pending_requests.remove(actor, pid)
+        res2 = self.db_access.delete_obj_by_query(DBPendingRequests, {"project_id": pid, "email": actor})
+        if not res2.success:
+            self.db_access.insert(db_project_member)
+            self.pending_requests.insert(actor, pid)
+            return res2
+
         return ResponseSuccessMsg(f"member {actor} approved for project {pid}: {project.name}")
 
     def reject_member(self, pid, actor):
         self._verify_member_in_pending(pid, actor)
         self.pending_requests.remove(pid, actor)
+        res = self.db_access.delete_obj_by_query(DBProjectMembers, {"project_id": pid, "email": actor})
+        if not res.success:
+            self.pending_requests.insert(pid, actor)
         return ResponseSuccessMsg(f"member {actor} denied participation in project {pid}")
 
 
@@ -239,22 +290,22 @@ class ProjectManager():
 
     def vote_on_factor(self, pid, actor, fid, score):
         project = self._find_project(pid)
-        return project.vote_factor(actor, fid, score)
+        return project.vote_on_factor(actor, fid, score)
 
     def vote_severities(self, pid, actor, severities):
         project = self._find_project(pid)
-        return project.vote_severiries(actor, severities)
+        return project.vote_severities(actor, severities)
 
     # ----------- Project Control -----------------------
 
     def publish_project(self, pid, actor):
         project = self._verify_owner(pid, actor)
-        res = project.publish_project(actor)
+        res = project.publish()
         if not res.success:
             return res
         to_invite = res.result
         for member in to_invite:
-            self._add_member_after_verifying_owner(project, member)
+            self._add_member_after_verifying_owner(project, member, False)
         return ResponseSuccessMsg(f"project {pid} published successfully, and members invited")
 
 
@@ -282,10 +333,32 @@ class ProjectManager():
 
     def load_from_db(self):
         # load projects & set idmaker
-        # load factor pool
+        published_pids = self.load_projects_from_db()
         # load pendings
-        # load archive??
-        ...
+        self.load_pendings(published_pids)
+
+    def load_pendings(self, pids):
+        for pid in pids:
+            pendings = self.db_access.load_by_query(DBPendingRequests, {"project_id": pid})
+            for pending in pendings:
+                self.pending_requests.insert(pending.email, pid)
+
+    def load_projects_from_db(self):
+        existing_projects = self.db_access.load_all(DBProject)
+        if existing_projects is None or len(existing_projects) == 0:
+            return []
+        last_id = 0
+        published_pids = []
+        for project_data in existing_projects:
+            project = Project(project_data.id, project_data.name, project_data.description, project_data.owner,
+                              db_access=self.db_access, db_instance=project_data)
+            last_id = max(last_id, project.pid + 1)
+            self.projects.insert(project.pid, project)
+            self.owners.insert(project.owner, project)
+            if project.is_published():
+                published_pids.append(project.pid)
+        self.project_id_maker.start_from(last_id)
+        return published_pids
 
 
 

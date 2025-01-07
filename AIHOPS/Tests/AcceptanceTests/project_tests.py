@@ -390,21 +390,21 @@ class ProjectTests(unittest.TestCase):
     def test_get_projects_success(self):
         self.server.login(self.cookie1, "Alice", "")
         self.server.create_project(self.cookie1, "Project1", "Description1")
-        res = self.server.get_projects(self.cookie1)
+        res = self.server.get_projects_of_owner(self.cookie1)
         self.assertTrue(res.success, res.msg)
         self.server.logout(self.cookie1)
 
     def test_get_projects_fail_empty_cookie(self):
-        res = self.server.get_projects(None)
+        res = self.server.get_projects_of_owner(None)
         self.assertFalse(res.success, f'Get projects succeeded when it should have failed - empty cookie')
 
     def test_get_projects_fail_not_logged_in(self):
-        res = self.server.get_projects(self.cookie1)
+        res = self.server.get_projects_of_owner(self.cookie1)
         self.assertFalse(res.success, f'Get projects succeeded when it should have failed - not logged in')
 
     def test_get_projects_fail_no_projects(self):
         self.server.login(self.cookie1, "Alice", "")
-        res = self.server.get_projects(self.cookie1)
+        res = self.server.get_projects_of_owner(self.cookie1)
         self.assertFalse(res.success, f'Get projects succeeded when it should have failed - no projects')
         self.server.logout(self.cookie1)
 

@@ -1,13 +1,19 @@
+from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
 from Domain.src.Loggs.Response import ResponseSuccessMsg
 
 class Factor:
-    def __init__(self, fid, owner,  name, description):
+    def __init__(self, fid, owner,  name, description, db_instance=None, persist=True):
         self.fid = fid
         self.owner = owner
         self.name = name
         self.description = description
+
+        self.db_instance = db_instance
+        if db_instance is None and persist:
+            self.db_instance = DBFactors(name, description, fid, owner)
+
 
     def to_dict(self):
         return {
@@ -33,9 +39,11 @@ DEFAULT_FACTORS = {
 }
 
 class FactorsPool:
-    def __init__(self):
+    def __init__(self, db_access):
         self.members = ThreadSafeDictWithListValue() # {email: factors}
         self.id_maker = IdMaker()
+        self.db_access = db_access
+        self.load_all_factors()
 
     def _check_id_dup_factor(self, actor, factor_name, factor_description):
         factors_of_member = self.members.get(actor)
@@ -54,15 +62,27 @@ class FactorsPool:
         self._check_id_dup_factor(actor, factor_name, factor_desc)
         new_id = self.id_maker.next_id()
         new_factor = Factor(new_id, actor, factor_name, factor_desc)
+        self.db_access.insert(new_factor.db_instance)
         self.members.insert(actor, new_factor)
         return new_factor
 
     def remove_factor(self, actor, fid):
         factor = self._find_factor(actor, fid)
+        self.db_access.delete(factor.db_instance)
         self.members.pop(actor, factor)
         return ResponseSuccessMsg(f"factor {fid} removed from {actor}")
 
     def get_factors(self, actor):
         return self.members.get(actor)
 
-
+    def load_all_factors(self):
+        top_id = 0
+        factors_data = self.db_access.load_all(DBFactors)
+        for factor in factors_data:
+            owner = factor.owner
+            name = factor.name
+            description = factor.description
+            fid = factor.id
+            self.members.insert(owner, Factor(fid, owner, name, description, factors_data))
+            top_id = max(top_id, fid)
+        self.id_maker.start_from(top_id + 1)

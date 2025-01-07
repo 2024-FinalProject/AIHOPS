@@ -128,7 +128,7 @@ def get_projects():
     try:
         cookie = request.args.get("cookie", type = int)
         
-        res = server.get_projects(cookie)
+        res = server.get_projects_of_owner(cookie)
         
         # Make sure we're only sending serializable data
         return jsonify({

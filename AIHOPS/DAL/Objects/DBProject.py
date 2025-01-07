@@ -1,6 +1,5 @@
 from datetime import datetime
 from sqlalchemy import Column, Index, Integer, String, DateTime, Boolean
-from sqlalchemy.ext.declarative import declarative_base
 
 from Service.config import Base
 
@@ -8,24 +7,24 @@ class DBProject(Base):
     __tablename__ = 'projects'
 
     id = Column(Integer, primary_key=True)
+    owner = Column(String(255), nullable=False)
     name = Column(String(255), nullable=False)
-    founder = Column(String(255), nullable=False)
     description = Column(String(1000))
     date_created = Column(DateTime, default=datetime.utcnow)
-    is_active = Column(Boolean, default=False)
-    factors_num = Column(Integer)
+    published = Column(Boolean, default=False)
+    factors_confirmed = Column(Boolean, default=False)
+    severity_factors_confirmed = Column(Boolean, default=False)
 
     __table_args__ = (
         Index('idx_project_name', 'name'),
-        Index('idx_project_founder', 'founder'),
+        Index('idx_project_owner', 'owner'),
     )
 
-    def __init__(self, name, founder, description, project_id, factors_num):
+    def __init__(self, pid, owner, name, description):
+        self.id = pid
+        self.owner = owner
         self.name = name
-        self.founder = founder
         self.description = description
-        self.id = project_id
-        self.date_created = datetime.now()
-        self.is_active = False
-        self.factors_num = factors_num
-       
+        self.published = False
+        self.factors_confirmed = False
+        self.severity_factors_confirmed = False
