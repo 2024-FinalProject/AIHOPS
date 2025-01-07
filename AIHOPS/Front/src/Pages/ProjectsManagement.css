@@ -1,0 +1,556 @@
+/* General Layout */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+  }
+  
+  .container {
+    padding: 20px;
+  }
+  
+  .header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  /* Container to center the loading text */
+  .loading-container {
+    position: fixed;  /* Fixed position to center in the viewport */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);  /* Centers the container */
+    text-align: center;  /* Centers the text inside the container */
+  }
+  
+  /* Stylish loading text */
+  .loading-text {
+    font-size: 24px;
+    font-family: 'Arial', sans-serif;
+    font-weight: bold;
+    color: #333;
+    letter-spacing: 2px;
+    position: relative;
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #e58181, #ec82a8);
+    color: #fff;
+    border-radius: 50px;
+    animation: pulse 1.5s infinite ease-in-out;
+  }
+  
+  /* Animation for the loading text */
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .projects-management-container {
+    padding: 20px;
+  }
+  
+  /* Project Cards */
+  .project-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 10px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 35%;
+    max-width: 800px;
+  }
+  
+  .project-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .project-info {
+    width: 100%;
+    margin-bottom: 0.5px;
+  }
+  
+  .project-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 2px;
+  }
+  
+  /* Action Buttons */
+  .action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    color: white;
+  }
+  
+  .view-edit-btn {
+    background-color: #88cd8d;
+  }
+  
+  .delete-btn {
+    background-color: #ac423a;
+  }
+  
+  .archive-btn {
+    background-color: #757171;
+    padding: 12px;
+    margin: 0px 0;
+    font-size: 16px;
+    width:fit-content;
+  }
+  
+  .publish-btn {
+    background-color: #5f8fb7;
+    padding: 12px;
+    margin: 0px 0;
+    font-size: 16px;
+    width:fit-content;
+  }
+  
+  .action-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  
+  /* Popup Styles */
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .popup-content {
+    background-color: #fff;
+    padding: 25px;
+    max-width: 700px;
+    width: 90%;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    max-height: 85vh;
+    position: relative;
+  }
+  
+  .close-popup {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  
+  .close-popup:hover {
+    color: #333;
+  }
+  
+  /* Factors Styling */
+  .factors-list {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .factor-item {
+    margin-bottom: 12px;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .factor-inputs {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+  }
+  
+  .factor-name-input {
+    flex: 1;
+    max-width: 200px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .factor-desc-input {
+    flex: 2;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .factor-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+  
+  .update-factor-btn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  
+  .update-factor-btn:hover {
+    background-color: #1976D2;
+  }
+  
+  /* Severity Factors */
+  .severity-factors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .severity-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: white;
+    padding: 8px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .severity-label {
+    font-weight: 500;
+    min-width: 70px;
+    color: #333;
+  }
+  
+  .severity-input {
+    width: 60px;
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+  }
+  
+  .severity-value {
+    font-size: 14px;
+    padding: 4px 8px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    min-width: 60px;
+    text-align: center;
+  }
+  
+  .severity-factors-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  
+  /* Members Section */
+  .members-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .member-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+  }
+  
+  .member-name {
+    font-size: 14px;
+  }
+  
+  .remove-btn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  
+  .remove-btn:hover {
+    background-color: #d32f2f;
+  }
+  
+  .add-member-container {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .add-member-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .add-member-btn {
+    background-color: #4CAF50;
+    padding: 8px 16px;
+  }
+  
+  .remove-pending-member-container {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .remove-pending-member-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .pending-member-item{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border-bottom: 1px solid #ddd; /* Add a border for separation */
+  }
+  
+  .pending-members-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .remove-pending-member-btn {
+    background-color: #4CAF50;
+    padding: 8px 16px;
+  }
+  
+  
+  
+  /* Error Message */
+  .error-message {
+    color: #f44336;
+    text-align: center;
+    padding: 20px;
+    background-color: #ffebee;
+    border-radius: 4px;
+    margin: 20px auto;
+    max-width: 600px;
+  }
+  
+  /* Updated Severity Factors */
+  .severity-factors-container {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+  
+  .severity-factors-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .severity-factors-row:last-child {
+    justify-content: flex-start;
+    gap: 30px;
+    margin-bottom: 0;
+  }
+  
+  .severity-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: white;
+    padding: 12px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    min-width: 180px;
+  }
+  
+  .severity-label {
+    font-weight: 500;
+    min-width: 80px;
+    color: #333;
+  }
+  
+  .severity-input {
+    width: 70px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 14px;
+  }
+  
+  .severity-value {
+    font-size: 14px;
+    padding: 6px 10px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    min-width: 70px;
+    text-align: center;
+  }
+  
+  /* Update Project Button */
+  .edit-btn {
+    width:fit-content;
+    background-color: #949696;
+    padding: 12px;
+    margin: 20px 0;
+    margin-top: 40px;
+    margin-left: 20px;
+    font-size: 16px;
+  }
+  
+  .edit-btn:hover {
+    background-color: #1976D2;
+  }
+  
+  /* Members Warning */
+  .members-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 12px 15px;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 14px;
+  }
+  
+  .members-warning p {
+    margin: 0;
+  }
+  
+  .project-edit-container {
+    margin-bottom: 20px;
+  }
+  
+  .edit-field {
+    margin-bottom: 15px;
+  }
+  
+  .edit-field label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #333;
+  }
+  
+  .project-input {
+    width: 50%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+  }
+  
+  .project-textarea {
+    width: 95%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    min-height: 80px;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+  }
+  
+  .project-input:focus,
+  .project-textarea:focus {
+    border-color: #2196F3;
+    outline: none;
+  }
+  
+  /* Sort Button Styling */
+  .sort-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #333;
+    transition: color 0.3s;
+  }
+  
+  .sort-button:hover {
+    color: #0078d7; /* Highlight on hover */
+  }
+  
+  /* Sort Button Container */
+  .sort-container {
+    position: absolute;
+    right: 80px; /* Align to the far right */
+    top: 30%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* Sort Button Styling */
+  .sort-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #333;
+    transition: color 0.3s;
+  }

@@ -12,6 +12,7 @@ const ProjectsManagement_old = () => {
     const [selectedProject, setSelectedProject] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
     const [factorUpdates, setFactorUpdates] = useState({});
+      const [severityUpdates, setSeverityUpdates] = useState({});
     const [projectUpdates, setProjectUpdates] = useState({});
     const [newFactorName, setNewFactorName] = useState("");
     const [newFactorDescription, setNewFactorDescription] = useState("");
@@ -467,22 +468,6 @@ const ProjectsManagement_old = () => {
                                     >
                                         Delete
                                     </button>
-                                    {project.isActive && (
-                                        <button
-                                            className="action-btn archive-btn"
-                                            onClick={() => handleArchive(project.id, project.name)}
-                                        >
-                                            Archive
-                                        </button>
-                                    )}
-                                    {!project.isActive && (
-                                        <button
-                                            className="action-btn publish-btn"
-                                            onClick={() => handlePublish(project.id, project.name)}
-                                        >
-                                            Publish
-                                        </button>
-                                    )}
                                 </div>
                             </div>
                         ))}
@@ -557,6 +542,108 @@ const ProjectsManagement_old = () => {
                     </div>
                 </div>
             )}
+            
+            {/* Edit/View Project Popup */}
+            {showPopup && selectedProject && (
+            <div className="popup-overlay">
+                <div className="popup-content">
+                    <span className="close-popup" onClick={closePopup}>
+                    &times;
+                    </span>
+                    <h3>Project Details</h3>
+                    <div className="project-edit-container">
+                        <div className="edit-field">
+                        <label>Name:</label>
+                        <input
+                            type="text"
+                            defaultValue={selectedProject.name}
+                            className="project-input"
+                            onChange={(e) => {
+                            setProjectUpdates(prev => ({
+                                ...prev,
+                                name: e.target.value
+                            }));
+                            }}
+                        />
+                        </div>
+                        <div className="edit-field">
+                        <label>Description:</label>
+                        <textarea
+                            defaultValue={selectedProject.description}
+                            className="project-textarea"
+                            onChange={(e) => {
+                            setProjectUpdates(prev => ({
+                                ...prev,
+                                description: e.target.value
+                            }));
+                            }}
+                        />
+                        </div>
+                    </div>
+                        
+                    <div
+                        className="project-edit-status"
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'left', // Center horizontally
+                            alignItems: 'center',    // Center vertically
+                            height: '0px',
+                        }}
+                    >
+                        <span style={{ display: 'block', marginLeft: '70px'}}>
+                            <strong>Content Factors Set:</strong> {selectedProject.factors_inited ? "✅" : "❌"}
+                        </span>
+
+                        <span style={{ display: 'block', marginLeft: '35px' }}>
+                            <strong>d-values (Seveirty Factors) Set:</strong> {selectedProject.severity_factors_inited ? "✅" : "❌"}
+                        </span>
+
+                        <span style={{ display: 'block', marginLeft: '35px' }}>
+                            <strong>Invited Assessors:</strong> {projectsPendingRequests.length > 1 ? "✅" : "❌"}
+                        </span>
+                    </div>
+                    <div>
+                        <button style={{ marginRight: '10px' }}
+                            className="action-btn edit-btn"
+                                onClick={() => handleEditContentFactors(selectedProject.id, selectedProject.name)}
+                            >
+                                Edit Content Factors
+                        </button>
+
+                        <button style={{ marginRight: '10px' }}
+                            className="action-btn edit-btn"
+                                onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
+                            >
+                                Edit d-score (Severity Factors)
+                        </button>
+
+                        <button
+                            className="action-btn edit-btn"
+                                onClick={() => handleManageAssessors(selectedProject.id, selectedProject.name)}
+                            >
+                                Manage Assessors
+                        </button>
+                    </div>
+                    <div>
+                        {selectedProject.isActive && (
+                            <button
+                                className="action-btn archive-btn"
+                                onClick={() => handleArchive(selectedProject.id, selectedProject.name)}
+                            >
+                                Archive
+                            </button>
+                        )}
+                        {!selectedProject.isActive && (
+                            <button
+                                className="action-btn publish-btn"
+                                onClick={() => handlePublish(selectedProject.id, selectedProject.name)}
+                            >
+                                Publish
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>)}
         </section>
     );    
 };
