@@ -11,6 +11,7 @@ import WelcomePage from "./pages/WelcomePage";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Notification from "./pages/PendingRequests";
+import ProjectsManagement_old from "./Pages/ProjectsManagement_old";
 import ProjectsManagement from "./Pages/ProjectsManagement";
 import MyProjects from "./Pages/MyProjects";
 
@@ -41,6 +42,7 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/notification" element={<Notification />} />
         <Route path="/projectsmanagement" element={<ProjectsManagement />} />
+        <Route path="/projectsmanagement_old" element={<ProjectsManagement_old />} />
         <Route path="/myprojects" element={<MyProjects />} />
       </Routes>
     </>
