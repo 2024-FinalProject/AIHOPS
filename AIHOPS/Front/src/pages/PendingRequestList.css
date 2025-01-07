@@ -1,5 +1,18 @@
+/* Global Font Styling for request Components */
+.request-header,
+.request-status-container,
+.request-status,
+.request-name,
+.request-sender,
+.request-item,
+.request-footer,
+.request-actions button {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+
 .pending-request-title {
-  font-size: 1.5em;
+  font-size: 2em;
   font-weight: bold;
   color: #333;
   text-align: center;
@@ -50,17 +63,41 @@
 }
 
 
-.email-list-container {
-  width: 40%;
-  margin: auto;
+.request-list-container {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin: 20px auto;
   border: 1px solid #ccc;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #fff;
-  margin-top: 20px;
+  background-color: #f5f5f5;
+  padding: 10px;
 }
 
-.email-subject {
+
+.request-status {
+  font-size: 1rem;
+}
+
+
+.request-status-container {
+  display: flex;
+  justify-content: space-between; /* Align status to left and button to right */
+  align-items: center; /* Align items vertically in the center */
+  width: 100%; /* Ensure it stretches across the container */
+  margin-bottom: 0.5rem; /* Optional spacing */
+}
+
+.request-name {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.request-description {
   font-size: 1.2em;
   font-weight: bold;
   color: #333;
@@ -68,7 +105,7 @@
   font-family: 'Courier New', Courier, monospace;
 }
 
-.email-sender {
+.request-sender {
   font-size: 1em;
   font-weight: bold;
   color: #333;
@@ -77,45 +114,34 @@
 }
 
 
-.email-item {
-  display: flex;
-  flex-direction: column;
-  padding: 15px;
-  border-bottom: 1px solid #eee;
-  cursor: pointer;
-  transition: background-color 0.2s;
+.request-item {
+  margin: 10px 0; /* Adds spacing around each item */
+  padding: 20px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  background-color: #fff;
 }
 
 
-
-.email-item:last-child {
-  border-bottom: none;
+.request-item:last-child {
+  margin-bottom: 0; /* Prevent extra space on the last item */
 }
 
-.email-item:hover {
+.request-item:hover {
   background-color: #f9f9f9;
 }
 
-.email-item.selected {
-  background-color: #e6f7ff;
+.request-header {
+  margin-bottom: 10px; /* Space below the header */
 }
 
-.email-footer {
-  margin-top: auto;
+.request-actions {
   display: flex;
-  justify-content: space-between; /* This ensures the buttons are aligned on opposite sides */
-  align-items: center;
-  font-size: 12px;
-  color: #777;
+  justify-content: space-around; /* Even spacing between buttons */
+  margin-top: 15px; /* Space above action buttons */
 }
 
-.email-actions {
-  display: flex;
-  justify-content: space-evenly;
-  width: 100%; /* Make sure it takes up the full width */
-}
-
-.email-actions button {
+.request-actions button {
   margin-left: 10px;
   padding: 5px 10px;
   font-size: 15px;
@@ -124,25 +150,33 @@
   cursor: pointer;
 }
 
+.request-button.close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: black; /* Highlighted color for visibility */
+}
 
 
-.email-button.reject {
+
+.request-button.reject {
   background-color: #ac423a;
   color: white;
 }
 
-.email-button.reject:hover {
+.request-button.reject:hover {
   background-color: #ac423a;
   zoom: 1.2;
 }
 
-.email-button.accept:hover {
+.request-button.accept:hover {
   background-color: #88cd8d;
   zoom: 1.2;
 }
 
 
-.email-button.accept {
+.request-button.accept {
   background-color: #88cd8d;
   color: white;
 }

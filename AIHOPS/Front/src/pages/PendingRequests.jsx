@@ -144,7 +144,10 @@ const PendingRequestList = () => {
   return (
     <div>
       <div className="center-container">
-        <h1 className="pending-request-title"> You have been invited to projects: </h1>
+        <h1 className="pending-request-title">
+          {" "}
+          You have been invited to projects:{" "}
+        </h1>
         <div className="sort-container">
           <button className="sort-button" onClick={toggleSort}>
             {/* Use the sort icon */}⇅
@@ -165,43 +168,48 @@ const PendingRequestList = () => {
 
       {/* Display Pending Requests */}
       {!isLoading && !error && requestList.length > 0 && (
-        <div className="email-list-container">
+        <div className="request-list-container">
           {sortRequestList.map((request) => (
             <div
               key={request.id} // Prefer id if available
-              className={`email-item ${
+              className={`request-item ${
                 request === selectedElement ? "selected" : ""
               }`}
               onClick={(e) => handleSelectRequest(e, request)}
             >
-              <span className="email-status">
-                  {request.isActive ? "🟢 Active" : "🔴 Inactive"}
-                </span>
-              <div className="email-header">
-                <h4 className="email-subject">
-                  <span className="underline ">Project Name:</span>
-                  <span className="underline ">{request.name}</span>
-                  {", "} {request.description}
+              <div className="request-header">
+                <div className="request-status-container">
+                  <span className="request-status">
+                    {request.isActive ? "🟢 Active" : "🔴 Inactive"}
+                  </span>
+                  {!request.isActive && (
+                    <button
+                      className="request-button close"
+                      onClick={(e) => handleReject(e, request)}
+                    >
+                      x
+                    </button>
+                  )}
+                </div>
+                <h4 className="request-name">
+                  Project Name:
+                  {request.name}
                 </h4>
-                <h4 className="email-subject">
-                  Project Description:{" "}
-                  {request.description}
+                <h4 className="request-description">
+                  Project Description: {request.description}
                 </h4>
-                <h5 className="email-sender">
-                  Owner: {request.founder}
-                </h5>
-            
+                <h5 className="request-sender">Owner: {request.founder}</h5>
               </div>
-              <div className="email-footer">
-                <div className="email-actions">
+              <div className="request-footer">
+                <div className="request-actions">
                   <button
-                    className="email-button accept"
+                    className="request-button accept"
                     onClick={(e) => handleAccept(e, request)}
                   >
                     ✅ Accept
                   </button>
                   <button
-                    className="email-button reject"
+                    className="request-button reject"
                     onClick={(e) => handleReject(e, request)}
                   >
                     ❌ Reject
