@@ -184,11 +184,11 @@ const PendingRequestList = () => {
                   {", "} {request.description}
                 </h4>
                 <h4 className="email-subject">
-                  <span className="underline ">Project Description:</span>{" "}
+                  Project Description:{" "}
                   {request.description}
                 </h4>
                 <h5 className="email-sender">
-                  <span className="underline ">Founder:</span> {request.founder}
+                  Owner: {request.founder}
                 </h5>
             
               </div>

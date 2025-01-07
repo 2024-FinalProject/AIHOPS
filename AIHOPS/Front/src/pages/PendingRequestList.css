@@ -86,9 +86,7 @@
   transition: background-color 0.2s;
 }
 
-.underline {
-  text-decoration: underline;
-}
+
 
 .email-item:last-child {
   border-bottom: none;
@@ -126,22 +124,25 @@
   cursor: pointer;
 }
 
-.email-button.accept {
-  background-color: #4caf50;
-  color: white;
-}
+
 
 .email-button.reject {
-  background-color: #f44336;
+  background-color: #ac423a;
   color: white;
-}
-
-.email-button.accept:hover {
-  background-color: #388e3c;
-  zoom: 1.2;
 }
 
 .email-button.reject:hover {
-  background-color: #d32f2f;
+  background-color: #ac423a;
   zoom: 1.2;
+}
+
+.email-button.accept:hover {
+  background-color: #88cd8d;
+  zoom: 1.2;
+}
+
+
+.email-button.accept {
+  background-color: #88cd8d;
+  color: white;
 }
