@@ -19,9 +19,10 @@ body {
 /* Projects List */
 .projects-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
   gap: 20px;
   margin-bottom: 40px;
+  margin-top: 5%;
   padding: 50px;
 }
 
@@ -29,13 +30,14 @@ body {
 .project-card {
   background-color: #fff;
   padding: 20px;
-  width: 100%;
+  width: 80%;
   border-radius: 8px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   max-width: 400px;
   margin: 0 auto;
   text-align: center;
+  gap: 10px;
 }
 
 .project-card:hover {
@@ -108,7 +110,28 @@ body {
   margin-bottom: 10px;
 }
 
-/* Start Vote Button */
+
+/* Popup Content - Flexbox Layout */
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Align items from top to bottom */
+  /* height: 100%; Ensure the content stretches to take the full height */
+  padding: 30px;
+}
+
+
+/* Start Voting Button Container */
+.start-vote-container {
+  margin-top: auto; /* Push the button to the bottom */
+  display: flex;
+  justify-content: flex-end; /* Align the button to the right */
+}
+
+
+
+
+/* Start Voting Button */
 .start-vote-btn {
   background-color: #4caf50;
   color: #fff;
@@ -119,6 +142,7 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease;
   text-align: center;
+  justify-content: right;
 }
 
 .start-vote-btn:hover {

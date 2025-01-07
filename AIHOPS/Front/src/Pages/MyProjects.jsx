@@ -19,6 +19,51 @@ const dummyProjects = [
       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
     ],
   },
+  {
+    id: 2,
+    name: "Project Beta",
+    description: "Description of Project Beta.",
+    founder: "Jane Doe",
+    members: [
+      { userId: 1, name: "John Doe", hasVoted: true },
+      { userId: 2, name: "Jane Doe", hasVoted: true },
+      { userId: 3, name: "Mike Smith", hasVoted: false },
+    ],
+    factors: [
+      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+      { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+    ],
+  },
+  {
+    id: 3,
+    name: "Project Gamma",
+    description: "Description of Project Gamma.",
+    founder: "Mike Smith",
+    members: [
+      { userId: 1, name: "John Doe", hasVoted: true },
+      { userId: 2, name: "Jane Doe", hasVoted: true },
+      { userId: 3, name: "Mike Smith", hasVoted: true },
+    ],
+    factors: [
+      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+      { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+    ],
+  },
+  {
+    id: 4,
+    name: "Project Delta",
+    description: "Description of Project Delta.",
+    founder: "John Doe",
+    members: [
+      { userId: 1, name: "John Doe", hasVoted: true },
+      { userId: 2, name: "Jane Doe", hasVoted: true },
+      { userId: 3, name: "Mike Smith", hasVoted: true },
+    ],
+    factors: [
+      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+      { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+    ],
+  },
 ];
 
 const MyProjects = () => {
@@ -31,7 +76,7 @@ const MyProjects = () => {
   const [showVotePopup, setShowVotePopup] = useState(false);
   const [severityLevel, setSeverityLevel] = useState(false);
   const [projectVotingStatus, setProjectVotingStatus] = useState({});
-  
+
   useEffect(() => {
     setProjects(dummyProjects);
   }, []);
@@ -62,9 +107,9 @@ const MyProjects = () => {
 
       if (response.data.success) {
         // Only update submitted votes after successful API call
-        setSubmittedVotes(prev => ({
+        setSubmittedVotes((prev) => ({
           ...prev,
-          [currentFactorId]: factorVotes[currentFactorId]
+          [currentFactorId]: factorVotes[currentFactorId],
         }));
         return true;
       } else {
@@ -94,9 +139,9 @@ const MyProjects = () => {
 
       const response = await checkFactorVotingStatus(cookie, projectId);
       if (response.data.success) {
-        setProjectVotingStatus(prev => ({
+        setProjectVotingStatus((prev) => ({
           ...prev,
-          [projectId]: response.data.voted
+          [projectId]: response.data.voted,
         }));
       }
     } catch (error) {
@@ -111,13 +156,13 @@ const MyProjects = () => {
     setFactorVotes({});
     setSubmittedVotes({});
     setCurrentFactorIndex(0);
-    
+
     await checkProjectVotingStatus(projectId);
   };
 
   const handleNextFactor = async () => {
     const submitSuccess = await handleFactorSubmit();
-    
+
     if (submitSuccess) {
       if (currentFactorIndex < currentProject.factors.length - 1) {
         setCurrentFactorIndex(currentFactorIndex + 1);
@@ -167,6 +212,7 @@ const MyProjects = () => {
                   type="checkbox"
                   checked={severityLevel}
                   onChange={() => setSeverityLevel(!severityLevel)}
+                  disabled
                 />
                 D.Score Voted
               </label>
@@ -190,7 +236,7 @@ const MyProjects = () => {
             <p className="mb-4 text-center">
               Explanation on the Project ......
             </p>
-            <div className="flex justify-center mt-4">
+            <div className="start-vote-container">
               <button onClick={handleStartVoting} className="start-vote-btn">
                 Start Voting
               </button>
