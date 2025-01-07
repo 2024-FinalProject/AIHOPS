@@ -25,13 +25,13 @@ const MyProjects = () => {
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
   const [factorVotes, setFactorVotes] = useState({});
+  const [submittedVotes, setSubmittedVotes] = useState({}); // Track successfully submitted votes
   const [currentFactorIndex, setCurrentFactorIndex] = useState(0);
   const [isVoteStarted, setIsVoteStarted] = useState(false);
   const [showVotePopup, setShowVotePopup] = useState(false);
   const [severityLevel, setSeverityLevel] = useState(false);
   const [projectVotingStatus, setProjectVotingStatus] = useState({});
   
-  // Load initial projects
   useEffect(() => {
     setProjects(dummyProjects);
   }, []);
@@ -50,7 +50,7 @@ const MyProjects = () => {
       const cookie = localStorage.getItem("authToken");
       if (!cookie) {
         alert("Authentication token not found");
-        return;
+        return false;
       }
       const currentFactorId = currentProject.factors[currentFactorIndex].id;
 
@@ -60,18 +60,28 @@ const MyProjects = () => {
         factorVotes[currentFactorId]
       );
 
-      if (!response.data.success) {
+      if (response.data.success) {
+        // Only update submitted votes after successful API call
+        setSubmittedVotes(prev => ({
+          ...prev,
+          [currentFactorId]: factorVotes[currentFactorId]
+        }));
+        return true;
+      } else {
         alert(response.data.message || "Failed to submit vote for factor");
+        return false;
       }
     } catch (error) {
       alert("Failed to submit vote for factor");
       console.error(error);
+      return false;
     }
   };
 
   const handleStartVoting = () => {
     setIsVoteStarted(true);
     setShowVotePopup(false);
+    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
   };
 
   const checkProjectVotingStatus = async (projectId) => {
@@ -95,24 +105,25 @@ const MyProjects = () => {
   };
 
   const handleCloseVoting = async (projectId) => {
-    // Reset states
     setShowVotePopup(false);
     setCurrentProject(null);
     setIsVoteStarted(false);
     setFactorVotes({});
+    setSubmittedVotes({});
     setCurrentFactorIndex(0);
     
-    // Only check voting status once after closing
     await checkProjectVotingStatus(projectId);
   };
 
   const handleNextFactor = async () => {
-    await handleFactorSubmit();
-    if (currentFactorIndex < currentProject.factors.length - 1) {
-      setCurrentFactorIndex(currentFactorIndex + 1);
-    } else {
-      // If this is the last factor, close voting and check status
-      await handleCloseVoting(currentProject.id);
+    const submitSuccess = await handleFactorSubmit();
+    
+    if (submitSuccess) {
+      if (currentFactorIndex < currentProject.factors.length - 1) {
+        setCurrentFactorIndex(currentFactorIndex + 1);
+      } else {
+        await handleCloseVoting(currentProject.id);
+      }
     }
   };
 
@@ -123,7 +134,8 @@ const MyProjects = () => {
   };
 
   const countVotedFactors = () => {
-    return Object.keys(factorVotes).filter((key) => factorVotes[key]).length;
+    // Count only successfully submitted votes
+    return Object.keys(submittedVotes).length;
   };
 
   return (
@@ -163,7 +175,6 @@ const MyProjects = () => {
         ))}
       </div>
 
-      {/* Pop-up for starting the voting process */}
       {showVotePopup && (
         <div className="popup-overlay">
           <div className="popup-content">
@@ -188,7 +199,6 @@ const MyProjects = () => {
         </div>
       )}
 
-      {/* Voting Process Popup */}
       {currentProject && isVoteStarted && (
         <div className="popup-overlay">
           <div className="popup-content">
