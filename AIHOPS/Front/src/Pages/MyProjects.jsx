@@ -183,6 +183,10 @@ const MyProjects = () => {
     return Object.keys(submittedVotes).length;
   };
 
+  const isBothCheckboxesChecked = (project) => {
+    return projectVotingStatus[project.id] && severityLevel;
+  };
+
   return (
     <div className="my-projects-container">
       <h1 className="page-heading">My Projects</h1>
@@ -197,6 +201,11 @@ const MyProjects = () => {
             <h3 className="text-xl font-semibold">{project.name}:</h3>
             <p>{project.description}</p>
             <p>Founder: {project.founder}</p>
+
+            {/* Display checkmark if both checkboxes are checked */}
+            {isBothCheckboxesChecked(project) && (
+              <div clasName="checkmark"> ✓ </div>
+            )}
 
             <div className="checkboxes">
               <label>
