@@ -216,7 +216,7 @@ def get_pending_requests_for_project():
 # expecting json with {cookie, pid, factorsValues, severityFactorsValues}
 def vote():
     data = request.json
-    res = server.vote(int(data["cookie"]), int(data["pid"]), data["factorsValues"], data["severityFactorsValues"])
+    res = server.vote(int(data["cookie"]), int(data["pid"]), data["factorValue"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/score", methods=["GET"])

@@ -113,3 +113,17 @@ export const rejectProjByUser = async (cookie, projId) => {
         projId
     });
 }
+
+export const submitFactorVote = async (cookie, pid, factorValue) => {
+    return await axios.post(`${API_URL}/project/vote`, {
+        cookie,
+        pid,
+        factorValue
+    });
+}
+
+export const checkFactorVotingStatus = async (cookie, pid) => {
+    return await axios.get(`${API_URL}/project/vote-status`, {
+        params: { cookie, pid }
+    });
+}

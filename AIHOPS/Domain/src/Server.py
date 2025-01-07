@@ -233,14 +233,14 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to update project name and description: {e}")
     
-    def vote(self, cookie, pid, factors_values, severity_factors_values):
+    def vote(self, cookie, pid, factors_value):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res.result
             user_name = session.user_name
-            return self.project_manager.vote(pid, user_name, factors_values, severity_factors_values)
+            return self.project_manager.vote(pid, user_name, factors_value)
         except Exception as e:
             return ResponseFailMsg(f"Failed to vote: {e}")
     
