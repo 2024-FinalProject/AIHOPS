@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { archiveProject, createProject, getProjects, publishProject, setProjectFactors,
          setSeverityFactors, update_project_name_and_desc, addMembers, removeMember,
          get_pending_requests_for_project } from "../api/ProjectApi";
+import CreateProjectPopup from '../Components/CreateProjectPopUp';
+import ProjectStatusPopup from '../Components/ProjectStatusPopup';
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
-const ProjectsManagement_old = () => {
+const ProjectsManagement = () => {
     const [msg, setMsg] = useState("");
     const [isSuccess, setIsSuccess] = useState(null);
     const [projects, setProjects] = useState([]);
@@ -142,6 +144,26 @@ const ProjectsManagement_old = () => {
         if (window.confirm(`Are you sure you want to delete the project "${projectName}"?`)) {
             alert(`Deleted project: "${projectName}". Implement the backend call.`);
         }
+    };
+
+    const handleEditProjectsName = async (projectID, projectName) => {
+        
+    };
+
+    const handleEditProjectsDescription = async (projectID, projectName) => {
+
+    };
+
+    const handleEditContentFactors = async (projectID, projectName) => {
+
+    };
+
+    const handleEditSeveirtyFactors = async (projectID, projectName) => {
+
+    };
+
+    const handleManageAssessors = async (projectID, projectName) => {
+
     };
 
     const handleArchive = async (projectID, projectName) => {
@@ -484,168 +506,29 @@ const ProjectsManagement_old = () => {
                 )}
             </div>
     
-            {/* Create Project Popup */}
-            {showCreatePopup && (
-                <div className="popup-overlay">
-                    <div className="popup-content">
-                        <span
-                            className="close-popup"
-                            onClick={() => setShowCreatePopup(false)}
-                        >
-                            &times;
-                        </span>
-                        <h3>Create New Project</h3>
-    
-                        <div className="project-edit-container">
-                            <div className="edit-field">
-                                <label>Name:</label>
-                                <input
-                                    type="text"
-                                    value={newProject.name}
-                                    className="project-input"
-                                    onChange={(e) =>
-                                        setNewProject((prev) => ({
-                                            ...prev,
-                                            name: e.target.value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <div className="edit-field">
-                                <label>Description:</label>
-                                <textarea
-                                    value={newProject.description}
-                                    className="project-textarea"
-                                    onChange={(e) =>
-                                        setNewProject((prev) => ({
-                                            ...prev,
-                                            description: e.target.value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                        </div>
-    
-                        <div className="severity-factors-warning">
-                            <p>
-                                Note: You'll be able to add Factors & Severity Factors after the
-                                creation of the project, in the edit/view window
-                            </p>
-                        </div>
-    
-                        <button
-                            className="action-btn update-project-btn"
-                            onClick={handleCreateProject}
-                        >
-                            Create Project
-                        </button>
-                    </div>
-                </div>
-            )}
+            <CreateProjectPopup
+                showCreatePopup={showCreatePopup}
+                setShowCreatePopup={setShowCreatePopup}
+                newProject={newProject}
+                setNewProject={setNewProject}
+                handleCreateProject={handleCreateProject}
+            />
             
             {/* Edit/View Project Popup */}
             {showPopup && selectedProject && (
-            <div className="popup-overlay">
-                <div className="popup-content">
-                    <span className="close-popup" onClick={closePopup}>
-                    &times;
-                    </span>
-                    <h3>Project Details</h3>
-                    <div className="project-edit-container">
-                        <div className="edit-field">
-                        <label>Name:</label>
-                        <input
-                            type="text"
-                            defaultValue={selectedProject.name}
-                            className="project-input"
-                            onChange={(e) => {
-                            setProjectUpdates(prev => ({
-                                ...prev,
-                                name: e.target.value
-                            }));
-                            }}
-                        />
-                        </div>
-                        <div className="edit-field">
-                        <label>Description:</label>
-                        <textarea
-                            defaultValue={selectedProject.description}
-                            className="project-textarea"
-                            onChange={(e) => {
-                            setProjectUpdates(prev => ({
-                                ...prev,
-                                description: e.target.value
-                            }));
-                            }}
-                        />
-                        </div>
-                    </div>
-                        
-                    <div
-                        className="project-edit-status"
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'left', // Center horizontally
-                            alignItems: 'center',    // Center vertically
-                            height: '0px',
-                        }}
-                    >
-                        <span style={{ display: 'block', marginLeft: '70px'}}>
-                            <strong>Content Factors Set:</strong> {selectedProject.factors_inited ? "✅" : "❌"}
-                        </span>
-
-                        <span style={{ display: 'block', marginLeft: '35px' }}>
-                            <strong>d-values (Seveirty Factors) Set:</strong> {selectedProject.severity_factors_inited ? "✅" : "❌"}
-                        </span>
-
-                        <span style={{ display: 'block', marginLeft: '35px' }}>
-                            <strong>Invited Assessors:</strong> {projectsPendingRequests.length > 1 ? "✅" : "❌"}
-                        </span>
-                    </div>
-                    <div>
-                        <button style={{ marginRight: '10px' }}
-                            className="action-btn edit-btn"
-                                onClick={() => handleEditContentFactors(selectedProject.id, selectedProject.name)}
-                            >
-                                Edit Content Factors
-                        </button>
-
-                        <button style={{ marginRight: '10px' }}
-                            className="action-btn edit-btn"
-                                onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
-                            >
-                                Edit d-score (Severity Factors)
-                        </button>
-
-                        <button
-                            className="action-btn edit-btn"
-                                onClick={() => handleManageAssessors(selectedProject.id, selectedProject.name)}
-                            >
-                                Manage Assessors
-                        </button>
-                    </div>
-                    <div>
-                        {selectedProject.isActive && (
-                            <button
-                                className="action-btn archive-btn"
-                                onClick={() => handleArchive(selectedProject.id, selectedProject.name)}
-                            >
-                                Archive
-                            </button>
-                        )}
-                        {!selectedProject.isActive && (
-                            <button
-                                className="action-btn publish-btn"
-                                onClick={() => handlePublish(selectedProject.id, selectedProject.name)}
-                            >
-                                Publish
-                            </button>
-                        )}
-                    </div>
-                </div>
-            </div>)}
+            <ProjectStatusPopup
+                closePopup={closePopup}
+                selectedProject={selectedProject}
+                handleEditProjectsName={handleEditProjectsName}
+                handleEditProjectsDescription={handleEditProjectsDescription}
+                handleEditContentFactors={handleEditContentFactors}
+                handleEditSeveirtyFactors={handleEditSeveirtyFactors}
+                handleManageAssessors={handleManageAssessors}
+                handleArchive={handleArchive}
+                handlePublish={handlePublish}
+            />)}
         </section>
     );    
 };
 
-export default ProjectsManagement_old;
+export default ProjectsManagement;
