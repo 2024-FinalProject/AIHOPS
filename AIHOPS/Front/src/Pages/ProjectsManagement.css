@@ -398,6 +398,8 @@ body {
     padding: 15px;
     border-radius: 8px;
     margin-bottom: 20px;
+    justify-content: center;
+    align-self: center;
   }
   
   .severity-factors-row {

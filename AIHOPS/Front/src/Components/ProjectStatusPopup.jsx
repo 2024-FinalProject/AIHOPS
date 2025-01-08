@@ -22,7 +22,7 @@ const ProjectStatusPopup = ({
           <p style={{ color: 'red' }}> TODO: Create a progress bar... </p>
         </div>
         <div>
-          <button 
+          <button disabled = {selectedProject.isActive}
             className="action-btn edit-btn"
             onClick={() => handleEditProjectsName(selectedProject.id, selectedProject.name)}
           >
@@ -30,7 +30,7 @@ const ProjectStatusPopup = ({
           </button>
         </div>
         <div>
-          <button 
+          <button disabled = {selectedProject.isActive}
             className="action-btn edit-btn"
             onClick={() => handleEditProjectsDescription(selectedProject.id, selectedProject.name)}
           >
@@ -38,7 +38,7 @@ const ProjectStatusPopup = ({
           </button>
         </div>
         <div>
-          <button 
+          <button disabled = {selectedProject.isActive}
             className="action-btn edit-btn"
             onClick={() => handleEditContentFactors(selectedProject.id, selectedProject.name)}
           >
@@ -46,7 +46,7 @@ const ProjectStatusPopup = ({
           </button>
         </div>
         <div>
-          <button 
+          <button disabled = {selectedProject.isActive}
             className="action-btn edit-btn"
             onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
           >
