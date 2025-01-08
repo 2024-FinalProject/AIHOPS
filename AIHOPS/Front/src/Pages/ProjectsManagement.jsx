@@ -16,7 +16,7 @@ const ProjectsManagement = () => {
     const [showPopup, setShowPopup] = useState(false);
     const [currentPopup, setCurrentPopup] = useState(null); //Track the current popup type
     const [factorUpdates, setFactorUpdates] = useState({});
-      const [severityUpdates, setSeverityUpdates] = useState({});
+    const [severityUpdates, setSeverityUpdates] = useState({});
     const [projectUpdates, setProjectUpdates] = useState({});
     const [newFactorName, setNewFactorName] = useState("");
     const [newFactorDescription, setNewFactorDescription] = useState("");
@@ -230,90 +230,6 @@ const ProjectsManagement = () => {
         }
     };
 
-    const handleAddMember = async () => {
-        if (newMemberName === selectedProject.founder) {
-          alert(`You cannot add the founder of the project, as they already exist.`);
-          return;
-        }
-    
-        if(newMemberName === "") {
-          alert(`Please enter a valid member name.`);
-          return;
-        }
-      
-        const memberKeys = selectedProject.members.map((memberItem) => memberItem.key);
-      
-        if (!memberKeys.includes(newMemberName)) {
-          const cookie = localStorage.getItem("authToken");
-      
-          if (!cookie) {
-            setMsg("No authentication token found. Please log in again.");
-            setIsSuccess(false);
-            return;
-          }
-      
-          const tempMembersList = [newMemberName];
-      
-          try {
-            const response = await addMembers(cookie, selectedProject.id, tempMembersList);
-      
-            if (response.data.success) {
-              alert(`An invitation has been sent to member ${newMemberName}.`);
-              await fetchProjects(); // Refresh projects after adding the member
-              await fetch_pending_requests(cookie, selectedProject.id);
-              // Clear the input fields after adding
-              setNewMemberName('');
-              setIsSuccess(true);
-            } else {
-              setMsg(response.data.message);
-              alert(response.data.message);
-              setIsSuccess(true);
-            }
-          } catch (error) {
-            const errorMessage = error.response?.data?.message || error.message;
-            console.error("Error:", errorMessage);
-            setMsg(`Error in adding member: ${errorMessage}`);
-            setIsSuccess(false);
-          }
-        } else {
-          alert(`Member already exists.`);
-        }
-    };
-
-    const handleRemoveMember = async (member) => {
-        if (member === selectedProject.founder) {
-          alert(`You cannot remove the founder of the project.`);
-          return;
-        }
-      
-        const cookie = localStorage.getItem("authToken");
-      
-        if (!cookie) {
-          setMsg("No authentication token found. Please log in again.");
-          setIsSuccess(false);
-          return;
-        }
-      
-        try {
-          const response = await removeMember(cookie, selectedProject.id, member);
-      
-          if (response.data.success) {
-            alert(`The member ${member} has been removed from the project.`);
-            await fetchProjects(); // Refresh the project data after removal
-            await fetch_pending_requests(cookie, selectedProject.id);
-            setIsSuccess(true);
-          } else {
-            setMsg(response.data.message);
-            alert(response.data.message);
-            setIsSuccess(true);
-          }
-        } catch (error) {
-          const errorMessage = error.response?.data?.message || error.message;
-          console.error("Error:", errorMessage);
-          setMsg(`Error in removing member: ${errorMessage}`);
-          setIsSuccess(false);
-        }
-    };
 
     const handleAddFactor = async () => {
         if (!window.confirm("Are you sure you want to add this factor?")) {
@@ -525,6 +441,7 @@ const ProjectsManagement = () => {
               <EditPopup
                 fetchProjects = {fetchProjects}
                 fetch_selected_project = {fetch_selected_project}
+                fetch_pending_requests = {fetch_pending_requests}
                 setIsSuccess={setIsSuccess}
                 setMsg = {setMsg}
                 closePopup={returnToMainPopup}
