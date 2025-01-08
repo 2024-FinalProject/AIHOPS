@@ -67,6 +67,13 @@ const EditPopup = ({ fetchProjects, fetch_selected_project ,setIsSuccess, setMsg
             }
             tempSeverityFactors.push(severityUpdates[level]);
         }
+
+        for(let i = 1; i < tempSeverityFactors.length; i++){
+            if(tempSeverityFactors[i - 1] > tempSeverityFactors[i]){
+                alert("Severity factors must be in increasing order.\nCurrently level " + (i) + " is greater than level " + (i + 1));
+                return;
+            }
+        }
         
         try {
             const severityResponse = await setSeverityFactors(cookie, selectedProject.id, tempSeverityFactors);
