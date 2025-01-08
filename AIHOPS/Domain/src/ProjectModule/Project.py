@@ -43,14 +43,29 @@ class Project:
         self.db_access.update(self.db_instance)
         self.severity_factors_inited = True
 
+    def _set_factors_inited_false(self):
+        if self.factors_inited:
+            self.db_instance.factors_confirmed = False
+            self.db_access.update(self.db_instance)
+            self.factors_inited = False
+
+    def _set_severity_factors_inited_false(self):
+        if self.severity_factors_inited:
+            self.db_instance.severity_factors_confirmed = False
+            self.db_access.update(self.db_instance)
+            self.severity_factors_inited = False
+
     def add_factor(self, factor):
+        self._set_factors_inited_false()
         self.vote_manager.add_factor(factor)
 
     def remove_factor(self, fid):
+        self._set_factors_inited_false()
         self.vote_manager.remove_factor(fid)
         return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
 
     def set_severity_factors(self, severity_factors):
+        self._set_severity_factors_inited_false()
         if len(severity_factors) != 5:
             return ResponseFailMsg(f"only 5 severity factors")
         for factor in severity_factors:
@@ -93,11 +108,17 @@ class Project:
 
 
     def remove_member(self, member):
-        if self.published:
+        try:
             self.members.remove(member)
-        else:
+            return ResponseSuccessMsg(f"member {member} has been removed from project {self.pid}")
+        except ValueError:
+            res1 = ResponseFailMsg(f"member {member} not in project {self.pid}")
+        try:
             self.to_invite_when_published.remove(member)
-        return ResponseSuccessMsg(f"member {member} has been removed from project: {self.pid}")
+            return ResponseSuccessMsg(f"member {member} has been from to invite list project {self.pid}")
+        except ValueError:
+            res2 = ResponseFailMsg(f"member {member} not in to invite for project {self.pid}")
+        return ResponseFailMsg(f"member {member} not in to invite nor member of project {self.pid}")
 
     def is_published(self):
         return self.published
@@ -107,10 +128,10 @@ class Project:
         return ResponseSuccessObj(f"project factors for {self.pid}", self.vote_manager.get_factors())
 
     def get_members(self):
-        if self.is_published():
-            return ResponseSuccessObj(f"project members for {self.pid}", self.members.to_list())
-        else:
-            return ResponseSuccessObj(f"project members for {self.pid}", self.to_invite_when_published.to_list())
+        return ResponseSuccessObj(f"project members for {self.pid}", self.members.to_list())
+
+    def get_to_invite(self):
+        return ResponseSuccessObj(f"project members for {self.pid}", self.to_invite_when_published.to_list())
 
     def get_severity_factors(self):
         return ResponseSuccessObj(f"project severity factors for {self.pid}", copy.deepcopy(self.severity_factors))
@@ -149,14 +170,17 @@ class Project:
         self.db_instance.published = True
         self.db_access.update(self.db_instance)
         self.published = True
-        return ResponseSuccessObj(f"project {self.pid} published", self.to_invite_when_published.to_list())
+        lst = copy.deepcopy(self.to_invite_when_published.to_list())
+        self.to_invite_when_published.clear()
+        return ResponseSuccessObj(f"project {self.pid} published", lst)
 
-    def archive_project(self):
+    def archive_project(self, to_invite):
         if not self.published:
             return ResponseFailMsg(f"project {self.pid} has not been published")
         self.db_instance.published = False
         self.db_access.update(self.db_instance)
         self.published = False
+        self.to_invite_when_published = copy.deepcopy(to_invite)
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
     def get_score(self):
@@ -185,6 +209,7 @@ class Project:
             "severity_factors_inited": self.severity_factors_inited,
             "severity_factors": self.severity_factors if self.severity_factors else [],
             "members": self.members.to_list() if self.members else [],
+            "to_invite": self.to_invite_when_published.to_list() if self.to_invite_when_published else []
         }
 
 

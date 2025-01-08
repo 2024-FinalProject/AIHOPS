@@ -110,7 +110,6 @@ class ProjectManager():
         project.update_name(desc)
         return ResponseSuccessMsg(f"{pid}: updated name and desc to {project.name}, {project.desc}")
 
-    # TODO: add to server
     def get_project_progress_for_owner(self, pid, actor):
         """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}"""
         project = self._verify_owner(pid, actor)
@@ -188,29 +187,42 @@ class ProjectManager():
         return project.get_factors(actor)
 
     def get_members(self, pid, actor):
+        """return only projects active members"""
         project = self._verify_owner(pid, actor)
         return project.get_members()
 
-    # TODO: add to server
+    def get_to_invite(self, pid, actor):
+        """return only members that will be invited once the project will be published"""
+        project = self._verify_owner(pid, actor)
+        return project.get_to_invite()
+
     def get_project_severity_factors(self, pid, actor):
         project = self._verify_owner(pid, actor)
-        return project.get_severities()
+        return project.get_severity_factors()
 
     # TODO: remove
     def get_project(self, pid):
-        ...
+        return ResponseSuccessObj(self._find_project(pid))
 
-    # TODO: add to server
+    def _get_pending_emails_by_projects_list(self, pid):
+        pending_emails = []
+        for email, projects in self.pending_requests.dict.items():
+            if pid in projects:
+                pending_emails.append(email)
+        return pending_emails
+
     def get_pending_emails_for_project(self, pid, actor):
         project = self._verify_owner(pid, actor)
         if project.is_published():
-            pending_emails = []
-            for email, projects in self.pending_requests.dict.items():
-                if pid in projects:  # Check if the project_id exists in the list of project_ids
-                    pending_emails.append(email)  #If so, add the email to the result list
+            pending_emails = self._get_pending_emails_by_projects_list(pid)
             return ResponseSuccessObj(f"pending requests for project {pid} : {pending_emails}", pending_emails)
         else:
             return project.get_members()
+
+    def get_project_to_invite(self, pid, actor):
+        project = self._find_project(pid)
+        return project.get_to_invite()
+
 
     # ---------------- Projects by Users ----------
 
@@ -222,7 +234,6 @@ class ProjectManager():
         return ResponseSuccessObj(f"pending projects for actor {actor} : {pids}", projects)
 
 
-    # TODO: add to server
     def get_projects_by_owner(self, actor):
         """returns all projects founded by actor"""
         projects = self.owners.get(actor)
@@ -236,13 +247,14 @@ class ProjectManager():
     # TODO: add to server
     def get_projects_of_member(self, actor):
         """returns all projects actors participates in"""
+        # TODO: how to return projects, maybe only active projects
         pids = self.projects.getKeys()
         projects = []
         pids_with_member = []
         for pid in pids:
             project = self._find_project(pid)
             if project.has_member(actor):
-                projects.append(project)
+                projects.append(project.to_dict())
                 pids_with_member.append(pid)
         return ResponseSuccessObj(f"projects for actor {actor} : {pids_with_member}", projects)
 
@@ -310,13 +322,23 @@ class ProjectManager():
 
 
     def archive_project(self, pid, actor):
-        """changes projects status to inActive"""
+        """changes projects status to not published, members invited can no longer accept reject,
+            be saved and will be invited again if the project owner republished the project """
         project = self._verify_owner(pid, actor)
-        return project.archive_project(actor)
+        pending_emails = self._get_pending_emails_by_projects_list(pid)
+        res = project.archive_project(actor, self.pending_requests.get(actor), pending_emails)
+        if res.success:
+            for email in pending_emails:
+                self.pending_requests.remove(email, pid)
+        return res
 
     def get_score(self, pid, actor):
         project = self._verify_owner(pid, actor)
         return project.get_score()
+
+
+    def get_factor_pool(self, actor):
+        return ResponseSuccessObj(f"factors for {actor}", self.factor_pool.get_factors(actor))
 
     # TODO: add to server
     def duplicate_project(self, pid, actor):

@@ -132,7 +132,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project factors: {e}")
 
-
+    # TODO: new
     def add_project_factor(self, cookie, pid, factor):
         """factor: (name, description)"""
         try:
@@ -144,6 +144,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project factors: {e}")
 
+    # TODO: new
     def delete_project_factor(self, cookie, pid, fid):
         try:
             res = self.get_session_member(cookie)
@@ -154,6 +155,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove factor {fid} from project {pid}:\n {e}")
 
+    # TODO: new
     def delete_factor_from_pool(self, cookie, fid):
         try:
             res = self.get_session_member(cookie)
@@ -187,6 +189,8 @@ class Server:
             return ResponseFailMsg(f"Failed to add member: {e}")
 
     def add_member(self, cookie, pid, users_name):
+        """project not  published -> added to the toinvite list once project is published
+                        published -> added to pending requests"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -197,6 +201,8 @@ class Server:
             return ResponseFailMsg(f"Failed to add member: {e}")
         
     def remove_member(self, cookie, pid, user_name):
+        """only allowed for project owner
+            removes user_name from all places -> member / pending / toinvite"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -207,14 +213,25 @@ class Server:
             return ResponseFailMsg(f"Failed to remove member: {e}")
         
     def get_members_of_project(self, cookie, pid):
-        """if projects is published gets the approved members
-            else gets the members that are planned to be invited once the project is published"""
+        """gets the approved members """
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res
             return self.project_manager.get_members(pid, session.result.user_name)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get member projects: {e}")
+
+    # TODO: new
+    def get_project_to_invite(self, cookie, pid):
+        """gets the members that are planned to be invited once the project is published"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res
+            return self.project_manager.get_project_to_invite(pid, session.result.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get member projects: {e}")
 
@@ -228,7 +245,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get projects: {e}")
 
-    # TODO: remove?
+    # TODO: remove? or add permissions?
     def get_project(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
@@ -251,6 +268,9 @@ class Server:
             return ResponseFailMsg(f"Failed to get project by name and description: {e}")
 
     def publish_project(self, cookie, pid):
+        """only allowed for project owner
+            must confirm factors and severity factors, and add at least 1 member to to_invite
+            all to_invite are moved to pending requests"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -261,6 +281,9 @@ class Server:
             return ResponseFailMsg(f"Failed to publish project: {e}")
         
     def archive_project(self, cookie, pid):
+        """only allowed for project owner
+            after unapproved members cant join while archived, but savedd and f republished
+            they will be reinvited"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -275,8 +298,8 @@ class Server:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
-            session = res
-            return self.project_manager.update_project_name_and_desc(pid, name, description)
+            actor = res.result.user_name
+            return self.project_manager.update_project_name_and_desc(pid,actor, name, description)
         except Exception as e:
             return ResponseFailMsg(f"Failed to update project name and description: {e}")
 
@@ -292,6 +315,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to vote: {e}")
 
+    # TODO: new
     def vote_on_factor(self, cookie, pid, fid, score):
         try:
             res = self.get_session_member(cookie)
@@ -303,6 +327,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to vote: {e}")
 
+    # TODO: new
     def vote_severities(self, cookie, pid, severity_votes):
         try:
             res = self.get_session_member(cookie)
@@ -368,6 +393,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to reject member: {e}")
 
+    # TODO: new
     def confirm_project_factors(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
@@ -378,6 +404,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to confirm factors : {e}")
 
+    # TODO: new
     def confirm_project_severity_factors(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
@@ -388,6 +415,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to confirm severity factors: {e}")
 
+    # TODO: new
     def get_project_factors(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
@@ -396,4 +424,53 @@ class Server:
             actor = res.result.user_name
             return self.project_manager.get_project_factors(pid, actor)
         except Exception as e:
+            return ResponseFailMsg(f"Failed to get_project_factors: {e}")
+
+    # TODO: new
+    def get_project_progress_for_owner(self, cookie, pid):
+        """for progress bar returns dict with values"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.get_project_progress_for_owner(pid, actor)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get_project_progress_for_owner: {e}")
+
+    # TODO: new
+    def get_project_severity_factors(self, cookie, pid):
+        """for progress bar returns dict with values"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.get_project_severity_factors(pid, actor)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get_project_severity_factors: {e}")
+
+    # TODO: new
+    def get_projects_of_member(self, cookie):
+        """returns all the projects actor is active member of"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.get_projects_of_member(actor)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed get_project_of_member: {e}")
+
+    # TODO: new
+    def get_factor_pool_of_member(self, cookie):
+        """returns all the projects actor is active member of"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.get_factor_pool(actor)
+        except Exception as e:
             return ResponseFailMsg(f"Failed to confirm severity factors: {e}")
+

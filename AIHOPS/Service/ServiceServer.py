@@ -146,7 +146,8 @@ def get_projects():
             "message": f"Server error: {str(e)}", 
             "success": False
         }), 500
-    
+
+    # TODO: remove?
 @app.route("/project/<int:pid>", methods=["GET"])
 # expecting query param: cookie
 def get_project(pid):
@@ -227,6 +228,8 @@ def get_score():
     res = server.get_score(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "score": res.result if res.success else None})
 
+
+
 # run the backed server
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
@@ -235,3 +238,4 @@ if __name__ == "__main__":
     # running the server
     app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
     # app.run(threaded=True, port=5555)  # runs multithreaded
+
