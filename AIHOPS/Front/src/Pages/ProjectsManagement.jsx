@@ -4,6 +4,7 @@ import { archiveProject, createProject, getProjects, publishProject, setProjectF
          get_pending_requests_for_project } from "../api/ProjectApi";
 import CreateProjectPopup from '../Components/CreateProjectPopUp';
 import ProjectStatusPopup from '../Components/ProjectStatusPopup';
+import EditPopup from '../Components/EditPopup'; //Component for secondary popups
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -13,6 +14,7 @@ const ProjectsManagement = () => {
     const [projects, setProjects] = useState([]);
     const [selectedProject, setSelectedProject] = useState(null);
     const [showPopup, setShowPopup] = useState(false);
+    const [currentPopup, setCurrentPopup] = useState(null); //Track the current popup type
     const [factorUpdates, setFactorUpdates] = useState({});
       const [severityUpdates, setSeverityUpdates] = useState({});
     const [projectUpdates, setProjectUpdates] = useState({});
@@ -38,9 +40,9 @@ const ProjectsManagement = () => {
         let cookie = localStorage.getItem("authToken");
 
         if (!cookie) {
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
         }
 
         try {
@@ -129,6 +131,7 @@ const ProjectsManagement = () => {
 
     const closePopup = async () => {
         setShowPopup(false);
+        setCurrentPopup(null);
         setSelectedProject(null);
         setFactorUpdates({});
         let initialSeverityUpdates = {};
@@ -139,31 +142,19 @@ const ProjectsManagement = () => {
         setProjectsPendingRequests([]);
         fetchProjects();
     };
+
+    const handleEditPopup = (popupType) => {
+        setCurrentPopup(popupType);
+    };
+
+    const returnToMainPopup = () => {
+        setCurrentPopup(null); // Reset to the main popup
+    };
     
     const handleDelete = async (projectName) => {
         if (window.confirm(`Are you sure you want to delete the project "${projectName}"?`)) {
             alert(`Deleted project: "${projectName}". Implement the backend call.`);
         }
-    };
-
-    const handleEditProjectsName = async (projectID, projectName) => {
-        
-    };
-
-    const handleEditProjectsDescription = async (projectID, projectName) => {
-
-    };
-
-    const handleEditContentFactors = async (projectID, projectName) => {
-
-    };
-
-    const handleEditSeveirtyFactors = async (projectID, projectName) => {
-
-    };
-
-    const handleManageAssessors = async (projectID, projectName) => {
-
     };
 
     const handleArchive = async (projectID, projectName) => {
@@ -515,18 +506,32 @@ const ProjectsManagement = () => {
             />
             
             {/* Edit/View Project Popup */}
-            {showPopup && selectedProject && (
-            <ProjectStatusPopup
+            {showPopup && currentPopup === null && selectedProject && (
+              <ProjectStatusPopup
                 closePopup={closePopup}
                 selectedProject={selectedProject}
-                handleEditProjectsName={handleEditProjectsName}
-                handleEditProjectsDescription={handleEditProjectsDescription}
-                handleEditContentFactors={handleEditContentFactors}
-                handleEditSeveirtyFactors={handleEditSeveirtyFactors}
-                handleManageAssessors={handleManageAssessors}
-                handleArchive={handleArchive}
-                handlePublish={handlePublish}
-            />)}
+                handleEditProjectsName={() => handleEditPopup('editName')}
+                handleEditProjectsDescription={() => handleEditPopup('editDescription')}
+                handleEditContentFactors={() => handleEditPopup('editContentFactors')}
+                handleEditSeveirtyFactors={() => handleEditPopup('editSeverityFactors')}
+                handleManageAssessors={() => handleEditPopup('manageAssessors')}
+                handleArchive={() => console.log('Archive clicked')}
+                handlePublish={() => console.log('Publish clicked')}
+              />
+            )}
+
+            {/* Secondary popups */}
+            {currentPopup && (
+              <EditPopup
+                fetchProjects = {fetchProjects}
+                fetch_selected_project = {fetch_selected_project}
+                setIsSuccess={setIsSuccess}
+                setMsg = {setMsg}
+                closePopup={returnToMainPopup}
+                popupType={currentPopup}
+                selectedProject={selectedProject}
+              />
+            )}
         </section>
     );    
 };
