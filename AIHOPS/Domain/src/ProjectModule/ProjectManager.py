@@ -331,7 +331,7 @@ class ProjectManager():
             be saved and will be invited again if the project owner republished the project """
         project = self._verify_owner(pid, actor)
         pending_emails = self._get_pending_emails_by_projects_list(pid)
-        res = project.archive_project(actor, self.pending_requests.get(actor), pending_emails)
+        res = project.archive_project(pending_emails)
         if res.success:
             for email in pending_emails:
                 self.pending_requests.remove(email, pid)

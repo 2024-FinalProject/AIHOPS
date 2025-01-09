@@ -74,10 +74,10 @@ const ProjectsManagement = () => {
         }
 
         try {
-            {
-            setSelectedProject(project);
-            setIsSuccess(true);
-            }
+              {
+                setSelectedProject(project);
+                setIsSuccess(true);
+              }
         } catch (error) {
             const errorMessage = error.response?.data?.message || error.message;
             console.error("Error:", errorMessage);
@@ -159,6 +159,7 @@ const ProjectsManagement = () => {
                 alert(`Archived project: "${project.name}".`);
                 setIsSuccess(true);
                 await fetchProjects(); // Ensure the projects list is refreshed
+                selectedProject.isActive = false;
               } else {
                 setMsg(response.data.message);
                 setIsSuccess(false);
@@ -195,6 +196,7 @@ const ProjectsManagement = () => {
                 alert(`Published project: "${project.name}".`);
                 setIsSuccess(true);
                 await fetchProjects(); // Refresh project list after publishing
+                selectedProject.isActive = true;
               } else {
                 setMsg(response.data.message);
                 alert(response.data.message);
@@ -209,62 +211,6 @@ const ProjectsManagement = () => {
           } else {
             alert("Please initialize factors and severity factors first.");
           }
-        }
-    };
-
-
-    const handleAddFactor = async () => {
-        if (!window.confirm("Are you sure you want to add this factor?")) {
-          return;
-        }
-      
-        const cookie = localStorage.getItem("authToken");
-        if (!cookie) {
-          setMsg("No authentication token found. Please log in again.");
-          setIsSuccess(false);
-          return;
-        }
-      
-        const factorToAdd = [newFactorName, newFactorDescription];
-        setNewFactorName('');
-        setNewFactorDescription('');
-      
-        try {
-          const response = await setProjectFactors(cookie, selectedProject.id, [factorToAdd]);
-      
-          if (response.data.success) {
-            setIsSuccess(true);
-            
-            //Get fresh project data
-            const projectResponse = await getProjects(cookie);
-            if (projectResponse.data.success) {
-              setProjects([...projectResponse.data.projects]);
-              // Find and set the updated project directly from the response
-              const updatedProject = projectResponse.data.projects.find(
-                p => p.id === selectedProject.id
-              );
-              if (updatedProject) {
-                setSelectedProject(updatedProject);
-              }
-            }
-            
-            alert(`Factor ${factorToAdd[0]} has been added successfully.`);
-          } else {
-            setMsg(response.data.message);
-            alert(response.data.message);
-            setIsSuccess(true);
-          }
-        } catch (error) {
-          const errorMessage = error.response?.data?.message || error.message;
-          console.error("Error:", errorMessage);
-          setMsg(`Error in adding factor: ${errorMessage}`);
-          setIsSuccess(false);
-        }
-    };
-
-    const handleDeleteFactor = async (factorName) => {
-        if (window.confirm(`Are you sure you want to delete the factor "${factorName}"?`)) {
-          alert("TODO: Implement delete factor logic");
         }
     };
 
@@ -406,6 +352,7 @@ const ProjectsManagement = () => {
             {/* Edit/View Project Popup */}
             {showPopup && currentPopup === null && selectedProject && (
               <ProjectStatusPopup
+                fetch_selected_project = {fetch_selected_project}
                 closePopup={closePopup}
                 selectedProject={selectedProject}
                 handleEditProjectsName={() => handleEditPopup('editName')}
@@ -413,8 +360,8 @@ const ProjectsManagement = () => {
                 handleEditContentFactors={() => handleEditPopup('editContentFactors')}
                 handleEditSeveirtyFactors={() => handleEditPopup('editSeverityFactors')}
                 handleManageAssessors={() => handleEditPopup('manageAssessors')}
-                handleArchive={() => console.log('Archive clicked')}
-                handlePublish={() => console.log('Publish clicked')}
+                handleArchive={() => handleArchive(selectedProject.id, selectedProject.name)}
+                handlePublish={() => handlePublish(selectedProject.id, selectedProject.name)}
               />
             )}
 

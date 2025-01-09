@@ -180,7 +180,9 @@ class Project:
         self.db_instance.published = False
         self.db_access.update(self.db_instance)
         self.published = False
-        self.to_invite_when_published = copy.deepcopy(to_invite)
+        self.to_invite_when_published.clear()
+        for invite in to_invite:
+            self.to_invite_when_published.append(invite)
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
     def get_score(self):

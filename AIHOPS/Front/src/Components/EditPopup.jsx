@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
-        get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFator,
-        getProjectFactors, getProjectSeverityFactors
+        get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
+        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -12,6 +12,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [description, setDescription] = useState(selectedProject.description || '');
     const [severityUpdates, setSeverityUpdates] = useState({});
     const [newMemberName, setNewMemberName] = useState("");
+    const [projectsPendingInvites, setProjectsPendingInvites] = useState([]);
     const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
     const [newFactorDescription, setNewFactorDescription] = useState("");
     const [newFactorName, setNewFactorName] = useState("");
@@ -26,14 +27,29 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         return;
         }
 
+        fetch_pending_invites(cookie, selectedProject.id);
         fetch_pending_requests(cookie, selectedProject.id);
     }, []);
 
-    const fetch_pending_requests = async (cookie, projectId) => {
+    const fetch_pending_invites = async (cookie, projectId) => {
         try {
             const response = await get_project_to_invite(cookie, projectId);
             if (response?.data) {
-                setProjectsPendingRequests(response.data.invites);
+                setProjectsPendingInvites(response.data.invites);
+            } else {
+                setProjectsPendingInvites([]); // Set empty array if no emails found
+            }
+        } catch (error) {
+            console.error("Error fetching pending requests:", error);
+            setProjectsPendingInvites([]); // Set empty array in case of error
+        }
+    };
+
+    const fetch_pending_requests = async (cookie, projectId) => {
+        try {
+            const response = await get_pending_requests_for_project(cookie, projectId);
+            if (response?.data) {
+                setProjectsPendingRequests(response.data.emails);
             } else {
                 setProjectsPendingRequests([]); // Set empty array if no emails found
             }
@@ -152,7 +168,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             if (response.data.success) {
                 alert(`The member ${member} has been removed from the project.`);
                 await fetchProjects(); // Refresh the project data after removal
-                await fetch_pending_requests(cookie, selectedProject.id);
+                await fetch_pending_invites(cookie, selectedProject.id);
                 selectedProject.members = selectedProject.members.filter((memberItem) => memberItem.key !== member);
                 setIsSuccess(true);
             } else {
@@ -198,6 +214,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             if (response.data.success) {
                 alert(`An invitation has been sent to member ${newMemberName}.`);
                 await fetchProjects(); // Refresh projects after adding the member
+                await fetch_pending_invites(cookie, selectedProject.id);
                 await fetch_pending_requests(cookie, selectedProject.id);
                 // Clear the input fields after adding
                 setNewMemberName('');
@@ -474,11 +491,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
                     {/* Remove invited members section: */}
                     <p>
-                    <strong>Invited Members:</strong>
+                    {!selectedProject.isActive && <strong>Invited Members:</strong>}
                     </p>
-                    {projectsPendingRequests.length > 0 && (
+                    {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
                         <ul className="members-list">
-                        {projectsPendingRequests.map((pendingMember, index) => (
+                        {projectsPendingInvites.map((pendingMember, index) => (
                             <li key={index} className="member-item">
                             <span className="member-name">{pendingMember}</span>
                             {<button
@@ -491,7 +508,28 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         ))}
                         </ul>
                     )}
-                    {!(projectsPendingRequests.length > 0) && (<p> There are currently no pending requests </p>)}
+                    {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p> There are currently no invited members </p>)}
+                    
+
+                    <p>
+                    {selectedProject.isActive && <strong>Pending Members:</strong>}
+                    </p>
+                    {selectedProject.isActive && projectsPendingRequests != null && projectsPendingRequests.length > 0 && (
+                        <ul className="members-list">
+                        {projectsPendingRequests.map((pendingMember, index) => (
+                            <li key={index} className="member-item">
+                            <span className="member-name">{pendingMember}</span>
+                            {<button
+                                className="remove-btn"
+                                onClick={() => handleRemoveMember(pendingMember)}
+                            >
+                            Remove Pending Member
+                            </button>}
+                            </li>
+                        ))}
+                        </ul>
+                    )}
+                    {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p> There are currently no pending requests </p>)}
 
                     {/* Add member section */}
                     <div className="add-member-container">
