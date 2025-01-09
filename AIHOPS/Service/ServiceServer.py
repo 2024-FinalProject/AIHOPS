@@ -50,10 +50,10 @@ def create_project():
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
 @app.route("/project/factor", methods=["POST"])
-# expecting json with {cookie, pid, factor}
+# expecting json with {cookie, pid, factor_name, factor_desc}
 def add_project_factor():
     data = request.json
-    res = server.add_project_factor(int(data["cookie"]), int(data["pid"]), data["factor"])
+    res = server.add_project_factor(int(data["cookie"]), int(data["pid"]), data["factor_name"], data["factor_desc"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/factors", methods=["POST"])
@@ -113,7 +113,7 @@ def get_project_progress():
     res = server.get_project_progress_for_owner(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "progress": res.result if res.success else None})
 
-app.route("project/get-severity-factors", methods=["GET"])
+@app.route("/project/get-severity-factors", methods=["GET"])
 # expecting json with {cookie, pid}
 def get_project_severity_factors():
     cookie = request.args.get("cookie", type=int)
@@ -125,7 +125,7 @@ def get_project_severity_factors():
 # expecting query param: cookie
 def get_factors_pool_of_member():
     cookie = request.args.get("cookie", type=int)
-    res = server.get_factors_pool_of_member(cookie)
+    res = server.get_factor_pool_of_member(cookie)
     return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
 
 @app.route("/project/publish", methods=["POST"])

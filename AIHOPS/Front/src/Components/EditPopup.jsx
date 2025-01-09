@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
-        get_project_to_invite
+        get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFator,
+        getProjectFactors, getProjectSeverityFactors
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -12,6 +13,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [severityUpdates, setSeverityUpdates] = useState({});
     const [newMemberName, setNewMemberName] = useState("");
     const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
+    const [newFactorDescription, setNewFactorDescription] = useState("");
+    const [newFactorName, setNewFactorName] = useState("");
+    const [factorUpdates, setFactorUpdates] = useState({});
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -115,9 +119,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 return;
             }
             await fetchProjects();
-            for(let i = 0; i < selectedProject.severity_factors.length; i++){
-                selectedProject.severity_factors[i] = tempSeverityFactors[i];
-            }
+            selectedProject.severity_factors = (await getProjectSeverityFactors(cookie, selectedProject.id)).data.severityFactors;
             await fetch_selected_project(selectedProject);
             setMsg("Severity factors updated successfully");
             setIsSuccess(true);
@@ -216,6 +218,50 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleAddFactor = async () => {
+        console.log(selectedProject.factors);
+        if (!window.confirm("Are you sure you want to add this factor?")) {
+            return;
+        }
+        
+        const cookie = localStorage.getItem("authToken");
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+        
+        try {
+            const response = await addProjectFactor(cookie, selectedProject.id, newFactorName, newFactorDescription);
+        
+            if (response.data.success) {
+                setIsSuccess(true);
+                
+                //Get fresh project data
+                await fetchProjects(); // Refresh projects after adding the member
+                await fetch_selected_project(selectedProject);
+                selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+                setNewFactorName('');
+                setNewFactorDescription('');
+            } else {
+                setMsg(response.data.message);
+                alert(response.data.message);
+                setIsSuccess(true);
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || error.message;
+            console.error("Error:", errorMessage);
+            setMsg(`Error in adding factor: ${errorMessage}`);
+            setIsSuccess(false);
+        }
+    };
+
+    const handleDeleteFactor = (factorName) => {
+        if (window.confirm(`Are you sure you want to delete the factor "${factorName}"?`)) {
+            alert("TODO: Implement delete factor logic");
+        }
+    };
+
 
     const getPopupContent = () => {
         switch (popupType) {
@@ -243,11 +289,106 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             );
         case 'editContentFactors':
             return (
-            <div>
-                <h3>Edit Content Factors</h3>
-                <p>TODO: Add fields for editing content factors.</p>
-                <button onClick={closePopup}>Save</button>
-            </div>
+                <div>
+                    <p>
+                    <strong>Factors:</strong>
+                    </p>
+                    <div className="factors-list">
+                    {/* Existing Factors */}
+                    {selectedProject.factors.length > 0 && selectedProject.factors.map((factor, index) => (
+                        <div key={index} className="factor-item" style={{
+                        display: 'flex',
+                        gap: '10px',
+                        marginBottom: '10px',
+                        alignItems: 'center'
+                        }}>
+                        <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                            <input
+                            type="text"
+                            defaultValue={factor.name}
+                            className="factor-name-input"
+                            placeholder="Factor Name"
+                            onChange={(e) => {
+                                const updates = { ...factorUpdates };
+                                if (!updates[index]) updates[index] = {};
+                                updates[index].name = e.target.value;
+                                setFactorUpdates(updates);
+                            }}
+                            style={{ flex: '1' }}
+                            />
+                            <input
+                            type="text"
+                            defaultValue={factor.description}
+                            className="factor-desc-input"
+                            placeholder="Factor Description"
+                            onChange={(e) => {
+                                const updates = { ...factorUpdates };
+                                if (!updates[index]) updates[index] = {};
+                                updates[index].description = e.target.value;
+                                setFactorUpdates(updates);
+                            }}
+                            style={{ flex: '2' }}
+                            />
+                            <button
+                            className="action-btn delete-btn"
+                            onClick={() => handleDeleteFactor(factor.name)}
+                            style={{
+                                padding: '5px 15px',
+                                backgroundColor: '#ff4444',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                            >
+                            Delete
+                            </button>
+                        </div>
+                        </div>
+                    ))}
+
+                    {/* Add New Factor - matching the same style as existing factors */}
+                    <div className="factor-item" style={{
+                        display: 'flex',
+                        gap: '10px',
+                        marginBottom: '10px',
+                        alignItems: 'center'
+                    }}>
+                        <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                        <input
+                            type="text"
+                            value={newFactorName}
+                            onChange={(e) => setNewFactorName(e.target.value)}
+                            className="factor-name-input"
+                            placeholder="New factor name"
+                            style={{ flex: '1' }}
+                        />
+                        <input
+                            type="text"
+                            value={newFactorDescription}
+                            onChange={(e) => setNewFactorDescription(e.target.value)}
+                            className="factor-desc-input"
+                            placeholder="New factor description"
+                            style={{ flex: '2' }}
+                        />
+                        <button
+                            className="action-btn view-edit-btn"
+                            onClick={handleAddFactor}
+                            style={{
+                            padding: '5px 15px',
+                            backgroundColor: '#88cd8d',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer'
+                            }}
+                        >
+                            Add Factor
+                        </button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
             );
         case 'editSeverityFactors':
             return (

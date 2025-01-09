@@ -134,7 +134,7 @@ class Project:
         return ResponseSuccessObj(f"project members for {self.pid}", self.to_invite_when_published.to_list())
 
     def get_severity_factors(self):
-        return ResponseSuccessObj(f"project severity factors for {self.pid}", copy.deepcopy(self.severity_factors))
+        return ResponseSuccessObj(f"project severity factors for {self.pid}", list(copy.deepcopy(self.severity_factors)))
 
 
     def add_member(self, member):

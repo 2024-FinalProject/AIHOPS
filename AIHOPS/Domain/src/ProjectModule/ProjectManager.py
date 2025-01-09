@@ -184,7 +184,11 @@ class ProjectManager():
 
     def get_project_factors(self, pid, actor):
         project = self._find_project(pid)
-        return project.get_factors(actor)
+        factors = project.get_factors(actor)
+        to_ret = []
+        for factor in factors.result:
+            to_ret.append(factor.to_dict())
+        return ResponseSuccessObj(f"factors for project {pid}", to_ret)
 
     def get_members(self, pid, actor):
         """return only projects active members"""

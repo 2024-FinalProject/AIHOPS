@@ -53,11 +53,12 @@ export const setProjectFactors = async(cookie, project_id, factors) => {
     });
 };
 
-export const addProjectFactor = async (cookie, project_id, factor) => {
+export const addProjectFactor = async (cookie, project_id, factor_name, factor_desc) => {
     return await axios.post(`${API_URL}/project/factor`, {
         cookie: cookie,
         pid: project_id,
-        factor: factor
+        factor_name: factor_name,
+        factor_desc: factor_desc
     });
 };
 
@@ -168,7 +169,7 @@ export const getProjectProgress = async(cookie, project_id) => {
 }
 
 export const getProjectSeverityFactors = async (cookie, project_id) => {
-    return await axios.get(`${API_URL}/project/get-severity-factor`, {
+    return await axios.get(`${API_URL}/project/get-severity-factors`, {
         params: { 
             cookie: cookie, 
             pid: project_id
