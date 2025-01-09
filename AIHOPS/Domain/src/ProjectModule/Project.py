@@ -134,7 +134,7 @@ class Project:
         return ResponseSuccessObj(f"project members for {self.pid}", self.to_invite_when_published.to_list())
 
     def get_severity_factors(self):
-        return ResponseSuccessObj(f"project severity factors for {self.pid}", copy.deepcopy(self.severity_factors))
+        return ResponseSuccessObj(f"project severity factors for {self.pid}", list(copy.deepcopy(self.severity_factors)))
 
 
     def add_member(self, member):
@@ -180,7 +180,9 @@ class Project:
         self.db_instance.published = False
         self.db_access.update(self.db_instance)
         self.published = False
-        self.to_invite_when_published = copy.deepcopy(to_invite)
+        self.to_invite_when_published.clear()
+        for invite in to_invite:
+            self.to_invite_when_published.append(invite)
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
     def get_score(self):

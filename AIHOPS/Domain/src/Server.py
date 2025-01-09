@@ -132,19 +132,16 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project factors: {e}")
 
-    # TODO: new
-    def add_project_factor(self, cookie, pid, factor):
-        """factor: (name, description)"""
+    def add_project_factor(self, cookie, pid, factor_name, factor_desc):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res.result
-            return self.project_manager.add_project_factor(pid, session.user_name, factor)
+            return self.project_manager.add_project_factor(pid, session.user_name, factor_name, factor_desc)
         except Exception as e:
-            return ResponseFailMsg(f"Failed to set project factors: {e}")
+            return ResponseFailMsg(f"Failed to set project factor: {e}")
 
-    # TODO: new
     def delete_project_factor(self, cookie, pid, fid):
         try:
             res = self.get_session_member(cookie)
@@ -155,7 +152,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove factor {fid} from project {pid}:\n {e}")
 
-    # TODO: new
     def delete_factor_from_pool(self, cookie, fid):
         try:
             res = self.get_session_member(cookie)
@@ -223,7 +219,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get member projects: {e}")
 
-    # TODO: new
     def get_project_to_invite(self, cookie, pid):
         """gets the members that are planned to be invited once the project is published"""
         try:
@@ -393,7 +388,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to reject member: {e}")
 
-    # TODO: new
     def confirm_project_factors(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
@@ -404,7 +398,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to confirm factors : {e}")
 
-    # TODO: new
     def confirm_project_severity_factors(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
@@ -415,7 +408,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to confirm severity factors: {e}")
 
-    # TODO: new
     def get_project_factors(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
@@ -426,7 +418,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get_project_factors: {e}")
 
-    # TODO: new
     def get_project_progress_for_owner(self, cookie, pid):
         """for progress bar returns dict with values"""
         try:
@@ -438,7 +429,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get_project_progress_for_owner: {e}")
 
-    # TODO: new
     def get_project_severity_factors(self, cookie, pid):
         """for progress bar returns dict with values"""
         try:
@@ -462,7 +452,6 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed get_project_of_member: {e}")
 
-    # TODO: new
     def get_factor_pool_of_member(self, cookie):
         """returns all the projects actor is active member of"""
         try:

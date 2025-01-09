@@ -184,7 +184,11 @@ class ProjectManager():
 
     def get_project_factors(self, pid, actor):
         project = self._find_project(pid)
-        return project.get_factors(actor)
+        factors = project.get_factors(actor)
+        to_ret = []
+        for factor in factors.result:
+            to_ret.append(factor.to_dict())
+        return ResponseSuccessObj(f"factors for project {pid}", to_ret)
 
     def get_members(self, pid, actor):
         """return only projects active members"""
@@ -220,6 +224,7 @@ class ProjectManager():
             return project.get_members()
 
     def get_project_to_invite(self, pid, actor):
+        project = self._verify_owner(pid, actor)
         project = self._find_project(pid)
         return project.get_to_invite()
 
@@ -326,7 +331,7 @@ class ProjectManager():
             be saved and will be invited again if the project owner republished the project """
         project = self._verify_owner(pid, actor)
         pending_emails = self._get_pending_emails_by_projects_list(pid)
-        res = project.archive_project(actor, self.pending_requests.get(actor), pending_emails)
+        res = project.archive_project(pending_emails)
         if res.success:
             for email in pending_emails:
                 self.pending_requests.remove(email, pid)

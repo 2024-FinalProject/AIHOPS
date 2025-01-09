@@ -32,6 +32,13 @@ const NavBar = () => {
                   </Link>
                 </li>
 
+                {/* _old Projects Management button */}
+                <li className="nav-item">
+                  <Link to="/projectsmanagement_old" className="nav-link nav-button">
+                    Projects Management _old
+                  </Link>
+                </li>
+
                 {/* MyProjects button */}
                 <li className="nav-item">
                   <Link to="/myprojects" className="nav-link nav-button">
