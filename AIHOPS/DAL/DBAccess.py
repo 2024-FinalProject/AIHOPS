@@ -78,6 +78,20 @@ class DBAccess:
             finally:
                 session.close()  # Close the session
 
+    def delete(self, obj):
+        with self.lock:  # Ensure thread safety if applicable
+            session = Session()  # Create a new session
+            try:
+                session.delete(obj)  # Mark the object for deletion
+                session.commit()  # Commit the deletion
+                return ResponseSuccessMsg("Successfully deleted the object from the database.")
+            except SQLAlchemyError as e:
+                session.rollback()  # Rollback the session in case of an error
+                return ResponseFailMsg(f"Rolled back, failed to delete the object: {str(e)}")
+            finally:
+                session.close()  # Ensure the session is closed
+
+
     def load_all(self, Obj):
         session = Session()  # Create a new session
         try:

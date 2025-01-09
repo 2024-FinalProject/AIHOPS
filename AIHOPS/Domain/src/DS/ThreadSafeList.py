@@ -11,6 +11,14 @@ class ThreadSafeList:
         with self.lock:
             self.list.append(value)
 
+    def append_unique(self, value):
+        """Append an item to the list."""
+        with self.lock:
+            if value not in self.list:
+                self.list.append(value)
+            else:
+                raise IndexError("Duplicate item in list")
+
     def pop(self, index=-1):
         """Remove and return an item at the specified index. Defaults to the last item."""
         with self.lock:

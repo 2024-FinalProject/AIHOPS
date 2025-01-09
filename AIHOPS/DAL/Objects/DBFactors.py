@@ -9,9 +9,10 @@ class DBFactors(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100))
     description = Column(String(500))
+    owner = Column(String(100))
 
-    def __init__(self, name, description, factor_id = None):
+    def __init__(self, name, description, factor_id, owner):
         self.name = name
         self.description = description
-        if factor_id is not None:
-            self.id = factor_id
+        self.id = factor_id
+        self.owner = owner
