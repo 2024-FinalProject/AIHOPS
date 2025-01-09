@@ -331,9 +331,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <p>No members added yet.</p>
                     )}
 
-                    {/* Remove pending members section: */}
+                    {/* Remove invited members section: */}
                     <p>
-                    <strong>Pending Members:</strong>
+                    <strong>Invited Members:</strong>
                     </p>
                     {projectsPendingRequests.length > 0 && (
                         <ul className="members-list">
@@ -344,7 +344,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 className="remove-btn"
                                 onClick={() => handleRemoveMember(pendingMember)}
                             >
-                            Remove Pending Member
+                            Remove Invited Member
                             </button>}
                             </li>
                         ))}
