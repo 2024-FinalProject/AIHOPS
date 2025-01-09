@@ -1,15 +1,43 @@
 import React, { useState, useEffect } from "react";
-import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember } from "../api/ProjectApi";
+import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
+        get_project_to_invite
+ } from "../api/ProjectApi";
 import "./EditPopup.css";
 
 
-const EditPopup = ({ fetchProjects, fetch_selected_project, fetch_pending_requests ,setIsSuccess, setMsg, closePopup,
-     popupType, selectedProject }) => {
+const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg,
+                     closePopup, popupType, selectedProject }) => {
     const [name, setName] = useState(selectedProject.name || '');
     const [description, setDescription] = useState(selectedProject.description || '');
     const [severityUpdates, setSeverityUpdates] = useState({});
-    const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
     const [newMemberName, setNewMemberName] = useState("");
+    const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
+
+    useEffect(() => {
+        const cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+        setMsg("No authentication token found. Please log in again.");
+        setIsSuccess(false);
+        return;
+        }
+
+        fetch_pending_requests(cookie, selectedProject.id);
+    }, []);
+
+    const fetch_pending_requests = async (cookie, projectId) => {
+        try {
+            const response = await get_project_to_invite(cookie, projectId);
+            if (response?.data) {
+                setProjectsPendingRequests(response.data.invites);
+            } else {
+                setProjectsPendingRequests([]); // Set empty array if no emails found
+            }
+        } catch (error) {
+            console.error("Error fetching pending requests:", error);
+            setProjectsPendingRequests([]); // Set empty array in case of error
+        }
+    };
 
     const updateProjectsNameOrDesc = async () => {
         let cookie = localStorage.getItem("authToken");
@@ -123,6 +151,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, fetch_pending_reques
                 alert(`The member ${member} has been removed from the project.`);
                 await fetchProjects(); // Refresh the project data after removal
                 await fetch_pending_requests(cookie, selectedProject.id);
+                selectedProject.members = selectedProject.members.filter((memberItem) => memberItem.key !== member);
                 setIsSuccess(true);
             } else {
                 setMsg(response.data.message);

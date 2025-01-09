@@ -220,6 +220,7 @@ class ProjectManager():
             return project.get_members()
 
     def get_project_to_invite(self, pid, actor):
+        project = self._verify_owner(pid, actor)
         project = self._find_project(pid)
         return project.get_to_invite()
 

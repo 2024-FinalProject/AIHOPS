@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { archiveProject, createProject, getProjects, publishProject, setProjectFactors,
-         setSeverityFactors, update_project_name_and_desc, addMembers, removeMember,
-         get_pending_requests_for_project } from "../api/ProjectApi";
+         get_project_to_invite } from "../api/ProjectApi";
 import CreateProjectPopup from '../Components/CreateProjectPopUp';
 import ProjectStatusPopup from '../Components/ProjectStatusPopup';
 import EditPopup from '../Components/EditPopup'; //Component for secondary popups
@@ -21,7 +20,6 @@ const ProjectsManagement = () => {
     const [newFactorName, setNewFactorName] = useState("");
     const [newFactorDescription, setNewFactorDescription] = useState("");
     const [newMemberName, setNewMemberName] = useState("");
-    const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
     const [showCreatePopup, setShowCreatePopup] = useState(false);
     const [isNewFirst, setIsNewFirst] = useState(false);
     const [newProject, setNewProject] = useState({
@@ -65,20 +63,6 @@ const ProjectsManagement = () => {
     useEffect(() => {
         fetchProjects();
     }, []);
-
-    const fetch_pending_requests = async (cookie, projectId) => {
-        try {
-            const response = await get_pending_requests_for_project(cookie, projectId);
-            if (response?.data?.emails) {
-            setProjectsPendingRequests(response.data.emails);
-            } else {
-            setProjectsPendingRequests([]); // Set empty array if no emails found
-            }
-        } catch (error) {
-            console.error("Error fetching pending requests:", error);
-            setProjectsPendingRequests([]); // Set empty array in case of error
-        }
-    };
 
     const fetch_selected_project = async (project) => {
         let cookie = localStorage.getItem("authToken");
@@ -124,8 +108,7 @@ const ProjectsManagement = () => {
           setIsSuccess(false);
           return;
         }
-    
-        fetch_pending_requests(cookie, project.id);
+
         setShowPopup(true);
     };
 
@@ -139,7 +122,6 @@ const ProjectsManagement = () => {
           initialSeverityUpdates[i] = 0;
         }
         setSeverityUpdates(initialSeverityUpdates);
-        setProjectsPendingRequests([]);
         fetchProjects();
     };
 
@@ -441,7 +423,6 @@ const ProjectsManagement = () => {
               <EditPopup
                 fetchProjects = {fetchProjects}
                 fetch_selected_project = {fetch_selected_project}
-                fetch_pending_requests = {fetch_pending_requests}
                 setIsSuccess={setIsSuccess}
                 setMsg = {setMsg}
                 closePopup={returnToMainPopup}
