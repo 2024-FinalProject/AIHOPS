@@ -50,7 +50,29 @@ html, body {
   width: 80%;
   max-width: 60%; /* Using percentages to control max-width */
   color: #666;
-  padding-bottom: 10%;
+  padding-bottom: 5%;
   font-family: 'Courier New', Courier, monospace;
 
+}
+
+.pdf-link-container {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.pdf-headline {
+  font-size: 1.5em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #666666;
+  cursor: pointer;
+}
+
+.pdf-headline a {
+  text-decoration: underline;
+  color: inherit;
+}
+
+.pdf-headline a:hover {
+  color: #0056b3;
 }
