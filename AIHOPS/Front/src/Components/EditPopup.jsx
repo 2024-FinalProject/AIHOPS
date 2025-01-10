@@ -109,8 +109,10 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 return;
             } else {
                 await fetchProjects();
-                selectedProject.name = name;
-                selectedProject.description = description;
+                if(name != null)
+                    selectedProject.name = name;
+                if(description != null)
+                    selectedProject.description = description;
                 await fetch_selected_project(selectedProject);
                 setMsg(response.data.message);
                 setIsSuccess(true);

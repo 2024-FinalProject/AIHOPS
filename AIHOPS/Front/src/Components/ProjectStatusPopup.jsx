@@ -1,6 +1,8 @@
 import { confirmProjectFactors, confirmSeverityFactors} from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 import "./ProjectStatusPopup.css";
+import ProgressBar from '../Components/ProgressBar'; //Component for secondary popups
+
 
 const ProjectStatusPopup = ({
   fetch_selected_project,
@@ -80,8 +82,9 @@ const ProjectStatusPopup = ({
         </span>
         <h3>Project's Status:</h3>
         <div className="project-edit-container">
-          <p style={{ color: 'red' }}> TODO: Create a progress bar... </p>
+        <ProgressBar project={selectedProject} />
         </div>
+        <h3>Project's Actions:</h3>
         <div>
           <button disabled = {selectedProject.isActive}
             className="action-btn edit-btn"
