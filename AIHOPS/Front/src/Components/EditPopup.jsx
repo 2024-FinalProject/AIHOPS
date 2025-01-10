@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
         get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
-        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project
+        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -17,6 +17,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [newFactorDescription, setNewFactorDescription] = useState("");
     const [newFactorName, setNewFactorName] = useState("");
     const [factorUpdates, setFactorUpdates] = useState({});
+    const [factorsPool, setFactorsPool] = useState([]);
+    const [selectedFactors, setSelectedFactors] = useState([]);
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -29,6 +31,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
         fetch_pending_invites(cookie, selectedProject.id);
         fetch_pending_requests(cookie, selectedProject.id);
+        fetch_factors_pool();
     }, []);
 
     const fetch_pending_invites = async (cookie, projectId) => {
@@ -56,6 +59,28 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         } catch (error) {
             console.error("Error fetching pending requests:", error);
             setProjectsPendingRequests([]); // Set empty array in case of error
+        }
+    };
+
+    const fetch_factors_pool = async () => {
+        const cookie = localStorage.getItem("authToken");
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+
+        try {
+            const response = await getFactorsPoolOfMember(cookie);
+            if (response?.data) {
+                setFactorsPool(response.data.factors);
+                console.log(response.data);
+            } else {
+                setFactorsPool([]); // Set empty array if no factors found
+            }
+        } catch (error) {
+            console.error("Error fetching factors pool:", error);
+            setFactorsPool([]); // Set empty array in case of error
         }
     };
 
@@ -235,6 +260,20 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleCheckboxChange = (factor) => {
+        setSelectedFactors((prev) =>
+          prev.includes(factor)
+            ? prev.filter((item) => item !== factor) // Remove if already selected
+            : [...prev, factor] // Add if not selected
+        );
+    };
+
+    const handleSubmit = () => {
+        console.log('Selected Factors:', selectedFactors); // Debugging
+        // Navigate to your function with `selectedFactors` here
+        alert(`You selected: ${selectedFactors.map((f) => f.name).join(', ')}`); // Debugging
+    };
+
     const handleAddFactor = async () => {
         console.log(selectedProject.factors);
         if (!window.confirm("Are you sure you want to add this factor?")) {
@@ -308,9 +347,10 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             return (
                 <div>
                     <p>
-                    <strong>Factors:</strong>
+                    <strong>Edit Content Factors:</strong>
                     </p>
                     <div className="factors-list">
+                    {selectedProject.factors.length > 0 && <p>Projects Factors:</p>}
                     {/* Existing Factors */}
                     {selectedProject.factors.length > 0 && selectedProject.factors.map((factor, index) => (
                         <div key={index} className="factor-item" style={{
@@ -361,17 +401,92 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             Delete
                             </button>
                         </div>
-                        </div>
-                    ))}
+                    </div>
+                ))}
 
-                    {/* Add New Factor - matching the same style as existing factors */}
-                    <div className="factor-item" style={{
+                <div
+                    style={{
                         display: 'flex',
-                        gap: '10px',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        //height: '100vh', // Full viewport height
+                        backgroundColor: '#f5f5f5', // Light background
+                    }}
+                    >
+                    <label
+                        htmlFor="factors-dropdown"
+                        style={{
+                        fontSize: '18px',
+                        fontWeight: 'bold',
                         marginBottom: '10px',
-                        alignItems: 'center'
-                    }}>
-                        <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                        }}
+                    >
+                        Select Factors:
+                    </label>
+                    <div
+                        id="factors-dropdown"
+                        style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        maxHeight: '200px',
+                        overflowY: 'auto',
+                        padding: '10px',
+                        border: '1px solid #ccc',
+                        borderRadius: '5px',
+                        backgroundColor: '#fff',
+                        }}
+                    >
+                        {factorsPool.map((factor) => (
+                        <div
+                            key={factor.id}
+                            style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            marginBottom: '5px',
+                            }}
+                        >
+                            <input
+                            type="checkbox"
+                            id={`factor-${factor.id}`}
+                            onChange={() => handleCheckboxChange(factor)}
+                            />
+                            <label
+                            htmlFor={`factor-${factor.id}`}
+                            style={{
+                                marginLeft: '5px',
+                            }}
+                            >
+                            <strong>{factor.name}</strong>: {factor.description}
+                            </label>
+                        </div>
+                        ))}
+                    </div>
+                    <button
+                        style={{
+                        marginTop: '10px',
+                        padding: '10px 20px',
+                        backgroundColor: 'blue',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        }}
+                        onClick={handleSubmit}
+                    >
+                        Submit Selected Factors
+                    </button>
+                </div>
+
+                {/* Add New Factor - matching the same style as existing factors */}
+                <div className="factor-item" style={{
+                    display: 'flex',
+                    gap: '10px',
+                    marginBottom: '10px',
+                    alignItems: 'center'
+                }}>
+                    <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
                         <input
                             type="text"
                             value={newFactorName}
@@ -402,11 +517,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         >
                             Add Factor
                         </button>
-                        </div>
-                    </div>
                     </div>
                 </div>
-            );
+                </div>
+            </div>
+        );
         case 'editSeverityFactors':
             return (
             <div>
