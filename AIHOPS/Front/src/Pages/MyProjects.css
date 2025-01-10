@@ -1,317 +1,231 @@
-/* General styling */
+/* General Styles */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
+  font-family: 'Courier New', Courier, monospace;
 }
 
-.container {
-    width: 90%;
-    margin: 0 auto;
-    padding: 20px;
+/* Container Styles */
+.my-projects-container {
+  padding: 20px 20px 0;
+  background-color: transparent;
 }
 
+/* Page Heading */
 .page-heading {
-    text-align: center;
-    font-size: 2.5rem;
-    color: #333;
-    margin-bottom: 20px;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
 }
 
-/* Centerized Projects Section */
+/* Projects List */
 .projects-list {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
+  gap: 20px;
+  margin-bottom: 40px;
+  margin-top: 5%;
+  padding: 50px;
 }
 
+/* Project Card */
 .project-card {
-    background-color: #fff;
-    border-radius: 1px;
-    padding: 1px;
-    width: 50%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
+  background-color: #fff;
+  padding: 20px;
+  width: 80%;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+  gap: 10px;
 }
 
 .project-card:hover {
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
-.project-info {
-    margin-bottom: 1px;
+.project-card h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
-.project-info h3 {
-    font-size: 1.5rem;
-    color: #333;
+.project-card p {
+  margin: 10px 0;
 }
 
-.project-actions .vote-btn {
-    background-color: #70a1ff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.vote-btn:hover {
-    background-color: #468ff3;
-}
-
-/* Popup Styling */
-.popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.popup-content {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 30px;
-    width: 70%;
-    max-width: 800px;
-    position: relative;
-    text-align: center;
-}
-
-.close-popup {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.factor-item {
-    margin-bottom: 15px;
-}
-
-.factor-name {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.2rem;
-}
-
-/* Factor Description Button Styling */
-.factor-description-btn {
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: #007bff;
-    transition: color 0.3s;
-    background: transparent;
-    border: none;
-}
-
-.factor-description-btn:hover {
-    color: #0056b3;
-}
-
-input[type="range"] {
-    width: 100%;
-    margin-top: 5px;
-    transform: scale(0.8); /* Smaller range slider */
-}
-
-.severity-graph {
-    margin-bottom: 0.5px;
-    height: 400px;
-    justify-content: center;
-    align-items: center;
-}
-
-.severity-factors-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-}
-
-.severity-item {
-    margin-bottom: 0.5px;
-    margin-left: 5px;
-    width: 20%;
-}
-
-.severity-item.second-line {
-    margin-top: 0.5px;
-}
-
-.actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-button {
-    background-color: #70a1ff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1.2rem;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #468ff3;
-}
-
-/* Custom Styling for the Selectable Project Boxes */
-.project-card {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
-}
-
-.project-card:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* Centering Pop-up Window */
-.description-popup-content {
-    background-color: #fff;
-    padding: 25px;
-    max-width: 700px;
-    width: 30%;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-    max-height: 85vh;
-    position: relative;
-}
-
-/* Popup-Description Styling */
+/* Popup Styles */
+.popup-overlay,
 .description-popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+.popup-content,
+.description-popup-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-out;
+  transform: scale(0.9);
+  position: relative;
+}
+
+.popup-content.open,
+.description-popup-content.open {
+  transform: scale(1);
+}
+
+.close-popup,
 .close-description-popup {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5rem;
-    cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
+.popup-content h2 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.popup-content p,
+.description-popup-content p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+
+/* Popup Content - Flexbox Layout */
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Align items from top to bottom */
+  /* height: 100%; Ensure the content stretches to take the full height */
+  padding: 30px;
+}
+
+
+/* Start Voting Button Container */
+.start-vote-container {
+  margin-top: auto; /* Push the button to the bottom */
+  display: flex;
+  justify-content: flex-end; /* Align the button to the right */
+}
+
+
+
+
+/* Start Voting Button */
+.start-vote-btn {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  justify-content: right;
+}
+
+.start-vote-btn:hover {
+  background-color: #45a049;
+}
+
+/* Factor Navigation */
+.factor-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.prev-factor-btn,
+.next-factor-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.prev-factor-btn:disabled,
+.next-factor-btn:disabled {
+  background-color: #ccc;
+}
+
+.prev-factor-btn:hover,
+.next-factor-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Progress Bar */
 .vote-progress-container {
-    width: 100%;
-    margin: 20px 0;
-  }
-  
-  .vote-progress {
-    color: #ffffff;
-    font-weight: 600;
-    font-size: 1rem;
-    text-align: center;
-    line-height: 2rem; /* Center text vertically */
-    background: linear-gradient(90deg, #71db98, #61d1bb);
-    height: 100%; /* Matches the container's height */
-    border-radius: 8px 0 0 8px; /* Rounded corners on the left */
-    transition: width 0.4s ease-in-out; /* Smooth animation on width change */
-    position: relative;
-  }
-  
-  .vote-progress:hover {
-    transform: scale(1.05);
-    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
-  }
-  
-  @keyframes shimmer {
-    0% {
-      background-position: -100%;
-    }
-    100% {
-      background-position: 200%;
-    }
-  }
-  
+  margin-top: 20px;
+  width: 100%;
+}
+
 .progress-bar {
-    width: 100%;
-    height: 20px;
-    background-color: #e0e0e0;
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-  }
+  width: 100%;
+  background-color: #e0e0e0;
+  border-radius: 5px;
+  height: 20px;
+}
 
 .progress-bar-fill {
-    height: 100%;
-    background-color: #4caf50;
-    transition: width 0.5s ease-in-out;
-  }
-  
+  height: 100%;
+  background-color: #4caf50;
+  border-radius: 5px;
+}
+
 .vote-progress-text {
-    text-align: center;
-    margin-top: 5px;
-    font-size: 16px;
-    color: #333;
-  }
-
-.get-score-btn {
-    background-color: #70a1ff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    font-size: 1.2rem;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.7s;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 1rem;
+  color: #333;
 }
 
-.score-popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+/* Checkboxes */
+.checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
 }
 
-.score-popup-content {
-    background-color: #fff;
-    padding: 25px;
-    max-width: 700px;
-    width: 30%;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-    max-height: 85vh;
-    position: relative;
+.checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
 }
 
-.close-score-popup {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 1.5rem;
-    cursor: pointer;
+
+/* Add this to your MyProjects.css */
+.checkmark {
+  font-size: 3rem;
+  color: green;
+  font-weight: bold;
+  position: absolute;
+  top: 10px;
+  right: 10px;
 }
