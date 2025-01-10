@@ -302,12 +302,12 @@ def get_pending_requests_for_project():
 
 # -------- Voting and Scoring ---------------
 
-@app.route("/project/vote", methods=["POST"])
-# expecting json with {cookie, pid, factorsValues, severityFactorsValues}
-def vote():
-    data = request.json
-    res = server.vote(int(data["cookie"]), int(data["pid"]), data["factorsValues"], data["severityFactorsValues"])
-    return jsonify({"message": res.msg, "success": res.success})
+# @app.route("/project/vote", methods=["POST"])
+# # expecting json with {cookie, pid, factorsValues, severityFactorsValues}
+# def vote():
+#     data = request.json
+#     res = server.vote(int(data["cookie"]), int(data["pid"]), data["factorValue"])
+#     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/score", methods=["GET"])
 # expecting query params: cookie, pid
@@ -316,6 +316,28 @@ def get_score():
     pid = request.args.get("pid", type=int)
     res = server.get_score(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "score": res.result if res.success else None})
+
+
+@app.route("/project/vote_on_factor", methods=["POST"])
+# expecting json with {cookie, pid, factorId, score}
+def vote_on_factor():
+    data = request.json
+    res = server.vote_on_factor(int(data["cookie"]), int(data["pid"]), int(data["factorId"]), int(data["score"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
+
+@app.route("/project/vote_on_severities", methods=["POST"])
+def vote_on_severities():
+    data = request.json
+    res = server.vote_on_severities(int(data["cookie"]), int(data["pid"]), data["severityFactors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+
+@app.route("/project/get-projects-member", methods=["GET"])
+def get_projects_member():
+    cookie = request.args.get("cookie", type=int)
+    res = server.get_projects_of_member(cookie)
+    return jsonify({"message": res.msg, "success": res.success, "projects": res.result if res.success else None})
 
 
 

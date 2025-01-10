@@ -1,138 +1,214 @@
 import React, { useState, useEffect } from "react";
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+import FactorVote from "../components/FactorVote";
+import { getProjectsMember, submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
 import "./MyProjects.css";
 
-const dummyProjects = [
-  {
-    id: 1,
-    name: "Project Alpha",
-    description: "Description of Project Alpha.",
-    founder: "John Doe",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: true },
-      { userId: 2, name: "Jane Doe", hasVoted: false },
-      { userId: 3, name: "Mike Smith", hasVoted: false }
-    ],
-    factors: [
-      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-      { id: 2, name: "Factor 2", description: "Description of Factor 2" }
-    ]
-  },
-  {
-    id: 2,
-    name: "Project Beta",
-    description: "Description of Project Beta.",
-    founder: "Jane Doe",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: false },
-      { userId: 2, name: "Jane Doe", hasVoted: false }
-    ],
-    factors: [
-      { id: 1, name: "Factor A", description: "Description of Factor A" },
-      { id: 2, name: "Factor B", description: "Description of Factor B" }
-    ]
-  },
-
-  {
-    id: 3,
-    name: "Project Delta",
-    description: "Description of Project Beta.",
-    founder: "Jane Doe",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: false },
-      { userId: 2, name: "Jane Doe", hasVoted: false }
-    ],
-    factors: [
-      { id: 1, name: "Factor A", description: "Description of Factor A" },
-      { id: 2, name: "Factor B", description: "Description of Factor B" }
-    ]
-  },
-
-  {
-    id: 4,
-    name: "Project Gama",
-    description: "Description of Project Beta.",
-    founder: "Jane Doe",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: false },
-      { userId: 2, name: "Jane Doe", hasVoted: false }
-    ],
-    factors: [
-      { id: 1, name: "Factor A", description: "Description of Factor A" },
-      { id: 2, name: "Factor B", description: "Description of Factor B" }
-    ]
-  }
-];
+// const dummyProjects = [
+//   {
+//     id: 1,
+//     name: "Project Alpha",
+//     description: "Description of Project Alpha.",
+//     founder: "John Doe",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: false },
+//       { userId: 3, name: "Mike Smith", hasVoted: false },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     name: "Project Beta",
+//     description: "Description of Project Beta.",
+//     founder: "Jane Doe",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: true },
+//       { userId: 3, name: "Mike Smith", hasVoted: false },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+//   {
+//     id: 3,
+//     name: "Project Gamma",
+//     description: "Description of Project Gamma.",
+//     founder: "Mike Smith",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: true },
+//       { userId: 3, name: "Mike Smith", hasVoted: true },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+//   {
+//     id: 4,
+//     name: "Project Delta",
+//     description: "Description of Project Delta.",
+//     founder: "John Doe",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: true },
+//       { userId: 3, name: "Mike Smith", hasVoted: true },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+// ];
 
 const MyProjects = () => {
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
-  const [voteProgress, setVoteProgress] = useState("");
-  const [severityVotes, setSeverityVotes] = useState([0, 0, 0, 0, 0]);
   const [factorVotes, setFactorVotes] = useState({});
-  const [totalSeverity, setTotalSeverity] = useState(0);
-  const [factorDescription, setFactorDescription] = useState(null);
-  const [currentScore, setCurrentScore] = useState(null);
+  const [submittedVotes, setSubmittedVotes] = useState({}); // Track successfully submitted votes
+  const [currentFactorIndex, setCurrentFactorIndex] = useState(0);
+  const [isVoteStarted, setIsVoteStarted] = useState(false);
+  const [showVotePopup, setShowVotePopup] = useState(false);
+  const [severityLevel, setSeverityLevel] = useState(false);
+  const [projectVotingStatus, setProjectVotingStatus] = useState({});
 
-  useEffect(() => {
-    setProjects(dummyProjects);
-  }, []);
 
-  useEffect(() => {
-    const sum = severityVotes.reduce((acc, curr) => acc + Number(curr), 0);
-    setTotalSeverity(sum);
-  }, [severityVotes]);
-
-  const handleVoteClick = (project) => {
-    setCurrentProject(project);
-    const votedMembers = project.members.filter(member => member.hasVoted).length;
-    setVoteProgress(`${votedMembers}/${project.members.length} have voted`);
-  };
-
-  const handleFactorVoteChange = (factorId, value) => {
-    setFactorVotes(prev => ({ ...prev, [factorId]: Number(value) }));
-  };
-
-  const handleSeverityVoteChange = (level, value) => {
-    setSeverityVotes(prev => {
-      const newVotes = [...prev];
-      newVotes[level - 1] = Number(value);
-      return newVotes;
-    });
-  };
-
-  const handleSubmitVote = () => {
-    if (totalSeverity === 100) {
-      console.log("Vote submitted:", { severityVotes, factorVotes });
-      alert("Vote submitted successfully!");
-      setCurrentProject(null);
-    } else {
-      alert(`Total severity must equal 100. Current total: ${totalSeverity}`);
+  const fetchProjects = async () => {
+    try {
+      const cookie = localStorage.getItem("authToken");
+      if (!cookie) {
+        alert("Authentication token not found");
+        return;
+      }
+      const response = await getProjectsMember(cookie);
+      if(response.data.success) {
+        setProjects(response.data.projects);
+      } else {
+        alert(response.data.message || "Failed to fetch projects");
+      }
+    } catch (error) {
+      alert("Failed to fetch projects");
+      console.error(error);
     }
   };
 
-  const severityData = {
-    labels: ['1', '2', '3', '4', '5'],
-    datasets: [
-      {
-        label: 'Severity Votes',
-        data: severityVotes,
-        borderColor: 'rgba(75, 192, 192, 1)',
-        tension: 0.1,
-      },
-    ],
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+
+  const handleVoteClick = (project) => {
+    setCurrentProject(project);
+    setShowVotePopup(true);
   };
 
-  const handleFactorDescription = (description) => {
-    setFactorDescription(description);
+  const handleFactorVoteChange = (factorId, value) => {
+    setFactorVotes((prev) => ({ ...prev, [factorId]: value }));
   };
 
-  const handleGetCurrentScore = (score) => {
-    //TODO:: Get the current score of the project here (from the backend)
-    setCurrentScore(score);
+  const handleFactorSubmit = async () => {
+    try {
+      const cookie = localStorage.getItem("authToken");
+      if (!cookie) {
+        alert("Authentication token not found");
+        return false;
+      }
+      const currentFactorId = currentProject.factors[currentFactorIndex].id;
+      const response = await submitFactorVote(
+        cookie,
+        currentProject.id,
+        currentFactorId,
+        factorVotes[currentFactorId]
+      );
+     
+
+
+      if (response.data.success) {
+        // Only update submitted votes after successful API call
+        setSubmittedVotes((prev) => ({
+          ...prev,
+          [currentFactorId]: factorVotes[currentFactorId],
+        }));
+        return true;
+      } else {
+        alert(response.data.message || "Failed to submit vote for factor");
+        return false;
+      }
+    } catch (error) {
+      alert("Failed to submit vote for factor");
+      console.error(error);
+      return false;
+    }
+  };
+
+  const handleStartVoting = () => {
+    setIsVoteStarted(true);
+    setShowVotePopup(false);
+    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
+  };
+
+  const checkProjectVotingStatus = async (projectId) => {
+    try {
+      const cookie = localStorage.getItem("authToken");
+      if (!cookie) {
+        alert("Authentication token not found");
+        return;
+      }
+
+      const response = await checkFactorVotingStatus(cookie, projectId);
+      const respone = null;
+      if (response.data.success) {
+        setProjectVotingStatus((prev) => ({
+          ...prev,
+          [projectId]: response.data.voted,
+        }));
+      }
+    } catch (error) {
+      console.error("Error checking voting status:", error);
+    }
+  };
+
+  const handleCloseVoting = async (projectId) => {
+    setShowVotePopup(false);
+    setCurrentProject(null);
+    setIsVoteStarted(false);
+    setFactorVotes({});
+    setSubmittedVotes({});
+    setCurrentFactorIndex(0);
+
+    await checkProjectVotingStatus(projectId);
+  };
+
+  const handleNextFactor = async () => {
+    const submitSuccess = await handleFactorSubmit();
+
+    if (submitSuccess) {
+      if (currentFactorIndex < currentProject.factors.length - 1) {
+        setCurrentFactorIndex(currentFactorIndex + 1);
+      } else {
+        await handleCloseVoting(currentProject.id);
+      }
+    }
+  };
+
+  const handlePrevFactor = () => {
+    if (currentFactorIndex > 0) {
+      setCurrentFactorIndex(currentFactorIndex - 1);
+    }
+  };
+
+  const countVotedFactors = () => {
+    // Count only successfully submitted votes
+    return Object.keys(submittedVotes).length;
+  };
+
+  const isBothCheckboxesChecked = (project) => {
+    return projectVotingStatus[project.id] && severityLevel;
   };
 
   return (
@@ -140,148 +216,124 @@ const MyProjects = () => {
       <h1 className="page-heading">My Projects</h1>
 
       <div className="projects-list">
-        {projects.map(project => (
-          <div key={project.id} className="project-card" onClick={() => handleVoteClick(project)}>
+        {projects.map((project) => (
+          <div
+            key={project.id}
+            className="project-card"
+            onClick={() => handleVoteClick(project)}
+          >
             <h3 className="text-xl font-semibold">{project.name}:</h3>
             <p>{project.description}</p>
             <p>Founder: {project.founder}</p>
+
+            {/* Display checkmark if both checkboxes are checked */}
+            {isBothCheckboxesChecked(project) && (
+              <div clasName="checkmark"> ✓ </div>
+            )}
+
+            <div className="checkboxes">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={projectVotingStatus[project.id] || false}
+                  disabled
+                />
+                Factors Voted
+              </label>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={severityLevel}
+                  onChange={() => setSeverityLevel(!severityLevel)}
+                  disabled
+                />
+                D.Score Voted
+              </label>
+            </div>
           </div>
         ))}
       </div>
 
-      {currentProject && (
+      {showVotePopup && (
         <div className="popup-overlay">
           <div className="popup-content">
             <button
               className="close-popup"
-              onClick={() => setCurrentProject(null)}
+              onClick={() => handleCloseVoting(currentProject.id)}
             >
               ×
             </button>
-
-            <h2 className="text-2xl font-bold mb-4">Vote on {currentProject.name}</h2>
-
-            <div className="vote-progress-container">
-              <div className="progress-bar">
-                <div
-                  className="progress-bar-fill"
-                  style={{
-                    width: `${(currentProject.members.filter((m) => m.hasVoted).length / currentProject.members.length) * 100}%`,
-                  }}
-                ></div>
-              </div>
-              <p className="vote-progress-text">
-                {voteProgress}
-              </p>
-            </div>
-
-            <h3 className="text-xl font-semibold mb-4">Project's Score:</h3>
-            {/*TODO: Check here that the current user is the founder of the project && */<button
-                    className="get-score-btn"
-                    onClick={() => handleGetCurrentScore(0)}
-                  >
-                    Get current score
-            </button>}
-
-            <h3 className="text-xl font-semibold mb-4">Factor Votes</h3>
-            {currentProject.factors.map(factor => (
-              <div key={factor.id} className="factor-item">
-                <div className="factor-name">
-                  <span>{factor.name}</span>
-                  <button
-                    className="factor-description-btn"
-                    onClick={() => handleFactorDescription(factor.description)}
-                  >
-                    ?
-                  </button>
-                </div> Factor vote:
-                <input
-                  type="range"
-                  min="0"
-                  max="4"
-                  value={factorVotes[factor.id] || 0}
-                  onChange={(e) => handleFactorVoteChange(factor.id, e.target.value)}
-                  className="factor-range"
-                />
-                <span>{factorVotes[factor.id] || 0}</span>
-              </div>
-            ))}
-
-            <h3 className="text-xl font-semibold mb-4">Severity Votes (Total: {totalSeverity}%)</h3>
-            <div className="severity-graph">
-              <Line data={severityData} />
-            </div>
-
-            <div className="severity-factors-container">
-              {severityVotes.slice(0, 3).map((vote, index) => (
-                <div key={index} className="severity-item">
-                  <label>Level {index + 1}</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={vote}
-                    onChange={(e) => handleSeverityVoteChange(index + 1, e.target.value)}
-                    className="severity-range"
-                  />
-                  <span>{vote}%</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="severity-factors-container">
-              {severityVotes.slice(3).map((vote, index) => (
-                <div key={index + 3} className="severity-item second-line">
-                  <label>Level {index + 4}</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    value={vote}
-                    onChange={(e) => handleSeverityVoteChange(index + 4, e.target.value)}
-                    className="severity-range"
-                  />
-                  <span>{vote}%</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={handleSubmitVote}
-                className="submit-vote-btn"
-              >
-                Submit Vote
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Start Voting on {currentProject.name}
+            </h2>
+            <p className="mb-4 text-center">
+              Explanation on the Project ......
+            </p>
+            <div className="start-vote-container">
+              <button onClick={handleStartVoting} className="start-vote-btn">
+                Start Voting
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {factorDescription && (
-        <div className="description-popup-overlay">
-          <div className="description-popup-content">
+      {currentProject && isVoteStarted && (
+        <div className="popup-overlay">
+          <div className="popup-content">
             <button
-              className="close-description-popup"
-              onClick={() => setFactorDescription(null)}
+              className="close-popup"
+              onClick={() => handleCloseVoting(currentProject.id)}
             >
               ×
             </button>
-            <p>{factorDescription}</p>
-          </div>
-        </div>
-      )}
 
-      {currentScore !== null && (
-        <div className="score-popup-overlay">
-          <div className="score-popup-content">
-            <button
-              className="close-score-popup"
-              onClick={() => setCurrentScore(null)}
-            >
-              ×
-            </button>
-            <p>Current Score: {currentScore}</p>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Vote on {currentProject.name}
+            </h2>
+
+            <div className="vote-container">
+              {currentProject.factors.length > 0 && (
+                <FactorVote
+                  factor={currentProject.factors[currentFactorIndex]}
+                  factorVotes={factorVotes}
+                  handleFactorVoteChange={handleFactorVoteChange}
+                />
+              )}
+
+              <div className="factor-navigation">
+                <button
+                  className="prev-factor-btn"
+                  onClick={handlePrevFactor}
+                  disabled={currentFactorIndex === 0}
+                >
+                  Back
+                </button>
+                <button className="next-factor-btn" onClick={handleNextFactor}>
+                  {currentFactorIndex === currentProject.factors.length - 1
+                    ? "Submit Vote"
+                    : "Next"}
+                </button>
+              </div>
+            </div>
+
+            <div className="vote-progress-container">
+              <div className="progress-bar">
+                <div
+                  className="progress-bar-fill"
+                  style={{
+                    width: `${
+                      (countVotedFactors() / currentProject.factors.length) *
+                      100
+                    }%`,
+                  }}
+                ></div>
+              </div>
+              <p className="vote-progress-text">
+                {countVotedFactors()} / {currentProject.factors.length} factors
+                have been voted
+              </p>
+            </div>
           </div>
         </div>
       )}

@@ -14,7 +14,7 @@ const Login = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate("/");
     }
   }, [isAuthenticated, navigate]);
 
@@ -25,29 +25,32 @@ const Login = () => {
     try {
       const session = await startSession();
       const cookie = session.data.cookie;
-      
-      console.log('Cookie received from startSession:', cookie); // Debug log
+
+      console.log("Cookie received from startSession:", cookie); // Debug log
 
       const response = await loginUser(cookie, userName, password);
 
       if (response.data.success) {
         setMsg(response.data.message);
-        
+
         // Store auth data in localStorage
-        localStorage.setItem('authToken', cookie);
-        console.log('Cookie stored in localStorage:', localStorage.getItem('authToken')); // Debug log
-        
-        localStorage.setItem('userName', userName);
+        localStorage.setItem("authToken", cookie);
+        console.log(
+          "Cookie stored in localStorage:",
+          localStorage.getItem("authToken")
+        ); // Debug log
+
+        localStorage.setItem("userName", userName);
         login(cookie, userName);
-        navigate('/');
+        navigate("/");
       } else {
         setMsg(response.data.message);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error("Login error:", error);
       setMsg("Login failed: Invalid credentials");
     }
-};
+  };
 
   return (
     <section>
