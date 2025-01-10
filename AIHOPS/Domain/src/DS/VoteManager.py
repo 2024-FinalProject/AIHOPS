@@ -47,8 +47,7 @@ class VoteManager:
             member_votes[fid] = score
 
             if cur_vote is not None:
-                to_remove = DBFactorVotes(fid, actor, self.pid, cur_vote)
-                res = self.db_access.delete(to_remove)
+                res = self.db_access.delete_obj_by_query(DBFactorVotes, {"project_id": self.pid, "factor_id": fid, "member_email": actor})
                 if not res.success:
                     self.factors_votes[actor] = member_votes_revert
                     return res
