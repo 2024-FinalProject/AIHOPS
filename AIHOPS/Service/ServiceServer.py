@@ -318,6 +318,28 @@ def get_score():
     return jsonify({"message": res.msg, "success": res.success, "score": res.result if res.success else None})
 
 
+@app.route("/project/vote_on_factor", methods=["POST"])
+# expecting json with {cookie, pid, factorId, score}
+def vote_on_factor():
+    data = request.json
+    res = server.vote_on_factor(int(data["cookie"]), int(data["pid"]), int(data["factorId"]), int(data["score"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
+
+@app.route("/project/vote_on_severities", methods=["POST"])
+def vote_on_severities():
+    data = request.json
+    res = server.vote_on_severities(int(data["cookie"]), int(data["pid"]), data["severityFactors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+
+@app.route("/project/get-projects-member", methods=["GET"])
+def get_projects_member():
+    cookie = request.args.get("cookie", type=int)
+    res = server.get_projects_of_member(cookie)
+    return jsonify({"message": res.msg, "success": res.success, "projects": res.result if res.success else None})
+
+
 
 # run the backed server
 if __name__ == "__main__":

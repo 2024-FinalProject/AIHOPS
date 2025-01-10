@@ -306,31 +306,7 @@ class Server:
                 return res
             session = res.result
             user_name = session.user_name
-            return self.project_manager.vote(pid, user_name, factors_value)
-        except Exception as e:
-            return ResponseFailMsg(f"Failed to vote: {e}")
-
-    # TODO: new
-    def vote_on_factor(self, cookie, pid, fid, score):
-        try:
-            res = self.get_session_member(cookie)
-            if not res.success:
-                return res
-            session = res.result
-            user_name = session.user_name
-            return self.project_manager.vote_on_factor(pid, user_name, fid, score)
-        except Exception as e:
-            return ResponseFailMsg(f"Failed to vote: {e}")
-
-    # TODO: new
-    def vote_severities(self, cookie, pid, severity_votes):
-        try:
-            res = self.get_session_member(cookie)
-            if not res.success:
-                return res
-            session = res.result
-            user_name = session.user_name
-            return self.project_manager.vote_severities(pid, user_name, severity_votes)
+            return self.project_manager.vote(pid, user_name, factors_values, severity_factors_values)
         except Exception as e:
             return ResponseFailMsg(f"Failed to vote: {e}")
 

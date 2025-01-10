@@ -1,70 +1,70 @@
 import React, { useState, useEffect } from "react";
 import FactorVote from "../components/FactorVote";
-import { submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
+import { getProjectsMember, submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
 import "./MyProjects.css";
 
-const dummyProjects = [
-  {
-    id: 1,
-    name: "Project Alpha",
-    description: "Description of Project Alpha.",
-    founder: "John Doe",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: true },
-      { userId: 2, name: "Jane Doe", hasVoted: false },
-      { userId: 3, name: "Mike Smith", hasVoted: false },
-    ],
-    factors: [
-      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-      { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Project Beta",
-    description: "Description of Project Beta.",
-    founder: "Jane Doe",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: true },
-      { userId: 2, name: "Jane Doe", hasVoted: true },
-      { userId: 3, name: "Mike Smith", hasVoted: false },
-    ],
-    factors: [
-      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-      { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-    ],
-  },
-  {
-    id: 3,
-    name: "Project Gamma",
-    description: "Description of Project Gamma.",
-    founder: "Mike Smith",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: true },
-      { userId: 2, name: "Jane Doe", hasVoted: true },
-      { userId: 3, name: "Mike Smith", hasVoted: true },
-    ],
-    factors: [
-      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-      { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-    ],
-  },
-  {
-    id: 4,
-    name: "Project Delta",
-    description: "Description of Project Delta.",
-    founder: "John Doe",
-    members: [
-      { userId: 1, name: "John Doe", hasVoted: true },
-      { userId: 2, name: "Jane Doe", hasVoted: true },
-      { userId: 3, name: "Mike Smith", hasVoted: true },
-    ],
-    factors: [
-      { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-      { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-    ],
-  },
-];
+// const dummyProjects = [
+//   {
+//     id: 1,
+//     name: "Project Alpha",
+//     description: "Description of Project Alpha.",
+//     founder: "John Doe",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: false },
+//       { userId: 3, name: "Mike Smith", hasVoted: false },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+//   {
+//     id: 2,
+//     name: "Project Beta",
+//     description: "Description of Project Beta.",
+//     founder: "Jane Doe",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: true },
+//       { userId: 3, name: "Mike Smith", hasVoted: false },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+//   {
+//     id: 3,
+//     name: "Project Gamma",
+//     description: "Description of Project Gamma.",
+//     founder: "Mike Smith",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: true },
+//       { userId: 3, name: "Mike Smith", hasVoted: true },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+//   {
+//     id: 4,
+//     name: "Project Delta",
+//     description: "Description of Project Delta.",
+//     founder: "John Doe",
+//     members: [
+//       { userId: 1, name: "John Doe", hasVoted: true },
+//       { userId: 2, name: "Jane Doe", hasVoted: true },
+//       { userId: 3, name: "Mike Smith", hasVoted: true },
+//     ],
+//     factors: [
+//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
+//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
+//     ],
+//   },
+// ];
 
 const MyProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -77,9 +77,30 @@ const MyProjects = () => {
   const [severityLevel, setSeverityLevel] = useState(false);
   const [projectVotingStatus, setProjectVotingStatus] = useState({});
 
+
+  const fetchProjects = async () => {
+    try {
+      const cookie = localStorage.getItem("authToken");
+      if (!cookie) {
+        alert("Authentication token not found");
+        return;
+      }
+      const response = await getProjectsMember(cookie);
+      if(response.data.success) {
+        setProjects(response.data.projects);
+      } else {
+        alert(response.data.message || "Failed to fetch projects");
+      }
+    } catch (error) {
+      alert("Failed to fetch projects");
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
-    setProjects(dummyProjects);
+    fetchProjects();
   }, []);
+
 
   const handleVoteClick = (project) => {
     setCurrentProject(project);
@@ -98,11 +119,13 @@ const MyProjects = () => {
         return false;
       }
       const currentFactorId = currentProject.factors[currentFactorIndex].id;
+      const score = factorVotes[currentFactorId];
 
       const response = await submitFactorVote(
         cookie,
         currentProject.id,
-        factorVotes[currentFactorId]
+        currentFactorId,
+        score
       );
 
       if (response.data.success) {

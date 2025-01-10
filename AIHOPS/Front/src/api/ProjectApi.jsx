@@ -207,16 +207,23 @@ export const rejectProjByUser = async (cookie, projId) => {
     });
 }
 
-export const submitFactorVote = async (cookie, pid, factorValue) => {
+export const submitFactorVote = async (cookie, pid, factorId, factorValue) => {
     return await axios.post(`${API_URL}/project/vote`, {
         cookie,
         pid,
-        factorValue
+        factorId,
+        score
     });
 }
 
 export const checkFactorVotingStatus = async (cookie, pid) => {
     return await axios.get(`${API_URL}/project/vote-status`, {
         params: { cookie, pid }
+    });
+}
+
+export const getProjectsMember = async (cookie) => {
+    return await axios.get(`${API_URL}/project/get-projects-member`, {
+        params: { cookie }
     });
 }
