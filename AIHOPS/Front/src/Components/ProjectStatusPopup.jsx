@@ -38,6 +38,11 @@ const ProjectStatusPopup = ({
         return;
     }
 
+    if(selectedProject.factors.length == 0){
+      alert("Please add at least one factor in order to confirm");
+      return;
+    }
+
     try {
       const response = await confirmProjectFactors(cookie, pid);
       if (response.data.success) {

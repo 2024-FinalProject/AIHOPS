@@ -42,15 +42,15 @@ const ProgressBar = ({ project }) => {
   const isStepActive = (stepName) => {
     switch (stepName) {
       case 'name':
-        return Boolean(project?.name);
+        return Boolean(projectsProgress.name != null);
       case 'description':
-        return Boolean(project?.description);
+        return Boolean(projectsProgress.desc != null);
       case 'content':
-        return Boolean(project?.factors_inited);
+        return Boolean(projectsProgress.factors_inited);
       case 'severity':
-        return Boolean(project?.severity_factors_inited);
+        return Boolean(projectsProgress.severity_factors_inited);
       case 'invite':
-        return Boolean(project?.assessors?.length);
+        return Boolean(projectsProgress.invited_members);
       case 'confirmed':
         return project?.assessors?.every(a => a.confirmed);
       case 'completed':
