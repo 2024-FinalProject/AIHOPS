@@ -3,68 +3,7 @@ import FactorVote from "../components/FactorVote";
 import { getProjectsMember, submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
 import "./MyProjects.css";
 
-// const dummyProjects = [
-//   {
-//     id: 1,
-//     name: "Project Alpha",
-//     description: "Description of Project Alpha.",
-//     founder: "John Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: false },
-//       { userId: 3, name: "Mike Smith", hasVoted: false },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 2,
-//     name: "Project Beta",
-//     description: "Description of Project Beta.",
-//     founder: "Jane Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: false },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 3,
-//     name: "Project Gamma",
-//     description: "Description of Project Gamma.",
-//     founder: "Mike Smith",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: true },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 4,
-//     name: "Project Delta",
-//     description: "Description of Project Delta.",
-//     founder: "John Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: true },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-// ];
+
 
 const MyProjects = () => {
   const [projects, setProjects] = useState([]);
@@ -103,8 +42,15 @@ const MyProjects = () => {
 
 
   const handleVoteClick = (project) => {
+    console.log("project", project);
     setCurrentProject(project);
     setShowVotePopup(true);
+    console.log("Project clicked");
+    console.log(project.id);
+    console.log("factor index", currentFactorIndex);
+    console.log("factor votes", factorVotes);
+    // console.log("current project", currentProject);
+    console.log("factor lenght", project.factors.length);
   };
 
   const handleFactorVoteChange = (factorId, value) => {
@@ -149,6 +95,7 @@ const MyProjects = () => {
   const handleStartVoting = () => {
     setIsVoteStarted(true);
     setShowVotePopup(false);
+    setCurrentFactorIndex(0);
     setSubmittedVotes({}); // Reset submitted votes when starting new voting session
   };
 
@@ -160,7 +107,7 @@ const MyProjects = () => {
         return;
       }
 
-      const response = await checkFactorVotingStatus(cookie, projectId);
+      // const response = await checkFactorVotingStatus(cookie, projectId);
       const respone = null;
       if (response.data.success) {
         setProjectVotingStatus((prev) => ({
