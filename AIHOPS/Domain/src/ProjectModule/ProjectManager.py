@@ -107,7 +107,7 @@ class ProjectManager():
     def update_project_name_and_desc(self, pid, actor, name, desc):
         project = self._verify_owner(pid, actor)
         project.update_name(name)
-        project.update_name(desc)
+        project.update_desc(desc)
         return ResponseSuccessMsg(f"{pid}: updated name and desc to {project.name}, {project.desc}")
 
     def get_project_progress_for_owner(self, pid, actor):
