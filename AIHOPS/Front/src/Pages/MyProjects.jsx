@@ -119,14 +119,14 @@ const MyProjects = () => {
         return false;
       }
       const currentFactorId = currentProject.factors[currentFactorIndex].id;
-      const score = factorVotes[currentFactorId];
-
       const response = await submitFactorVote(
         cookie,
         currentProject.id,
         currentFactorId,
-        score
+        factorVotes[currentFactorId]
       );
+     
+
 
       if (response.data.success) {
         // Only update submitted votes after successful API call
@@ -161,6 +161,7 @@ const MyProjects = () => {
       }
 
       const response = await checkFactorVotingStatus(cookie, projectId);
+      const respone = null;
       if (response.data.success) {
         setProjectVotingStatus((prev) => ({
           ...prev,

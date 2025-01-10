@@ -84,6 +84,9 @@ class Project:
             if factor.id == fid:
                 return True
         return False
+    
+    def has_member(self, member):
+        return self.members.contains(member)
 
     def update_name(self, name):
         self.db_instance.name = name

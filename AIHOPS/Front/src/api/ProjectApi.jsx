@@ -207,8 +207,8 @@ export const rejectProjByUser = async (cookie, projId) => {
     });
 }
 
-export const submitFactorVote = async (cookie, pid, factorId, factorValue) => {
-    return await axios.post(`${API_URL}/project/vote`, {
+export const submitFactorVote = async (cookie, pid, factorId, score) => {
+    return await axios.post(`${API_URL}/project/vote_on_factor`, {
         cookie,
         pid,
         factorId,
