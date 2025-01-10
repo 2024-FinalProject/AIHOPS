@@ -8,8 +8,8 @@ import "./EditPopup.css";
 
 const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg,
                      closePopup, popupType, selectedProject }) => {
-    const [name, setName] = useState(selectedProject.name || '');
-    const [description, setDescription] = useState(selectedProject.description || '');
+    const [name, setName] = useState(selectedProject.name);
+    const [description, setDescription] = useState(selectedProject.description);
     const [severityUpdates, setSeverityUpdates] = useState({});
     const [newMemberName, setNewMemberName] = useState("");
     const [projectsPendingInvites, setProjectsPendingInvites] = useState([]);
@@ -101,7 +101,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
         try {
             const response = await update_project_name_and_desc(cookie, selectedProject.id,
-                                name || selectedProject.name, description || selectedProject.description);
+                                name, description);
             if (!response.data.success) {
                 setMsg(response.data.message);
                 setIsSuccess(true);
@@ -109,8 +109,10 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 return;
             } else {
                 await fetchProjects();
-                selectedProject.name = name;
-                selectedProject.description = description;
+                if(name != null)
+                    selectedProject.name = name;
+                if(description != null)
+                    selectedProject.description = description;
                 await fetch_selected_project(selectedProject);
                 setMsg(response.data.message);
                 setIsSuccess(true);
@@ -326,7 +328,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             <div>
                 <h3>Edit Project's Name</h3>
                 <textarea
-                value={name}
+                defaultValue={selectedProject.name}
                 onChange={(e) => setName(e.target.value)}
                 ></textarea>
                 <button onClick={updateProjectsNameOrDesc}>Save</button>
@@ -337,7 +339,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             <div>
                 <h3>Edit Project's Description</h3>
                 <textarea
-                value={description}
+                defaultValue={selectedProject.description}
                 onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
                 <button onClick={updateProjectsNameOrDesc}>Save</button>
