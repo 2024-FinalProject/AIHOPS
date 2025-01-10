@@ -1,0 +1,57 @@
+.severity-card {
+    width: 100%;
+    max-width: 64rem;
+  }
+  
+  .severity-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .info-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: #6b7280;
+    cursor: pointer;
+  }
+  
+  .info-icon:hover {
+    color: #374151;
+  }
+  
+  .severity-tooltip {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    background-color: #f3f4f6;
+    border-radius: 0.375rem;
+  }
+  
+  .level-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .color-dot {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+  }
+  
+  .chart-container {
+    height: 24rem;
+  }
+  
+  .vote-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f3f4f6;
+    border-radius: 0.375rem;
+  }
+  
+  .vote-info h4 {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }

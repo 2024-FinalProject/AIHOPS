@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceDot } from 'recharts';
 import { Info } from 'lucide-react';
+import './DGraph.css';
 
-const SeverityVoting = () => {
-  // Severity levels from the AIHOPS document
+const DGraph = ({ onVoteComplete }) => {
   const severityLevels = [
     { level: 1, name: "No to Negligible Damage", value: 0.5, color: "#4ade80" },
     { level: 2, name: "Minor Damage", value: 1, color: "#fbbf24" },
@@ -17,7 +17,6 @@ const SeverityVoting = () => {
   const [votes, setVotes] = useState([]);
   const [showTooltip, setShowTooltip] = useState(false);
 
-  // Generate data points for the chart
   const generatePoints = () => {
     const points = [];
     for (let i = 0; i < 100; i++) {
@@ -45,13 +44,23 @@ const SeverityVoting = () => {
     return level ? level.color : severityLevels[severityLevels.length - 1].color;
   };
 
+  const handleSubmit = async () => {
+    // Here you would typically send the votes to your backend
+    // For now, we'll just call onVoteComplete
+    if (votes.length > 0) {
+      onVoteComplete();
+    } else {
+      alert('Please make at least one vote before submitting');
+    }
+  };
+
   return (
-    <Card className="w-full max-w-4xl">
+    <Card className="severity-card">
       <CardHeader>
-        <div className="flex items-center gap-2">
+        <div className="severity-header">
           <CardTitle>Severity Voting</CardTitle>
           <Info 
-            className="w-5 h-5 text-gray-500 cursor-pointer hover:text-gray-700"
+            className="info-icon"
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
           />
@@ -60,12 +69,12 @@ const SeverityVoting = () => {
           Click on the graph to vote on severity levels. Your votes will be shown as colored dots.
         </CardDescription>
         {showTooltip && (
-          <div className="mt-2 p-4 bg-gray-100 rounded-md">
+          <div className="severity-tooltip">
             <h4 className="font-bold mb-2">Severity Levels:</h4>
             {severityLevels.map((level) => (
-              <div key={level.level} className="flex items-center gap-2 mb-1">
+              <div key={level.level} className="level-indicator">
                 <div 
-                  className="w-4 h-4 rounded-full" 
+                  className="color-dot"
                   style={{ backgroundColor: level.color }}
                 />
                 <span>{level.name} (Level {level.level})</span>
@@ -75,7 +84,7 @@ const SeverityVoting = () => {
         )}
       </CardHeader>
       <CardContent>
-        <div className="h-96">
+        <div className="chart-container">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={generatePoints()}
@@ -114,8 +123,8 @@ const SeverityVoting = () => {
         </div>
         
         {selectedPoint && (
-          <div className="mt-4 p-4 bg-gray-100 rounded-md">
-            <h4 className="font-bold mb-2">Last Vote:</h4>
+          <div className="vote-info">
+            <h4>Last Vote:</h4>
             <p>Risk Level: {Math.round(selectedPoint.x)}</p>
             <p>Severity Score: {Math.round(selectedPoint.y)}</p>
             <p>Category: {
@@ -124,9 +133,18 @@ const SeverityVoting = () => {
             }</p>
           </div>
         )}
+
+        <div className="flex justify-center mt-4">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            onClick={handleSubmit}
+          >
+            Submit D-Score Votes
+          </button>
+        </div>
       </CardContent>
     </Card>
   );
 };
 
-export default SeverityVoting;
+export default DGraph;
