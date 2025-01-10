@@ -49,11 +49,38 @@ def create_project():
     res = server.create_project(int(data["cookie"]), data["name"], data["description"])
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
+@app.route("/project/factor", methods=["POST"])
+# expecting json with {cookie, pid, factor_name, factor_desc}
+def add_project_factor():
+    data = request.json
+    res = server.add_project_factor(int(data["cookie"]), int(data["pid"]), data["factor_name"], data["factor_desc"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 @app.route("/project/factors", methods=["POST"])
 # expecting json with {cookie, pid, factors}
 def set_project_factors():
     data = request.json
     res = server.set_project_factors(int(data["cookie"]), int(data["pid"]), data["factors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/project/delete-factor", methods=["POST"])
+# expecting json with {cookie, pid, factor}
+def delete_project_factor():
+    data = request.json
+    res = server.delete_project_factor(int(data["cookie"]), int(data["pid"]), int(data["fid"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/project/factor/delete-from-pool", methods=["POST"])
+# expecting json with {cookie, pid, factor}
+def delete_factor_from_pool():
+    data = request.json
+    res = server.delete_factor_from_pool(int(data["cookie"]), int(data["fid"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/project/confirm-factors", methods=["POST"])
+def confirm_factors():
+    data = request.json
+    res = server.confirm_project_factors(int(data["cookie"]), int(data["pid"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/severity-factors", methods=["POST"])
@@ -62,6 +89,44 @@ def set_project_severity_factors():
     data = request.json
     res = server.set_project_severity_factors(int(data["cookie"]), int(data["pid"]), data["severityFactors"])
     return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/project/confirm-severity-factors", methods=["POST"])
+# expecting json with {cookie, pid}
+def confirm_severity_factors():
+    data = request.json
+    res = server.confirm_project_severity_factors(int(data["cookie"]), int(data["pid"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/project/get-factors", methods=["GET"])
+# expecting json with {cookie, pid}
+def get_project_factors():
+    cookie = request.args.get("cookie", type=int)
+    pid = request.args.get("pid", type=int)
+    res = server.get_project_factors(cookie, pid)
+    return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
+
+@app.route("/project/get-progress", methods=["GET"])
+# expecting json with {cookie, pid}
+def get_project_progress():
+    cookie = request.args.get("cookie", type=int)
+    pid = request.args.get("pid", type=int)
+    res = server.get_project_progress_for_owner(cookie, pid)
+    return jsonify({"message": res.msg, "success": res.success, "progress": res.result if res.success else None})
+
+@app.route("/project/get-severity-factors", methods=["GET"])
+# expecting json with {cookie, pid}
+def get_project_severity_factors():
+    cookie = request.args.get("cookie", type=int)
+    pid = request.args.get("pid", type=int)
+    res = server.get_project_severity_factors(cookie, pid)
+    return jsonify({"message": res.msg, "success": res.success, "severityFactors": res.result if res.success else None})
+
+@app.route("/project/get-factors-pool", methods=["GET"])
+# expecting query param: cookie
+def get_factors_pool_of_member():
+    cookie = request.args.get("cookie", type=int)
+    res = server.get_factor_pool_of_member(cookie)
+    return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
 
 @app.route("/project/publish", methods=["POST"])
 # expecting json with {cookie, pid}
@@ -128,7 +193,7 @@ def get_projects():
     try:
         cookie = request.args.get("cookie", type = int)
         
-        res = server.get_projects(cookie)
+        res = server.get_projects_of_owner(cookie)
         
         # Make sure we're only sending serializable data
         return jsonify({
@@ -146,7 +211,8 @@ def get_projects():
             "message": f"Server error: {str(e)}", 
             "success": False
         }), 500
-    
+
+    # TODO: remove?
 @app.route("/project/<int:pid>", methods=["GET"])
 # expecting query param: cookie
 def get_project(pid):
@@ -185,6 +251,30 @@ def get_pending_requests():
     cookie = request.args.get("cookie", type=int)
     res = server.get_pending_requests(cookie)
     return jsonify({"message": res.msg, "success": res.success, "requests": res.result if res.success else None})
+
+@app.route("/project/to-invite", methods=["GET"])
+def get_project_to_invite():
+    try:
+        cookie = request.args.get("cookie", type = int)
+        pid = request.args.get("pid", type = int)
+        res = server.get_project_to_invite(cookie, pid)
+        
+        # Make sure we're only sending serializable data
+        return jsonify({
+            "message": str(res.msg),  # Convert message to string explicitly
+            "success": bool(res.success),  # Convert to bool explicitly
+            "invites": res.result if res.success and res.result else [],
+        })
+    except ValueError as e:
+        return jsonify({
+            "message": f"Invalid cookie format: {str(e)}", 
+            "success": False
+        }), 400
+    except Exception as e:
+        return jsonify({
+            "message": f"Server error: {str(e)}", 
+            "success": False
+        }), 500
 
 @app.route("/project/pending-requests-project", methods=["GET"])
 def get_pending_requests_for_project():
@@ -227,6 +317,8 @@ def get_score():
     res = server.get_score(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "score": res.result if res.success else None})
 
+
+
 # run the backed server
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
@@ -235,3 +327,4 @@ if __name__ == "__main__":
     # running the server
     app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
     # app.run(threaded=True, port=5555)  # runs multithreaded
+

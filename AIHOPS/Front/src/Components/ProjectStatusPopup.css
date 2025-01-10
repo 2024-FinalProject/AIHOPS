@@ -1,0 +1,5 @@
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5; /* Makes it look visually disabled */
+    pointer-events: none; /* Ensures no interaction */
+  }
