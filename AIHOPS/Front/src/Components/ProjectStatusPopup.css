@@ -113,29 +113,3 @@ button:disabled {
   width: 20px;
   background-color: #aaa;
 }
-
-.back-button {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  background-color: #007BFF; /* Stylish blue */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 12px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.back-button:hover {
-  background-color: #0056b3; /* Darker blue on hover */
-  transform: scale(1.05); /* Slight zoom on hover */
-}
-
-.back-button:active {
-  background-color: #004494; /* Even darker blue on click */
-  transform: scale(0.95); /* Slight shrink on click */
-}
