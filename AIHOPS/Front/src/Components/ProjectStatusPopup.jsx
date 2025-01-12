@@ -114,7 +114,7 @@ const ProjectStatusPopup = ({
             Edit Content Factors
           </button>
           <button disabled = {selectedProject.isActive}
-            className="action-btn"
+            className="action-btn edit-btn"
             onClick={() => handleConfirmFactors(selectedProject.id, selectedProject.name)}
           >
             Confirm Content Factors
@@ -128,7 +128,7 @@ const ProjectStatusPopup = ({
             Edit d-score (Severity Factors)
           </button>
           <button disabled = {selectedProject.isActive}
-            className="action-btn"
+            className="action-btn edit-btn"
             onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
           >
             Confirm Severity Factors
@@ -136,7 +136,7 @@ const ProjectStatusPopup = ({
         </div>
         <div>
           <button
-            className="action-btn"
+            className="action-btn edit-btn"
             onClick={() => handleManageAssessors(selectedProject.id, selectedProject.name)}
           >
             Manage Assessors

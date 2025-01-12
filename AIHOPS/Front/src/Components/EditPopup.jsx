@@ -331,7 +331,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 defaultValue={selectedProject.name}
                 onChange={(e) => setName(e.target.value)}
                 ></textarea>
-                <button onClick={updateProjectsNameOrDesc}>Save</button>
+                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
             </div>
             );
         case 'editDescription':
@@ -342,7 +342,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 defaultValue={selectedProject.description}
                 onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
-                <button onClick={updateProjectsNameOrDesc}>Save</button>
+                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
             </div>
             );
         case 'editContentFactors':
@@ -576,7 +576,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 <div className="severity-factors-warning">
                     <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
                 </div>
-                <button onClick={updateProjectsSeverityFactors}>Save</button>
+                <button className = "edit-btn" onClick={updateProjectsSeverityFactors}>Save</button>
             </div>
             );
         case 'manageAssessors':
