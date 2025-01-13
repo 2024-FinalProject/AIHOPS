@@ -58,26 +58,31 @@ class ProjectManager():
     def add_project_factor(self, pid, actor, factor_name, factor_desc):
         """ adds of factor to a project"""
         # check valid project, and owned by owner
+        if(factor_name == "" or factor_desc == ""):
+            return ResponseFailMsg("factor name and description cannot be empty")
         project = self._verify_owner(pid, actor)
         factor = self.factor_pool.add_factor(actor, factor_name, factor_desc)
         project.add_factor(factor)
         return ResponseSuccessMsg(f"actor: {actor} added factor {factor.name} to project {project.name}")
 
-    def add_factors(self, pid, actor, factors):
-        """ adds factor list to project: list of tuples (name, description)"""
+    def add_factors(self, pid, actor, factor_ids):
         project = self._verify_owner(pid, actor)
-        fails = ""
-        success = ""
-        for factor_data in factors:
+        fails = []
+        success = []
+
+        for factor_id in factor_ids:
             try:
-                factor = self.factor_pool.add_factor(actor, factor_data[0], factor_data[1])
+                # Attempt to find the factor
+                factor = self.factor_pool._find_factor(actor, factor_id)
                 project.add_factor(factor)
-                success += f"actor: {actor} added factor {factor.name} to project {project.name}"
+                success.append(f"actor: {actor} added factor {factor.name} to project {project.name}")
             except Exception as e:
-                fails += f"factor {factor_data[0]} failed to add : {e}\n"
-        if len(fails) > 0:
-            return ResponseFailMsg(fails)
-        return ResponseSuccessMsg(success)
+                # Use the factor_id in case `factor` is not defined
+                fails.append(f"factor ID {factor_id} failed to add: {e}")
+
+        if fails:
+            return ResponseFailMsg("\n".join(fails))
+        return ResponseSuccessMsg("\n".join(success))
 
     def delete_factor(self, pid, actor, fid):
         project = self._verify_owner(pid, actor)
@@ -348,6 +353,15 @@ class ProjectManager():
         for factor in factors:
             to_ret.append(factor.to_dict())
         return ResponseSuccessObj(f"factors pool for user: {actor}", to_ret)
+    
+    def get_projects_factor_pool(self, actor, pid):
+        factors = self.factor_pool.get_factors(actor)
+        project = self._find_project(pid)
+        to_ret = []
+        for factor in factors:
+            if not project.has_factor(factor.fid):
+                to_ret.append(factor.to_dict())
+        return ResponseSuccessObj(f"projects factors pool for user: {actor} {to_ret}", to_ret)
 
     # TODO: add to server
     def duplicate_project(self, pid, actor):

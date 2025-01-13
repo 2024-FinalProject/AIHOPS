@@ -29,7 +29,6 @@ const ProgressBar = ({ project }) => {
             let res = await getProjectProgress(cookie, project.id);
             if (res.data.success) {
                 setProjectsProgress(res.data.progress);
-                console.log(projectsProgress);
             }
             else {
                 alert("Error fetching project progress");

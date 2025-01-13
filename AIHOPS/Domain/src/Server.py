@@ -461,5 +461,17 @@ class Server:
             actor = res.result.user_name
             return self.project_manager.get_factor_pool(actor)
         except Exception as e:
-            return ResponseFailMsg(f"Failed to confirm severity factors: {e}")
+            return ResponseFailMsg(f"Failed to get factor pool of member: {e}")
+        
+    def get_projects_factor_pool_of_member(self, cookie, pid):
+        """returns all the projects actor is active member of"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.get_projects_factor_pool(actor, pid)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get projects factor pool of member: {e}")
+
 

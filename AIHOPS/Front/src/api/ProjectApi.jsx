@@ -187,6 +187,12 @@ export const getFactorsPoolOfMember = async (cookie) => {
     });
 }
 
+export const getProjectsFactorsPoolOfMember = async (cookie, project_id) => {
+    return await axios.get(`${API_URL}/project/get-projects-factors-pool`, {
+        params: { cookie, pid: project_id }
+    });
+}
+
 export const getPendingRequest = async (cookie) => {
     return await axios.get(`${API_URL}/project/pending-requests`, {
         params: { cookie }

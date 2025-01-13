@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
         get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
-        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember
+        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
+        getProjectsFactorsPoolOfMember
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -71,10 +72,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
 
         try {
-            const response = await getFactorsPoolOfMember(cookie);
+            const response = await getProjectsFactorsPoolOfMember(cookie, selectedProject.id);
             if (response?.data) {
                 setFactorsPool(response.data.factors);
-                console.log(response.data);
             } else {
                 setFactorsPool([]); // Set empty array if no factors found
             }
@@ -270,10 +270,30 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         );
     };
 
-    const handleSubmit = () => {
-        console.log('Selected Factors:', selectedFactors); // Debugging
-        // Navigate to your function with `selectedFactors` here
-        alert(`You selected: ${selectedFactors.map((f) => f.name).join(', ')}`); // Debugging
+    const handleSubmit = async () => {
+        let cookie = localStorage.getItem("authToken");
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+
+        const factorIds = selectedFactors.map((factor) => factor.id);
+        const response = await setProjectFactors(cookie, selectedProject.id, factorIds);
+
+        if (response.data.success) {
+            setIsSuccess(true);
+            //Get fresh project data
+            await fetchProjects(); // Refresh projects after adding the member
+            await fetch_selected_project(selectedProject);
+            selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+            await fetch_factors_pool();
+            setSelectedFactors([]);
+        } else {
+            setMsg(response.data.message);
+            alert(response.data.message);
+            setIsSuccess(true);
+        }
     };
 
     const handleAddFactor = async () => {
@@ -286,6 +306,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         if (!cookie) {
             setMsg("No authentication token found. Please log in again.");
             setIsSuccess(false);
+            return;
+        }
+
+        if(newFactorName === "" || newFactorDescription === ""){
+            alert("Please enter a valid factor name and description.");
             return;
         }
         
@@ -406,7 +431,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     </div>
                 ))}
 
-                <div
+                {factorsPool != null && factorsPool.length > 0 && <div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -424,7 +449,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         marginBottom: '10px',
                         }}
                     >
-                        Select Factors:
+                        Select Factors From Pool:
                     </label>
                     <div
                         id="factors-dropdown"
@@ -440,7 +465,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         backgroundColor: '#fff',
                         }}
                     >
-                        {factorsPool.map((factor) => (
+                        {factorsPool != null && factorsPool.length > 0 && factorsPool.map((factor) => (
                         <div
                             key={factor.id}
                             style={{
@@ -477,9 +502,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         }}
                         onClick={handleSubmit}
                     >
-                        Submit Selected Factors
+                        Add Selected Factors
                     </button>
-                </div>
+                </div>}
 
                 {/* Add New Factor - matching the same style as existing factors */}
                 <div className="factor-item" style={{
@@ -517,7 +542,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             cursor: 'pointer'
                             }}
                         >
-                            Add Factor
+                            Add New Factor
                         </button>
                     </div>
                 </div>

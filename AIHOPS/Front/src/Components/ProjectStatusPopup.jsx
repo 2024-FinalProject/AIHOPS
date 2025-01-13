@@ -47,6 +47,7 @@ const ProjectStatusPopup = ({
       const response = await confirmProjectFactors(cookie, pid);
       if (response.data.success) {
         selectedProject.factors_inited = true;
+        fetch_selected_project(selectedProject);
         alert("Factors confirmed successfully");
       } else {
         console.log("Error confirming project factors");
@@ -70,6 +71,7 @@ const ProjectStatusPopup = ({
       if (response.data.success) {
         alert("Severity factors confirmed successfully");
         selectedProject.severity_factors_inited = true;
+        fetch_selected_project(selectedProject);
       } else {
         console.log("Error confirming project factors");
       }
