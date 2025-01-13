@@ -75,7 +75,6 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             const response = await getProjectsFactorsPoolOfMember(cookie, selectedProject.id);
             if (response?.data) {
                 setFactorsPool(response.data.factors);
-                console.log(response.data);
             } else {
                 setFactorsPool([]); // Set empty array if no factors found
             }
@@ -432,7 +431,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     </div>
                 ))}
 
-                <div
+                {factorsPool != null && factorsPool.length > 0 && <div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -450,7 +449,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         marginBottom: '10px',
                         }}
                     >
-                        Select Factors:
+                        Select Factors From Pool:
                     </label>
                     <div
                         id="factors-dropdown"
@@ -503,9 +502,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         }}
                         onClick={handleSubmit}
                     >
-                        Submit Selected Factors
+                        Add Selected Factors
                     </button>
-                </div>
+                </div>}
 
                 {/* Add New Factor - matching the same style as existing factors */}
                 <div className="factor-item" style={{
@@ -543,7 +542,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             cursor: 'pointer'
                             }}
                         >
-                            Add Factor
+                            Add New Factor
                         </button>
                     </div>
                 </div>
