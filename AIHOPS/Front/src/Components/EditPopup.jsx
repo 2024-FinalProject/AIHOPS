@@ -271,10 +271,30 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         );
     };
 
-    const handleSubmit = () => {
-        console.log('Selected Factors:', selectedFactors); // Debugging
-        // Navigate to your function with `selectedFactors` here
-        alert(`You selected: ${selectedFactors.map((f) => f.name).join(', ')}`); // Debugging
+    const handleSubmit = async () => {
+        let cookie = localStorage.getItem("authToken");
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+
+        const factorIds = selectedFactors.map((factor) => factor.id);
+        const response = await setProjectFactors(cookie, selectedProject.id, factorIds);
+
+        if (response.data.success) {
+            setIsSuccess(true);
+            //Get fresh project data
+            await fetchProjects(); // Refresh projects after adding the member
+            await fetch_selected_project(selectedProject);
+            selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+            await fetch_factors_pool();
+            setSelectedFactors([]);
+        } else {
+            setMsg(response.data.message);
+            alert(response.data.message);
+            setIsSuccess(true);
+        }
     };
 
     const handleAddFactor = async () => {
@@ -287,6 +307,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         if (!cookie) {
             setMsg("No authentication token found. Please log in again.");
             setIsSuccess(false);
+            return;
+        }
+
+        if(newFactorName === "" || newFactorDescription === ""){
+            alert("Please enter a valid factor name and description.");
             return;
         }
         

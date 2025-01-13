@@ -25,7 +25,7 @@ class VoteManager:
         res = self.db_access.insert(instance)
         if not res.success:
             self.factors.pop(factor.fid)
-            return ResponseFailMsg(res.message)
+            return ResponseFailMsg(res.msg)
         return ResponseSuccessMsg(f"factor {factor.fid} added to project {self.pid}")
 
 

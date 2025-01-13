@@ -233,7 +233,7 @@ const ProjectsManagement = () => {
             const response = await createProject(cookie, newProject.name, newProject.description);
       
             if (response.data.success) {
-              alert(response.data.message);
+              alert(`Created project: "${newProject.name}" successfully.`);
               setIsSuccess(true);
               setNewProject({ name: "", description: "" });
               await fetchProjects();

@@ -54,7 +54,7 @@ class FactorsPool:
     def _find_factor(self, actor, fid):
         factors_of_member = self.members.get(actor)
         for factor in factors_of_member:
-            if factor.id == fid:
+            if factor.fid == fid:
                 return factor
         raise KeyError(f"factor {fid} not found")
 
