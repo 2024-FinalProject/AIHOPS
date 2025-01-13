@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
         get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
-        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember
+        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
+        getProjectsFactorsPoolOfMember
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -71,7 +72,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
 
         try {
-            const response = await getFactorsPoolOfMember(cookie);
+            const response = await getProjectsFactorsPoolOfMember(cookie, selectedProject.id);
             if (response?.data) {
                 setFactorsPool(response.data.factors);
                 console.log(response.data);
@@ -440,7 +441,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         backgroundColor: '#fff',
                         }}
                     >
-                        {factorsPool.map((factor) => (
+                        {factorsPool != null && factorsPool.length > 0 && factorsPool.map((factor) => (
                         <div
                             key={factor.id}
                             style={{

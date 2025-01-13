@@ -81,7 +81,7 @@ class Project:
     def has_factor(self, fid):
         factors = self.vote_manager.get_factors()
         for factor in factors:
-            if factor.id == fid:
+            if factor.fid == fid:
                 return True
         return False
     

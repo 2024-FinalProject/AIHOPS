@@ -348,6 +348,15 @@ class ProjectManager():
         for factor in factors:
             to_ret.append(factor.to_dict())
         return ResponseSuccessObj(f"factors pool for user: {actor}", to_ret)
+    
+    def get_projects_factor_pool(self, actor, pid):
+        factors = self.factor_pool.get_factors(actor)
+        project = self._find_project(pid)
+        to_ret = []
+        for factor in factors:
+            if not project.has_factor(factor.fid):
+                to_ret.append(factor.to_dict())
+        return ResponseSuccessObj(f"factors pool for user: {actor}", to_ret)
 
     # TODO: add to server
     def duplicate_project(self, pid, actor):

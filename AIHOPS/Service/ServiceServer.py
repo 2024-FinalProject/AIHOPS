@@ -128,6 +128,14 @@ def get_factors_pool_of_member():
     res = server.get_factor_pool_of_member(cookie)
     return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
 
+@app.route("/project/get-projects-factors-pool", methods=["GET"])
+# expecting query param: cookie
+def get_projects_factors_pool_of_member():
+    cookie = request.args.get("cookie", type=int)
+    pid = request.args.get("pid", type=int)
+    res = server.get_projects_factor_pool_of_member(cookie, pid)
+    return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
+
 @app.route("/project/publish", methods=["POST"])
 # expecting json with {cookie, pid}
 def publish_project():
