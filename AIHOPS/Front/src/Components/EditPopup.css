@@ -5,11 +5,31 @@
     justify-content: center; /* Center-aligns items vertically */
   }
   
-  .severity-factors-row {
+.severity-factors-row {
     display: flex;
     justify-content: center; /* Center-aligns the row content */
     gap: 20px; /* Optional: Adds spacing between items */
     margin-bottom: 10px; /* Adds spacing between rows */
   }
   
-  
+.severity-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.severity-table th, .severity-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.severity-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+.severity-input {
+    width: 100%;
+    padding: 5px;
+}
