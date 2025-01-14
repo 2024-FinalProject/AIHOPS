@@ -1,10 +1,13 @@
+import os
 import unittest
 from Domain.src.Server import Server
 from Service.config import Base, engine
 
 class DBProjectTests(unittest.TestCase):
 
-
+    @classmethod
+    def setUpClass(cls):
+        print(os.getcwd())
 
     def setUp(self) -> None:
         Base.metadata.create_all(engine)
