@@ -1,7 +1,13 @@
 import unittest
+
+from DAL.Objects.DBFactors import DBFactors
+from Domain.src.DS.FactorsPool import FactorsPool, DEFAULT_FACTORS
+from Domain.src.DS import FactorsPool as FP
+from Domain.src.ProjectModule.Project import DEFAULT_SEVERITY_FACTORS
 from Domain.src.Server import Server
 from Service.config import Base, engine
 import copy
+from sqlalchemy import event
 
 import random
 
@@ -15,6 +21,7 @@ class ProjectTests(unittest.TestCase):
 
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
+        FP.insert_defaults()
         self.server = Server()
         self.cookie1 = self.server.enter().result.cookie
         self.cookie2 = self.server.enter().result.cookie
@@ -22,11 +29,8 @@ class ProjectTests(unittest.TestCase):
         self.server.register(self.cookie2, "Bob", "")
 
     def tearDown(self) -> None:
-        # TODO:
-        # 1) Remove the registered users (all of them, including those in the setUp) from the database
-        # 2) Remove the organizations created in the tests
         self.server.clear_db()
-        pass  # TODO: remove this line after adding the function above
+        FP.insert_defaults()
 
     def text_enter(self):
         res = self.server.enter()
@@ -135,6 +139,37 @@ class ProjectTests(unittest.TestCase):
 
 
 
+
+    def test_project_default_factors_success(self):
+        self.create_server()
+        self.register_all()
+        cookie1 = self.server.enter().result.cookie
+        self.login(cookie1, self.AliceCred)
+
+        pid = self.server.create_project(cookie1, *self.p1_data, True).result
+        default_factors_list_dicts = [f.to_dict() for f in DEFAULT_FACTORS]
+
+        factors = self.server.get_project_factors(cookie1, pid).result
+        severity_factors = self.server.get_project_severity_factors(cookie1, pid).result
+
+        self.assertTrue(factors == default_factors_list_dicts, f"default factors not entered")
+        self.assertTrue(severity_factors == DEFAULT_SEVERITY_FACTORS, f"default severity factors not entered")
+
+        self.server = Server()
+        cookie1 = self.server.enter().result.cookie
+        self.login(cookie1, self.AliceCred)
+
+        factors = self.server.get_project_factors(cookie1, pid).result
+        self.assertTrue(len(factors) == len(DEFAULT_FACTORS), f"number of factors loaded: {len(factors)}, expected {len(DEFAULT_FACTORS)}")
+        for factor in default_factors_list_dicts:
+            self.assertTrue(factor in factors, f"factor {factor} not loaded")
+
+        severity_factors = self.server.get_project_severity_factors(cookie1, pid).result
+        self.assertTrue(severity_factors == DEFAULT_SEVERITY_FACTORS, f"default severity factors not loaded correctly")
+
+
+
+
     def test_update_factor(self):
         cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
         factors = self.server.get_project_factors(cookie_alice, pid).result
@@ -197,17 +232,17 @@ class ProjectTests(unittest.TestCase):
         self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
 
 
-    def test_update_factor_not_exist(self):
-        ...
-
-    def test_update_factor_published_project(self):
-        ...
-
-    def test_update_factor_project_not_exists(self):
-        ...
-
-    def test_update_factor_not_owner_of_project(self):
-        ...
+    # def test_update_factor_not_exist(self):
+    #     ...
+    #
+    # def test_update_factor_published_project(self):
+    #     ...
+    #
+    # def test_update_factor_project_not_exists(self):
+    #     ...
+    #
+    # def test_update_factor_not_owner_of_project(self):
+    #     ...
 
     def test_get_member_vote_success(self):
         c, cookie, pid = self.start_project_with_bob_member()
@@ -238,14 +273,14 @@ class ProjectTests(unittest.TestCase):
         self.assertTrue(factor_votes == fetched_factor_votes, f"factor votes: expected: {factor_votes}, actual: {fetched_factor_votes}")
         self.assertTrue(severity_votes == fetched_severity_votes, f"severity votes: expected: {severity_votes}, actual: {fetched_severity_votes}")
 
-    def text_get_member_vote_no_member(self):
-        ...
-
-    def text_get_member_vote_no_project(self):
-        ...
-
-    def text_get_member_vote_no_vote(self):
-        ...
+    # def text_get_member_vote_no_member(self):
+    #     ...
+    #
+    # def text_get_member_vote_no_project(self):
+    #     ...
+    #
+    # def text_get_member_vote_no_vote(self):
+    #     ...
 
     # def test_create_project_failure_duplicate_published(self):
     #     ...

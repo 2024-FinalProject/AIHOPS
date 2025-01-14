@@ -1,7 +1,10 @@
+from DAL.Objects.DBFactors import DBFactors
+from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
 from Service.config import app
 from flask import Flask, request, jsonify
 from Service.config import Base, engine
+from sqlalchemy import event
 
 from flask_cors import CORS
 
@@ -352,6 +355,7 @@ def get_projects_member():
 # run the backed server
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
+    FactorsPool.insert_defaults()
 
     server = Server()
     # running the server

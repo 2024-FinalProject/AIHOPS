@@ -1,5 +1,6 @@
 from threading import RLock
 
+from DAL.DBAccess import DBAccess
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
@@ -40,7 +41,7 @@ class Factor:
 
 
 
-DEFAULT_FACTORS = {
+DEFAULT_FACTORS = [
     Factor(-1, "DEFAULT", "Tech Availability", "The readiness of technology for integration into healthcare settings."),
     Factor(-2, "DEFAULT", "Organizational Attention", "The level of organizational focus and monitoring of the technology."),
     Factor(-3, "DEFAULT", "Urgency of Need", "The immediate and future necessity for the technology in healthcare operations."),
@@ -48,7 +49,13 @@ DEFAULT_FACTORS = {
     Factor(-5, "DEFAULT", "Cost Assessment", "Evaluation of the financial implications and justifiability of the technology investment."),
     Factor(-6, "DEFAULT", "Workflow Disruption", "The impact of the technology on existing workflows and processes."),
     Factor(-7, "DEFAULT", "Ethical Feasibility", "The ethical considerations and approval requirements associated with the technology’s implementation."),
-}
+]
+
+DEFAULT_FACTORS_IDS = [-1,-2,-3,-4,-5,-6,-7]
+
+def insert_defaults():
+    for factor in DEFAULT_FACTORS:
+        DBAccess().insert(DBFactors(factor.name, factor.description, factor.fid, factor.owner))
 
 class FactorsPool:
     def __init__(self, db_access):
@@ -59,6 +66,9 @@ class FactorsPool:
         self.load_all_factors()
         self.lock = RLock()
 
+    def get_default_factor_ids(self):
+        return DEFAULT_FACTORS_IDS
+
     def _check_id_dup_factor(self, actor, factor_name, factor_description):
         factors_of_member = self.members.get(actor)
         for factor in factors_of_member:
@@ -67,6 +77,9 @@ class FactorsPool:
 
     def _find_factor(self, actor, fid):
         with self.lock:
+            if fid in DEFAULT_FACTORS_IDS:
+                return DEFAULT_FACTORS[(fid * (-1)) -1]
+
             factors_of_member = self.members.get(actor)
             for factor in factors_of_member:
                 if factor.fid == fid:
@@ -98,16 +111,19 @@ class FactorsPool:
         return ResponseSuccessMsg(f"factor {fid} removed from {actor}")
 
     def get_factors(self, actor):
-        return self.members.get(actor)
+        return self.members.get(actor) + DEFAULT_FACTORS
 
     def load_all_factors(self):
         top_id = 0
         factors_data = self.db_access.load_all(DBFactors)
         for factor in factors_data:
-            owner = factor.owner
-            name = factor.name
-            description = factor.description
-            fid = factor.id
-            self.members.insert(owner, Factor(fid, owner, name, description, factor))
-            top_id = max(top_id, fid)
+            if factor.id >= 0:
+                owner = factor.owner
+                name = factor.name
+                description = factor.description
+                fid = factor.id
+                self.members.insert(owner, Factor(fid, owner, name, description, factor))
+                top_id = max(top_id, fid)
         self.id_maker.start_from(top_id + 1)
+
+

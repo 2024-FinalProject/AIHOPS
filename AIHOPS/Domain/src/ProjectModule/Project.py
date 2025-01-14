@@ -7,7 +7,7 @@ from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.VoteManager import VoteManager
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
-
+DEFAULT_SEVERITY_FACTORS = [0.5, 1, 25, 100, 400]
 
 class Project:
     def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None):
@@ -23,7 +23,7 @@ class Project:
         self.factors_inited = False
         self.severity_factors_inited = False
         self.published = False
-        self.severity_factors = [1,4,10,25,50]
+        self.severity_factors = DEFAULT_SEVERITY_FACTORS
 
         if db_instance is None:
             self.db_instance = DBProject(pid, owner, name, desc)

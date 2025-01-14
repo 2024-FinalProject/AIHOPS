@@ -111,14 +111,16 @@ class Server:
             return ResponseFailMsg(f"Failed to logout: {e}")
     
     # ------------- Project ------------------
-
-    def create_project(self, cookie, name, description):
+    # TODO: newnew added use_default_Factors argument
+    def create_project(self, cookie, name, description, use_default_factors=False):
+        """when using default factors, if anything goes wrong with the factor assignment,
+                    project will be created without or with partial factors"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res
-            return self.project_manager.create_project(name, description, session.result.user_name)
+            return self.project_manager.create_project(name, description, session.result.user_name, use_default_factors)
         except Exception as e:
             return ResponseFailMsg(f"Failed to create project: {e}")
     
@@ -467,7 +469,7 @@ class Server:
             return ResponseFailMsg(f"Failed get_project_of_member: {e}")
 
     def get_factor_pool_of_member(self, cookie):
-        """returns all the projects actor is active member of"""
+        """returns all members factors"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:

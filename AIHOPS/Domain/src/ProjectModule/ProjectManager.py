@@ -12,6 +12,7 @@ from Domain.src.ProjectModule.Project import Project
 
 
 
+
 class ProjectManager():
     def __init__(self, db_access):
         self.db_access = db_access
@@ -51,11 +52,17 @@ class ProjectManager():
         self._verify_unique_project(owner, name, description)
         # create Project
         pid = self.project_id_maker.next_id()
-        project = Project(pid, name, description, owner, self.db_access, is_default_factors)
+        project = Project(pid, name, description, owner, self.db_access)
         # add to lists
         self.projects.insert(pid, project)
         self.owners.insert(owner, project)
-        return ResponseSuccessObj(f"actor: {owner} sccessfully created project: {pid, name, description}", pid)
+        msg = f"actor: {owner} sccessfully created project: {pid, name, description}"
+        # default_factors:
+        if is_default_factors:
+            def_facts = self.factor_pool.get_default_factor_ids()
+            res_facts = self.add_factors(pid, owner, def_facts)
+            msg += res_facts.msg
+        return ResponseSuccessObj(msg, pid)
 
     def add_project_factor(self, pid, actor, factor_name, factor_desc):
         """ adds of factor to a project"""
@@ -379,7 +386,7 @@ class ProjectManager():
 
 
     def get_projects_factor_pool(self, actor, pid):
-        """ returns available factors for project, that ar nopt in the project already"""
+        """ returns available factors for project, that are nop in the project already"""
         factors = self.factor_pool.get_factors(actor)
         project = self._find_project(pid)
         to_ret = []

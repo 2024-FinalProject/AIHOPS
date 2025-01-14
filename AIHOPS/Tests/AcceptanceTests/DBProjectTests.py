@@ -67,7 +67,8 @@ class DBProjectTests(unittest.TestCase):
             print("")
 
     def set_default_factors_for_project(self, cookie, pid):
-        self.server.set_project_factors(cookie, pid, self.factors)
+        for f in self.factors:
+            self.server.add_project_factor(cookie, pid, f[0], f[1])
 
     def set_default_severity_factors_for_project(self, cookie, pid):
         self.server.set_project_severity_factors(cookie, pid, self.severities)
@@ -113,8 +114,9 @@ class DBProjectTests(unittest.TestCase):
     def test_factors_loading(self):
         cookie1, pid = self.start_and_create_project()
 
-        factors = [["factor1", "desc1"], ["factor2", "desc2"], ["factor3", "desc3"], ["factor4", "desc4"]]
-        self.server.set_project_factors(cookie1, pid, factors)
+        self.set_default_factors_for_project(cookie1, pid)
+        factors = self.server.get_project_factors(cookie1, pid).result
+        factor_info = [[f["name"], f["description"]] for f in factors]
 
         self.server = Server()
         projects = self.get_projects_dict(self.server)
@@ -126,7 +128,7 @@ class DBProjectTests(unittest.TestCase):
         self.assertFalse(project.is_published(), "loaded project is active, expected -> not Active")
         factors_loaded = project.vote_manager.get_factors()
         for factor in factors_loaded:
-            self.assertTrue([factor.name, factor.description] in factors, f"factor not loaded: {factor.name}, {factor.description}")
+            self.assertTrue([factor.name, factor.description] in factor_info, f"factor not loaded: {factor.name}, {factor.description}")
 
 
     def test_severities_loading(self):
