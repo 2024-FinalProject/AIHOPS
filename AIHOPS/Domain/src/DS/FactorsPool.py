@@ -74,6 +74,8 @@ class FactorsPool:
         raise KeyError(f"factor {fid} not found")
 
     def update_factor(self, actor, fid, factor_name, factor_desc):
+        if fid < 0:
+            return ResponseFailMsg(f"can't update default factor")
         factor = self._find_factor(actor, fid)
         res = factor.update(factor_name, factor_desc, self.db_access)
         if res.success:
