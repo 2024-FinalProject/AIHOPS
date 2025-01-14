@@ -434,8 +434,11 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get_project_factors: {e}")
 
+    # TODO: newnew added dict fields
     def get_project_progress_for_owner(self, cookie, pid):
-        """for progress bar returns dict with values"""
+        """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}
+                    new: {voted_amount: int, member_count: int, pending_members: int}
+            voted: counts partial votes as well, also if only voted on severities and not on factors"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -446,7 +449,7 @@ class Server:
             return ResponseFailMsg(f"Failed to get_project_progress_for_owner: {e}")
 
     def get_project_severity_factors(self, cookie, pid):
-        """for progress bar returns dict with values"""
+        """returns projects current severity factors"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -490,7 +493,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get projects factor pool of member: {e}")
 
-
+    # TODO: newnew
     def get_member_vote_on_project(self, cookie, pid):
         """returns asking actors vote on ongoing project,
             {"factor_votes": {fid: score, fid: score ...}

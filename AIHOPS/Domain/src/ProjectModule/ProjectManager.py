@@ -125,9 +125,11 @@ class ProjectManager():
         return ResponseSuccessMsg(f"{pid}: updated name and desc to {project.name}, {project.desc}")
 
     def get_project_progress_for_owner(self, pid, actor):
-        """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}"""
+        """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}
+                    new: {voted_amount: int, member_count: int, pending_members: int}"""
         project = self._verify_owner(pid, actor)
-        return ResponseSuccessObj(f"{actor}: progress for project {pid}", project.get_progress_for_owner())
+        pending_amount = len(self.get_pending_emails_for_project(pid, actor).result)
+        return ResponseSuccessObj(f"{actor}: progress for project {pid}", project.get_progress_for_owner(pending_amount))
 
     def confirm_factors(self, pid, actor):
         project = self._verify_owner(pid, actor)
@@ -400,11 +402,6 @@ class ProjectManager():
         """creates project NTH"""
         pass
 
-    # TODO: add to server
-    def get_project_voting_progress(self):
-        """returns percentage of voter"""
-        # TODO: we allow partial voting, if member voted on 1 factor is it enough?
-        pass
 
     # --------------- Data Base ------------------------
 

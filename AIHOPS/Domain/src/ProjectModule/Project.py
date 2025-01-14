@@ -107,11 +107,12 @@ class Project:
         self.desc = description
         return ResponseSuccessMsg(f"description {self.desc} has been updated for project: {self.pid}")
 
-    def get_progress_for_owner(self):
+    def get_progress_for_owner(self, pending_amount):
         invited_members = self.to_invite_when_published.size() > 0
         return {"name": self.name, "desc": self.desc, "factors_amount": len(self.vote_manager.get_factors()),
                 "factors_inited": self.factors_inited, "severity_factors_inited": self.severity_factors_inited,
-                "invited_members": invited_members}
+                "invited_members": invited_members, "published": self.published, "pending_amount": pending_amount,
+                "voted_amount": len(self.vote_manager.get_partially_voted_amount()), "member_count": self.members.size()}
 
     def add_member_to_invite(self, member):
         self.to_invite_when_published.append_unique(member)
@@ -196,9 +197,6 @@ class Project:
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
     def get_score(self):
-        pass
-
-    def get_voting_progress(self):
         pass
 
     def get_member_votes(self, actor):
