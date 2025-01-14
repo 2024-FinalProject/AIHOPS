@@ -1,7 +1,10 @@
+from threading import RLock
+
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
-from Domain.src.Loggs.Response import ResponseSuccessMsg
+from Domain.src.Loggs.Response import ResponseSuccessMsg, ResponseFailMsg, ResponseSuccessObj
+
 
 class Factor:
     def __init__(self, fid, owner,  name, description, db_instance=None, persist=True):
@@ -14,6 +17,15 @@ class Factor:
         if db_instance is None and persist:
             self.db_instance = DBFactors(name, description, fid, owner)
 
+    def update(self, name, desc, db_access):
+        self.db_instance.name = name
+        self.db_instance.description = desc
+        res = db_access.insert(self.db_instance)
+        if not res.success:
+            return ResponseFailMsg(f"failed to update factor: {self.name}, {self.description}, {self.fid}: {res.msg}")
+        self.name = name
+        self.description = desc
+        return ResponseSuccessMsg(f"factor {self.fid} updated successfully with: {self.name}, {self.description}")
 
     def to_dict(self):
         return {
@@ -40,10 +52,12 @@ DEFAULT_FACTORS = {
 
 class FactorsPool:
     def __init__(self, db_access):
+        # TODO: change to dict values in members -> for efficiency in _find_factor
         self.members = ThreadSafeDictWithListValue() # {email: factors}
         self.id_maker = IdMaker()
         self.db_access = db_access
         self.load_all_factors()
+        self.lock = RLock()
 
     def _check_id_dup_factor(self, actor, factor_name, factor_description):
         factors_of_member = self.members.get(actor)
@@ -52,11 +66,20 @@ class FactorsPool:
                 raise NameError(f"factor name {factor_name} already exists")
 
     def _find_factor(self, actor, fid):
-        factors_of_member = self.members.get(actor)
-        for factor in factors_of_member:
-            if factor.fid == fid:
-                return factor
+        with self.lock:
+            factors_of_member = self.members.get(actor)
+            for factor in factors_of_member:
+                if factor.fid == fid:
+                    return factor
         raise KeyError(f"factor {fid} not found")
+
+    def update_factor(self, actor, fid, factor_name, factor_desc):
+        factor = self._find_factor(actor, fid)
+        res = factor.update(factor_name, factor_desc, self.db_access)
+        if res.success:
+            return ResponseSuccessObj(res.msg, factor)
+        return res
+
 
     def add_factor(self, actor, factor_name, factor_desc):
         self._check_id_dup_factor(actor, factor_name, factor_desc)
@@ -83,6 +106,6 @@ class FactorsPool:
             name = factor.name
             description = factor.description
             fid = factor.id
-            self.members.insert(owner, Factor(fid, owner, name, description, factors_data))
+            self.members.insert(owner, Factor(fid, owner, name, description, factor))
             top_id = max(top_id, fid)
         self.id_maker.start_from(top_id + 1)

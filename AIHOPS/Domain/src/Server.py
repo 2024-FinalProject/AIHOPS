@@ -163,7 +163,20 @@ class Server:
             return self.project_manager.delete_factor_from_pool(actor, fid)
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove factor {fid} from users {actor} pool:\n {e}")
-        
+
+    # TODO: newnew
+    def update_factor(self, cookie, fid, new_name, new_desc):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            actor = session.user_name
+            return self.project_manager.update_factor(actor, fid, new_name, new_desc)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to update factor {fid} :\n {e}")
+
+
     def set_project_severity_factors(self, cookie, pid, severity_factors):
         try:
             res = self.get_session_member(cookie)

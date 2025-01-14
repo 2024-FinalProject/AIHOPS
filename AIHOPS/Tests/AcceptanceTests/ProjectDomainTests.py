@@ -1,6 +1,7 @@
 import unittest
 from Domain.src.Server import Server
 from Service.config import Base, engine
+import copy
 
 import random
 
@@ -113,7 +114,7 @@ class ProjectTests(unittest.TestCase):
         self.login(cookie_bob, self.BobCred)
         res = self.server.approve_member(cookie_bob, pid)
         self.assertTrue(res.success, f"user bob failed to be approved member {res.msg}")
-        return cookie_bob, pid
+        return cookie, cookie_bob, pid
 
     # ------------- Project ------------------
 
@@ -133,8 +134,83 @@ class ProjectTests(unittest.TestCase):
         self.create_project_fail(cookie1, pid, "sus", None)
 
 
+
+    def test_update_factor(self):
+        cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
+        factors = self.server.get_project_factors(cookie_alice, pid).result
+
+        factor_old = copy.deepcopy(random.choice(factors))
+        new_fields = ["new name", "new desc"]
+
+        res = self.server.update_factor(cookie_alice, factor_old["id"], *new_fields)
+        self.assertTrue(res.success, f"failed to update factor {res.msg}")
+
+        # check factor updated in factor pool
+        factors = self.server.get_factor_pool_of_member(cookie_alice).result
+        self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
+
+        # check factor updated in project
+        factors = self.server.get_project_factors(cookie_alice, pid).result
+        self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
+
+    def _check_factor_updated(self, factors, cookie_alice, factor_old, new_fields):
+        self.assertFalse(factor_old in factors, f"old factor is still in factors pool for alice")
+        found = False
+        for f in factors:
+            if f["id"] == factor_old["id"]:
+                self.assertTrue(f["description"] == new_fields[1], f"factor desc not updated")
+                self.assertTrue(f["name"] == new_fields[0], f"factor name not updated")
+                found = True
+                break
+        self.assertTrue(found, f"factor not found")
+
+    def test_update_factor_after_db_loaded(self):
+        cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
+        factors = self.server.get_project_factors(cookie_alice, pid).result
+
+        factor_old = copy.deepcopy(random.choice(factors))
+        new_fields = ["new name", "new desc"]
+
+        self.server = Server()
+        cookie_alice = self.enter_login(self.AliceCred)
+
+        res = self.server.update_factor(cookie_alice, factor_old["id"], *new_fields)
+        self.assertTrue(res.success, f"failed to update factor {res.msg}")
+
+        # check factor updated in factor pool
+        factors = self.server.get_factor_pool_of_member(cookie_alice).result
+        self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
+
+        # check factor updated in project
+        factors = self.server.get_project_factors(cookie_alice, pid).result
+        self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
+
+        # check again
+        self.server = Server()
+        cookie_alice = self.enter_login(self.AliceCred)
+        # check factor updated in factor pool
+        factors = self.server.get_factor_pool_of_member(cookie_alice).result
+        self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
+
+        # check factor updated in project
+        factors = self.server.get_project_factors(cookie_alice, pid).result
+        self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
+
+
+    def test_update_factor_not_exist(self):
+        ...
+
+    def test_update_factor_published_project(self):
+        ...
+
+    def test_update_factor_project_not_exists(self):
+        ...
+
+    def test_update_factor_not_owner_of_project(self):
+        ...
+
     def test_get_member_vote_success(self):
-        cookie, pid = self.start_project_with_bob_member()
+        c, cookie, pid = self.start_project_with_bob_member()
         factors = self.server.get_project_factors(cookie, pid).result
         factor_ids = [factor["id"] for factor in factors]
         votes = [random.randint(0, 4) for _ in range(len(factor_ids))]

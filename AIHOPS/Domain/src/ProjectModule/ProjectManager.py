@@ -358,7 +358,26 @@ class ProjectManager():
         for factor in factors:
             to_ret.append(factor.to_dict())
         return ResponseSuccessObj(f"factors pool for user: {actor}", to_ret)
-    
+
+    def _get_projects_containing_factor(self, actor, fid):
+        actors_projects = self.owners.get(actor)
+        ps = []
+        for project in actors_projects:
+            if project.has_factor(fid):
+                ps.append(project)
+        return ps
+
+    def update_factor(self, actor, fid, name, desc):
+        res = self.factor_pool.update_factor(actor, fid, name, desc)
+        if not res.success:
+            return res
+        factor = res.result
+        projects = self._get_projects_containing_factor(actor, fid)
+        for project in projects:
+            project.update_factor(factor)
+        return res
+
+
     def get_projects_factor_pool(self, actor, pid):
         """ returns available factors for project, that ar nopt in the project already"""
         factors = self.factor_pool.get_factors(actor)
