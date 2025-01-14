@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
         get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
         getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
-        getProjectsFactorsPoolOfMember
+        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -123,6 +123,31 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleConfirmSeverityFactors = async (pid) => {
+        let cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+    
+        try {
+          if(await updateProjectsSeverityFactors() == -1){
+            return;
+          }
+          const response = await confirmSeverityFactors(cookie, pid);
+          if (response.data.success) {
+            alert("Severity factors confirmed successfully");
+            selectedProject.severity_factors_inited = true;
+            fetch_selected_project(selectedProject);
+          } else {
+            console.log("Error confirming project factors");
+          }
+        } catch (error) {
+          console.log("Error confirming project factors");
+        }
+    };    
 
     const updateProjectsSeverityFactors = async () =>{
         const cookie = localStorage.getItem("authToken");
@@ -130,14 +155,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         if (!cookie) {
             setMsg("No authentication token found. Please log in again.");
             setIsSuccess(false);
-            return;
+            return -1;
         }
 
         let tempSeverityFactors = [];
         for (let level = 1; level <= selectedProject.severity_factors.length; level++) {
             if (severityUpdates[level] < 0) {
                 alert("Severity factors cannot be negative. Please enter a valid number for all levels.");
-                return;
+                return -1;
             }
             if(severityUpdates == null || severityUpdates[level] === undefined){
                 tempSeverityFactors.push(selectedProject.severity_factors[level - 1]);
@@ -149,7 +174,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         for(let i = 1; i < tempSeverityFactors.length; i++){
             if(tempSeverityFactors[i - 1] > tempSeverityFactors[i]){
                 alert("Severity factors must be in increasing order.\nCurrently level " + (i) + " is greater than level " + (i + 1));
-                return;
+                return -1;
             }
         }
         
@@ -159,7 +184,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 setMsg(severityResponse.data.message);
                 setIsSuccess(true);
                 alert(severityResponse.data.message);
-                return;
+                return -1;
             }
             await fetchProjects();
             selectedProject.severity_factors = (await getProjectSeverityFactors(cookie, selectedProject.id)).data.severityFactors;
@@ -167,11 +192,13 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             setMsg("Severity factors updated successfully");
             setIsSuccess(true);
             closePopup();
+            return 1;
         } catch (error) {
           const errorMessage = error.response?.data?.message || error.message;
           console.error("Error:", errorMessage);
           setMsg(`Error in updating the severity factors: ${errorMessage}`);
           setIsSuccess(false);
+          return -1;
         }
     }
 
@@ -336,6 +363,35 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             console.error("Error:", errorMessage);
             setMsg(`Error in adding factor: ${errorMessage}`);
             setIsSuccess(false);
+        }
+    };
+
+    const handleConfirmFactors = async (pid) => {
+        let cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+    
+        if(selectedProject.factors.length == 0){
+          alert("Please add at least one factor in order to confirm");
+          return;
+        }
+    
+        try {
+          const response = await confirmProjectFactors(cookie, pid);
+          if (response.data.success) {
+            selectedProject.factors_inited = true;
+            fetch_selected_project(selectedProject);
+            alert("Factors confirmed successfully");
+            closePopup();
+          } else {
+            console.log("Error confirming project factors");
+          }
+        } catch (error) {
+          console.log("Error confirming project factors");
         }
     };
 
@@ -547,63 +603,73 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     </div>
                 </div>
                 </div>
+                <button disabled = {selectedProject.isActive}
+                    className="action-btn edit-btn"
+                    onClick={() => handleConfirmFactors(selectedProject.id, selectedProject.name)}
+                >
+                    Confirm Content Factors
+                </button>
             </div>
         );
         case 'editSeverityFactors':
             return (
-            <div>
-                <h3>Edit d-score (Severity Factors)</h3>
-                <p>TODO: Add fields for editing severity factors.</p>
-                <div className="severity-factors-container">
-                    <div className="severity-factors-row">
-                        {selectedProject.severity_factors.slice(0, 3).map((severity, index) => (
-                        <div key={index} className="severity-item">
-                            <label className="severity-label">Level {index + 1}:</label>
-                            {selectedProject.isActive ? (
-                            <span className="severity-value">{severity}</span>
-                            ) : (
-                            <input
-                                type="number"
-                                defaultValue={severity}
-                                className="severity-input"
-                                onChange={(e) => {
-                                const updates = { ...severityUpdates };
-                                updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1, 2, 3
-                                setSeverityUpdates(updates);
-                                }}
-                            />
-                            )}
-                        </div>
-                        ))}
+                <div>
+                    <h3>Edit d-score (Severity Factors)</h3>
+                    <table className="severity-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Level Name</th>
+                                <th>Level Description</th>
+                                <th>Severity Factor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {selectedProject.severity_factors.map((severity, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>Level {index + 1}</td>
+                                    <td>
+                                        {[
+                                            "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
+                                            "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
+                                            "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
+                                            "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
+                                            "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention."
+                                        ][index]}
+                                    </td>
+                                    <td>
+                                        {selectedProject.isActive ? (
+                                            <span>{severity}</span>
+                                        ) : (
+                                            <input
+                                                type="number"
+                                                defaultValue={severity}
+                                                className="severity-input"
+                                                onChange={(e) => {
+                                                    const updates = { ...severityUpdates };
+                                                    updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1-5
+                                                    setSeverityUpdates(updates);
+                                                }}
+                                            />
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <div className="severity-factors-warning">
+                        <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
                     </div>
-                    <div className="severity-factors-row">
-                        {selectedProject.severity_factors.slice(3, 5).map((severity, index) => (
-                        <div key={index + 3} className="severity-item">
-                            <label className="severity-label">Level {index + 4}:</label>
-                            {selectedProject.isActive ? (
-                            <span className="severity-value">{severity}</span>
-                            ) : (
-                            <input
-                                type="number"
-                                defaultValue={severity}
-                                className="severity-input"
-                                onChange={(e) => {
-                                const updates = { ...severityUpdates };
-                                updates[index + 4] = Number(e.target.value); // Map to dictionary keys 4, 5
-                                setSeverityUpdates(updates);
-                                }}
-                            />
-                            )}
-                        </div>
-                        ))}
-                    </div>
+                    <button disabled = {selectedProject.isActive}
+                        className="action-btn edit-btn"
+                        onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
+                    >
+                        Confirm Severity Factors
+                    </button>
                 </div>
-                <div className="severity-factors-warning">
-                    <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
-                </div>
-                <button className = "edit-btn" onClick={updateProjectsSeverityFactors}>Save</button>
-            </div>
-            );
+        );
+
         case 'manageAssessors':
             return (
                 <div>
