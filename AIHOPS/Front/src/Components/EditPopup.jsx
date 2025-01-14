@@ -395,9 +395,32 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
-    const handleDeleteFactor = (factorName) => {
+    const handleDeleteFactor = async (factorName, factorId) => {
         if (window.confirm(`Are you sure you want to delete the factor "${factorName}"?`)) {
-            alert("TODO: Implement delete factor logic");
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            try{
+            const res = await deleteProjectFactor(cookie, selectedProject.id, factorId);
+            if (res.data.success) {
+                alert(`Factor "${factorName}" deleted successfully.`);
+                await fetchProjects();
+                selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+                await fetch_selected_project(selectedProject);
+                await fetch_factors_pool();
+            } else {
+                alert(res.data.message);
+            }
+            } catch (error) {
+                console.error("Error deleting factor:", error);
+                setMsg(`Error deleting factor: ${error.response?.data?.message || error.message}`);
+                setIsSuccess(false);
+                alert(error.message)
+            }
         }
     };
 
@@ -471,7 +494,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             />
                             <button
                             className="action-btn delete-btn"
-                            onClick={() => handleDeleteFactor(factor.name)}
+                            onClick={() => handleDeleteFactor(factor.name, factor.id)}
                             style={{
                                 padding: '5px 15px',
                                 backgroundColor: '#ff4444',
