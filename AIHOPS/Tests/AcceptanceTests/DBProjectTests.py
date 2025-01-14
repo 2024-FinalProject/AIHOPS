@@ -223,9 +223,10 @@ class DBProjectTests(unittest.TestCase):
 
         factors = self.server.get_project_factors(cookie_bob, pid).result
         for i in range(len(factors)):
-            self.server.vote_on_factor(cookie_bob, pid, factors[i].fid, bobs_factor_scores[i])
+            self.server.vote_on_factor(cookie_bob, pid, factors[i]["id"], bobs_factor_scores[i])
         self.server.vote_severities(cookie_bob, pid, bobs_severity_votes)
 
+        res = self.server.vote_on_factor(cookie_bob, pid, 2, 0)
         # self.server.vote(cookie_bob, pid, [1, 2, 3, 4], [45, 25, 15, 10, 5])
         # self.server.vote(cookie_eve, pid, [0, 1, 2, 3], [40, 30, 30, 0, 0])
 

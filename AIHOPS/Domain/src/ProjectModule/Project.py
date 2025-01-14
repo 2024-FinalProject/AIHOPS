@@ -10,7 +10,7 @@ from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, Respo
 
 
 class Project:
-    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=True, db_instance=None):
+    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None):
         self.db_access = db_access
         self.pid = pid
         self.name = name
@@ -68,9 +68,11 @@ class Project:
         self._set_severity_factors_inited_false()
         if len(severity_factors) != 5:
             return ResponseFailMsg(f"only 5 severity factors")
+        prev_factor = 0
         for factor in severity_factors:
-            if factor < 0:
-                return ResponseFailMsg(f"only positive factor")
+            if factor < prev_factor:
+                return ResponseFailMsg(f"severity factors must be in non decreasing order")
+            prev_factor = factor
         instance = DBProjectSeverityFactor(self.pid, *severity_factors)
         res = self.db_access.update(instance)
         if not res.success:

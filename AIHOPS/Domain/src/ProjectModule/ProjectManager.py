@@ -355,6 +355,7 @@ class ProjectManager():
         return ResponseSuccessObj(f"factors pool for user: {actor}", to_ret)
     
     def get_projects_factor_pool(self, actor, pid):
+        """ returns available factors for project, that ar nopt in the project already"""
         factors = self.factor_pool.get_factors(actor)
         project = self._find_project(pid)
         to_ret = []
