@@ -88,7 +88,7 @@ class ProjectManager():
         project = self._verify_owner(pid, actor)
         return project.remove_factor(fid)
 
-    def delete_factor_from_pool(self, fid, actor):
+    def delete_factor_from_pool(self, actor, fid):
         # check if any of the projects founded by actor have the factor, if so fail
         if fid < 0:
             raise NameError(f"factor {fid} is default and cant be removed")
@@ -98,7 +98,7 @@ class ProjectManager():
             if proj.has_factor(fid):
                 projects_containing_factor.append(proj.pid)
         if len(projects_containing_factor) > 0:
-            Response(False, "factor appears in projects", projects_containing_factor, False)
+            return Response(False, "factor appears in projects", projects_containing_factor, False)
         else:
             return self.factor_pool.remove_factor(actor, fid)
 

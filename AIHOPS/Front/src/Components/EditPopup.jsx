@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
         get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
         getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
-        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors
+        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -323,6 +323,34 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleDeleteFactorFromPool = async (factorName, factorId) => {
+        if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the pool"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            try{
+            const res = await deleteFactorFromPool(cookie, factorId);
+            if (res.data.success) {
+                alert(`Factor "${factorName}" deleted successfully.`);
+                await fetchProjects();
+                await fetch_selected_project(selectedProject);
+                await fetch_factors_pool();
+            } else {
+                alert(res.data.message);
+            }
+            } catch (error) {
+                console.error("Error deleting factor:", error);
+                setMsg(`Error deleting factor: ${error.response?.data?.message || error.message}`);
+                setIsSuccess(false);
+                alert(error.message)
+            }
+        }
+    };
+
     const handleAddFactor = async () => {
         console.log(selectedProject.factors);
         if (!window.confirm("Are you sure you want to add this factor?")) {
@@ -395,9 +423,32 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
-    const handleDeleteFactor = (factorName) => {
-        if (window.confirm(`Are you sure you want to delete the factor "${factorName}"?`)) {
-            alert("TODO: Implement delete factor logic");
+    const handleDeleteFactor = async (factorName, factorId) => {
+        if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the project"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            try{
+            const res = await deleteProjectFactor(cookie, selectedProject.id, factorId);
+            if (res.data.success) {
+                alert(`Factor "${factorName}" deleted successfully.`);
+                await fetchProjects();
+                selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+                await fetch_selected_project(selectedProject);
+                await fetch_factors_pool();
+            } else {
+                alert(res.data.message);
+            }
+            } catch (error) {
+                console.error("Error deleting factor:", error);
+                setMsg(`Error deleting factor: ${error.response?.data?.message || error.message}`);
+                setIsSuccess(false);
+                alert(error.message)
+            }
         }
     };
 
@@ -471,7 +522,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             />
                             <button
                             className="action-btn delete-btn"
-                            onClick={() => handleDeleteFactor(factor.name)}
+                            onClick={() => handleDeleteFactor(factor.name, factor.id)}
                             style={{
                                 padding: '5px 15px',
                                 backgroundColor: '#ff4444',
@@ -543,6 +594,21 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             >
                             <strong>{factor.name}</strong>: {factor.description}
                             </label>
+                            <button
+                            className="action-btn delete-btn"
+                            onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
+                            style={{
+                                padding: '5px 15px',
+                                backgroundColor: '#ff4444',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                marginLeft: '10px',
+                            }}
+                            >
+                            Delete From Pool
+                            </button>
                         </div>
                         ))}
                     </div>

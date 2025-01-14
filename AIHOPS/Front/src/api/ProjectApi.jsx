@@ -71,7 +71,7 @@ export const deleteProjectFactor = async (cookie, project_id, factor_id) => {
 };
 
 export const deleteFactorFromPool = async (cookie, factor_id) => {
-    return await axios.post(`${API_URL}/project/delete-from-pool`, {
+    return await axios.post(`${API_URL}/project/factor/delete-from-pool`, {
         cookie: cookie,
         fid: factor_id
     });
