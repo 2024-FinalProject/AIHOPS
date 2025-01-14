@@ -7,11 +7,11 @@ class DBSeverityVotes(Base):
 
     project_id = Column(Integer, ForeignKey('projects.id', ondelete='CASCADE'), primary_key=True)
     member_email = Column(String(255),ForeignKey('members.email', ondelete='CASCADE'), primary_key=True)
-    severity_level1 = Column(Float, nullable=False)
-    severity_level2 = Column(Float, nullable=False)
-    severity_level3 = Column(Float, nullable=False)
-    severity_level4 = Column(Float, nullable=False)
-    severity_level5 = Column(Float, nullable=False)
+    severity_level1 = Column(Integer, nullable=False)
+    severity_level2 = Column(Integer, nullable=False)
+    severity_level3 = Column(Integer, nullable=False)
+    severity_level4 = Column(Integer, nullable=False)
+    severity_level5 = Column(Integer, nullable=False)
 
     # __table_args__ = (
     #     CheckConstraint('severity_level1 >= 0 AND severity_level1 <= 1'),

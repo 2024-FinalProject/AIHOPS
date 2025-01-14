@@ -196,6 +196,12 @@ class Project:
     def get_voting_progress(self):
         pass
 
+    def get_member_votes(self, actor):
+        self._verify_member(actor)
+        return self.vote_manager.get_member_votes(actor)
+
+
+
     def __eq__(self, other):
         return (
             isinstance(other, Project)

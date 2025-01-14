@@ -1,3 +1,5 @@
+from virtualenv.discovery.builtin import propose_interpreters
+
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectMembers import DBProjectMembers
@@ -304,6 +306,9 @@ class ProjectManager():
             self.pending_requests.insert(pid, actor)
         return ResponseSuccessMsg(f"member {actor} denied participation in project {pid}")
 
+    def get_member_votes(self, pid, actor):
+        project = self._find_project(pid)
+        return project.get_member_votes(actor)
 
     # --------  data collection ----------------------
     # TODO: remove?

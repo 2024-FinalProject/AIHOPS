@@ -123,6 +123,7 @@ class Server:
             return ResponseFailMsg(f"Failed to create project: {e}")
     
     def set_project_factors(self, cookie, pid, factors):
+        """expects a list of factor ids, that exist in actors factors pool"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -192,7 +193,7 @@ class Server:
             if not res.success:
                 return res
             session = res
-            return self.project_manager.add_members(session.result.user_name, pid, users_name)
+            return self.project_manager.add_member(session.result.user_name, pid, users_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to add member: {e}")
         
@@ -473,5 +474,20 @@ class Server:
             return self.project_manager.get_projects_factor_pool(actor, pid)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get projects factor pool of member: {e}")
+
+
+    def get_member_vote_on_project(self, cookie, pid):
+        """returns asking actors vote on ongoing project,
+            {"factor_votes": {fid: score, fid: score ...}
+             "severity_votes": [v1, v2, v3, v4, v5]}"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.project_manager.get_member_votes(pid, actor)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get members vote on project: {e}")
+
 
 
