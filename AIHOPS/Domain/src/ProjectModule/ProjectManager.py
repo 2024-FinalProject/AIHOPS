@@ -1,3 +1,5 @@
+from virtualenv.discovery.builtin import propose_interpreters
+
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectMembers import DBProjectMembers
@@ -7,6 +9,7 @@ from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
 from Domain.src.Loggs.Response import ResponseSuccessObj, ResponseSuccessMsg, ResponseFailMsg, Response
 from Domain.src.ProjectModule.Project import Project
+
 
 
 
@@ -49,11 +52,17 @@ class ProjectManager():
         self._verify_unique_project(owner, name, description)
         # create Project
         pid = self.project_id_maker.next_id()
-        project = Project(pid, name, description, owner, self.db_access, is_default_factors)
+        project = Project(pid, name, description, owner, self.db_access)
         # add to lists
         self.projects.insert(pid, project)
         self.owners.insert(owner, project)
-        return ResponseSuccessObj(f"actor: {owner} sccessfully created project: {pid, name, description}", pid)
+        msg = f"actor: {owner} sccessfully created project: {pid, name, description}"
+        # default_factors:
+        if is_default_factors:
+            def_facts = self.factor_pool.get_default_factor_ids()
+            res_facts = self.add_factors(pid, owner, def_facts)
+            msg += res_facts.msg
+        return ResponseSuccessObj(msg, pid)
 
     def add_project_factor(self, pid, actor, factor_name, factor_desc):
         """ adds of factor to a project"""
@@ -116,9 +125,11 @@ class ProjectManager():
         return ResponseSuccessMsg(f"{pid}: updated name and desc to {project.name}, {project.desc}")
 
     def get_project_progress_for_owner(self, pid, actor):
-        """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}"""
+        """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}
+                    new: {voted_amount: int, member_count: int, pending_members: int}"""
         project = self._verify_owner(pid, actor)
-        return ResponseSuccessObj(f"{actor}: progress for project {pid}", project.get_progress_for_owner())
+        pending_amount = len(self.get_pending_emails_for_project(pid, actor).result)
+        return ResponseSuccessObj(f"{actor}: progress for project {pid}", project.get_progress_for_owner(pending_amount))
 
     def confirm_factors(self, pid, actor):
         project = self._verify_owner(pid, actor)
@@ -304,6 +315,9 @@ class ProjectManager():
             self.pending_requests.insert(pid, actor)
         return ResponseSuccessMsg(f"member {actor} denied participation in project {pid}")
 
+    def get_member_votes(self, pid, actor):
+        project = self._find_project(pid)
+        return project.get_member_votes(actor)
 
     # --------  data collection ----------------------
     # TODO: remove?
@@ -353,8 +367,28 @@ class ProjectManager():
         for factor in factors:
             to_ret.append(factor.to_dict())
         return ResponseSuccessObj(f"factors pool for user: {actor}", to_ret)
-    
+
+    def _get_projects_containing_factor(self, actor, fid):
+        actors_projects = self.owners.get(actor)
+        ps = []
+        for project in actors_projects:
+            if project.has_factor(fid):
+                ps.append(project)
+        return ps
+
+    def update_factor(self, actor, fid, name, desc):
+        res = self.factor_pool.update_factor(actor, fid, name, desc)
+        if not res.success:
+            return res
+        factor = res.result
+        projects = self._get_projects_containing_factor(actor, fid)
+        for project in projects:
+            project.update_factor(factor)
+        return res
+
+
     def get_projects_factor_pool(self, actor, pid):
+        """ returns available factors for project, that are nop in the project already"""
         factors = self.factor_pool.get_factors(actor)
         project = self._find_project(pid)
         to_ret = []
@@ -368,11 +402,6 @@ class ProjectManager():
         """creates project NTH"""
         pass
 
-    # TODO: add to server
-    def get_project_voting_progress(self):
-        """returns percentage of voter"""
-        # TODO: we allow partial voting, if member voted on 1 factor is it enough?
-        pass
 
     # --------------- Data Base ------------------------
 

@@ -7,7 +7,7 @@ from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.FactorsPool import Factor
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
-from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg
+from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 
 
 class VoteManager:
@@ -28,6 +28,10 @@ class VoteManager:
             return ResponseFailMsg(res.msg)
         return ResponseSuccessMsg(f"factor {factor.fid} added to project {self.pid}")
 
+    def update_factor(self, factor):
+        with self.lock:
+            self.factors.insert(factor.fid, factor)
+
 
     def remove_factor(self, fid):
         res = self.db_access.delete_obj_by_query(DBProjectFactors, {"project_id": self.pid, "factor_id": fid})
@@ -47,8 +51,7 @@ class VoteManager:
             member_votes[fid] = score
 
             if cur_vote is not None:
-                to_remove = DBFactorVotes(fid, actor, self.pid, cur_vote)
-                res = self.db_access.delete(to_remove)
+                res = self.db_access.delete_obj_by_query(DBFactorVotes, {"project_id": self.pid, "factor_id": fid, "member_email": actor})
                 if not res.success:
                     self.factors_votes[actor] = member_votes_revert
                     return res
@@ -93,6 +96,10 @@ class VoteManager:
                 voted.add(actor)
         return len(voted)
 
+    def get_member_votes(self, actor):
+        factor_votes = copy.deepcopy(self.factors_votes.get(actor, {}))
+        severity_votes = list(self.severity_votes.get(actor, []))
+        return ResponseSuccessObj(f"fetching votes for {actor}", {"factor_votes": factor_votes, "severity_votes": severity_votes})
 
 
 
