@@ -233,11 +233,12 @@ export const submitFactorVote = async (cookie, pid, factorId, score) => {
     });
 }
 
-export const checkFactorVotingStatus = async (cookie, pid) => {
-    return await axios.get(`${API_URL}/project/vote-status`, {
+export const getMemberVoteOnProject = async (cookie, pid) => {
+    return await axios.get(`${API_URL}/project/get-member-votes`, {
         params: { cookie, pid }
     });
 }
+
 
 export const getProjectsMember = async (cookie) => {
     return await axios.get(`${API_URL}/project/get-projects-member`, {

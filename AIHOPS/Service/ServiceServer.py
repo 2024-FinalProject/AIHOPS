@@ -358,6 +358,13 @@ def get_projects_member():
     res = server.get_projects_of_member(cookie)
     return jsonify({"message": res.msg, "success": res.success, "projects": res.result if res.success else None})
 
+@app.route("/project/get-member-votes", methods=["GET"])
+def get_member_votes():
+    cookie = request.args.get("cookie", type=int)
+    pid = request.args.get("pid", type=int)
+    res = server.get_member_vote_on_project(cookie, pid)
+    return jsonify({"message": res.msg, "success": res.success, "votes": res.result if res.success else None})
+
 
 
 # run the backed server
