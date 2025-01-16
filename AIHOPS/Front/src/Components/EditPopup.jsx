@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
-        get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
+        get_project_to_invite, setProjectFactors, addProjectFactor, updateProjectFactor, deleteProjectFactor,
         getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
         getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool
  } from "../api/ProjectApi";
@@ -423,6 +423,21 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleUpdateFactor = async (factorId) => {
+        if (window.confirm(`Are you sure you want to update the factor "${factorUpdates.name}"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            //TODO:: Implement here in a similar way to the delete factor below
+            //Use: factorUpdates.name, factorUpdates.description
+            alert("Not implemented yet!");
+        }
+    };
+
     const handleDeleteFactor = async (factorName, factorId) => {
         if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the project"?`)) {
             let cookie = localStorage.getItem("authToken");
@@ -451,7 +466,6 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             }
         }
     };
-
 
     const getPopupContent = () => {
         switch (popupType) {
@@ -521,18 +535,32 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             style={{ flex: '2' }}
                             />
                             <button
-                            className="action-btn delete-btn"
-                            onClick={() => handleDeleteFactor(factor.name, factor.id)}
-                            style={{
-                                padding: '5px 15px',
-                                backgroundColor: '#ff4444',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
-                            >
-                            Delete
+                                className="action-btn update-btn"
+                                onClick={() => handleUpdateFactor(factor.id)}
+                                style={{
+                                    padding: '5px 15px',
+                                    backgroundColor: '#44ff4d',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                >
+                                Update
+                            </button>
+                            <button
+                                className="action-btn delete-btn"
+                                onClick={() => handleDeleteFactor(factor.name, factor.id)}
+                                style={{
+                                    padding: '5px 15px',
+                                    backgroundColor: '#ff4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                >
+                                Delete
                             </button>
                         </div>
                     </div>
@@ -544,16 +572,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        //height: '100vh', // Full viewport height
-                        backgroundColor: '#f5f5f5', // Light background
+                        backgroundColor: '#f5f5f5',
                     }}
-                    >
+                >
                     <label
                         htmlFor="factors-dropdown"
                         style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        marginBottom: '10px',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            marginBottom: '10px',
                         }}
                     >
                         Select Factors From Pool:
@@ -561,55 +588,56 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <div
                         id="factors-dropdown"
                         style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                        padding: '10px',
-                        border: '1px solid #ccc',
-                        borderRadius: '5px',
-                        backgroundColor: '#fff',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'stretch', // Changed from 'center' to 'stretch'
+                            width: '100%', // Added to ensure full width
+                            maxHeight: '300px',
+                            overflowY: 'auto',
+                            padding: '10px',
+                            border: '1px solid #ccc',
+                            borderRadius: '5px',
+                            backgroundColor: '#fff',
                         }}
                     >
                         {factorsPool != null && factorsPool.length > 0 && factorsPool.map((factor) => (
-                        <div
-                            key={factor.id}
-                            style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginBottom: '5px',
-                            }}
-                        >
-                            <input
-                            type="checkbox"
-                            id={`factor-${factor.id}`}
-                            onChange={() => handleCheckboxChange(factor)}
-                            />
-                            <label
-                            htmlFor={`factor-${factor.id}`}
-                            style={{
-                                marginLeft: '5px',
-                            }}
+                            <div
+                                key={factor.id}
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'auto 1fr auto', // Changed to grid layout
+                                    gap: '10px', // Added consistent spacing
+                                    alignItems: 'center',
+                                    marginBottom: '5px',
+                                    padding: '5px',
+                                }}
                             >
-                            <strong>{factor.name}</strong>: {factor.description}
-                            </label>
-                            <button
-                            className="action-btn delete-btn"
-                            onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
-                            style={{
-                                padding: '5px 15px',
-                                backgroundColor: '#ff4444',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer',
-                                marginLeft: '10px',
-                            }}
-                            >
-                            Delete From Pool
-                            </button>
-                        </div>
+                                <input
+                                    type="checkbox"
+                                    id={`factor-${factor.id}`}
+                                    onChange={() => handleCheckboxChange(factor)}
+                                />
+                                <label
+                                    htmlFor={`factor-${factor.id}`}
+                                >
+                                    <strong>{factor.name}</strong>: {factor.description}
+                                </label>
+                                <button
+                                    className="action-btn delete-btn"
+                                    onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
+                                    style={{
+                                        padding: '5px 15px',
+                                        backgroundColor: '#ff4444',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap', // Added to prevent button text from wrapping
+                                    }}
+                                >
+                                    Delete From Pool
+                                </button>
+                            </div>
                         ))}
                     </div>
                     <button

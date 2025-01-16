@@ -111,7 +111,6 @@ class Server:
             return ResponseFailMsg(f"Failed to logout: {e}")
     
     # ------------- Project ------------------
-    # TODO: newnew added use_default_Factors argument
     def create_project(self, cookie, name, description, use_default_factors=False):
         """when using default factors, if anything goes wrong with the factor assignment,
                     project will be created without or with partial factors"""
@@ -166,7 +165,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove factor {fid} from users {actor} pool:\n {e}")
 
-    # TODO: newnew
+    # TODO: newnewnew- need to change it
     def update_factor(self, cookie, fid, new_name, new_desc):
         try:
             res = self.get_session_member(cookie)

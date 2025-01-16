@@ -49,7 +49,7 @@ def logout():
 # expecting json with {cookie, name, description}
 def create_project():
     data = request.json
-    res = server.create_project(int(data["cookie"]), data["name"], data["description"])
+    res = server.create_project(int(data["cookie"]), data["name"], data["description"], bool(data["defaultFactors"]))
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
 @app.route("/project/factor", methods=["POST"])
@@ -64,6 +64,14 @@ def add_project_factor():
 def set_project_factors():
     data = request.json
     res = server.set_project_factors(int(data["cookie"]), int(data["pid"]), data["factors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+# TODO: Change this!
+@app.route("/project/update-factor", methods=["POST"])
+# expecting json with {cookie, fid, new_name, new_desc}
+def update_project_factor():
+    data = request.json
+    res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["new_name"], data["new_desc"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/delete-factor", methods=["POST"])

@@ -13,11 +13,12 @@ export const getProjects = async (cookie) => {
     });
 };
 
-export const createProject = async (cookie, project_name, project_desc) => {
+export const createProject = async (cookie, project_name, project_desc, use_default_factors) => {
     return await axios.post(`${API_URL}/project/create`, {
         cookie: cookie,
         name: project_name,
-        description: project_desc
+        description: project_desc,
+        defaultFactors: use_default_factors
     });
 };
 
@@ -67,6 +68,16 @@ export const deleteProjectFactor = async (cookie, project_id, factor_id) => {
         cookie: cookie,
         pid: project_id,
         fid: factor_id
+    });
+};
+
+//TODO: Change this!
+export const updateProjectFactor = async (cookie, factor_id, factor_name, factor_desc) => {
+    return await axios.post(`${API_URL}/project/update-factor`, {
+        cookie: cookie,
+        fid: factor_id,
+        new_name: factor_name,
+        new_desc: factor_desc
     });
 };
 

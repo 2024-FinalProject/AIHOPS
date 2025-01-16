@@ -12,10 +12,11 @@
 }
 
 .popup-content {
-  width: 90vw;  /* Increased from previous size */
-  max-width: 1200px; /* Added max-width to ensure readability on very large screens */
-  min-width: 900px; /* Ensure minimum width to fit progress bar */
-  max-height: 90vh;
+  width: 1500px;
+  max-width: 1500px;
+  min-height: 600px;
+  min-width: 1200px;
+  max-height: 95vh;  
   background-color: white;
   border-radius: 8px;
   padding: 20px 30px;
