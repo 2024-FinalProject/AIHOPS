@@ -165,7 +165,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove factor {fid} from users {actor} pool:\n {e}")
 
-    # TODO: newnew
+    # TODO: newnewnew- need to change it
     def update_factor(self, cookie, fid, new_name, new_desc):
         try:
             res = self.get_session_member(cookie)

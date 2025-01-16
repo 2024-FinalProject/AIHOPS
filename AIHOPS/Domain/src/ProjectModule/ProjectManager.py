@@ -126,7 +126,10 @@ class ProjectManager():
         """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}
                     new: {voted_amount: int, member_count: int, pending_members: int}"""
         project = self._verify_owner(pid, actor)
-        pending_amount = len(self.get_pending_emails_for_project(pid, actor).result)
+        if(project.is_published()):  
+            pending_amount = len(self.get_pending_emails_for_project(pid, actor).result)
+        else:
+            pending_amount = len(project.get_to_invite().result)
         return ResponseSuccessObj(f"{actor}: progress for project {pid}", project.get_progress_for_owner(pending_amount))
 
     def confirm_factors(self, pid, actor):

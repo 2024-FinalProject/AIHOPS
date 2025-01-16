@@ -50,10 +50,6 @@ const ProgressBar = ({ project }) => {
         return Boolean(projectsProgress.severity_factors_inited);
       case 'invite':
         return Boolean(projectsProgress.invited_members);
-      case 'confirmed':
-        return project?.assessors?.every(a => a.confirmed);
-      case 'completed':
-        return project?.assessors?.every(a => a.completed);
       case 'analyzed':
         return Boolean(project?.analyzed);
       default:
@@ -89,11 +85,57 @@ const ProgressBar = ({ project }) => {
           <div className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}>
             Invite{'\n'}Assessors
           </div>
-          <div className={`progress-step ${isStepActive('confirmed') ? 'active' : ''}`}>
+          <div
+            className={`progress-step ${
+              projectsProgress.pending_amount + projectsProgress.member_count - 1 > 0 &&
+              projectsProgress.member_count - 1 / (projectsProgress.pending_amount + projectsProgress.member_count - 1) === 1
+                ? 'active' // Add green background only if 100%
+                : ''
+            }`}
+          >
             Assessors{'\n'}Confirmed
+            <span>
+              {(() => {
+                /* Subtract 1 from the amount and from the member.count (owner doesn't count here)*/
+                const totalMembers = projectsProgress.pending_amount + projectsProgress.member_count -1;
+
+                if (totalMembers === 0) {
+                  return `0% (0/0)`; // No members or pending invites
+                }
+
+                const percentage = Math.round((projectsProgress.member_count - 1 / totalMembers) * 100);
+
+                if (projectsProgress.member_count - 1 === 0) {
+                  return `0% (0/${projectsProgress.pending_amount})`; // No confirmed members
+                }
+
+                return `${percentage}% (${projectsProgress.member_count}/${totalMembers})`; // Normal case
+              })()}
+            </span>
           </div>
-          <div className={`progress-step ${isStepActive('completed') ? 'active' : ''}`}>
+          <div
+            className={`progress-step ${
+              projectsProgress.member_count > 0 &&
+              projectsProgress.voted_amount / projectsProgress.member_count === 1
+                ? 'active' // Green background only if 100%
+                : ''
+            }`}
+          >
             Survey{'\n'}Completed
+            <span>
+              {(() => {
+                const totalMembers = projectsProgress.member_count || 0;
+                const votedAmount = projectsProgress.voted_amount || 0;
+
+                if (totalMembers === 0) {
+                  return `0% (0/0)`; // No members
+                }
+
+                const percentage = Math.round((votedAmount / totalMembers) * 100);
+
+                return `${percentage}% (${votedAmount}/${totalMembers})`; // Display percentage and fraction
+              })()}
+            </span>
           </div>
         </div>
         

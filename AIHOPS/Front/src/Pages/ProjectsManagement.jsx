@@ -231,6 +231,7 @@ const ProjectsManagement = () => {
           }
       
           try {
+            console.log(`Using default factors? : ${useDefaultFactors}`);
             const response = await createProject(cookie, newProject.name, newProject.description, useDefaultFactors);
       
             if (response.data.success) {
@@ -238,6 +239,7 @@ const ProjectsManagement = () => {
               setIsSuccess(true);
               setNewProject({ name: "", description: "" });
               await fetchProjects();
+              setShowCreatePopup(false);
             } else {
               setMsg(response.data.message);
               setIsSuccess(true);
