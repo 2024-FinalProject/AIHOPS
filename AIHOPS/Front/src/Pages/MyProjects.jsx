@@ -46,20 +46,18 @@ const MyProjects = () => {
               console.log("voteResponse", voteResponse);
               if (voteResponse.data.success) {
                 const factorVotes = voteResponse.data.votes.factor_votes || {};
-                const severityVotes = voteResponse.data.votes.severity_votes || [];
+                setFactorVotes(factorVotes);
+                const severityVotes =
+                  voteResponse.data.votes.severity_votes || [];
 
                 console.log("factorVotes", factorVotes);
                 console.log("severityVotes", severityVotes);
 
                 // Count only valid votes (not -1)
-                const validVotesCount = Object.values(factorVotes).filter(
-                  (vote) => vote !== -1
-                ).length;
+                const validVotesCount = Object.values(factorVotes).length;
 
                 // Count only valid severity votes (not -1)
-                const validSeverityCount = severityVotes.filter(
-                  (vote) => vote !== -1
-                ).length;
+                const validSeverityCount = severityVotes.length;
 
                 initialStatus[project.id] = {
                   votingStatus: validVotesCount / project.factors.length,
@@ -85,7 +83,7 @@ const MyProjects = () => {
         );
 
         setProjectVotingStatus(initialStatus);
-        console.log(initialStatus)
+        console.log(initialStatus);
       } else {
         alert(response.data.message || "Failed to fetch projects");
       }
@@ -103,6 +101,7 @@ const MyProjects = () => {
     console.log("project", project);
     setCurrentProject(project);
     setShowVotePopup(true);
+    updateFactorsVotes(project.id);
     console.log("Project clicked");
     console.log(project.id);
     console.log("factor index", currentFactorIndex);
@@ -149,6 +148,7 @@ const MyProjects = () => {
           },
         }));
 
+
         return true;
       } else {
         alert(response.data.message || "Failed to submit vote for factor");
@@ -161,6 +161,28 @@ const MyProjects = () => {
     }
   };
 
+  const updateFactorsVotes = async (projectId) => {
+    try {
+      const cookie = localStorage.getItem("authToken");
+      if (!cookie) {
+        alert("Authentication token not found");
+        return;
+      }
+      const response = await getMemberVoteOnProject(cookie, projectId);
+      if (response.data.success) {
+        const factorVotes = response.data.votes.factor_votes || {};
+        setFactorVotes(factorVotes);
+      } else {
+        alert(response.data.message || "Failed to fetch votes for project");
+      }
+    } catch (error) {
+      alert("Failed to fetch votes for project");
+      console.error(error);
+    }
+  };
+
+
+
   const handleStartVoting = () => {
     setIsVoteStarted(true);
     setShowVotePopup(false);
@@ -172,7 +194,7 @@ const MyProjects = () => {
     setShowVotePopup(false);
     setCurrentProject(null);
     setIsVoteStarted(false);
-    setFactorVotes({});
+    
     setSubmittedVotes({});
     setCurrentFactorIndex(0);
 
@@ -199,7 +221,11 @@ const MyProjects = () => {
 
   const countVotedFactors = () => {
     // Count only successfully submitted votes
+    console.log("submittedVotes", Object.keys(submittedVotes).length);
+    console.log("currentProject?.factors.length",currentProject?.factors.length)
     return Object.keys(submittedVotes).length;
+
+    // return projectVotingStatus[currentProject.id]?.votingStatus;
   };
 
   const isBothCheckboxesChecked = (project) => {
@@ -322,16 +348,19 @@ const MyProjects = () => {
                 <div
                   className="progress-bar-fill"
                   style={{
-                    width: `${
-                      (countVotedFactors() / currentProject.factors.length) *
-                      100
-                    }%`,
+                    width:
+                      currentProject?.factors.length > 0
+                        ? `${
+                            (0.5) *
+                            100
+                          }%`
+                        : "0%",
                   }}
                 ></div>
               </div>
               <p className="vote-progress-text">
-                {countVotedFactors()} / {currentProject.factors.length} factors
-                have been voted
+                {countVotedFactors()} / {currentProject?.factors.length || 0}{" "}
+                factors have been voted
               </p>
             </div>
           </div>
