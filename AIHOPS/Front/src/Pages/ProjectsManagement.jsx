@@ -142,6 +142,7 @@ const ProjectsManagement = () => {
 
     const handleArchive = async (projectID, projectName) => {
         if (window.confirm(`Are you sure you want to archive the project "${projectName}"?`)) {
+          await fetchProjects(); // Ensure the projects list is refreshed
           const project = findProjectByID(projectID);
       
           if (project.severity_factors_inited && project.factors_inited) {
@@ -179,8 +180,9 @@ const ProjectsManagement = () => {
 
     const handlePublish = async (projectID, projectName) => {
         if (window.confirm(`Are you sure you want to publish the project "${projectName}"?`)) {
+          await fetchProjects(); // Ensure the projects list is refreshed
           const project = findProjectByID(projectID);
-      
+          
           if (project.severity_factors_inited && project.factors_inited) {
             const cookie = localStorage.getItem("authToken");
       

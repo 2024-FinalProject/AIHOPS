@@ -49,7 +49,7 @@ const ProgressBar = ({ project }) => {
       case 'severity':
         return Boolean(projectsProgress.severity_factors_inited);
       case 'invite':
-        return Boolean(projectsProgress.invited_members);
+        return Boolean(projectsProgress.invited_members || projectsProgress.pending_amount > 0);
       case 'analyzed':
         return Boolean(project?.analyzed);
       default:
