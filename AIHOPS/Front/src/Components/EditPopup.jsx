@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
-        get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
+        get_project_to_invite, setProjectFactors, addProjectFactor, updateProjectFactor, deleteProjectFactor,
         getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
         getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool
  } from "../api/ProjectApi";
@@ -423,6 +423,21 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleUpdateFactor = async (factorId) => {
+        if (window.confirm(`Are you sure you want to update the factor "${factorUpdates.name}"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            //TODO:: Implement here in a similar way to the delete factor below
+            //Use: factorUpdates.name, factorUpdates.description
+            alert("Not implemented yet!");
+        }
+    };
+
     const handleDeleteFactor = async (factorName, factorId) => {
         if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the project"?`)) {
             let cookie = localStorage.getItem("authToken");
@@ -451,7 +466,6 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             }
         }
     };
-
 
     const getPopupContent = () => {
         switch (popupType) {
@@ -521,18 +535,32 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             style={{ flex: '2' }}
                             />
                             <button
-                            className="action-btn delete-btn"
-                            onClick={() => handleDeleteFactor(factor.name, factor.id)}
-                            style={{
-                                padding: '5px 15px',
-                                backgroundColor: '#ff4444',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
-                            >
-                            Delete
+                                className="action-btn update-btn"
+                                onClick={() => handleUpdateFactor(factor.id)}
+                                style={{
+                                    padding: '5px 15px',
+                                    backgroundColor: '#44ff4d',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                >
+                                Update
+                            </button>
+                            <button
+                                className="action-btn delete-btn"
+                                onClick={() => handleDeleteFactor(factor.name, factor.id)}
+                                style={{
+                                    padding: '5px 15px',
+                                    backgroundColor: '#ff4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                >
+                                Delete
                             </button>
                         </div>
                     </div>
