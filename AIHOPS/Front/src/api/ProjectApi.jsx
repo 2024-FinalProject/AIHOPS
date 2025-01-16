@@ -13,11 +13,12 @@ export const getProjects = async (cookie) => {
     });
 };
 
-export const createProject = async (cookie, project_name, project_desc) => {
+export const createProject = async (cookie, project_name, project_desc, use_default_factors) => {
     return await axios.post(`${API_URL}/project/create`, {
         cookie: cookie,
         name: project_name,
-        description: project_desc
+        description: project_desc,
+        defaultFactors: use_default_factors
     });
 };
 

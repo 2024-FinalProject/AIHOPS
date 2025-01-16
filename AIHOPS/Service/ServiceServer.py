@@ -49,7 +49,7 @@ def logout():
 # expecting json with {cookie, name, description}
 def create_project():
     data = request.json
-    res = server.create_project(int(data["cookie"]), data["name"], data["description"])
+    res = server.create_project(int(data["cookie"]), data["name"], data["description"], bool(data["defaultFactors"]))
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
 @app.route("/project/factor", methods=["POST"])

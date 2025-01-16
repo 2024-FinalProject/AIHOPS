@@ -1,5 +1,3 @@
-from virtualenv.discovery.builtin import propose_interpreters
-
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectMembers import DBProjectMembers

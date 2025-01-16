@@ -112,7 +112,7 @@ class Project:
         return {"name": self.name, "desc": self.desc, "factors_amount": len(self.vote_manager.get_factors()),
                 "factors_inited": self.factors_inited, "severity_factors_inited": self.severity_factors_inited,
                 "invited_members": invited_members, "published": self.published, "pending_amount": pending_amount,
-                "voted_amount": len(self.vote_manager.get_partially_voted_amount()), "member_count": self.members.size()}
+                "voted_amount": self.vote_manager.get_partially_voted_amount(), "member_count": self.members.size()}
 
     def add_member_to_invite(self, member):
         self.to_invite_when_published.append_unique(member)

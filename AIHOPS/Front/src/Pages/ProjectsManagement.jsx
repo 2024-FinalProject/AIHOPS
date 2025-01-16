@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { archiveProject, createProject, getProjects, publishProject, setProjectFactors,
          get_project_to_invite } from "../api/ProjectApi";
-import CreateProjectPopup from '../Components/CreateProjectPopUp';
+import CreateProjectPopup from '../Components/CreateProjectPopup';
 import ProjectStatusPopup from '../Components/ProjectStatusPopup';
 import EditPopup from '../Components/EditPopup'; //Component for secondary popups
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,7 @@ const ProjectsManagement = () => {
         name: "",
         description: "",
     });
+    const [useDefaultFactors, setUseDefaultFactors] = useState(false);
 
     const navigate = useNavigate();
 
@@ -230,7 +231,7 @@ const ProjectsManagement = () => {
           }
       
           try {
-            const response = await createProject(cookie, newProject.name, newProject.description);
+            const response = await createProject(cookie, newProject.name, newProject.description, useDefaultFactors);
       
             if (response.data.success) {
               alert(`Created project: "${newProject.name}" successfully.`);
@@ -346,6 +347,7 @@ const ProjectsManagement = () => {
                 setShowCreatePopup={setShowCreatePopup}
                 newProject={newProject}
                 setNewProject={setNewProject}
+                setUseDefaultFactors = {setUseDefaultFactors}
                 handleCreateProject={handleCreateProject}
             />
             
