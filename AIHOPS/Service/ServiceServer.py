@@ -1,7 +1,10 @@
+from DAL.Objects.DBFactors import DBFactors
+from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
 from Service.config import app
 from flask import Flask, request, jsonify
 from Service.config import Base, engine
+from sqlalchemy import event
 
 from flask_cors import CORS
 
@@ -46,7 +49,7 @@ def logout():
 # expecting json with {cookie, name, description}
 def create_project():
     data = request.json
-    res = server.create_project(int(data["cookie"]), data["name"], data["description"])
+    res = server.create_project(int(data["cookie"]), data["name"], data["description"], bool(data["defaultFactors"]))
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
 @app.route("/project/factor", methods=["POST"])
@@ -61,6 +64,14 @@ def add_project_factor():
 def set_project_factors():
     data = request.json
     res = server.set_project_factors(int(data["cookie"]), int(data["pid"]), data["factors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+# TODO: Change this!
+@app.route("/project/update-factor", methods=["POST"])
+# expecting json with {cookie, fid, new_name, new_desc}
+def update_project_factor():
+    data = request.json
+    res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["new_name"], data["new_desc"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/delete-factor", methods=["POST"])
@@ -126,6 +137,14 @@ def get_project_severity_factors():
 def get_factors_pool_of_member():
     cookie = request.args.get("cookie", type=int)
     res = server.get_factor_pool_of_member(cookie)
+    return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
+
+@app.route("/project/get-projects-factors-pool", methods=["GET"])
+# expecting query param: cookie
+def get_projects_factors_pool_of_member():
+    cookie = request.args.get("cookie", type=int)
+    pid = request.args.get("pid", type=int)
+    res = server.get_projects_factor_pool_of_member(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
 
 @app.route("/project/publish", methods=["POST"])
@@ -344,6 +363,7 @@ def get_projects_member():
 # run the backed server
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
+    FactorsPool.insert_defaults()
 
     server = Server()
     # running the server

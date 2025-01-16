@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { archiveProject, createProject, getProjects, publishProject, setProjectFactors,
          get_project_to_invite } from "../api/ProjectApi";
-import CreateProjectPopup from '../Components/CreateProjectPopUp';
+import CreateProjectPopup from '../Components/CreateProjectPopup';
 import ProjectStatusPopup from '../Components/ProjectStatusPopup';
 import EditPopup from '../Components/EditPopup'; //Component for secondary popups
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,7 @@ const ProjectsManagement = () => {
         name: "",
         description: "",
     });
+    const [useDefaultFactors, setUseDefaultFactors] = useState(false);
 
     const navigate = useNavigate();
 
@@ -141,6 +142,7 @@ const ProjectsManagement = () => {
 
     const handleArchive = async (projectID, projectName) => {
         if (window.confirm(`Are you sure you want to archive the project "${projectName}"?`)) {
+          await fetchProjects(); // Ensure the projects list is refreshed
           const project = findProjectByID(projectID);
       
           if (project.severity_factors_inited && project.factors_inited) {
@@ -178,8 +180,9 @@ const ProjectsManagement = () => {
 
     const handlePublish = async (projectID, projectName) => {
         if (window.confirm(`Are you sure you want to publish the project "${projectName}"?`)) {
+          await fetchProjects(); // Ensure the projects list is refreshed
           const project = findProjectByID(projectID);
-      
+          
           if (project.severity_factors_inited && project.factors_inited) {
             const cookie = localStorage.getItem("authToken");
       
@@ -230,13 +233,15 @@ const ProjectsManagement = () => {
           }
       
           try {
-            const response = await createProject(cookie, newProject.name, newProject.description);
+            console.log(`Using default factors? : ${useDefaultFactors}`);
+            const response = await createProject(cookie, newProject.name, newProject.description, useDefaultFactors);
       
             if (response.data.success) {
-              alert(response.data.message);
+              alert(`Created project: "${newProject.name}" successfully.`);
               setIsSuccess(true);
               setNewProject({ name: "", description: "" });
               await fetchProjects();
+              setShowCreatePopup(false);
             } else {
               setMsg(response.data.message);
               setIsSuccess(true);
@@ -346,6 +351,7 @@ const ProjectsManagement = () => {
                 setShowCreatePopup={setShowCreatePopup}
                 newProject={newProject}
                 setNewProject={setNewProject}
+                setUseDefaultFactors = {setUseDefaultFactors}
                 handleCreateProject={handleCreateProject}
             />
             

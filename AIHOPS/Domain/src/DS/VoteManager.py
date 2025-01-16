@@ -7,7 +7,7 @@ from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.FactorsPool import Factor
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
-from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg
+from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 
 
 class VoteManager:
@@ -25,8 +25,12 @@ class VoteManager:
         res = self.db_access.insert(instance)
         if not res.success:
             self.factors.pop(factor.fid)
-            return ResponseFailMsg(res.message)
+            return ResponseFailMsg(res.msg)
         return ResponseSuccessMsg(f"factor {factor.fid} added to project {self.pid}")
+
+    def update_factor(self, factor):
+        with self.lock:
+            self.factors.insert(factor.fid, factor)
 
 
     def remove_factor(self, fid):
@@ -92,6 +96,10 @@ class VoteManager:
                 voted.add(actor)
         return len(voted)
 
+    def get_member_votes(self, actor):
+        factor_votes = copy.deepcopy(self.factors_votes.get(actor, {}))
+        severity_votes = list(self.severity_votes.get(actor, []))
+        return ResponseSuccessObj(f"fetching votes for {actor}", {"factor_votes": factor_votes, "severity_votes": severity_votes})
 
 
 

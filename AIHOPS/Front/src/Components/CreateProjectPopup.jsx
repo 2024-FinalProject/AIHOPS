@@ -1,10 +1,12 @@
 import React from 'react';
+import "./CreateProjectPopup.css";
 
 const CreateProjectPopup = ({
     showCreatePopup,
     setShowCreatePopup,
     newProject,
     setNewProject,
+    setUseDefaultFactors,
     handleCreateProject,
 }) => {
     if (!showCreatePopup) return null; // Do not render anything if the popup is not visible
@@ -55,6 +57,18 @@ const CreateProjectPopup = ({
                         Note: You'll be able to add Factors & Severity Factors after the
                         creation of the project, in the edit/view window
                     </p>
+                </div>
+                
+                <div className="checkbox-container">
+                    <input
+                        type="checkbox"
+                        id="useDefaultFactors"
+                        className="styled-checkbox"
+                        onChange={(e) => setUseDefaultFactors(e.target.checked)}
+                    />
+                    <label htmlFor="useDefaultFactors" className="checkbox-label">
+                        Use default factors?
+                    </label>
                 </div>
 
                 <button
