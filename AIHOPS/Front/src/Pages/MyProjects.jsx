@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FactorVote from "../components/FactorVote";
+import VotingTypeSelector from "../components/VotingTypeSelector";
+import DGraph from "../components/DGraph";
 import { getProjectsMember, submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
 import "./MyProjects.css";
 
@@ -76,6 +78,8 @@ const MyProjects = () => {
   const [showVotePopup, setShowVotePopup] = useState(false);
   const [severityLevel, setSeverityLevel] = useState(false);
   const [projectVotingStatus, setProjectVotingStatus] = useState({});
+  const [showDScoreVote, setShowDScoreVote] = useState(false);
+  const [currentVotingType, setCurrentVotingType] = useState(null); // 'factors' or 'dscore'
 
 
   const fetchProjects = async () => {
@@ -134,6 +138,13 @@ const MyProjects = () => {
           ...prev,
           [currentFactorId]: factorVotes[currentFactorId],
         }));
+
+        if (currentFactorIndex === currentProject.factors.length - 1) {
+          setProjectVotingStatus((prev) => ({
+            ...prev,
+            [currentProject.id]: true
+          }));
+        }
         return true;
       } else {
         alert(response.data.message || "Failed to submit vote for factor");
@@ -146,10 +157,15 @@ const MyProjects = () => {
     }
   };
 
-  const handleStartVoting = () => {
-    setIsVoteStarted(true);
+  const handleStartVoting = (type) => {
+    if (type === 'factors') {
+      setIsVoteStarted(true);
+      setCurrentVotingType('factors');
+    } else if (type === 'dscore') {
+      setShowDScoreVote(true);
+      setCurrentVotingType('dscore');
+    }
     setShowVotePopup(false);
-    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
   };
 
   const checkProjectVotingStatus = async (projectId) => {
@@ -175,11 +191,13 @@ const MyProjects = () => {
 
   const handleCloseVoting = async (projectId) => {
     setShowVotePopup(false);
+    setShowDScoreVote(false);
     setCurrentProject(null);
     setIsVoteStarted(false);
     setFactorVotes({});
     setSubmittedVotes({});
     setCurrentFactorIndex(0);
+    setCurrentVotingType(null);
 
     await checkProjectVotingStatus(projectId);
   };
@@ -200,6 +218,13 @@ const MyProjects = () => {
     if (currentFactorIndex > 0) {
       setCurrentFactorIndex(currentFactorIndex - 1);
     }
+  };
+
+  // Function to handle D-score vote completion
+  const handleDScoreVoteComplete = async () => {
+    setSeverityLevel(true);
+    setShowDScoreVote(false);
+    await handleCloseVoting(currentProject.id);
   };
 
   const countVotedFactors = () => {
@@ -257,23 +282,13 @@ const MyProjects = () => {
       {showVotePopup && (
         <div className="popup-overlay">
           <div className="popup-content">
-            <button
-              className="close-popup"
-              onClick={() => handleCloseVoting(currentProject.id)}
-            >
-              ×
-            </button>
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              Start Voting on {currentProject.name}
-            </h2>
-            <p className="mb-4 text-center">
-              Explanation on the Project ......
-            </p>
-            <div className="start-vote-container">
-              <button onClick={handleStartVoting} className="start-vote-btn">
-                Start Voting
-              </button>
-            </div>
+            <VotingTypeSelector 
+              projectName={currentProject.name}
+              onSelectVoteType={handleStartVoting}
+              isFactorsVoted={projectVotingStatus[currentProject?.id]}
+              isDScoreVoted={severityLevel}
+              onClose={() => handleCloseVoting(currentProject.id)}
+            />
           </div>
         </div>
       )}
@@ -334,6 +349,45 @@ const MyProjects = () => {
                 have been voted
               </p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showVotePopup && (
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              Choose Voting Type for {currentProject.name}
+            </h2>
+            <div className="voting-options">
+              <button 
+                className="vote-option-btn"
+                onClick={() => handleStartVoting('factors')}
+                disabled={projectVotingStatus[currentProject?.id]}
+              >
+                Vote on Factors
+              </button>
+              <button 
+                className="vote-option-btn"
+                onClick={() => handleStartVoting('dscore')}
+                disabled={!projectVotingStatus[currentProject?.id] || severityLevel}
+              >
+                Vote on D-Score
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* D-score voting popup */}
+      {showDScoreVote && (
+        <div className="popup-overlay">
+          <div className="popup-content wide">
+            <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              D-Score Voting for {currentProject.name}
+            </h2>
+            <DGraph onVoteComplete={handleDScoreVoteComplete} />
           </div>
         </div>
       )}
