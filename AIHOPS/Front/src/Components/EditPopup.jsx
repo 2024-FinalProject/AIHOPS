@@ -775,11 +775,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <ul className="members-list">
                     {selectedProject.members.map((memberItem, index) => (
                         <li key={index} className="member-item">
-                        <span className="member-name">{memberItem.key}</span>
-                        {selectedProject.founder != memberItem.key && selectedProject.isActive && (
+                        <span className="member-name">{memberItem}</span>
+                        {selectedProject.founder != memberItem && selectedProject.isActive && (
                             <button
                             className="remove-btn"
-                            onClick={() => handleRemoveMember(memberItem.key)}
+                            onClick={() => handleRemoveMember(memberItem)}
                             >
                             Remove Member
                             </button>
