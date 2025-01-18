@@ -49,7 +49,8 @@ const ProgressBar = ({ project }) => {
       case 'severity':
         return Boolean(projectsProgress.severity_factors_inited);
       case 'invite':
-        return Boolean(projectsProgress.invited_members || projectsProgress.pending_amount > 0);
+        return Boolean(projectsProgress.invited_members || projectsProgress.pending_amount > 0
+                      || projectsProgress.member_count > 1);
       case 'analyzed':
         return Boolean(project?.analyzed);
       default:
@@ -103,13 +104,13 @@ const ProgressBar = ({ project }) => {
                   return `0% (0/0)`; // No members or pending invites
                 }
 
-                const percentage = Math.round((projectsProgress.member_count - 1 / totalMembers) * 100);
+                const percentage = Math.round(((projectsProgress.member_count - 1) / totalMembers) * 100);
 
                 if (projectsProgress.member_count - 1 === 0) {
                   return `0% (0/${projectsProgress.pending_amount})`; // No confirmed members
                 }
 
-                return `${percentage}% (${projectsProgress.member_count}/${totalMembers})`; // Normal case
+                return `${percentage}% (${projectsProgress.member_count - 1}/${totalMembers})`; // Normal case
               })()}
             </span>
           </div>
