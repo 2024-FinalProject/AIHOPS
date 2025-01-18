@@ -223,7 +223,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 alert(`The member ${member} has been removed from the project.`);
                 await fetchProjects(); // Refresh the project data after removal
                 await fetch_pending_invites(cookie, selectedProject.id);
-                selectedProject.members = selectedProject.members.filter((memberItem) => memberItem.key !== member);
+                selectedProject.members = selectedProject.members.filter((memberItem) => memberItem !== member);
                 setIsSuccess(true);
             } else {
                 setMsg(response.data.message);
