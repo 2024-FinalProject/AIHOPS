@@ -223,7 +223,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 alert(`The member ${member} has been removed from the project.`);
                 await fetchProjects(); // Refresh the project data after removal
                 await fetch_pending_invites(cookie, selectedProject.id);
-                selectedProject.members = selectedProject.members.filter((memberItem) => memberItem.key !== member);
+                selectedProject.members = selectedProject.members.filter((memberItem) => memberItem !== member);
                 setIsSuccess(true);
             } else {
                 setMsg(response.data.message);
@@ -775,11 +775,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <ul className="members-list">
                     {selectedProject.members.map((memberItem, index) => (
                         <li key={index} className="member-item">
-                        <span className="member-name">{memberItem.key}</span>
-                        {selectedProject.founder != memberItem.key && selectedProject.isActive && (
+                        <span className="member-name">{memberItem}</span>
+                        {selectedProject.founder != memberItem && selectedProject.isActive && (
                             <button
                             className="remove-btn"
-                            onClick={() => handleRemoveMember(memberItem.key)}
+                            onClick={() => handleRemoveMember(memberItem)}
                             >
                             Remove Member
                             </button>
