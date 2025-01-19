@@ -89,7 +89,7 @@ const ProgressBar = ({ project }) => {
           <div
             className={`progress-step ${
               projectsProgress.pending_amount + projectsProgress.member_count - 1 > 0 &&
-              projectsProgress.member_count - 1 / (projectsProgress.pending_amount + projectsProgress.member_count - 1) === 1
+              (projectsProgress.member_count - 1) / (projectsProgress.pending_amount + projectsProgress.member_count - 1) === 1
                 ? 'active' // Add green background only if 100%
                 : ''
             }`}

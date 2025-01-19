@@ -224,6 +224,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 await fetchProjects(); // Refresh the project data after removal
                 await fetch_pending_invites(cookie, selectedProject.id);
                 selectedProject.members = selectedProject.members.filter((memberItem) => memberItem !== member);
+                await fetch_selected_project(selectedProject);
+                await fetch_pending_requests(cookie, selectedProject.id);
                 setIsSuccess(true);
             } else {
                 setMsg(response.data.message);

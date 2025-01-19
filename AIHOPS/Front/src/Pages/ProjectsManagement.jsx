@@ -76,7 +76,7 @@ const ProjectsManagement = () => {
 
         try {
               {
-                fetchProjects();
+                await fetchProjects();
                 let prj = "";
                 for(prj in projects) {
                   if(prj.id === project.id) {
