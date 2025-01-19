@@ -76,7 +76,14 @@ const ProjectsManagement = () => {
 
         try {
               {
-                setSelectedProject(project);
+                await fetchProjects();
+                let prj = "";
+                for(prj in projects) {
+                  if(prj.id === project.id) {
+                    setSelectedProject(prj);
+                    break;
+                  }
+                }
                 setIsSuccess(true);
               }
         } catch (error) {

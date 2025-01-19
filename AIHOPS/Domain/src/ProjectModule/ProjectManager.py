@@ -188,8 +188,9 @@ class ProjectManager():
             # then member maybe in pendings
             try:
                 self.pending_requests.pop(member, pid)
-            except Exception:
-                return ResponseFailMsg(f"failed removing member {member}, \npending: {Exception}\nproject: {res.msg}")
+                return ResponseSuccessMsg(f"member {member} removed from project {pid} pendings")
+            except Exception as e:
+                return ResponseFailMsg(f"failed removing member {member}, \npending: {e}\nproject: {res.msg}")
         return res
 
     # -------------- project Info -----------------
