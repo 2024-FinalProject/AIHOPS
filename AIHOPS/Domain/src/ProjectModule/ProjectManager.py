@@ -435,6 +435,11 @@ class ProjectManager():
                 published_pids.append(project.pid)
         self.project_id_maker.start_from(last_id)
         return published_pids
+    
+    def check_factor_voting_status(self, pid, actor):
+        """Check if member has completed voting on all factors"""
+        project = self._find_project(pid)
+        return project.check_factor_voting_status(actor)
 
 
 

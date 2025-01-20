@@ -233,14 +233,21 @@ export const submitFactorVote = async (cookie, pid, factorId, score) => {
     });
 }
 
-export const checkFactorVotingStatus = async (cookie, pid) => {
-    return await axios.get(`${API_URL}/project/vote-status`, {
-        params: { cookie, pid }
-    });
-}
+export const checkFactorVotingStatus = async (cookie, projectId) => {
+    try {
+      const response = await axios.get(`${baseURL}/project/${projectId}/factor-vote-status`, {
+        params: { cookie: cookie }
+      });
+      return response;
+    } catch (error) {
+      console.error("Error checking factor voting status:", error);
+      throw error;
+    }
+  };
 
 export const getProjectsMember = async (cookie) => {
     return await axios.get(`${API_URL}/project/get-projects-member`, {
         params: { cookie }
     });
 }
+

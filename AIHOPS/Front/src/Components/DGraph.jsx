@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceDot } from 'recharts';
 import { Info } from 'lucide-react';
 import './DGraph.css';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/card';
 
 const DGraph = ({ onVoteComplete }) => {
   const severityLevels = [
