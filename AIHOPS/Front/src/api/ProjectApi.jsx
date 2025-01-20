@@ -13,11 +13,12 @@ export const getProjects = async (cookie) => {
     });
 };
 
-export const createProject = async (cookie, project_name, project_desc) => {
+export const createProject = async (cookie, project_name, project_desc, use_default_factors) => {
     return await axios.post(`${API_URL}/project/create`, {
         cookie: cookie,
         name: project_name,
-        description: project_desc
+        description: project_desc,
+        defaultFactors: use_default_factors
     });
 };
 
@@ -70,8 +71,18 @@ export const deleteProjectFactor = async (cookie, project_id, factor_id) => {
     });
 };
 
+//TODO: Change this!
+export const updateProjectFactor = async (cookie, factor_id, factor_name, factor_desc) => {
+    return await axios.post(`${API_URL}/project/update-factor`, {
+        cookie: cookie,
+        fid: factor_id,
+        new_name: factor_name,
+        new_desc: factor_desc
+    });
+};
+
 export const deleteFactorFromPool = async (cookie, factor_id) => {
-    return await axios.post(`${API_URL}/project/delete-from-pool`, {
+    return await axios.post(`${API_URL}/project/factor/delete-from-pool`, {
         cookie: cookie,
         fid: factor_id
     });
@@ -184,6 +195,12 @@ export const getProjectSeverityFactors = async (cookie, project_id) => {
 export const getFactorsPoolOfMember = async (cookie) => {
     return await axios.get(`${API_URL}/project/get-factors-pool`, {
         params: { cookie }
+    });
+}
+
+export const getProjectsFactorsPoolOfMember = async (cookie, project_id) => {
+    return await axios.get(`${API_URL}/project/get-projects-factors-pool`, {
+        params: { cookie, pid: project_id }
     });
 }
 

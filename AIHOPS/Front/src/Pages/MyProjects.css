@@ -289,6 +289,13 @@ body {
 .popup-content.wide {
   width: 90%;
   max-width: 1200px;
+  height: 80vh;
+  overflow-y: auto;
+}
+
+.chart-container {
+  height: 400px;
+  width: 100%;
 }
 
 .voting-options {

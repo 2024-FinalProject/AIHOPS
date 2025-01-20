@@ -19,20 +19,20 @@
   
   .section-title.design {
     background-color: #e8f5e9;
-    margin-right: 1px;
-    width: 650px; /* Set a specific width */
+    margin-right: 0px;
+    width: 735px; /* Set a specific width */
   }
   
   .section-title.data {
     background-color: #f3e5f5;
-    margin: 0 5px;
-    width: 250px; /* Set a specific width */
+    margin: 0 0px;
+    width: 290px; /* Set a specific width */
   }
   
   .section-title.result {
     background-color: #ffebee;
-    margin-left: 1px;
-    width: 130px; /* Set a specific width */
+    margin-left: 0px;
+    width: 145px; /* Set a specific width */
   }
   
   .progress-steps {

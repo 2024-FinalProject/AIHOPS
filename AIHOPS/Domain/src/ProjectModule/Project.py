@@ -7,10 +7,10 @@ from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.VoteManager import VoteManager
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
-
+DEFAULT_SEVERITY_FACTORS = [0.5, 1, 25, 100, 400]
 
 class Project:
-    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=True, db_instance=None):
+    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None):
         self.db_access = db_access
         self.pid = pid
         self.name = name
@@ -23,7 +23,7 @@ class Project:
         self.factors_inited = False
         self.severity_factors_inited = False
         self.published = False
-        self.severity_factors = [1,4,10,25,50]
+        self.severity_factors = DEFAULT_SEVERITY_FACTORS
 
         if db_instance is None:
             self.db_instance = DBProject(pid, owner, name, desc)
@@ -59,6 +59,11 @@ class Project:
         self._set_factors_inited_false()
         self.vote_manager.add_factor(factor)
 
+    def update_factor(self, factor):
+        """if factor have been updated (name or desc) after ddb load, factor pool and project dont have the same object,
+            so this function will replace the factor object in the project only if necessary"""
+        self.vote_manager.update_factor(factor)
+
     def remove_factor(self, fid):
         self._set_factors_inited_false()
         self.vote_manager.remove_factor(fid)
@@ -68,9 +73,11 @@ class Project:
         self._set_severity_factors_inited_false()
         if len(severity_factors) != 5:
             return ResponseFailMsg(f"only 5 severity factors")
+        prev_factor = 0
         for factor in severity_factors:
-            if factor < 0:
-                return ResponseFailMsg(f"only positive factor")
+            if factor < prev_factor:
+                return ResponseFailMsg(f"severity factors must be in non decreasing order")
+            prev_factor = factor
         instance = DBProjectSeverityFactor(self.pid, *severity_factors)
         res = self.db_access.update(instance)
         if not res.success:
@@ -81,7 +88,7 @@ class Project:
     def has_factor(self, fid):
         factors = self.vote_manager.get_factors()
         for factor in factors:
-            if factor.id == fid:
+            if factor.fid == fid:
                 return True
         return False
     
@@ -100,11 +107,12 @@ class Project:
         self.desc = description
         return ResponseSuccessMsg(f"description {self.desc} has been updated for project: {self.pid}")
 
-    def get_progress_for_owner(self):
+    def get_progress_for_owner(self, pending_amount):
         invited_members = self.to_invite_when_published.size() > 0
         return {"name": self.name, "desc": self.desc, "factors_amount": len(self.vote_manager.get_factors()),
                 "factors_inited": self.factors_inited, "severity_factors_inited": self.severity_factors_inited,
-                "invited_members": invited_members}
+                "invited_members": invited_members, "published": self.published, "pending_amount": pending_amount,
+                "voted_amount": self.vote_manager.get_partially_voted_amount(), "member_count": self.members.size()}
 
     def add_member_to_invite(self, member):
         self.to_invite_when_published.append_unique(member)
@@ -191,8 +199,11 @@ class Project:
     def get_score(self):
         pass
 
-    def get_voting_progress(self):
-        pass
+    def get_member_votes(self, actor):
+        self._verify_member(actor)
+        return self.vote_manager.get_member_votes(actor)
+
+
 
     def __eq__(self, other):
         return (

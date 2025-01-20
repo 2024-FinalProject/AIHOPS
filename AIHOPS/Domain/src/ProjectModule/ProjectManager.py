@@ -10,6 +10,7 @@ from Domain.src.ProjectModule.Project import Project
 
 
 
+
 class ProjectManager():
     def __init__(self, db_access):
         self.db_access = db_access
@@ -49,41 +50,52 @@ class ProjectManager():
         self._verify_unique_project(owner, name, description)
         # create Project
         pid = self.project_id_maker.next_id()
-        project = Project(pid, name, description, owner, self.db_access, is_default_factors)
+        project = Project(pid, name, description, owner, self.db_access)
         # add to lists
         self.projects.insert(pid, project)
         self.owners.insert(owner, project)
-        return ResponseSuccessObj(f"actor: {owner} sccessfully created project: {pid, name, description}", pid)
+        msg = f"actor: {owner} sccessfully created project: {pid, name, description}"
+        # default_factors:
+        if is_default_factors:
+            def_facts = self.factor_pool.get_default_factor_ids()
+            res_facts = self.add_factors(pid, owner, def_facts)
+            msg += res_facts.msg
+        return ResponseSuccessObj(msg, pid)
 
     def add_project_factor(self, pid, actor, factor_name, factor_desc):
         """ adds of factor to a project"""
         # check valid project, and owned by owner
+        if(factor_name == "" or factor_desc == ""):
+            return ResponseFailMsg("factor name and description cannot be empty")
         project = self._verify_owner(pid, actor)
         factor = self.factor_pool.add_factor(actor, factor_name, factor_desc)
         project.add_factor(factor)
         return ResponseSuccessMsg(f"actor: {actor} added factor {factor.name} to project {project.name}")
 
-    def add_factors(self, pid, actor, factors):
-        """ adds factor list to project: list of tuples (name, description)"""
+    def add_factors(self, pid, actor, factor_ids):
         project = self._verify_owner(pid, actor)
-        fails = ""
-        success = ""
-        for factor_data in factors:
+        fails = []
+        success = []
+
+        for factor_id in factor_ids:
             try:
-                factor = self.factor_pool.add_factor(actor, factor_data[0], factor_data[1])
+                # Attempt to find the factor
+                factor = self.factor_pool._find_factor(actor, factor_id)
                 project.add_factor(factor)
-                success += f"actor: {actor} added factor {factor.name} to project {project.name}"
+                success.append(f"actor: {actor} added factor {factor.name} to project {project.name}")
             except Exception as e:
-                fails += f"factor {factor_data[0]} failed to add : {e}\n"
-        if len(fails) > 0:
-            return ResponseFailMsg(fails)
-        return ResponseSuccessMsg(success)
+                # Use the factor_id in case `factor` is not defined
+                fails.append(f"factor ID {factor_id} failed to add: {e}")
+
+        if fails:
+            return ResponseFailMsg("\n".join(fails))
+        return ResponseSuccessMsg("\n".join(success))
 
     def delete_factor(self, pid, actor, fid):
         project = self._verify_owner(pid, actor)
         return project.remove_factor(fid)
 
-    def delete_factor_from_pool(self, fid, actor):
+    def delete_factor_from_pool(self, actor, fid):
         # check if any of the projects founded by actor have the factor, if so fail
         if fid < 0:
             raise NameError(f"factor {fid} is default and cant be removed")
@@ -93,7 +105,7 @@ class ProjectManager():
             if proj.has_factor(fid):
                 projects_containing_factor.append(proj.pid)
         if len(projects_containing_factor) > 0:
-            Response(False, "factor appears in projects", projects_containing_factor, False)
+            return Response(False, "factor appears in projects", projects_containing_factor, False)
         else:
             return self.factor_pool.remove_factor(actor, fid)
 
@@ -111,9 +123,14 @@ class ProjectManager():
         return ResponseSuccessMsg(f"{pid}: updated name and desc to {project.name}, {project.desc}")
 
     def get_project_progress_for_owner(self, pid, actor):
-        """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}"""
+        """return {name: bool , desc: bool, factors: amount, d_score:bool, invited: bool}
+                    new: {voted_amount: int, member_count: int, pending_members: int}"""
         project = self._verify_owner(pid, actor)
-        return ResponseSuccessObj(f"{actor}: progress for project {pid}", project.get_progress_for_owner())
+        if(project.is_published()):  
+            pending_amount = len(self.get_pending_emails_for_project(pid, actor).result)
+        else:
+            pending_amount = len(project.get_to_invite().result)
+        return ResponseSuccessObj(f"{actor}: progress for project {pid}", project.get_progress_for_owner(pending_amount))
 
     def confirm_factors(self, pid, actor):
         project = self._verify_owner(pid, actor)
@@ -171,8 +188,9 @@ class ProjectManager():
             # then member maybe in pendings
             try:
                 self.pending_requests.pop(member, pid)
-            except Exception:
-                return ResponseFailMsg(f"failed removing member {member}, \npending: {Exception}\nproject: {res.msg}")
+                return ResponseSuccessMsg(f"member {member} removed from project {pid} pendings")
+            except Exception as e:
+                return ResponseFailMsg(f"failed removing member {member}, \npending: {e}\nproject: {res.msg}")
         return res
 
     # -------------- project Info -----------------
@@ -299,6 +317,9 @@ class ProjectManager():
             self.pending_requests.insert(pid, actor)
         return ResponseSuccessMsg(f"member {actor} denied participation in project {pid}")
 
+    def get_member_votes(self, pid, actor):
+        project = self._find_project(pid)
+        return project.get_member_votes(actor)
 
     # --------  data collection ----------------------
     # TODO: remove?
@@ -349,16 +370,40 @@ class ProjectManager():
             to_ret.append(factor.to_dict())
         return ResponseSuccessObj(f"factors pool for user: {actor}", to_ret)
 
+    def _get_projects_containing_factor(self, actor, fid):
+        actors_projects = self.owners.get(actor)
+        ps = []
+        for project in actors_projects:
+            if project.has_factor(fid):
+                ps.append(project)
+        return ps
+
+    def update_factor(self, actor, fid, name, desc):
+        res = self.factor_pool.update_factor(actor, fid, name, desc)
+        if not res.success:
+            return res
+        factor = res.result
+        projects = self._get_projects_containing_factor(actor, fid)
+        for project in projects:
+            project.update_factor(factor)
+        return res
+
+
+    def get_projects_factor_pool(self, actor, pid):
+        """ returns available factors for project, that are nop in the project already"""
+        factors = self.factor_pool.get_factors(actor)
+        project = self._find_project(pid)
+        to_ret = []
+        for factor in factors:
+            if not project.has_factor(factor.fid):
+                to_ret.append(factor.to_dict())
+        return ResponseSuccessObj(f"projects factors pool for user: {actor} {to_ret}", to_ret)
+
     # TODO: add to server
     def duplicate_project(self, pid, actor):
         """creates project NTH"""
         pass
 
-    # TODO: add to server
-    def get_project_voting_progress(self):
-        """returns percentage of voter"""
-        # TODO: we allow partial voting, if member voted on 1 factor is it enough?
-        pass
 
     # --------------- Data Base ------------------------
 

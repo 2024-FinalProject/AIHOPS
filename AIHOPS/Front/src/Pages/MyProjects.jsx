@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FactorVote from "../components/FactorVote";
 import VotingTypeSelector from "../components/VotingTypeSelector";
-import DGraph from "../components/DGraph";
+import DGraph from "../Components/DGraph";
 import { getProjectsMember, submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
 import "./MyProjects.css";
 

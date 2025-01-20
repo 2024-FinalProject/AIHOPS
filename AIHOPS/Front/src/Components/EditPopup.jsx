@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
-        get_project_to_invite, setProjectFactors, addProjectFactor, deleteProjectFactor,
-        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember
+        get_project_to_invite, setProjectFactors, addProjectFactor, updateProjectFactor, deleteProjectFactor,
+        getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
+        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 
@@ -71,10 +72,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
 
         try {
-            const response = await getFactorsPoolOfMember(cookie);
+            const response = await getProjectsFactorsPoolOfMember(cookie, selectedProject.id);
             if (response?.data) {
                 setFactorsPool(response.data.factors);
-                console.log(response.data);
             } else {
                 setFactorsPool([]); // Set empty array if no factors found
             }
@@ -123,6 +123,31 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleConfirmSeverityFactors = async (pid) => {
+        let cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+    
+        try {
+          if(await updateProjectsSeverityFactors() == -1){
+            return;
+          }
+          const response = await confirmSeverityFactors(cookie, pid);
+          if (response.data.success) {
+            alert("Severity factors confirmed successfully");
+            selectedProject.severity_factors_inited = true;
+            fetch_selected_project(selectedProject);
+          } else {
+            console.log("Error confirming project factors");
+          }
+        } catch (error) {
+          console.log("Error confirming project factors");
+        }
+    };    
 
     const updateProjectsSeverityFactors = async () =>{
         const cookie = localStorage.getItem("authToken");
@@ -130,14 +155,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         if (!cookie) {
             setMsg("No authentication token found. Please log in again.");
             setIsSuccess(false);
-            return;
+            return -1;
         }
 
         let tempSeverityFactors = [];
         for (let level = 1; level <= selectedProject.severity_factors.length; level++) {
             if (severityUpdates[level] < 0) {
                 alert("Severity factors cannot be negative. Please enter a valid number for all levels.");
-                return;
+                return -1;
             }
             if(severityUpdates == null || severityUpdates[level] === undefined){
                 tempSeverityFactors.push(selectedProject.severity_factors[level - 1]);
@@ -149,7 +174,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         for(let i = 1; i < tempSeverityFactors.length; i++){
             if(tempSeverityFactors[i - 1] > tempSeverityFactors[i]){
                 alert("Severity factors must be in increasing order.\nCurrently level " + (i) + " is greater than level " + (i + 1));
-                return;
+                return -1;
             }
         }
         
@@ -159,7 +184,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 setMsg(severityResponse.data.message);
                 setIsSuccess(true);
                 alert(severityResponse.data.message);
-                return;
+                return -1;
             }
             await fetchProjects();
             selectedProject.severity_factors = (await getProjectSeverityFactors(cookie, selectedProject.id)).data.severityFactors;
@@ -167,11 +192,13 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             setMsg("Severity factors updated successfully");
             setIsSuccess(true);
             closePopup();
+            return 1;
         } catch (error) {
           const errorMessage = error.response?.data?.message || error.message;
           console.error("Error:", errorMessage);
           setMsg(`Error in updating the severity factors: ${errorMessage}`);
           setIsSuccess(false);
+          return -1;
         }
     }
 
@@ -196,7 +223,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 alert(`The member ${member} has been removed from the project.`);
                 await fetchProjects(); // Refresh the project data after removal
                 await fetch_pending_invites(cookie, selectedProject.id);
-                selectedProject.members = selectedProject.members.filter((memberItem) => memberItem.key !== member);
+                selectedProject.members = selectedProject.members.filter((memberItem) => memberItem !== member);
+                await fetch_selected_project(selectedProject);
+                await fetch_pending_requests(cookie, selectedProject.id);
                 setIsSuccess(true);
             } else {
                 setMsg(response.data.message);
@@ -270,10 +299,58 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         );
     };
 
-    const handleSubmit = () => {
-        console.log('Selected Factors:', selectedFactors); // Debugging
-        // Navigate to your function with `selectedFactors` here
-        alert(`You selected: ${selectedFactors.map((f) => f.name).join(', ')}`); // Debugging
+    const handleSubmit = async () => {
+        let cookie = localStorage.getItem("authToken");
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+
+        const factorIds = selectedFactors.map((factor) => factor.id);
+        const response = await setProjectFactors(cookie, selectedProject.id, factorIds);
+
+        if (response.data.success) {
+            setIsSuccess(true);
+            //Get fresh project data
+            await fetchProjects(); // Refresh projects after adding the member
+            await fetch_selected_project(selectedProject);
+            selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+            await fetch_factors_pool();
+            setSelectedFactors([]);
+        } else {
+            setMsg(response.data.message);
+            alert(response.data.message);
+            setIsSuccess(true);
+        }
+    };
+
+    const handleDeleteFactorFromPool = async (factorName, factorId) => {
+        if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the pool"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            try{
+            const res = await deleteFactorFromPool(cookie, factorId);
+            if (res.data.success) {
+                alert(`Factor "${factorName}" deleted successfully.`);
+                await fetchProjects();
+                await fetch_selected_project(selectedProject);
+                await fetch_factors_pool();
+            } else {
+                alert(res.data.message);
+            }
+            } catch (error) {
+                console.error("Error deleting factor:", error);
+                setMsg(`Error deleting factor: ${error.response?.data?.message || error.message}`);
+                setIsSuccess(false);
+                alert(error.message)
+            }
+        }
     };
 
     const handleAddFactor = async () => {
@@ -286,6 +363,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         if (!cookie) {
             setMsg("No authentication token found. Please log in again.");
             setIsSuccess(false);
+            return;
+        }
+
+        if(newFactorName === "" || newFactorDescription === ""){
+            alert("Please enter a valid factor name and description.");
             return;
         }
         
@@ -314,12 +396,78 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
-    const handleDeleteFactor = (factorName) => {
-        if (window.confirm(`Are you sure you want to delete the factor "${factorName}"?`)) {
-            alert("TODO: Implement delete factor logic");
+    const handleConfirmFactors = async (pid) => {
+        let cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+    
+        if(selectedProject.factors.length == 0){
+          alert("Please add at least one factor in order to confirm");
+          return;
+        }
+    
+        try {
+          const response = await confirmProjectFactors(cookie, pid);
+          if (response.data.success) {
+            selectedProject.factors_inited = true;
+            fetch_selected_project(selectedProject);
+            alert("Factors confirmed successfully");
+            closePopup();
+          } else {
+            console.log("Error confirming project factors");
+          }
+        } catch (error) {
+          console.log("Error confirming project factors");
         }
     };
 
+    const handleUpdateFactor = async (factorId) => {
+        if (window.confirm(`Are you sure you want to update the factor "${factorUpdates.name}"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            //TODO:: Implement here in a similar way to the delete factor below
+            //Use: factorUpdates.name, factorUpdates.description
+            alert("Not implemented yet!");
+        }
+    };
+
+    const handleDeleteFactor = async (factorName, factorId) => {
+        if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the project"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            try{
+            const res = await deleteProjectFactor(cookie, selectedProject.id, factorId);
+            if (res.data.success) {
+                alert(`Factor "${factorName}" deleted successfully.`);
+                await fetchProjects();
+                selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+                await fetch_selected_project(selectedProject);
+                await fetch_factors_pool();
+            } else {
+                alert(res.data.message);
+            }
+            } catch (error) {
+                console.error("Error deleting factor:", error);
+                setMsg(`Error deleting factor: ${error.response?.data?.message || error.message}`);
+                setIsSuccess(false);
+                alert(error.message)
+            }
+        }
+    };
 
     const getPopupContent = () => {
         switch (popupType) {
@@ -331,7 +479,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 defaultValue={selectedProject.name}
                 onChange={(e) => setName(e.target.value)}
                 ></textarea>
-                <button onClick={updateProjectsNameOrDesc}>Save</button>
+                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
             </div>
             );
         case 'editDescription':
@@ -342,7 +490,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 defaultValue={selectedProject.description}
                 onChange={(e) => setDescription(e.target.value)}
                 ></textarea>
-                <button onClick={updateProjectsNameOrDesc}>Save</button>
+                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
             </div>
             );
         case 'editContentFactors':
@@ -389,80 +537,109 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             style={{ flex: '2' }}
                             />
                             <button
-                            className="action-btn delete-btn"
-                            onClick={() => handleDeleteFactor(factor.name)}
-                            style={{
-                                padding: '5px 15px',
-                                backgroundColor: '#ff4444',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '4px',
-                                cursor: 'pointer'
-                            }}
-                            >
-                            Delete
+                                className="action-btn update-btn"
+                                onClick={() => handleUpdateFactor(factor.id)}
+                                style={{
+                                    padding: '5px 15px',
+                                    backgroundColor: '#44ff4d',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                >
+                                Update
+                            </button>
+                            <button
+                                className="action-btn delete-btn"
+                                onClick={() => handleDeleteFactor(factor.name, factor.id)}
+                                style={{
+                                    padding: '5px 15px',
+                                    backgroundColor: '#ff4444',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer'
+                                }}
+                                >
+                                Delete
                             </button>
                         </div>
                     </div>
                 ))}
 
-                <div
+                {factorsPool != null && factorsPool.length > 0 && <div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        //height: '100vh', // Full viewport height
-                        backgroundColor: '#f5f5f5', // Light background
+                        backgroundColor: '#f5f5f5',
                     }}
-                    >
+                >
                     <label
                         htmlFor="factors-dropdown"
                         style={{
-                        fontSize: '18px',
-                        fontWeight: 'bold',
-                        marginBottom: '10px',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            marginBottom: '10px',
                         }}
                     >
-                        Select Factors:
+                        Select Factors From Pool:
                     </label>
                     <div
                         id="factors-dropdown"
                         style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        maxHeight: '200px',
-                        overflowY: 'auto',
-                        padding: '10px',
-                        border: '1px solid #ccc',
-                        borderRadius: '5px',
-                        backgroundColor: '#fff',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'stretch', // Changed from 'center' to 'stretch'
+                            width: '100%', // Added to ensure full width
+                            maxHeight: '300px',
+                            overflowY: 'auto',
+                            padding: '10px',
+                            border: '1px solid #ccc',
+                            borderRadius: '5px',
+                            backgroundColor: '#fff',
                         }}
                     >
-                        {factorsPool.map((factor) => (
-                        <div
-                            key={factor.id}
-                            style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginBottom: '5px',
-                            }}
-                        >
-                            <input
-                            type="checkbox"
-                            id={`factor-${factor.id}`}
-                            onChange={() => handleCheckboxChange(factor)}
-                            />
-                            <label
-                            htmlFor={`factor-${factor.id}`}
-                            style={{
-                                marginLeft: '5px',
-                            }}
+                        {factorsPool != null && factorsPool.length > 0 && factorsPool.map((factor) => (
+                            <div
+                                key={factor.id}
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'auto 1fr auto', // Changed to grid layout
+                                    gap: '10px', // Added consistent spacing
+                                    alignItems: 'center',
+                                    marginBottom: '5px',
+                                    padding: '5px',
+                                }}
                             >
-                            <strong>{factor.name}</strong>: {factor.description}
-                            </label>
-                        </div>
+                                <input
+                                    type="checkbox"
+                                    id={`factor-${factor.id}`}
+                                    onChange={() => handleCheckboxChange(factor)}
+                                />
+                                <label
+                                    htmlFor={`factor-${factor.id}`}
+                                >
+                                    <strong>{factor.name}</strong>: {factor.description}
+                                </label>
+                                <button
+                                    className="action-btn delete-btn"
+                                    onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
+                                    style={{
+                                        padding: '5px 15px',
+                                        backgroundColor: '#ff4444',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap', // Added to prevent button text from wrapping
+                                    }}
+                                >
+                                    Delete From Pool
+                                </button>
+                            </div>
                         ))}
                     </div>
                     <button
@@ -477,9 +654,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         }}
                         onClick={handleSubmit}
                     >
-                        Submit Selected Factors
+                        Add Selected Factors
                     </button>
-                </div>
+                </div>}
 
                 {/* Add New Factor - matching the same style as existing factors */}
                 <div className="factor-item" style={{
@@ -517,68 +694,78 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             cursor: 'pointer'
                             }}
                         >
-                            Add Factor
+                            Add New Factor
                         </button>
                     </div>
                 </div>
                 </div>
+                <button disabled = {selectedProject.isActive}
+                    className="action-btn edit-btn"
+                    onClick={() => handleConfirmFactors(selectedProject.id, selectedProject.name)}
+                >
+                    Confirm Content Factors
+                </button>
             </div>
         );
         case 'editSeverityFactors':
             return (
-            <div>
-                <h3>Edit d-score (Severity Factors)</h3>
-                <p>TODO: Add fields for editing severity factors.</p>
-                <div className="severity-factors-container">
-                    <div className="severity-factors-row">
-                        {selectedProject.severity_factors.slice(0, 3).map((severity, index) => (
-                        <div key={index} className="severity-item">
-                            <label className="severity-label">Level {index + 1}:</label>
-                            {selectedProject.isActive ? (
-                            <span className="severity-value">{severity}</span>
-                            ) : (
-                            <input
-                                type="number"
-                                defaultValue={severity}
-                                className="severity-input"
-                                onChange={(e) => {
-                                const updates = { ...severityUpdates };
-                                updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1, 2, 3
-                                setSeverityUpdates(updates);
-                                }}
-                            />
-                            )}
-                        </div>
-                        ))}
+                <div>
+                    <h3>Edit d-score (Severity Factors)</h3>
+                    <table className="severity-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Level Name</th>
+                                <th>Level Description</th>
+                                <th>Severity Factor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {selectedProject.severity_factors.map((severity, index) => (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>Level {index + 1}</td>
+                                    <td>
+                                        {[
+                                            "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
+                                            "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
+                                            "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
+                                            "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
+                                            "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention."
+                                        ][index]}
+                                    </td>
+                                    <td>
+                                        {selectedProject.isActive ? (
+                                            <span>{severity}</span>
+                                        ) : (
+                                            <input
+                                                type="number"
+                                                defaultValue={severity}
+                                                className="severity-input"
+                                                onChange={(e) => {
+                                                    const updates = { ...severityUpdates };
+                                                    updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1-5
+                                                    setSeverityUpdates(updates);
+                                                }}
+                                            />
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    <div className="severity-factors-warning">
+                        <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
                     </div>
-                    <div className="severity-factors-row">
-                        {selectedProject.severity_factors.slice(3, 5).map((severity, index) => (
-                        <div key={index + 3} className="severity-item">
-                            <label className="severity-label">Level {index + 4}:</label>
-                            {selectedProject.isActive ? (
-                            <span className="severity-value">{severity}</span>
-                            ) : (
-                            <input
-                                type="number"
-                                defaultValue={severity}
-                                className="severity-input"
-                                onChange={(e) => {
-                                const updates = { ...severityUpdates };
-                                updates[index + 4] = Number(e.target.value); // Map to dictionary keys 4, 5
-                                setSeverityUpdates(updates);
-                                }}
-                            />
-                            )}
-                        </div>
-                        ))}
-                    </div>
+                    <button disabled = {selectedProject.isActive}
+                        className="action-btn edit-btn"
+                        onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
+                    >
+                        Confirm Severity Factors
+                    </button>
                 </div>
-                <div className="severity-factors-warning">
-                    <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
-                </div>
-                <button onClick={updateProjectsSeverityFactors}>Save</button>
-            </div>
-            );
+        );
+
         case 'manageAssessors':
             return (
                 <div>
@@ -590,11 +777,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <ul className="members-list">
                     {selectedProject.members.map((memberItem, index) => (
                         <li key={index} className="member-item">
-                        <span className="member-name">{memberItem.key}</span>
-                        {selectedProject.founder != memberItem.key && selectedProject.isActive && (
+                        <span className="member-name">{memberItem}</span>
+                        {selectedProject.founder != memberItem && (
                             <button
                             className="remove-btn"
-                            onClick={() => handleRemoveMember(memberItem.key)}
+                            onClick={() => handleRemoveMember(memberItem)}
                             >
                             Remove Member
                             </button>
