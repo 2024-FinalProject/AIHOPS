@@ -503,7 +503,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     </p>
                     <div className="factors-list">
                     {showExistingContentFactors && selectedProject.factors.length === 0 &&
-                     <>p There are currently no content factors in the project, please add/select from the pool </>}
+                     <p> There are currently no content factors in the project, please add/select from the pool </p>}
                     {showExistingContentFactors && selectedProject.factors.length > 0 && <p>Projects Factors:</p>}
                     {/* Existing Factors */}
                     {showExistingContentFactors && selectedProject.factors.length > 0 && (
@@ -573,48 +573,48 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 </div>
                             </div>
                         ))}
-                        {/* Add New Factor - matching the same style as existing factors */}
-                        <div className="factor-item" style={{
-                            display: 'flex',
-                            gap: '10px',
-                            marginBottom: '10px',
-                            alignItems: 'center'
-                        }}>
-                            <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                                <input
-                                    type="text"
-                                    value={newFactorName}
-                                    onChange={(e) => setNewFactorName(e.target.value)}
-                                    className="factor-name-input"
-                                    placeholder="New factor name"
-                                    style={{ flex: '1' }}
-                                />
-                                <input
-                                    type="text"
-                                    value={newFactorDescription}
-                                    onChange={(e) => setNewFactorDescription(e.target.value)}
-                                    className="factor-desc-input"
-                                    placeholder="New factor description"
-                                    style={{ flex: '2' }}
-                                />
-                                <button
-                                    className="action-btn view-edit-btn"
-                                    onClick={handleAddFactor}
-                                    style={{
-                                        padding: '5px 15px',
-                                        backgroundColor: '#88cd8d',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Add New Factor
-                                </button>
-                            </div>
-                        </div>
                     </>
                 )}
+                {/* Add New Factor - matching the same style as existing factors */}
+                {showExistingContentFactors && <div className="factor-item" style={{
+                    display: 'flex',
+                    gap: '10px',
+                    marginBottom: '10px',
+                    alignItems: 'center'
+                }}>
+                    <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                        <input
+                            type="text"
+                            value={newFactorName}
+                            onChange={(e) => setNewFactorName(e.target.value)}
+                            className="factor-name-input"
+                            placeholder="New factor name"
+                            style={{ flex: '1' }}
+                        />
+                        <input
+                            type="text"
+                            value={newFactorDescription}
+                            onChange={(e) => setNewFactorDescription(e.target.value)}
+                            className="factor-desc-input"
+                            placeholder="New factor description"
+                            style={{ flex: '2' }}
+                        />
+                        <button
+                            className="action-btn view-edit-btn"
+                            onClick={handleAddFactor}
+                            style={{
+                                padding: '5px 15px',
+                                backgroundColor: '#88cd8d',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            Add New Factor
+                        </button>
+                    </div>
+                </div>}
 
 
                 {showPoolContentFactors && factorsPool != null && factorsPool.length > 0 && <div
