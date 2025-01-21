@@ -20,6 +20,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [factorUpdates, setFactorUpdates] = useState({});
     const [factorsPool, setFactorsPool] = useState([]);
     const [selectedFactors, setSelectedFactors] = useState([]);
+    const [showExistingContentFactors, setShowExistingContentFactors] = useState(true);
+    const [showPoolContentFactors, setShowPoolContentFactors] = useState(false);
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -500,75 +502,122 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <strong>Edit Content Factors:</strong>
                     </p>
                     <div className="factors-list">
-                    {selectedProject.factors.length > 0 && <p>Projects Factors:</p>}
+                    {showExistingContentFactors && selectedProject.factors.length === 0 &&
+                     <>p There are currently no content factors in the project, please add/select from the pool </>}
+                    {showExistingContentFactors && selectedProject.factors.length > 0 && <p>Projects Factors:</p>}
                     {/* Existing Factors */}
-                    {selectedProject.factors.length > 0 && selectedProject.factors.map((factor, index) => (
-                        <div key={index} className="factor-item" style={{
-                        display: 'flex',
-                        gap: '10px',
-                        marginBottom: '10px',
-                        alignItems: 'center'
+                    {showExistingContentFactors && selectedProject.factors.length > 0 && (
+                    <>
+                        {selectedProject.factors.map((factor, index) => (
+                            <div key={index} className="factor-item" style={{
+                                display: 'flex',
+                                gap: '10px',
+                                marginBottom: '10px',
+                                alignItems: 'center'
+                            }}>
+                                <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                                    <input
+                                        type="text"
+                                        defaultValue={factor.name}
+                                        className="factor-name-input"
+                                        placeholder="Factor Name"
+                                        onChange={(e) => {
+                                            const updates = { ...factorUpdates };
+                                            if (!updates[index]) updates[index] = {};
+                                            updates[index].name = e.target.value;
+                                            setFactorUpdates(updates);
+                                        }}
+                                        style={{ flex: '1' }}
+                                    />
+                                    <input
+                                        type="text"
+                                        defaultValue={factor.description}
+                                        className="factor-desc-input"
+                                        placeholder="Factor Description"
+                                        onChange={(e) => {
+                                            const updates = { ...factorUpdates };
+                                            if (!updates[index]) updates[index] = {};
+                                            updates[index].description = e.target.value;
+                                            setFactorUpdates(updates);
+                                        }}
+                                        style={{ flex: '2' }}
+                                    />
+                                    <button
+                                        className="action-btn update-btn"
+                                        onClick={() => handleUpdateFactor(factor.id)}
+                                        style={{
+                                            padding: '5px 15px',
+                                            backgroundColor: '#44ff4d',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Update
+                                    </button>
+                                    <button
+                                        className="action-btn delete-btn"
+                                        onClick={() => handleDeleteFactor(factor.name, factor.id)}
+                                        style={{
+                                            padding: '5px 15px',
+                                            backgroundColor: '#ff4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                        {/* Add New Factor - matching the same style as existing factors */}
+                        <div className="factor-item" style={{
+                            display: 'flex',
+                            gap: '10px',
+                            marginBottom: '10px',
+                            alignItems: 'center'
                         }}>
-                        <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                            <input
-                            type="text"
-                            defaultValue={factor.name}
-                            className="factor-name-input"
-                            placeholder="Factor Name"
-                            onChange={(e) => {
-                                const updates = { ...factorUpdates };
-                                if (!updates[index]) updates[index] = {};
-                                updates[index].name = e.target.value;
-                                setFactorUpdates(updates);
-                            }}
-                            style={{ flex: '1' }}
-                            />
-                            <input
-                            type="text"
-                            defaultValue={factor.description}
-                            className="factor-desc-input"
-                            placeholder="Factor Description"
-                            onChange={(e) => {
-                                const updates = { ...factorUpdates };
-                                if (!updates[index]) updates[index] = {};
-                                updates[index].description = e.target.value;
-                                setFactorUpdates(updates);
-                            }}
-                            style={{ flex: '2' }}
-                            />
-                            <button
-                                className="action-btn update-btn"
-                                onClick={() => handleUpdateFactor(factor.id)}
-                                style={{
-                                    padding: '5px 15px',
-                                    backgroundColor: '#44ff4d',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
+                            <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                                <input
+                                    type="text"
+                                    value={newFactorName}
+                                    onChange={(e) => setNewFactorName(e.target.value)}
+                                    className="factor-name-input"
+                                    placeholder="New factor name"
+                                    style={{ flex: '1' }}
+                                />
+                                <input
+                                    type="text"
+                                    value={newFactorDescription}
+                                    onChange={(e) => setNewFactorDescription(e.target.value)}
+                                    className="factor-desc-input"
+                                    placeholder="New factor description"
+                                    style={{ flex: '2' }}
+                                />
+                                <button
+                                    className="action-btn view-edit-btn"
+                                    onClick={handleAddFactor}
+                                    style={{
+                                        padding: '5px 15px',
+                                        backgroundColor: '#88cd8d',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
                                 >
-                                Update
-                            </button>
-                            <button
-                                className="action-btn delete-btn"
-                                onClick={() => handleDeleteFactor(factor.name, factor.id)}
-                                style={{
-                                    padding: '5px 15px',
-                                    backgroundColor: '#ff4444',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
-                                >
-                                Delete
-                            </button>
+                                    Add New Factor
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    </>
+                )}
 
-                {factorsPool != null && factorsPool.length > 0 && <div
+
+                {showPoolContentFactors && factorsPool != null && factorsPool.length > 0 && <div
                     style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -658,53 +707,25 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     </button>
                 </div>}
 
-                {/* Add New Factor - matching the same style as existing factors */}
-                <div className="factor-item" style={{
-                    display: 'flex',
-                    gap: '10px',
-                    marginBottom: '10px',
-                    alignItems: 'center'
-                }}>
-                    <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                        <input
-                            type="text"
-                            value={newFactorName}
-                            onChange={(e) => setNewFactorName(e.target.value)}
-                            className="factor-name-input"
-                            placeholder="New factor name"
-                            style={{ flex: '1' }}
-                        />
-                        <input
-                            type="text"
-                            value={newFactorDescription}
-                            onChange={(e) => setNewFactorDescription(e.target.value)}
-                            className="factor-desc-input"
-                            placeholder="New factor description"
-                            style={{ flex: '2' }}
-                        />
-                        <button
-                            className="action-btn view-edit-btn"
-                            onClick={handleAddFactor}
-                            style={{
-                            padding: '5px 15px',
-                            backgroundColor: '#88cd8d',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
-                            }}
-                        >
-                            Add New Factor
-                        </button>
-                    </div>
+                {!showExistingContentFactors && <button className="action-btn edit-btn" 
+                onClick={() => { setShowExistingContentFactors(true); setShowPoolContentFactors(false); }}>
+                    Show Existing Content Factors
+                </button>}
+                {!showPoolContentFactors && <button className="action-btn edit-btn" 
+                onClick={() => { setShowPoolContentFactors(true); setShowExistingContentFactors(false); }}>
+                    Show Factors Pool
+                </button>}
                 </div>
-                </div>
-                <button disabled = {selectedProject.isActive}
-                    className="action-btn edit-btn"
-                    onClick={() => handleConfirmFactors(selectedProject.id, selectedProject.name)}
-                >
-                    Confirm Content Factors
-                </button>
+
+                {showExistingContentFactors && <div>
+                    <button
+                        disabled={selectedProject.isActive}
+                        className="action-btn edit-btn"
+                        onClick={() => handleConfirmFactors(selectedProject.id, selectedProject.name)}
+                    >
+                        Confirm Content Factors
+                    </button>
+                </div>}
             </div>
         );
         case 'editSeverityFactors':
