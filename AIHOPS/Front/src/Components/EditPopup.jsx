@@ -26,6 +26,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [poolStartIndex, setPoolStartIndex] = useState(0); // Counter for factorsPool
     const itemsPerPage = 3; // Number of items to display at a time
 
+
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
         
@@ -314,9 +315,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
     const handleCheckboxChange = (factor) => {
         setSelectedFactors((prev) =>
-          prev.includes(factor)
-            ? prev.filter((item) => item !== factor) // Remove if already selected
-            : [...prev, factor] // Add if not selected
+            prev.some((selected) => selected.id === factor.id)
+                ? prev.filter((selected) => selected.id !== factor.id) // Remove if already selected
+                : [...prev, factor] // Add if not selected
         );
     };
 
@@ -520,7 +521,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     {/* Existing Content Factors Section */}
                     {showExistingContentFactors && (
                         <div>
-                            <h4>Project Factors</h4>
+                            <div style={{alignItmes: 'center', display: 'flex', justifyContent: 'center'}}>
+                                 <h2>Project Factors:</h2>
+                            </div>
                             {selectedProject.factors.length > 0 ? (
                                 <>
                                     {selectedProject.factors
@@ -534,6 +537,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     gap: '10px',
                                                     marginBottom: '10px',
                                                     alignItems: 'center',
+                                                    backgroundColor: '#f9f9f9',
                                                 }}
                                             >
                                                 <div style={{ flex: 1 }}>
@@ -563,6 +567,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         }}
                                     >
                                         <button
+                                            className="action-btn edit-btn"
                                             onClick={() => handlePrevious('factors')}
                                             disabled={factorStartIndex === 0}
                                             style={{
@@ -571,7 +576,31 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         >
                                             Previous
                                         </button>
+
+                                        {/* Confirm Content Factors */}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'center', // Center the button
+                                                padding: '10px 0', // Add some space above and below
+                                            }}
+                                        >
+                                            <button
+                                                disabled={selectedProject.isActive}
+                                                className="action-btn edit-btn"
+                                                onClick={() =>
+                                                    handleConfirmFactors(selectedProject.id, selectedProject.name)
+                                                }
+                                                style={{
+                                                    background: "#2e8b57",
+                                                }}
+                                            >
+                                                Confirm Content Factors
+                                            </button>
+                                        </div>
+
                                         <button
+                                            className="action-btn edit-btn"
                                             onClick={() => handleNext('factors')}
                                             disabled={
                                                 factorStartIndex + itemsPerPage >=
@@ -639,28 +668,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                     </button>
                                 </div>
                             </div>
-        
-                            {/* Confirm Content Factors */}
-                            <button
-                                disabled={selectedProject.isActive}
-                                className="action-btn edit-btn"
-                                onClick={() =>
-                                    handleConfirmFactors(selectedProject.id, selectedProject.name)
-                                }
-                                style={{
-                                    marginTop: '15px',
-                                    background: "#dc143c",
-                                }}
-                            >
-                                Confirm Content Factors
-                            </button>
                         </div>
                     )}
         
                     {/* Factors Pool Section */}
                     {showPoolContentFactors && (
                         <div>
-                            <h4>Factors Pool</h4>
+                            <div style={{alignItmes: 'center', display: 'flex', justifyContent: 'center'}}>
+                                 <h2>Factors Pool:</h2>
+                            </div>
                             {factorsPool.length > 0 ? (
                                 <>
                                     {factorsPool
@@ -674,12 +690,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     gap: '10px',
                                                     alignItems: 'center',
                                                     marginBottom: '10px',
+                                                    backgroundColor: '#f9f9f9',
                                                 }}
                                             >
                                                 <input
                                                     type="checkbox"
                                                     id={`factor-${factor.id}`}
                                                     onChange={() => handleCheckboxChange(factor)}
+                                                    checked={selectedFactors.some((selected) => selected.id === factor.id)}
                                                 />
                                                 <label htmlFor={`factor-${factor.id}`} style={{ flex: 1 }}>
                                                     <strong>{factor.name}</strong>: {factor.description}
@@ -710,6 +728,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         }}
                                     >
                                         <button
+                                            className="action-btn edit-btn"
                                             onClick={() => handlePrevious('pool')}
                                             disabled={poolStartIndex === 0}
                                             style={{
@@ -718,7 +737,26 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         >
                                             Previous
                                         </button>
+
+                                        {/* Add Selected Factors */}
                                         <button
+                                            className="action-btn edit-btn"
+                                            onClick={handleSubmit}
+                                            style={{
+                                                marginTop: '10px',
+                                                padding: '10px 20px',
+                                                backgroundColor: 'blue',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                cursor: 'pointer',
+                                            }}
+                                        >
+                                            Add Selected Factors
+                                        </button>
+
+                                        <button
+                                            className="action-btn edit-btn"
                                             onClick={() => handleNext('pool')}
                                             disabled={
                                                 poolStartIndex + itemsPerPage >= factorsPool.length
@@ -733,22 +771,6 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                             Next
                                         </button>
                                     </div>
-        
-                                    {/* Add Selected Factors */}
-                                    <button
-                                        onClick={handleSubmit}
-                                        style={{
-                                            marginTop: '10px',
-                                            padding: '10px 20px',
-                                            backgroundColor: 'blue',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        Add Selected Factors
-                                    </button>
                                 </>
                             ) : (
                                 <p>No factors available in the pool.</p>
@@ -757,35 +779,76 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     )}
         
                     {/* Buttons to Toggle Sections */}
-                    {!showExistingContentFactors && (
-                        <button
-                            className="action-btn edit-btn"
-                            onClick={() => {
-                                setShowExistingContentFactors(true);
-                                setShowPoolContentFactors(false);
-                            }}
-                        >
-                            Show Existing Content Factors
-                        </button>
-                    )}
-                    {!showPoolContentFactors && (
-                        <button
-                            className="action-btn edit-btn"
-                            onClick={() => {
-                                setShowPoolContentFactors(true);
-                                setShowExistingContentFactors(false);
-                            }}
-                        >
-                            Show Factors Pool
-                        </button>
-                    )}
+                    <div
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: '15px', // Increased space between buttons for a more spacious look
+                            padding: '15px 0', // Padding above and below
+                            marginTop: '50px',
+                        }}
+                    >
+                        {!showExistingContentFactors && (
+                            <button
+                                className="action-btn edit-btn"
+                                onClick={() => {
+                                    setShowExistingContentFactors(true);
+                                    setShowPoolContentFactors(false);
+                                }}
+                                style={{
+                                    padding: '20px 30px',
+                                    fontSize: '16px',
+                                    background: 'linear-gradient(145deg, #5D9CEC, #4A89DC)', // Soft gradient background
+                                    color: 'white',
+                                    border: '1px solid #4A89DC', // Slightly darker border for definition
+                                    borderRadius: '25px', // Rounded corners for a modern look
+                                    boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)', // Light shadow to make it pop
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    outline: 'none',
+                                }}
+                                onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')} // Hover effect: slight scale increase
+                                onMouseOut={(e) => (e.target.style.transform = 'scale(1)')} // Revert scale when mouse leaves
+                            >
+                                Show Existing Content Factors
+                            </button>
+                        )}
+                        {!showPoolContentFactors && (
+                            <button
+                                className="action-btn edit-btn"
+                                onClick={() => {
+                                    setShowPoolContentFactors(true);
+                                    setShowExistingContentFactors(false);
+                                }}
+                                style={{
+                                    padding: '20px 30px',
+                                    fontSize: '16px',
+                                    background: 'linear-gradient(145deg, #FFB6C1, #FF6F91)', // Soft gradient background for variety
+                                    color: 'white',
+                                    border: '1px solid #FF6F91',
+                                    borderRadius: '25px',
+                                    boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.3s ease',
+                                    outline: 'none',
+                                }}
+                                onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
+                            >
+                                Show Factors Pool
+                            </button>
+                        )}
+                    </div>
+
                 </div>
             );
             
         case 'editSeverityFactors':
             return (
                 <div>
-                    <h3>Edit d-score (Severity Factors)</h3>
+                    <div style={{alignItmes: 'center', display: 'flex', justifyContent: 'center'}}>
+                        <h2>Edit d-score (Severity Factors):</h2>
+                    </div>
                     <table className="severity-table">
                         <thead>
                             <tr>
@@ -832,12 +895,23 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <div className="severity-factors-warning">
                         <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
                     </div>
-                    <button disabled = {selectedProject.isActive}
-                        className="action-btn edit-btn"
-                        onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
+                    <div  
+                        style={{
+                            display: 'flex',
+                            justifyContent: 'center', // Center horizontally
+                            alignItems: 'center',    // Center vertically
+                            textAlign: 'center',     // Ensure text inside the heading is centered
+                            height: '100%',          // Optional: Ensures the div takes up full height for vertical centering
+                        }}
                     >
-                        Confirm Severity Factors
-                    </button>
+                        <button disabled = {selectedProject.isActive}
+                            className="action-btn edit-btn"
+                            onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
+                            style = {{backgroundColor: "#2e8b57"}}
+                        >
+                            Confirm Severity Factors
+                        </button>
+                    </div>
                 </div>
         );
 
