@@ -1,82 +1,25 @@
 import React, { useState, useEffect } from "react";
 import FactorVote from "../components/FactorVote";
-import { getProjectsMember, submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
+import {
+  getProjectsMember,
+  submitFactorVote,
+  getMemberVoteOnProject,
+} from "../api/ProjectApi";
 import "./MyProjects.css";
-
-// const dummyProjects = [
-//   {
-//     id: 1,
-//     name: "Project Alpha",
-//     description: "Description of Project Alpha.",
-//     founder: "John Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: false },
-//       { userId: 3, name: "Mike Smith", hasVoted: false },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 2,
-//     name: "Project Beta",
-//     description: "Description of Project Beta.",
-//     founder: "Jane Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: false },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 3,
-//     name: "Project Gamma",
-//     description: "Description of Project Gamma.",
-//     founder: "Mike Smith",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: true },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 4,
-//     name: "Project Delta",
-//     description: "Description of Project Delta.",
-//     founder: "John Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: true },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-// ];
 
 const MyProjects = () => {
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
   const [factorVotes, setFactorVotes] = useState({});
-  const [submittedVotes, setSubmittedVotes] = useState({}); // Track successfully submitted votes
+  const [submittedVotes, setSubmittedVotes] = useState({});
   const [currentFactorIndex, setCurrentFactorIndex] = useState(0);
   const [isVoteStarted, setIsVoteStarted] = useState(false);
   const [showVotePopup, setShowVotePopup] = useState(false);
-  const [severityLevel, setSeverityLevel] = useState(false);
-  const [projectVotingStatus, setProjectVotingStatus] = useState({});
+  const [projectVotingStatus, setProjectVotingStatus] = useState({}); // {projectId: {votingStatus: float, severitiesStatus: float}}
 
+  const calculateProgress = (votedCount, totalCount) => {
+    return totalCount > 0 ? votedCount / totalCount : 0;
+  };
 
   const fetchProjects = async () => {
     try {
@@ -86,8 +29,61 @@ const MyProjects = () => {
         return;
       }
       const response = await getProjectsMember(cookie);
-      if(response.data.success) {
+      if (response.data.success) {
         setProjects(response.data.projects);
+
+        // Initialize voting status for each project
+        const initialStatus = {};
+
+        // Fetch and process voting status for each project
+        await Promise.all(
+          response.data.projects.map(async (project) => {
+            try {
+              const voteResponse = await getMemberVoteOnProject(
+                cookie,
+                project.id
+              );
+              console.log("voteResponse", voteResponse);
+              if (voteResponse.data.success) {
+                const factorVotes = voteResponse.data.votes.factor_votes || {};
+                setFactorVotes(factorVotes);
+                const severityVotes =
+                  voteResponse.data.votes.severity_votes || [];
+
+                console.log("factorVotes", factorVotes);
+                console.log("severityVotes", severityVotes);
+
+                // Count only valid votes (not -1)
+                const validVotesCount = Object.values(factorVotes).length;
+
+                // Count only valid severity votes (not -1)
+                const validSeverityCount = severityVotes.length;
+
+                initialStatus[project.id] = {
+                  votingStatus: validVotesCount / project.factors.length,
+                  severitiesStatus: validSeverityCount / 5,
+                };
+              } else {
+                initialStatus[project.id] = {
+                  votingStatus: 0,
+                  severitiesStatus: 0,
+                };
+              }
+            } catch (error) {
+              console.error(
+                `Error fetching votes for project ${project.id}:`,
+                error
+              );
+              initialStatus[project.id] = {
+                votingStatus: 0,
+                severitiesStatus: 0,
+              };
+            }
+          })
+        );
+
+        setProjectVotingStatus(initialStatus);
+        console.log(initialStatus);
       } else {
         alert(response.data.message || "Failed to fetch projects");
       }
@@ -101,10 +97,17 @@ const MyProjects = () => {
     fetchProjects();
   }, []);
 
-
   const handleVoteClick = (project) => {
+    console.log("project", project);
     setCurrentProject(project);
     setShowVotePopup(true);
+    updateFactorsVotes(project.id);
+    console.log("Project clicked");
+    console.log(project.id);
+    console.log("factor index", currentFactorIndex);
+    console.log("factor votes", factorVotes);
+    // console.log("current project", currentProject);
+    console.log("factor lenght", project.factors.length);
   };
 
   const handleFactorVoteChange = (factorId, value) => {
@@ -125,15 +128,27 @@ const MyProjects = () => {
         currentFactorId,
         factorVotes[currentFactorId]
       );
-     
-
 
       if (response.data.success) {
-        // Only update submitted votes after successful API call
+        // Update submitted votes
         setSubmittedVotes((prev) => ({
           ...prev,
           [currentFactorId]: factorVotes[currentFactorId],
         }));
+
+        // Update voting status progress
+        const votedCount = Object.keys(submittedVotes).length + 1;
+        const totalFactors = currentProject.factors.length;
+
+        setProjectVotingStatus((prev) => ({
+          ...prev,
+          [currentProject.id]: {
+            ...prev[currentProject.id],
+            votingStatus: calculateProgress(votedCount, totalFactors),
+          },
+        }));
+
+
         return true;
       } else {
         alert(response.data.message || "Failed to submit vote for factor");
@@ -146,38 +161,40 @@ const MyProjects = () => {
     }
   };
 
-  const handleStartVoting = () => {
-    setIsVoteStarted(true);
-    setShowVotePopup(false);
-    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
-  };
-
-  const checkProjectVotingStatus = async (projectId) => {
+  const updateFactorsVotes = async (projectId) => {
     try {
       const cookie = localStorage.getItem("authToken");
       if (!cookie) {
         alert("Authentication token not found");
         return;
       }
-
-      const response = await checkFactorVotingStatus(cookie, projectId);
-      const respone = null;
+      const response = await getMemberVoteOnProject(cookie, projectId);
       if (response.data.success) {
-        setProjectVotingStatus((prev) => ({
-          ...prev,
-          [projectId]: response.data.voted,
-        }));
+        const factorVotes = response.data.votes.factor_votes || {};
+        setFactorVotes(factorVotes);
+      } else {
+        alert(response.data.message || "Failed to fetch votes for project");
       }
     } catch (error) {
-      console.error("Error checking voting status:", error);
+      alert("Failed to fetch votes for project");
+      console.error(error);
     }
+  };
+
+
+
+  const handleStartVoting = () => {
+    setIsVoteStarted(true);
+    setShowVotePopup(false);
+    setCurrentFactorIndex(0);
+    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
   };
 
   const handleCloseVoting = async (projectId) => {
     setShowVotePopup(false);
     setCurrentProject(null);
     setIsVoteStarted(false);
-    setFactorVotes({});
+    
     setSubmittedVotes({});
     setCurrentFactorIndex(0);
 
@@ -204,11 +221,20 @@ const MyProjects = () => {
 
   const countVotedFactors = () => {
     // Count only successfully submitted votes
+    console.log("submittedVotes", Object.keys(submittedVotes).length);
+    console.log("currentProject?.factors.length",currentProject?.factors.length)
     return Object.keys(submittedVotes).length;
+
+    // return projectVotingStatus[currentProject.id]?.votingStatus;
   };
 
   const isBothCheckboxesChecked = (project) => {
     return projectVotingStatus[project.id] && severityLevel;
+  };
+
+  const isBothStatusesComplete = (project) => {
+    const status = projectVotingStatus[project.id];
+    return status && status.votingStatus === 1 && status.severitiesStatus === 1;
   };
 
   return (
@@ -224,18 +250,17 @@ const MyProjects = () => {
           >
             <h3 className="text-xl font-semibold">{project.name}:</h3>
             <p>{project.description}</p>
-            <p>Founder: {project.founder}</p>
+            <p>Owner: {project.owner}</p>
 
-            {/* Display checkmark if both checkboxes are checked */}
-            {isBothCheckboxesChecked(project) && (
-              <div clasName="checkmark"> ✓ </div>
+            {isBothStatusesComplete(project) && (
+              <div className="checkmark"> ✓ </div>
             )}
 
             <div className="checkboxes">
               <label>
                 <input
                   type="checkbox"
-                  checked={projectVotingStatus[project.id] || false}
+                  checked={projectVotingStatus[project.id]?.votingStatus === 1}
                   disabled
                 />
                 Factors Voted
@@ -243,8 +268,9 @@ const MyProjects = () => {
               <label>
                 <input
                   type="checkbox"
-                  checked={severityLevel}
-                  onChange={() => setSeverityLevel(!severityLevel)}
+                  checked={
+                    projectVotingStatus[project.id]?.severitiesStatus === 1
+                  }
                   disabled
                 />
                 D.Score Voted
@@ -322,16 +348,19 @@ const MyProjects = () => {
                 <div
                   className="progress-bar-fill"
                   style={{
-                    width: `${
-                      (countVotedFactors() / currentProject.factors.length) *
-                      100
-                    }%`,
+                    width:
+                      currentProject?.factors.length > 0
+                        ? `${
+                            (0.5) *
+                            100
+                          }%`
+                        : "0%",
                   }}
                 ></div>
               </div>
               <p className="vote-progress-text">
-                {countVotedFactors()} / {currentProject.factors.length} factors
-                have been voted
+                {countVotedFactors()} / {currentProject?.factors.length || 0}{" "}
+                factors have been voted
               </p>
             </div>
           </div>
