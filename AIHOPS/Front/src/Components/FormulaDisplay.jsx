@@ -1,5 +1,6 @@
 import React from "react";
-import { MathComponent } from "react-mathjax2";
+import { BlockMath } from "react-katex";
+import "katex/dist/katex.min.css"; // Import the required CSS for KaTeX
 
 const FormulaDisplay = ({ nominator, denominator, d_score, score }) => {
     const formula = `
@@ -8,7 +9,7 @@ const FormulaDisplay = ({ nominator, denominator, d_score, score }) => {
 
     return (
         <div style={{ fontSize: "20px", textAlign: "center" }}>
-            <MathComponent tex={formula} />
+            <BlockMath>{formula}</BlockMath>
         </div>
     );
 };

@@ -80,7 +80,6 @@ const AnalyzeResult = ({
             let res = await getProjectFactors(cookie, projectId);
             if (res.data.success) {
                 setProjectFactors(res.data.factors);
-                console.log(res.data.factors);
             }
         } catch (error) {
             alert(error);
@@ -108,13 +107,13 @@ const AnalyzeResult = ({
                 <div>
                     <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>Project's Score:</h2>
                     <div>
-                         {/* Object.keys(projectsScore).length > 0 ?
+                         { Object.keys(projectsScore).length > 0 ?
                             <FormulaDisplay nominator={projectsScore.nominator} 
                                             denominator={projectsScore.denominator}
                                             d_score={projectsScore.d_score}
                                             score = {projectsScore.score} />
                           :
-                            "No score available" */}
+                            "No score available" }
                     </div>
                 </div>
                 );
