@@ -1,5 +1,5 @@
 import React from 'react';
-import './VotingTypeSelector.css';  // Make sure you have this CSS file
+import './VotingTypeSelector.css'; 
 
 const VotingTypeSelector = ({ 
   projectName, 
@@ -16,17 +16,17 @@ const VotingTypeSelector = ({
       </h2>
       <div className="voting-buttons-container">
         <button 
-          className={`voting-type-btn ${isFactorsVoted ? 'disabled' : ''}`}
-          onClick={() => onSelectVotingType('factors')}  // Changed to match prop name
-          disabled={isFactorsVoted}
+          className={`voting-type-btn ${isFactorsVoted ? 'completed' : ''}`}
+          onClick={() => onSelectVotingType('factors')}
+          disabled = {isFactorsVoted}
         >
           Vote on Factors
           {isFactorsVoted && <span className="check-mark">✓</span>}
         </button>
         <button 
-          className={`voting-type-btn ${!isFactorsVoted || isDScoreVoted ? 'disabled' : ''}`}
-          onClick={() => onSelectVotingType('dscore')}  // Changed to match prop name
-          disabled={!isFactorsVoted || isDScoreVoted}
+          className={`voting-type-btn ${isDScoreVoted ? 'completed' : ''}`}
+          onClick={() => onSelectVotingType('dscore')} 
+          disabled = {isDScoreVoted} // Changed to match prop name
         >
           Vote on D-Score
           {isDScoreVoted && <span className="check-mark">✓</span>}

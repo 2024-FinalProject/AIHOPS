@@ -233,17 +233,19 @@ export const submitFactorVote = async (cookie, pid, factorId, score) => {
     });
 }
 
-export const checkFactorVotingStatus = async (cookie, projectId) => {
+  export const getMemberVoteOnProject = async (cookie, projectId) => {
     try {
-      const response = await axios.get(`${baseURL}/project/${projectId}/factor-vote-status`, {
-        params: { cookie: cookie }
+      const response = await axios.get(`${API_URL}/project/get-member-votes`, {
+        params: { cookie,
+            pid: projectId //explicitly pass the project id because type mismatch, don't change this!
+         }
       });
       return response;
     } catch (error) {
-      console.error("Error checking factor voting status:", error);
       throw error;
     }
   };
+
 
 export const getProjectsMember = async (cookie) => {
     return await axios.get(`${API_URL}/project/get-projects-member`, {
@@ -251,3 +253,42 @@ export const getProjectsMember = async (cookie) => {
     });
 }
 
+export const submitDScoreVotes = async (cookie, projectId, votes) => {
+    return axios.post(`${API_URL}/project/vote_on_severities`, {
+      cookie,
+      pid: projectId,
+      severityFactors: votes
+    });
+  };
+
+  //maybe need to move this function to my project page file
+  export const checkProjectVotingStatus = async (cookie, project_id) => {
+    try {
+      const voteResponse = await getMemberVoteOnProject(cookie, project_id);
+      if (voteResponse.data.success) {
+        const factorVotes = voteResponse.data.votes.factor_votes || {};
+        const severityVotes = voteResponse.data.votes.severity_votes || [];
+  
+        const validFactorVotesCount = Object.values(factorVotes).length;
+        const validSeverityVotesCount = severityVotes.length;
+  
+        const totalFactors = (await getProjectFactors(cookie, project_id)).data.factors.length;
+  
+        return {
+          votingStatus: validFactorVotesCount / totalFactors,
+          severitiesStatus: validSeverityVotesCount / 5,
+        };
+      } else {
+        return {
+          votingStatus: 0,
+          severitiesStatus: 0,
+        };
+      }
+    } catch (error) {
+      console.error(`Error fetching votes for project ${project_id}:`, error);
+      return {
+        votingStatus: 0,
+        severitiesStatus: 0,
+      };
+    }
+  };
