@@ -34,9 +34,12 @@ class Project:
 
 
     def confirm_factors(self):
+        if self.vote_manager.get_factors() == []:
+            return ResponseFailMsg(f"project: {self.pid} has no factors to confirm")
         self.db_instance.factors_confirmed = True
         self.db_access.update(self.db_instance)
         self.factors_inited = True
+        return ResponseSuccessMsg(f"project: {self.pid} factors confirmed")
 
     def confirm_severity_factors(self):
         self.db_instance.severity_factors_confirmed = True
@@ -196,12 +199,12 @@ class Project:
             self.to_invite_when_published.append(invite)
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
-    def get_score(self):
+    def get_score(self, pending_amount):
         voted_amount = self.vote_manager.get_partially_voted_amount()
         if voted_amount == 0:
             return ResponseFailMsg(f"voted amount is 0")
         score_res = self.vote_manager.get_score(self.severity_factors)
-        score_res["assessors"] = [0, self.members.size(), voted_amount]
+        score_res["assessors"] = [pending_amount, self.members.size(), voted_amount]
         return ResponseSuccessObj(f"retrieving score for {self.pid}",score_res)
 
     def get_member_votes(self, actor):
