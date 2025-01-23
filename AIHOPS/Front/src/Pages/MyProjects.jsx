@@ -410,6 +410,7 @@ const MyProjects = () => {
           </div>
         </div>
       )}
+      
       {/* D-score voting popup */}
       {showDScoreVote && (
         <div className="popup-overlay">
