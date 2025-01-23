@@ -366,7 +366,8 @@ class ProjectManager():
 
     def get_score(self, actor, pid):
         project = self._verify_owner(pid, actor)
-        return project.get_score()
+        pendings = self._get_pending_emails_by_projects_list(pid)
+        return project.get_score(len(pendings))
 
 
     def get_factor_pool(self, actor):

@@ -445,7 +445,7 @@ class ProjectTests(unittest.TestCase):
         self.assertTrue(projects is not None)
         project = projects.get(pid)
         res = project.get_severity_factors()
-        self.assertTrue(res.result == DEFAULT_SEVERITY_FACTORS)
+        self.assertTrue(res.result == self.severities)
 
     
     def test_update_project_name_and_desc_Serializable_success(self):
