@@ -1,9 +1,9 @@
 import React from "react";
 import { MathComponent } from "react-mathjax2";
 
-const FormulaDisplay = ({ nominator, denominator, d_score }) => {
+const FormulaDisplay = ({ nominator, denominator, d_score, score }) => {
     const formula = `
-        \\left( \\frac{${nominator}}{${denominator}} \\right)^{${d_score}} = A
+        \\left( \\frac{${nominator}}{${denominator}} \\right)^{${d_score}} = ${score}
     `;
 
     return (

@@ -1,4 +1,4 @@
-import { getProjectProgress, getProjectsScore } from "../api/ProjectApi";
+import { getProjectProgress, getProjectsScore, getProjectFactors } from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 import "./ProjectStatusPopup.css";
 import ProgressBar from '../Components/ProgressBar'; //Component for secondary popups
@@ -12,7 +12,8 @@ const AnalyzeResult = ({
     projectId,
 }) => {
     const [projectsProgress, setProjectsProgress] = useState({});
-    const [ProjectsScore, setProjectsScore] = useState({});
+    const [projectsScore, setProjectsScore] = useState({});
+    const [projectFactors, setProjectFactors] = useState({});
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -25,6 +26,7 @@ const AnalyzeResult = ({
 
         fetch_project_progress();
         fetch_project_score();
+        fetch_project_factors();
     }, []);
 
     const fetch_project_progress = async () => {
@@ -66,6 +68,39 @@ const AnalyzeResult = ({
         }
     };
 
+    const fetch_project_factors = async () => {
+        let cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+        try{
+            let res = await getProjectFactors(cookie, projectId);
+            if (res.data.success) {
+                setProjectFactors(res.data.factors);
+                console.log(res.data.factors);
+            }
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    const ProjectScore = () => {
+        let totalSum = Object.values(projectsScore.factors)
+          .reduce((sum, factor) => sum + factor.avg, 0);
+      
+        let numFactors = Object.keys(projectsScore.factors).length;
+      
+        let averageScore = numFactors > 0 ? totalSum / numFactors : 0;
+      
+        return (
+          <h2>Current Content Factors Score: {averageScore}</h2>
+        );
+    };
+      
+
     const getPopupContent = () => {
         switch (analyzePopupType) {
             case 'showCurrentScore':
@@ -73,12 +108,13 @@ const AnalyzeResult = ({
                 <div>
                     <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>Project's Score:</h2>
                     <div>
-                         {Object.keys(ProjectsScore).length > 0 ?
-                            <FormulaDisplay nominator={ProjectsScore.nominator} 
-                                            denominator={ProjectsScore.denominator}
-                                            d_score={ProjectsScore.d_score} />
+                         {/* Object.keys(projectsScore).length > 0 ?
+                            <FormulaDisplay nominator={projectsScore.nominator} 
+                                            denominator={projectsScore.denominator}
+                                            d_score={projectsScore.d_score}
+                                            score = {projectsScore.score} />
                           :
-                            "No score available"}
+                            "No score available" */}
                     </div>
                 </div>
                 );
@@ -105,8 +141,14 @@ const AnalyzeResult = ({
                 <div>
                     <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>Content Factors Score:</h2>
                     <div>
-                        <h1>Histogram Example</h1>
-                        <Histogram />
+                        {Object.keys(projectsScore).length > 0 ?
+                                         ProjectScore()
+                                        : "Content Factors Score not available"}
+                        
+                        {Object.keys(projectsScore).length > 0 ? 
+                             (<Histogram factors = {projectsScore.factors} factorslist = {projectFactors}/>) 
+                            :
+                             null}
                     </div>
                 </div>
                 );
@@ -115,8 +157,8 @@ const AnalyzeResult = ({
                 <div>
                     <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>d-Score (Severity Factors):</h2>
                     <div>
-                        <h1>Histogram Example</h1>
-                        <Histogram />
+                        <p>Current d-Score: {Object.keys(projectsScore).length > 0 ? projectsScore.d_score : "No available d-Score"}</p>
+                        <p>Number of assessors that gave the d-Score: {projectsProgress.voted_amount} </p>
                     </div> 
                 </div>
                 );
