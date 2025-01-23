@@ -139,6 +139,24 @@ class ProjectTests(unittest.TestCase):
 
 
 
+    def test_get_score(self):
+        cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
+
+        factors = self.server.get_project_factors(cookie_bob, pid).result
+        factor_ids = [factor["id"] for factor in factors]
+        votes = [random.randint(1, 4) for _ in range(len(factor_ids))]
+        factor_votes = {}
+        for i in range(len(factor_ids)):
+            self.server.vote_on_factor(cookie_bob, pid, factor_ids[i], votes[i])
+            factor_votes[factor_ids[i]] = votes[i]
+
+        # vote on severities
+        severity_votes = [50, 30, 10, 7, 3]
+        self.server.vote_severities(cookie_bob, pid, severity_votes)
+
+        res = self.server.get_score(cookie_alice, pid)
+        self.assertTrue(res.success, f"failed to get score {res.msg}")
+
 
     def test_project_default_factors_success(self):
         self.create_server()

@@ -197,7 +197,12 @@ class Project:
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
     def get_score(self):
-        pass
+        voted_amount = self.vote_manager.get_partially_voted_amount()
+        if voted_amount == 0:
+            return ResponseFailMsg(f"voted amount is 0")
+        score_res = self.vote_manager.get_score(self.severity_factors)
+        score_res["assessors"] = [0, self.members.size(), voted_amount]
+        return ResponseSuccessObj(f"retrieving score for {self.pid}",score_res)
 
     def get_member_votes(self, actor):
         self._verify_member(actor)

@@ -101,6 +101,68 @@ class VoteManager:
         severity_votes = list(self.severity_votes.get(actor, []))
         return ResponseSuccessObj(f"fetching votes for {actor}", {"factor_votes": factor_votes, "severity_votes": severity_votes})
 
+    def _sum_score_by_factor(self):
+        factors_res = {}
+        for fid in self.factors.getKeys():
+            factors_res[fid] = {"vote_count": 0, "score": 0, "avg": 0}
+
+        for assessor, vote_dict in self.factors_votes.items():
+            for fid, score in vote_dict.items():
+                factors_res[fid]["vote_count"] += 1
+                factors_res[fid]["score"] += score
+        return factors_res
+
+    def _factors_score_data(self):
+        factors_res = self._sum_score_by_factor()
+
+        for fid, res in factors_res.items():
+            if res["vote_count"] > 0:
+                avg = res["score"] / res["vote_count"]
+                factors_res[fid] = {"avg": avg, "vote_count": res["vote_count"]}
+
+        N = 0
+        Sa_max = 0
+        for assessor, vote_dict in self.factors_votes.items():
+            if 0 not in vote_dict.values():
+                Sa = sum(list(vote_dict.values())) / len(vote_dict.values())
+                if Sa > Sa_max:
+                    Sa_max = Sa
+                N += Sa
+
+        m = len(self.factors_votes.keys())
+        D = Sa_max * m
+
+        return factors_res, N, D
+
+    def _severity_score_data(self, severity_factors):
+        damage_avg = [0, 0, 0, 0, 0]
+        for assessor in self.severity_votes.getKeys():
+            vote_list = self.severity_votes.get(assessor, [])
+            d_ass = 0
+            for i in range(5):
+                v = vote_list[i] / 100
+                damage_avg[i] += v
+                d_ass += v * severity_factors[i]
+        d = d_ass / len(self.severity_votes.getKeys())
+        return d, damage_avg
+
+    def get_score(self, severity_factors):
+        for i in range(5):
+            severity_factors[i] /= 100
+        factors_res, N, D = self._factors_score_data()
+        d, damage_avg = self._severity_score_data(severity_factors)
+
+        score = (N/D)**d
+
+        results = {"score": score,
+                   "assessors": [],
+                   "factors": factors_res,
+                   "severity_damage": damage_avg,
+                   "nominator": N,
+                   "denominator": D,
+                   "d_score": d
+                    }
+        return results
 
 
     def load_factors(self):
