@@ -245,3 +245,9 @@ export const getProjectsMember = async (cookie) => {
         params: { cookie }
     });
 }
+
+export const getProjectsScore = async (cookie, pid) => {
+    return await axios.get(`${API_URL}/project/score`, {
+        params: { cookie, pid }
+    });
+}
