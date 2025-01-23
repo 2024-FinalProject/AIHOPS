@@ -34,9 +34,12 @@ class Project:
 
 
     def confirm_factors(self):
+        if self.vote_manager.get_factors() == []:
+            return ResponseFailMsg(f"project: {self.pid} has no factors to confirm")
         self.db_instance.factors_confirmed = True
         self.db_access.update(self.db_instance)
         self.factors_inited = True
+        return ResponseSuccessMsg(f"project: {self.pid} factors confirmed")
 
     def confirm_severity_factors(self):
         self.db_instance.severity_factors_confirmed = True

@@ -134,8 +134,7 @@ class ProjectManager():
 
     def confirm_factors(self, pid, actor):
         project = self._verify_owner(pid, actor)
-        project.confirm_factors()
-        return ResponseSuccessMsg(f"{actor}: confirmed factors to {project.name}")
+        return project.confirm_factors()
 
     def confirm_severity_factors(self, pid, actor):
         project = self._verify_owner(pid, actor)
@@ -143,6 +142,10 @@ class ProjectManager():
         return ResponseSuccessMsg(f"{actor}: confirmed severity factors to {project.name}")
 
     # ----------------  Member Control ----------------
+
+    def _verify_not_duplicate_member(self, project, member):
+        if member in self.pending_requests.get(project.pid) or project.has_member(member) or project.to_invite_when_published.contains(member):
+            raise Exception(f"member: {member} already member, or invite, or pending for project {project.pid}")
 
     def _add_member_after_verifying_owner(self, project, member, persist=True):
         db_instance = DBPendingRequests(project.pid, member)
@@ -163,6 +166,7 @@ class ProjectManager():
     def add_member(self, actor, pid, member):
         """adds project to member pendings"""
         project = self._verify_owner(pid, actor)
+        self._verify_not_duplicate_member(project, member)
         self._add_member_after_verifying_owner(project, member)
         return ResponseSuccessMsg(f"members: {member} pending request added for project {pid}: {project.name}")
 

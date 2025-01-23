@@ -58,8 +58,8 @@ class ProjectTests(unittest.TestCase):
         self.server.register(self.cookie, *self.BobCred)
         self.server.register(self.cookie, *self.EveCred)
 
-    def create_project(self, cookie, user, project_name, project_desc):
-        res = self.server.create_project(cookie, project_name, project_desc)
+    def create_project(self, cookie, user, project_name, project_desc, use_defaults):
+        res = self.server.create_project(cookie, project_name, project_desc, use_defaults)
         self.assertTrue(res.success, f"failed to create project {project_name} user: {user}, {res.msg}")
         return res.result
 
@@ -96,13 +96,14 @@ class ProjectTests(unittest.TestCase):
     def set_default_severity_factors_for_project(self, cookie, pid):
         self.server.set_project_severity_factors(cookie, pid, self.severities)
 
-    def start_and_create_project(self):
+    def start_and_create_project(self, use_defaults=False):
         self.create_server()
         self.register_all()
         cookie1 = self.server.enter().result.cookie
         self.login(cookie1, self.AliceCred)
-        pid = self.create_project(cookie1, self.AliceCred, *self.p1_data)
+        pid = self.create_project(cookie1, self.AliceCred, *self.p1_data, use_defaults)
         return cookie1, pid
+
 
 
     def start_project_with_bob_member(self):
@@ -329,15 +330,131 @@ class ProjectTests(unittest.TestCase):
     #
     # def test_update_project_name_and_desc_Serializable_success(self):
     #
-    # def test_add_member_b4_publish(self):
-    # def test_remove_member_b4_publish(self):
-    #
-    # def test_publish_success(self):
-    # def test_publish_fails(self):
-    #
-    # def test_add_member_after_publish(self):
-    # def test_remove_member_after_publish(self):
-    #
+
+    def _get_all_project_members_lists(self, pid):
+        pendings = self.server.project_manager._get_pending_emails_by_projects_list(pid)
+        project_to_invite = self.server.project_manager.projects.get(pid).to_invite_when_published.list
+        project_members = self.server.project_manager.projects.get(pid).members.list
+        return pendings, project_to_invite, project_members
+
+    def test_add_member_b4_publish_fail_no_project(self):
+        cookie_alice, pid = self.start_and_create_project()
+        res = self.server.add_member(cookie_alice, 12, "bob")
+        self.assertFalse(res.success, f"failed to fail add member \n res: {res.msg} \n pid is invalid: 12")
+        self._assert_member_not_added_in_any_way_to_project(pid, "bob")
+
+
+    def _assert_member_not_added_in_any_way_to_project(self, pid, member):
+        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
+        self.assertFalse("bob" in pendings, "bob added to pending even tho invalid project")
+        self.assertFalse("bob" in project_to_invite, "bob added to to_invite even tho invalid project")
+        self.assertFalse("bob" in project_members, "bob added to members even tho invalid project")
+
+    def test_add_member_b4_publish_fail_wrong_cookie(self):
+        cookie_alice, pid = self.start_and_create_project()
+        cookie = self.server.enter().result.cookie
+        res = self.server.add_member(cookie, pid, "bob")
+        self.assertFalse(res.success, f"failed to fail add member, cookie is not project owners")
+        self._assert_member_not_added_in_any_way_to_project(pid, "bob")
+
+
+    def test_add_member_b4_publish_success(self):
+        cookie_alice, pid = self.start_and_create_project()
+        # try to add member b4 publish
+        res = self.server.add_member(cookie_alice, pid, "bob")
+        # verify it only added into the to_invite list inside project, not in members and not in invited
+        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
+
+        self.assertFalse("bob" in pendings, "bob added to pending, project not published")
+        self.assertTrue("bob" in project_to_invite, "bob not added to to_invite")
+        self.assertFalse("bob" in project_members, "bob added to members, project not published")
+
+        self.server = Server()
+        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
+
+        self.assertFalse("bob" in pendings, "bob added to pending, project not published")
+        self.assertTrue("bob" in project_to_invite, "bob not added to to_invite")
+        self.assertFalse("bob" in project_members, "bob added to members, project not published")
+
+    def test_remove_member_b4_publish(self):
+        cookie_alice, pid = self.start_and_create_project()
+        # try to add member b4 publish
+        res = self.server.add_member(cookie_alice, pid, "bob")
+
+        self.server.remove_member(cookie_alice, pid, "bob")
+        self._assert_member_not_added_in_any_way_to_project(pid, "bob")
+        self.server = Server()
+        self._assert_member_not_added_in_any_way_to_project(pid, "bob")
+
+    def _enter_create_project_defaults_publish(self):
+        cookie_alice, pid = self.start_and_create_project(use_defaults=True)
+        self.server.add_member(cookie_alice, pid, "bob")
+        self.server.confirm_project_factors(cookie_alice, pid)
+        self.server.confirm_project_severity_factors(cookie_alice, pid)
+        res = self.server.publish_project(cookie_alice, pid)
+        return cookie_alice, pid
+
+    def test_publish_success(self):
+        cookie_alice, pid = self._enter_create_project_defaults_publish()
+
+        # self.server.publish_project(cookie_alice, pid)
+        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
+
+        self.assertTrue("bob" in pendings, "bob not added to pending, project published")
+        self.assertFalse("bob" in project_to_invite, "bob in to_invite")
+        self.assertFalse("bob" in project_members, "bob added to members, project published but bob not approved")
+
+    def test_add_member_fail_duplicate_member_b4_publish(self):
+        cookie_alice, pid = self.start_and_create_project(use_defaults=True)
+        self.server.add_member(cookie_alice, pid, "bob")
+        res = self.server.add_member(cookie_alice, pid, "bob")
+        self.assertFalse(res.success, "added duplicate member")
+
+    def test_add_member_fail_duplicate_member_after_publish(self):
+        cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
+        res = self.server.add_member(cookie_alice, pid, self.BobCred[0])
+        self.assertFalse(res.success, "added duplicate member")
+
+
+    def test_add_member_fail_duplicate_member_after_publish_member_approved(self):
+        cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
+        self.server.approve_member(cookie_bob, pid)
+        res = self.server.add_member(cookie_alice, pid, self.BobCred[0])
+        self.assertFalse(res.success, "added duplicate member")
+
+    def test_confirm_factors_without_any(self):
+        cookie_alice, pid = self.start_and_create_project()
+        res = self.server.confirm_project_factors(cookie_alice, pid)
+        self.assertFalse(res.success, "confirmed project factors, without factors")
+
+    def test_publish_fails_factors_not_confirmed(self):
+        cookie_alice, pid = self.start_and_create_project(use_defaults=True)
+        self.server.add_member(cookie_alice, pid, "bob")
+        self.server.confirm_project_severity_factors(cookie_alice, pid)
+        res = self.server.publish_project(cookie_alice, pid)
+        self.assertFalse(res.success, "published project witout comfirming factors")
+
+    def test_publish_fails_severities_not_confirmed(self):
+        cookie_alice, pid = self.start_and_create_project(use_defaults=True)
+        self.server.add_member(cookie_alice, pid, "bob")
+        self.server.confirm_project_factors(cookie_alice, pid)
+        res = self.server.publish_project(cookie_alice, pid)
+        self.assertFalse(res.success, "published project witout comfirming severity factors")
+
+    def test_publish_fails_no_members_to_invite(self):
+        cookie_alice, pid = self.start_and_create_project(use_defaults=True)
+        self.server.confirm_project_factors(cookie_alice, pid)
+        self.server.confirm_project_severity_factors(cookie_alice, pid)
+        res = self.server.publish_project(cookie_alice, pid)
+        self.assertFalse(res.success, "published project witout any members to invite")
+
+
+    def test_remove_member_after_publish(self):
+        cookie_alice, pid = self._enter_create_project_defaults_publish()
+        res = self.server.remove_member(cookie_alice, pid, "bob")
+        self.assertTrue(res.success, "failed to removed member")
+        self._assert_member_not_added_in_any_way_to_project(pid, "bob")
+
     # def test_remove_dactors/set_severity_factors after test_remove_member_b4_publish()
     #
     # def test_pending projects/email
