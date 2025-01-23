@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
         get_project_to_invite, setProjectFactors, addProjectFactor, updateProjectFactor, deleteProjectFactor,
         getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
-        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool
+        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool, 
+        getProjectProgress
  } from "../api/ProjectApi";
 import "./EditPopup.css";
+import AnalyzeResult from './AnalyzeResult';
 
 
 const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg,
@@ -20,6 +22,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [factorUpdates, setFactorUpdates] = useState({});
     const [factorsPool, setFactorsPool] = useState([]);
     const [selectedFactors, setSelectedFactors] = useState([]);
+    const [analyzePopupType, setAnalyzePopupType] = useState("");
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -471,392 +474,426 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
     const getPopupContent = () => {
         switch (popupType) {
-        case 'editName':
-            return (
-            <div>
-                <h3>Edit Project's Name</h3>
-                <textarea
-                defaultValue={selectedProject.name}
-                onChange={(e) => setName(e.target.value)}
-                ></textarea>
-                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
-            </div>
-            );
-        case 'editDescription':
-            return (
-            <div>
-                <h3>Edit Project's Description</h3>
-                <textarea
-                defaultValue={selectedProject.description}
-                onChange={(e) => setDescription(e.target.value)}
-                ></textarea>
-                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
-            </div>
-            );
-        case 'editContentFactors':
-            return (
+            case 'analyzeResult':
+                return (
                 <div>
-                    <p>
-                    <strong>Edit Content Factors:</strong>
-                    </p>
-                    <div className="factors-list">
-                    {selectedProject.factors.length > 0 && <p>Projects Factors:</p>}
-                    {/* Existing Factors */}
-                    {selectedProject.factors.length > 0 && selectedProject.factors.map((factor, index) => (
-                        <div key={index} className="factor-item" style={{
-                        display: 'flex',
-                        gap: '10px',
-                        marginBottom: '10px',
-                        alignItems: 'center'
-                        }}>
-                        <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                            <input
-                            type="text"
-                            defaultValue={factor.name}
-                            className="factor-name-input"
-                            placeholder="Factor Name"
-                            onChange={(e) => {
-                                const updates = { ...factorUpdates };
-                                if (!updates[index]) updates[index] = {};
-                                updates[index].name = e.target.value;
-                                setFactorUpdates(updates);
-                            }}
-                            style={{ flex: '1' }}
-                            />
-                            <input
-                            type="text"
-                            defaultValue={factor.description}
-                            className="factor-desc-input"
-                            placeholder="Factor Description"
-                            onChange={(e) => {
-                                const updates = { ...factorUpdates };
-                                if (!updates[index]) updates[index] = {};
-                                updates[index].description = e.target.value;
-                                setFactorUpdates(updates);
-                            }}
-                            style={{ flex: '2' }}
-                            />
-                            <button
-                                className="action-btn update-btn"
-                                onClick={() => handleUpdateFactor(factor.id)}
-                                style={{
-                                    padding: '5px 15px',
-                                    backgroundColor: '#44ff4d',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
-                                >
-                                Update
-                            </button>
-                            <button
-                                className="action-btn delete-btn"
-                                onClick={() => handleDeleteFactor(factor.name, factor.id)}
-                                style={{
-                                    padding: '5px 15px',
-                                    backgroundColor: '#ff4444',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer'
-                                }}
-                                >
-                                Delete
-                            </button>
-                        </div>
+                    <h1>Project's Status:</h1>
+                    <div>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showCurrentScore')}}
+                        >
+                            Show Current Score
+                        </button>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showAssessorsInfo')}}
+                        >
+                            Show Assessors Info
+                        </button>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showContentFactorsScore')}}
+                        >
+                            Show Content Factors Score
+                        </button>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showSeverityFactorsScore')}}
+                        >
+                            Show d-Score (Severity Factors)
+                        </button>
+                        <AnalyzeResult analyzePopupType = {analyzePopupType} closePopup = {closePopup} projectId={selectedProject.id} />
                     </div>
-                ))}
+                </div>
+                );
 
-                {factorsPool != null && factorsPool.length > 0 && <div
-                    style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: '#f5f5f5',
-                    }}
-                >
-                    <label
-                        htmlFor="factors-dropdown"
-                        style={{
-                            fontSize: '18px',
-                            fontWeight: 'bold',
-                            marginBottom: '10px',
-                        }}
-                    >
-                        Select Factors From Pool:
-                    </label>
-                    <div
-                        id="factors-dropdown"
-                        style={{
+            case 'editName':
+                return (
+                <div>
+                    <h3>Edit Project's Name</h3>
+                    <textarea
+                    defaultValue={selectedProject.name}
+                    onChange={(e) => setName(e.target.value)}
+                    ></textarea>
+                    <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
+                </div>
+                );
+            case 'editDescription':
+                return (
+                <div>
+                    <h3>Edit Project's Description</h3>
+                    <textarea
+                    defaultValue={selectedProject.description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    ></textarea>
+                    <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
+                </div>
+                );
+            case 'editContentFactors':
+                return (
+                    <div>
+                        <p>
+                        <strong>Edit Content Factors:</strong>
+                        </p>
+                        <div className="factors-list">
+                        {selectedProject.factors.length > 0 && <p>Projects Factors:</p>}
+                        {/* Existing Factors */}
+                        {selectedProject.factors.length > 0 && selectedProject.factors.map((factor, index) => (
+                            <div key={index} className="factor-item" style={{
                             display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'stretch', // Changed from 'center' to 'stretch'
-                            width: '100%', // Added to ensure full width
-                            maxHeight: '300px',
-                            overflowY: 'auto',
-                            padding: '10px',
-                            border: '1px solid #ccc',
-                            borderRadius: '5px',
-                            backgroundColor: '#fff',
-                        }}
-                    >
-                        {factorsPool != null && factorsPool.length > 0 && factorsPool.map((factor) => (
-                            <div
-                                key={factor.id}
-                                style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: 'auto 1fr auto', // Changed to grid layout
-                                    gap: '10px', // Added consistent spacing
-                                    alignItems: 'center',
-                                    marginBottom: '5px',
-                                    padding: '5px',
-                                }}
-                            >
+                            gap: '10px',
+                            marginBottom: '10px',
+                            alignItems: 'center'
+                            }}>
+                            <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
                                 <input
-                                    type="checkbox"
-                                    id={`factor-${factor.id}`}
-                                    onChange={() => handleCheckboxChange(factor)}
+                                type="text"
+                                defaultValue={factor.name}
+                                className="factor-name-input"
+                                placeholder="Factor Name"
+                                onChange={(e) => {
+                                    const updates = { ...factorUpdates };
+                                    if (!updates[index]) updates[index] = {};
+                                    updates[index].name = e.target.value;
+                                    setFactorUpdates(updates);
+                                }}
+                                style={{ flex: '1' }}
                                 />
-                                <label
-                                    htmlFor={`factor-${factor.id}`}
-                                >
-                                    <strong>{factor.name}</strong>: {factor.description}
-                                </label>
+                                <input
+                                type="text"
+                                defaultValue={factor.description}
+                                className="factor-desc-input"
+                                placeholder="Factor Description"
+                                onChange={(e) => {
+                                    const updates = { ...factorUpdates };
+                                    if (!updates[index]) updates[index] = {};
+                                    updates[index].description = e.target.value;
+                                    setFactorUpdates(updates);
+                                }}
+                                style={{ flex: '2' }}
+                                />
+                                <button
+                                    className="action-btn update-btn"
+                                    onClick={() => handleUpdateFactor(factor.id)}
+                                    style={{
+                                        padding: '5px 15px',
+                                        backgroundColor: '#44ff4d',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer'
+                                    }}
+                                    >
+                                    Update
+                                </button>
                                 <button
                                     className="action-btn delete-btn"
-                                    onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
+                                    onClick={() => handleDeleteFactor(factor.name, factor.id)}
                                     style={{
                                         padding: '5px 15px',
                                         backgroundColor: '#ff4444',
                                         color: 'white',
                                         border: 'none',
                                         borderRadius: '4px',
-                                        cursor: 'pointer',
-                                        whiteSpace: 'nowrap', // Added to prevent button text from wrapping
+                                        cursor: 'pointer'
                                     }}
-                                >
-                                    Delete From Pool
+                                    >
+                                    Delete
                                 </button>
                             </div>
-                        ))}
-                    </div>
-                    <button
-                        style={{
-                        marginTop: '10px',
-                        padding: '10px 20px',
-                        backgroundColor: 'blue',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '5px',
-                        cursor: 'pointer',
-                        }}
-                        onClick={handleSubmit}
-                    >
-                        Add Selected Factors
-                    </button>
-                </div>}
+                        </div>
+                    ))}
 
-                {/* Add New Factor - matching the same style as existing factors */}
-                <div className="factor-item" style={{
-                    display: 'flex',
-                    gap: '10px',
-                    marginBottom: '10px',
-                    alignItems: 'center'
-                }}>
-                    <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                        <input
-                            type="text"
-                            value={newFactorName}
-                            onChange={(e) => setNewFactorName(e.target.value)}
-                            className="factor-name-input"
-                            placeholder="New factor name"
-                            style={{ flex: '1' }}
-                        />
-                        <input
-                            type="text"
-                            value={newFactorDescription}
-                            onChange={(e) => setNewFactorDescription(e.target.value)}
-                            className="factor-desc-input"
-                            placeholder="New factor description"
-                            style={{ flex: '2' }}
-                        />
-                        <button
-                            className="action-btn view-edit-btn"
-                            onClick={handleAddFactor}
+                    {factorsPool != null && factorsPool.length > 0 && <div
+                        style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            backgroundColor: '#f5f5f5',
+                        }}
+                    >
+                        <label
+                            htmlFor="factors-dropdown"
                             style={{
-                            padding: '5px 15px',
-                            backgroundColor: '#88cd8d',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer'
+                                fontSize: '18px',
+                                fontWeight: 'bold',
+                                marginBottom: '10px',
                             }}
                         >
-                            Add New Factor
-                        </button>
-                    </div>
-                </div>
-                </div>
-                <button disabled = {selectedProject.isActive}
-                    className="action-btn edit-btn"
-                    onClick={() => handleConfirmFactors(selectedProject.id, selectedProject.name)}
-                >
-                    Confirm Content Factors
-                </button>
-            </div>
-        );
-        case 'editSeverityFactors':
-            return (
-                <div>
-                    <h3>Edit d-score (Severity Factors)</h3>
-                    <table className="severity-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Level Name</th>
-                                <th>Level Description</th>
-                                <th>Severity Factor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {selectedProject.severity_factors.map((severity, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>Level {index + 1}</td>
-                                    <td>
-                                        {[
-                                            "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
-                                            "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
-                                            "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
-                                            "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
-                                            "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention."
-                                        ][index]}
-                                    </td>
-                                    <td>
-                                        {selectedProject.isActive ? (
-                                            <span>{severity}</span>
-                                        ) : (
-                                            <input
-                                                type="number"
-                                                defaultValue={severity}
-                                                className="severity-input"
-                                                onChange={(e) => {
-                                                    const updates = { ...severityUpdates };
-                                                    updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1-5
-                                                    setSeverityUpdates(updates);
-                                                }}
-                                            />
-                                        )}
-                                    </td>
-                                </tr>
+                            Select Factors From Pool:
+                        </label>
+                        <div
+                            id="factors-dropdown"
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'stretch', // Changed from 'center' to 'stretch'
+                                width: '100%', // Added to ensure full width
+                                maxHeight: '300px',
+                                overflowY: 'auto',
+                                padding: '10px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                backgroundColor: '#fff',
+                            }}
+                        >
+                            {factorsPool != null && factorsPool.length > 0 && factorsPool.map((factor) => (
+                                <div
+                                    key={factor.id}
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'auto 1fr auto', // Changed to grid layout
+                                        gap: '10px', // Added consistent spacing
+                                        alignItems: 'center',
+                                        marginBottom: '5px',
+                                        padding: '5px',
+                                    }}
+                                >
+                                    <input
+                                        type="checkbox"
+                                        id={`factor-${factor.id}`}
+                                        onChange={() => handleCheckboxChange(factor)}
+                                    />
+                                    <label
+                                        htmlFor={`factor-${factor.id}`}
+                                    >
+                                        <strong>{factor.name}</strong>: {factor.description}
+                                    </label>
+                                    <button
+                                        className="action-btn delete-btn"
+                                        onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
+                                        style={{
+                                            padding: '5px 15px',
+                                            backgroundColor: '#ff4444',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '4px',
+                                            cursor: 'pointer',
+                                            whiteSpace: 'nowrap', // Added to prevent button text from wrapping
+                                        }}
+                                    >
+                                        Delete From Pool
+                                    </button>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
-                    <div className="severity-factors-warning">
-                        <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
+                        </div>
+                        <button
+                            style={{
+                            marginTop: '10px',
+                            padding: '10px 20px',
+                            backgroundColor: 'blue',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '5px',
+                            cursor: 'pointer',
+                            }}
+                            onClick={handleSubmit}
+                        >
+                            Add Selected Factors
+                        </button>
+                    </div>}
+
+                    {/* Add New Factor - matching the same style as existing factors */}
+                    <div className="factor-item" style={{
+                        display: 'flex',
+                        gap: '10px',
+                        marginBottom: '10px',
+                        alignItems: 'center'
+                    }}>
+                        <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                            <input
+                                type="text"
+                                value={newFactorName}
+                                onChange={(e) => setNewFactorName(e.target.value)}
+                                className="factor-name-input"
+                                placeholder="New factor name"
+                                style={{ flex: '1' }}
+                            />
+                            <input
+                                type="text"
+                                value={newFactorDescription}
+                                onChange={(e) => setNewFactorDescription(e.target.value)}
+                                className="factor-desc-input"
+                                placeholder="New factor description"
+                                style={{ flex: '2' }}
+                            />
+                            <button
+                                className="action-btn view-edit-btn"
+                                onClick={handleAddFactor}
+                                style={{
+                                padding: '5px 15px',
+                                backgroundColor: '#88cd8d',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer'
+                                }}
+                            >
+                                Add New Factor
+                            </button>
+                        </div>
+                    </div>
                     </div>
                     <button disabled = {selectedProject.isActive}
                         className="action-btn edit-btn"
-                        onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
+                        onClick={() => handleConfirmFactors(selectedProject.id, selectedProject.name)}
                     >
-                        Confirm Severity Factors
+                        Confirm Content Factors
                     </button>
                 </div>
-        );
-
-        case 'manageAssessors':
-            return (
-                <div>
-                    {/* Members Section */}
-                    <p>
-                    <strong>Members:</strong>
-                    </p>
-                    {Object.keys(selectedProject.members).length > 0 ? (
-                    <ul className="members-list">
-                    {selectedProject.members.map((memberItem, index) => (
-                        <li key={index} className="member-item">
-                        <span className="member-name">{memberItem}</span>
-                        {selectedProject.founder != memberItem && (
-                            <button
-                            className="remove-btn"
-                            onClick={() => handleRemoveMember(memberItem)}
-                            >
-                            Remove Member
-                            </button>
-                        )}
-                        </li>
-                    ))}
-                    </ul>
-                    ) : (
-                    <p>No members added yet.</p>
-                    )}
-
-                    {/* Remove invited members section: */}
-                    <p>
-                    {!selectedProject.isActive && <strong>Invited Members:</strong>}
-                    </p>
-                    {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
-                        <ul className="members-list">
-                        {projectsPendingInvites.map((pendingMember, index) => (
-                            <li key={index} className="member-item">
-                            <span className="member-name">{pendingMember}</span>
-                            {<button
-                                className="remove-btn"
-                                onClick={() => handleRemoveMember(pendingMember)}
-                            >
-                            Remove Invited Member
-                            </button>}
-                            </li>
-                        ))}
-                        </ul>
-                    )}
-                    {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p> There are currently no invited members </p>)}
-                    
-
-                    <p>
-                    {selectedProject.isActive && <strong>Pending Members:</strong>}
-                    </p>
-                    {selectedProject.isActive && projectsPendingRequests != null && projectsPendingRequests.length > 0 && (
-                        <ul className="members-list">
-                        {projectsPendingRequests.map((pendingMember, index) => (
-                            <li key={index} className="member-item">
-                            <span className="member-name">{pendingMember}</span>
-                            {<button
-                                className="remove-btn"
-                                onClick={() => handleRemoveMember(pendingMember)}
-                            >
-                            Remove Pending Member
-                            </button>}
-                            </li>
-                        ))}
-                        </ul>
-                    )}
-                    {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p> There are currently no pending requests </p>)}
-
-                    {/* Add member section */}
-                    <div className="add-member-container">
-                        <input
-                        type="text"
-                        className="add-member-input"
-                        placeholder="New member's name"
-                        value={newMemberName}
-                        onChange={(e) => setNewMemberName(e.target.value)}
-                        style={{ flex: '1' }}
-                        />
-                        <button
-                        className="action-btn add-member-btn"
-                        onClick={handleAddMember}
+            );
+            case 'editSeverityFactors':
+                return (
+                    <div>
+                        <h3>Edit d-score (Severity Factors)</h3>
+                        <table className="severity-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Level Name</th>
+                                    <th>Level Description</th>
+                                    <th>Severity Factor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {selectedProject.severity_factors.map((severity, index) => (
+                                    <tr key={index}>
+                                        <td>{index + 1}</td>
+                                        <td>Level {index + 1}</td>
+                                        <td>
+                                            {[
+                                                "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
+                                                "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
+                                                "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
+                                                "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
+                                                "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention."
+                                            ][index]}
+                                        </td>
+                                        <td>
+                                            {selectedProject.isActive ? (
+                                                <span>{severity}</span>
+                                            ) : (
+                                                <input
+                                                    type="number"
+                                                    defaultValue={severity}
+                                                    className="severity-input"
+                                                    onChange={(e) => {
+                                                        const updates = { ...severityUpdates };
+                                                        updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1-5
+                                                        setSeverityUpdates(updates);
+                                                    }}
+                                                />
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="severity-factors-warning">
+                            <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
+                        </div>
+                        <button disabled = {selectedProject.isActive}
+                            className="action-btn edit-btn"
+                            onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
                         >
-                        Add Member
+                            Confirm Severity Factors
                         </button>
                     </div>
-                </div>
-        );
-        default:
-            return <p>Invalid popup type</p>;
-        }
+            );
+
+            case 'manageAssessors':
+                return (
+                    <div>
+                        {/* Members Section */}
+                        <p>
+                        <strong>Members:</strong>
+                        </p>
+                        {Object.keys(selectedProject.members).length > 0 ? (
+                        <ul className="members-list">
+                        {selectedProject.members.map((memberItem, index) => (
+                            <li key={index} className="member-item">
+                            <span className="member-name">{memberItem}</span>
+                            {selectedProject.founder != memberItem && (
+                                <button
+                                className="remove-btn"
+                                onClick={() => handleRemoveMember(memberItem)}
+                                >
+                                Remove Member
+                                </button>
+                            )}
+                            </li>
+                        ))}
+                        </ul>
+                        ) : (
+                        <p>No members added yet.</p>
+                        )}
+
+                        {/* Remove invited members section: */}
+                        <p>
+                        {!selectedProject.isActive && <strong>Invited Members:</strong>}
+                        </p>
+                        {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
+                            <ul className="members-list">
+                            {projectsPendingInvites.map((pendingMember, index) => (
+                                <li key={index} className="member-item">
+                                <span className="member-name">{pendingMember}</span>
+                                {<button
+                                    className="remove-btn"
+                                    onClick={() => handleRemoveMember(pendingMember)}
+                                >
+                                Remove Invited Member
+                                </button>}
+                                </li>
+                            ))}
+                            </ul>
+                        )}
+                        {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p> There are currently no invited members </p>)}
+                        
+
+                        <p>
+                        {selectedProject.isActive && <strong>Pending Members:</strong>}
+                        </p>
+                        {selectedProject.isActive && projectsPendingRequests != null && projectsPendingRequests.length > 0 && (
+                            <ul className="members-list">
+                            {projectsPendingRequests.map((pendingMember, index) => (
+                                <li key={index} className="member-item">
+                                <span className="member-name">{pendingMember}</span>
+                                {<button
+                                    className="remove-btn"
+                                    onClick={() => handleRemoveMember(pendingMember)}
+                                >
+                                Remove Pending Member
+                                </button>}
+                                </li>
+                            ))}
+                            </ul>
+                        )}
+                        {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p> There are currently no pending requests </p>)}
+
+                        {/* Add member section */}
+                        <div className="add-member-container">
+                            <input
+                            type="text"
+                            className="add-member-input"
+                            placeholder="New member's name"
+                            value={newMemberName}
+                            onChange={(e) => setNewMemberName(e.target.value)}
+                            style={{ flex: '1' }}
+                            />
+                            <button
+                            className="action-btn add-member-btn"
+                            onClick={handleAddMember}
+                            >
+                            Add Member
+                            </button>
+                        </div>
+                    </div>
+            );
+            default:
+                return <p>Invalid popup type</p>;
+            }
     };
 
     return (

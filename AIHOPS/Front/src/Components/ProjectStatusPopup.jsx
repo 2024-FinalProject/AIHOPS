@@ -13,6 +13,7 @@ const ProjectStatusPopup = ({
   handleEditContentFactors,
   handleEditSeveirtyFactors,
   handleManageAssessors,
+  handleAnalyzeResult,
   handleArchive,
   handlePublish
 }) => {
@@ -37,7 +38,7 @@ const ProjectStatusPopup = ({
         </span>
         <h3>Project's Status:</h3>
         <div className="project-edit-container">
-        <ProgressBar project={selectedProject} />
+        <ProgressBar project={selectedProject} handleAnalyzeResult = {handleAnalyzeResult} />
         </div>
         <h3>Project's Actions:</h3>
         <div>

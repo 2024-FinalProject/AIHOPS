@@ -373,6 +373,7 @@ const ProjectsManagement = () => {
                 handleEditContentFactors={() => handleEditPopup('editContentFactors')}
                 handleEditSeveirtyFactors={() => handleEditPopup('editSeverityFactors')}
                 handleManageAssessors={() => handleEditPopup('manageAssessors')}
+                handleAnalyzeResult = {() => handleEditPopup('analyzeResult')}
                 handleArchive={() => handleArchive(selectedProject.id, selectedProject.name)}
                 handlePublish={() => handlePublish(selectedProject.id, selectedProject.name)}
               />
