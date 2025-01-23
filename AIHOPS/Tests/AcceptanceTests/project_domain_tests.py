@@ -19,6 +19,7 @@ import random
 class ProjectTests(unittest.TestCase):
     # ------------- Base ------------------
 
+    
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
         FP.insert_defaults()
@@ -105,20 +106,21 @@ class ProjectTests(unittest.TestCase):
         return cookie1, pid
 
 
-    def start_project_with_bob_member(self):
+    def start_project_with_bob_member(self, publish= True):
         cookie, pid = self.start_and_create_project()
         self.server.add_member(cookie, pid, self.BobCred[0])
         self.set_default_factors_for_project(cookie, pid)
         self.set_default_severity_factors_for_project(cookie, pid)
         self.server.confirm_project_factors(cookie, pid)
         self.server.confirm_project_severity_factors(cookie, pid)
-        self.server.publish_project(cookie, pid)
-
-        cookie_bob = self.server.enter().result.cookie
-        self.login(cookie_bob, self.BobCred)
-        res = self.server.approve_member(cookie_bob, pid)
-        self.assertTrue(res.success, f"user bob failed to be approved member {res.msg}")
-        return cookie, cookie_bob, pid
+        if publish:
+            self.server.publish_project(cookie, pid)
+            cookie_bob = self.server.enter().result.cookie
+            self.login(cookie_bob, self.BobCred)
+            res = self.server.approve_member(cookie_bob, pid)
+            self.assertTrue(res.success, f"user bob failed to be approved member {res.msg}")
+            return cookie, cookie_bob, pid
+        return cookie, pid
 
     # ------------- Project ------------------
 
@@ -273,44 +275,184 @@ class ProjectTests(unittest.TestCase):
         self.assertTrue(factor_votes == fetched_factor_votes, f"factor votes: expected: {factor_votes}, actual: {fetched_factor_votes}")
         self.assertTrue(severity_votes == fetched_severity_votes, f"severity votes: expected: {severity_votes}, actual: {fetched_severity_votes}")
 
-    # def text_get_member_vote_no_member(self):
-    #     ...
-    #
-    # def text_get_member_vote_no_project(self):
-    #     ...
-    #
-    # def text_get_member_vote_no_vote(self):
-    #     ...
+    def test_get_member_vote_no_member(self):
+        cooike, pid = self.start_and_create_project()
+        
+        # enter with a new member
+        invaild_cookie = self.server.enter().result.cookie
+        self.server.register(invaild_cookie, "Charlie", "")
+        self.login(invaild_cookie, ["Charlie", ""])
 
-    # def test_create_project_failure_duplicate_published(self):
-    #     ...
+        # get the vote with invalid member
+        res = self.server.get_member_vote_on_project(invaild_cookie, pid)   
+
+        self.assertFalse(res.success, f"Actor Charlie not in project {pid}" )
+    
+    def test_get_member_vote_no_project(self):
+        c, cookie, pid = self.start_project_with_bob_member()
+
+        res = self.server.get_member_vote_on_project(cookie, pid + 1)
+        self.assertFalse(res.success, f"Got vote on project that doesn't exist")
+    
+
+    def test_get_member_vote_no_vote(self):
+        c, cookie, pid = self.start_project_with_bob_member()
+
+        # get the vote with invalid member
+        res = self.server.get_member_vote_on_project(cookie, pid)  
+
+        self.assertTrue(res.success, f"Got vote on project that has no votes")
+
+        factors_votes = res.result["factor_votes"] 
+        severity_votes = res.result["severity_votes"]
+
+        self.assertTrue(factors_votes == {}, f"Got vote on project that has no votes")
+        self.assertTrue(severity_votes == [], f"Got vote on project that has no votes")
 
 
+    def test_create_project_failure_duplicate_published(self):
+        c, cookie, pid1 = self.start_project_with_bob_member()
+        res = self.server.create_project(cookie, *self.p1_data)
+        pid2 = res.result
 
-    # def test_add_project_factor_success(self):
-    #     cookie1, pid = self.start_and_create_project()
-    #     self.set_default_factors_for_project(cookie1, pid)
-    #     projects = self.get_projects_dict(self.server)
-    #     self.assertTrue(projects is not None)
-    #     project = projects.get(pid)
-    #     self.assertTrue(project.get_factors == self.defa)
+        self.server.publish_project(cookie, pid1)
+        res = self.server.publish_project(cookie, pid2)
 
-    #
-    # def test_add_project_factor_fail_not_owner(self):
-    #
-    # def test_add_project_factor_fail_project_doesnt_exists(self):
-    #
-    # def test_add_project_factors_multiple_success(self):
-    #
-    # def test_remove_project_factor_success(self):
-    #
-    # def test_remove_project_factor_fail_no_factor(self):
-    #
-    # def test_set_severity_factors_success(self):
-    #     ...
-    #
-    # def test_update_project_name_and_desc_Serializable_success(self):
-    #
+        self.assertFalse(res.success, f"Can not publish 2 projects with the same name and desc")
+
+
+    def test_add_project_factor_success(self):
+        cookie1, pid = self.start_and_create_project()
+        self.set_default_factors_for_project(cookie1, pid)
+
+
+        # reload server
+        self.server = Server()
+        cookie1 = self.server.enter().result.cookie
+        self.login(cookie1, self.AliceCred)
+        projects = self.get_projects_dict(self.server)
+
+        self.assertTrue(projects is not None)
+        project = projects.get(pid)
+        res = project.get_factors(self.AliceCred[0])
+        self.assertTrue(len(res.result) == 4)
+
+        factors = res.result
+
+        for i in range(len(factors)):
+            self.assertTrue(factors[i].name == self.factors[i][0])
+            self.assertTrue(factors[i].description == self.factors[i][1])
+
+
+    def test_add_project_factor_fail_not_owner(self):
+        c, cookie, pid = self.start_project_with_bob_member()
+        cookie2 = self.server.enter().result.cookie
+        self.login(cookie2, self.BobCred)
+        res = self.server.add_project_factor(cookie2, pid, "factor1", "desc1")
+        self.assertFalse(res.success, f"Bob added factor to alices project")
+
+    def test_add_project_factor_fail_project_doesnt_exists(self):
+        c, cookie, pid = self.start_project_with_bob_member()
+        res = self.server.add_project_factor(cookie, pid + 1, "factor1", "desc1")
+        self.assertFalse(res.success, f"Added factor to project that doesn't exist") 
+    
+    def test_add_project_factors_multiple_success(self):
+        cookie1, pid = self.start_and_create_project()
+        for i in range(4):
+            res = self.server.add_project_factor(cookie1, pid, self.factors[i][0], self.factors[i][1])
+            self.assertTrue(res.success, f"failed to add factor {self.factors[i]}")
+        
+        # reload server
+        self.server = Server()
+        cookie1 = self.server.enter().result.cookie
+        self.login(cookie1, self.AliceCred)
+        projects = self.get_projects_dict(self.server)
+        self.assertTrue(projects is not None)
+        project = projects.get(pid)
+        res = project.get_factors(self.AliceCred[0])
+        factors = res.result
+        for i in range(len(factors)):
+            self.assertTrue(factors[i].name == self.factors[i][0])
+            self.assertTrue(factors[i].description == self.factors[i][1])
+    
+
+        
+    def test_remove_project_factor_success(self):
+        cookie1, pid = self.start_and_create_project()
+        self.set_default_factors_for_project(cookie1, pid)
+        factors = self.server.get_project_factors(cookie1, pid).result
+        factor = random.choice(factors)
+        res = self.server.delete_project_factor(cookie1, pid, factor["id"])
+        self.assertTrue(res.success, f"failed to remove factor {factor}")
+
+        # reload server
+        self.server = Server()
+        cookie1 = self.server.enter().result.cookie
+        self.login(cookie1, self.AliceCred)
+        projects = self.get_projects_dict(self.server)
+        self.assertTrue(projects is not None)
+        project = projects.get(pid)
+        res = project.get_factors(self.AliceCred[0])
+        factors = res.result
+        self.assertFalse(factor in factors, f"factor {factor} still in project")
+    
+    def test_remove_project_factor_fail_no_factor(self):
+        cookie1, pid = self.start_and_create_project()
+        res = self.server.delete_project_factor(cookie1, pid, 0)
+        self.assertFalse(res.success, f"removed factor that doesn't exist")
+
+    def test_remove_project_factor_fail_not_owner(self):
+        c, cookie, pid = self.start_project_with_bob_member()
+        factors = self.server.get_project_factors(cookie, pid).result
+        factor = random.choice(factors)
+        cookie2 = self.server.enter().result.cookie
+        self.login(cookie2, self.BobCred)
+        res = self.server.delete_project_factor(cookie2, pid, factor["id"])
+        self.assertFalse(res.success, f"Bob removed factor from alices project")
+
+    
+    def test_set_severity_factors_success(self):
+        cookie1, pid = self.start_and_create_project()
+        self.set_default_severity_factors_for_project(cookie1, pid)
+
+        # reload server
+        self.server = Server()
+
+        cookie1 = self.server.enter().result.cookie
+        self.login(cookie1, self.AliceCred)
+        projects = self.get_projects_dict(self.server)
+        self.assertTrue(projects is not None)
+        project = projects.get(pid)
+        res = project.get_severity_factors()
+        self.assertTrue(res.result == DEFAULT_SEVERITY_FACTORS)
+
+    
+    def test_update_project_name_and_desc_Serializable_success(self):
+        cookie, pid = self.start_project_with_bob_member(False)
+        new_name = "new name"
+        new_desc = "new desc"
+        res = self.server.update_project_name_and_desc(cookie, pid, new_name, new_desc)
+        self.assertTrue(res.success, f"failed to update project name {res.msg}")
+
+        # reload server
+        self.server = Server()
+        cookie = self.server.enter().result.cookie
+        self.login(cookie, self.AliceCred)
+        projects = self.get_projects_dict(self.server)
+        self.assertTrue(projects is not None)
+        project = projects.get(pid)
+        self.assertTrue([project.name, project.desc] == [new_name, new_desc])
+
+        res = self.server.publish_project(cookie, pid)
+        self.assertTrue(res.success, f"failed to publish project {res.msg}")
+
+        # try to update project name and desc after publish
+        new_name = "new name2"
+        new_desc = "new desc2"
+        res = self.server.update_project_name_and_desc(cookie, pid, new_name, new_desc)
+        self.assertFalse(res.success, f"updated project name or desc after publish")
+        
+    
     # def test_add_member_b4_publish(self):
     # def test_remove_member_b4_publish(self):
     #

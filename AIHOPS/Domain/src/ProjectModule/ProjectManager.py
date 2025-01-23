@@ -118,6 +118,8 @@ class ProjectManager():
 
     def update_project_name_and_desc(self, pid, actor, name, desc):
         project = self._verify_owner(pid, actor)
+        if (project.is_published()):
+            raise NameError("project is published and cannot be changed")
         project.update_name(name)
         project.update_desc(desc)
         return ResponseSuccessMsg(f"{pid}: updated name and desc to {project.name}, {project.desc}")
