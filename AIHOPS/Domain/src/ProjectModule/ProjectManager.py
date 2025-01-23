@@ -358,7 +358,7 @@ class ProjectManager():
                 self.pending_requests.remove(email, pid)
         return res
 
-    def get_score(self, pid, actor):
+    def get_score(self, actor, pid):
         project = self._verify_owner(pid, actor)
         return project.get_score()
 
