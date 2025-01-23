@@ -157,7 +157,7 @@ class VoteManager:
         results = {"score": score,
                    "assessors": [],
                    "factors": factors_res,
-                   "severity_damage": damage_avg,
+                   "severity_damage": {"avg": damage_avg, "vote_count": self.severity_votes.size()},
                    "nominator": N,
                    "denominator": D,
                    "d_score": d
