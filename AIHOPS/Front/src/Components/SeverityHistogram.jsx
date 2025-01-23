@@ -10,19 +10,19 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
     const factorsArray = Array.isArray(severityfactors) ? severityfactors : [];
 
     // Extract data for the chart
-    const data = severityfactorslist.avg || []; // Use avg array from severityfactorslist
-    const voteCount = severityfactorslist.vote_count || 0; // Single vote_count
+    const data = severityfactorslist?.avg || [];
+    const voteCount = severityfactorslist?.vote_count || 0;
 
-    // Generate factor names dynamically if not provided
-    const factorNames = factorsArray.map((_, index) => `Factor ${index + 1}`);
+    // Generate factor names based on the number of factors
+    const factorNames = Array.from({ length: data.length }, (_, index) => `Level ${index + 1}`);
 
     // Chart data
     const chartData = {
-        labels: factorNames, // Dynamic factor names
+        labels: factorNames,
         datasets: [
             {
                 label: "Average Score",
-                data: data, // Use avg data
+                data: data,
                 backgroundColor: "rgba(153, 102, 255, 0.5)",
                 borderColor: "rgba(153, 102, 255, 1)",
                 borderWidth: 1,
@@ -39,7 +39,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
             tooltip: {
                 enabled: true,
                 callbacks: {
-                    title: (context) => context[0].label, // Factor name as title
+                    title: (context) => context[0].label,
                     label: (context) => [
                         `Average Score: ${context.parsed.y.toFixed(2)}`,
                         `Total Votes: ${voteCount}`,
@@ -56,6 +56,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
                 },
                 ticks: {
                     font: { size: 14 },
+                    callback: (value, index) => `Level ${index + 1}`,
                 },
             },
             y: {
