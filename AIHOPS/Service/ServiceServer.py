@@ -348,7 +348,7 @@ def vote_on_factor():
 @app.route("/project/vote_on_severities", methods=["POST"])
 def vote_on_severities():
     data = request.json
-    res = server.vote_on_severities(int(data["cookie"]), int(data["pid"]), data["severityFactors"])
+    res = server.vote_severities(int(data["cookie"]), int(data["pid"]), data["severityFactors"])
     return jsonify({"message": res.msg, "success": res.success})
 
 

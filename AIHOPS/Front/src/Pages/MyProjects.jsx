@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { 
-  getProjectsMember, 
-  submitFactorVote, 
-  getMemberVoteOnProject 
-} from "../api/ProjectApi";
+import VotingTypeSelector from "../components/VotingTypeSelector";
+import DGraph from "../Components/DGraph";
+import { getProjectsMember, submitFactorVote, getMemberVoteOnProject, submitDScoreVotes, checkProjectVotingStatus} from "../api/ProjectApi";
+
+
 import ProjectList from "../components/ProjectList";
 import VotePopup from "../components/VotePopup";
 import FactorVotingModal from "../components/FactorVotingModal";
@@ -18,7 +18,10 @@ const MyProjects = () => {
   const [currentFactorIndex, setCurrentFactorIndex] = useState(0);
   const [isVoteStarted, setIsVoteStarted] = useState(false);
   const [showVotePopup, setShowVotePopup] = useState(false);
+  const [severityLevel, setSeverityLevel] = useState(false);
   const [projectVotingStatus, setProjectVotingStatus] = useState({});
+  const [showDScoreVote, setShowDScoreVote] = useState(false);
+  const [currentVotingType, setCurrentVotingType] = useState(null); // 'factors' or 'dscore'
 
   // Utility Functions
   const calculateProgress = (votedCount, totalCount) => {
@@ -100,12 +103,12 @@ const MyProjects = () => {
     updateFactorsVotes(project.id);
   };
 
-  const handleStartVoting = () => {
+  /*const handleStartVoting = () => {
     setIsVoteStarted(true);
     setShowVotePopup(false);
     setCurrentFactorIndex(0);
     setSubmittedVotes({}); 
-  };
+  };*/
 
   const handleFactorVoteChange = (factorId, value) => {
     setFactorVotes((prev) => ({ ...prev, [factorId]: value }));
@@ -171,7 +174,7 @@ const MyProjects = () => {
     }
   };
 
-  const handleCloseVoting = async (projectId) => {
+  /*const handleCloseVoting = async (projectId) => {
     setShowVotePopup(false);
     setCurrentProject(null);
     setIsVoteStarted(false);
@@ -179,7 +182,7 @@ const MyProjects = () => {
     setCurrentFactorIndex(0);
 
     await checkProjectVotingStatus(projectId);
-  };
+  };*/
 
   const updateFactorsVotes = async (projectId) => {
     try {
@@ -200,11 +203,87 @@ const MyProjects = () => {
       console.error(error);
     }
   };
+  /*const handleStartVoting = () => {
+    setIsVoteStarted(true);
+    setShowVotePopup(false);
+    setCurrentFactorIndex(0);
+    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
+  };*/
+
+  const handleStartVoting = (type) => {
+    setCurrentVotingType(type);
+    if (type === 'factors') {
+      setIsVoteStarted(true);
+      setShowDScoreVote(false);
+      setCurrentFactorIndex(0);
+    } else if (type === 'dscore') {
+      setIsVoteStarted(false);
+      setShowDScoreVote(true);
+    }
+    setShowVotePopup(false);
+    //setSubmittedVotes({});
+  };
+
+  const handleCloseVoting = async (projectId) => {
+    setShowVotePopup(false);
+    setShowDScoreVote(false);
+    setCurrentProject(null);
+    setIsVoteStarted(false);
+    
+    setSubmittedVotes({});
+    setCurrentFactorIndex(0);
+    setCurrentVotingType(null);
+
+    await checkProjectVotingStatus(projectId);
+  };
+
+  // Function to handle D-score vote completion
+  const handleDScoreVoteComplete = async (percentages) => {
+    try{
+      const cookie = localStorage.getItem("authToken");
+      const response = await submitDScoreVotes(cookie, currentProject.id, percentages);
+      if (response.data.success) {
+        setProjectVotingStatus(prev => ({
+          ...prev,
+          [currentProject.id]: {
+            ...prev[currentProject.id],
+            severitiesStatus: 1
+          }
+        }));
+        setShowDScoreVote(false);
+        await handleCloseVoting(currentProject.id);
+      }
+      //setSeverityLevel(true);
+    }
+    catch (error) {
+      alert("Failed to submit D-score votes");
+    }
+  };
 
   // Lifecycle Hook
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  /*const handleSubmitAllVotes = async () => {
+    try {
+      if (!currentProject) return;
+      const cookie = localStorage.getItem("authToken");
+      
+      // Check if both votes are complete
+      const status = projectVotingStatus[currentProject.id];
+      if (!isBothStatusesComplete(currentProject)) {
+        alert("Please complete both factor and D-score voting first");
+        return;
+      }
+  
+      // Add final submission logic here
+      setShowVotePopup(false);
+      await fetchProjects(); // Refresh status
+    } catch (error) {
+      alert("Failed to submit all votes");
+    }
+  };*/
 
   return (
     <div className="my-projects-container">
@@ -218,11 +297,17 @@ const MyProjects = () => {
       />
 
       {showVotePopup && (
-        <VotePopup
-          project={currentProject}
-          onClose={() => handleCloseVoting(currentProject.id)}
-          onStartVoting={handleStartVoting}
-        />
+        <div className="popup-overlay">
+          <div className="popup-content">
+            <VotingTypeSelector 
+              projectName={currentProject.name}
+              onSelectVotingType={handleStartVoting}
+              isFactorsVoted={projectVotingStatus[currentProject?.id]?.votingStatus === 1}
+              isDScoreVoted={projectVotingStatus[currentProject?.id]?.severitiesStatus === 1}
+              onClose={() => handleCloseVoting(currentProject.id)}
+            />
+          </div>
+        </div>
       )}
 
       {currentProject && isVoteStarted && (
@@ -237,6 +322,19 @@ const MyProjects = () => {
           onPrevFactor={handlePrevFactor}
           countVotedFactors={countVotedFactors}
         />
+      )}
+      
+      {/* D-score voting popup */}
+      {showDScoreVote && (
+        <div className="popup-overlay">
+          <div className="popup-content wide">
+            <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
+            <h2 className="text-2xl font-bold mb-4 text-center">
+              D-Score Voting for {currentProject.name}
+            </h2>
+            <DGraph onVoteComplete={handleDScoreVoteComplete} />
+          </div>
+        </div>
       )}
     </div>
   );

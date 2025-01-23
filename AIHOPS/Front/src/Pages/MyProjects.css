@@ -219,8 +219,6 @@ body {
   font-size: 14px;
 }
 
-
-/* Add this to your MyProjects.css */
 .checkmark {
   font-size: 3rem;
   color: green;
@@ -228,6 +226,87 @@ body {
   position: absolute;
   top: 10px;
   right: 10px;
+}
+
+/* Voting Type Selector Styles */
+.voting-type-selector {
+  background: linear-gradient(145deg, #ffffff, #f5f7ff);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+}
+
+.voting-type-title {
+  font-size: 1.8rem;
+  color: #2d3748;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+}
+
+.voting-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.voting-type-btn {
+  padding: 15px 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(145deg, #4a90e2, #357abd);
+  color: white;
+  text-align: center;
+}
+
+.voting-type-btn:not(.disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+.voting-type-btn.disabled {
+  background: #e2e8f0;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.voting-type-btn:first-child {
+  background: linear-gradient(145deg, #6366f1, #4f46e5);
+}
+
+.voting-type-btn:last-child {
+  background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+}
+
+.popup-content.wide {
+  width: 90%;
+  max-width: 1200px;
+  height: 80vh;
+  overflow-y: auto;
+}
+
+.chart-container {
+  height: 400px;
+  width: 100%;
+}
+
+.voting-options {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.vote-progress-container {
+  margin-top: 20px;
+  width: 100%;
 }
 
 .progress-bar {

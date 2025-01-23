@@ -280,3 +280,8 @@ class Project:
         severity_factors = [s_f_data.severity_level1, s_f_data.severity_level2, s_f_data.severity_level3,
                             s_f_data.severity_level4, s_f_data.severity_level5]
         self.severity_factors = severity_factors
+
+    def check_factor_voting_status(self, actor):
+        """Check if member has voted on all factors"""
+        self._verify_member(actor)
+        return self.vote_manager.has_voted_all_factors(actor)
