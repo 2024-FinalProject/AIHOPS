@@ -254,18 +254,34 @@ class ProjectTests(unittest.TestCase):
         self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
 
 
-    # def test_update_factor_not_exist(self):
-    #     ...
-    #
-    # def test_update_factor_published_project(self):
-    #     ...
-    #
-    # def test_update_factor_project_not_exists(self):
-    #     ...
-    #
-    # def test_update_factor_not_owner_of_project(self):
-    #     ...
+    def test_update_factor_not_exist(self):
+        cookie, pid = self.start_and_create_project()
+        res = self.server.update_factor(cookie, 0, "new name", "new desc")
+        self.assertFalse(res.success, f"updated factor that doesn't exist")
+    
+    def test_update_factor_published_project(self):
+        cookie, _, pid = self.start_project_with_bob_member(True)
+        res = self.server.update_factor(cookie, 0, "new name", "new desc")
+        self.assertFalse(res.success, f"updated factor in published project")
+        
+    
+    def test_update_factor_project_not_exists(self):
+        cookie, pid = self.start_and_create_project()
+        res = self.server.update_factor(cookie, pid + 1, "new name", "new desc")
+        self.assertFalse(res.success, f"updated factor in project that doesn't exist")
 
+
+    def test_update_factor_not_owner_of_project(self):
+        cookieAlice, cookieBob, pid = self.start_project_with_bob_member(True)
+
+        self.login(cookieBob, self.BobCred)
+        
+        res = self.server.update_factor(cookieBob, 0, "new name", "new desc")
+        self.assertFalse(res.success, f"updated factor in project that bob is not owner")
+
+
+
+        
     def test_get_member_vote_success(self):
         c, cookie, pid = self.start_project_with_bob_member()
         factors = self.server.get_project_factors(cookie, pid).result

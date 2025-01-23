@@ -253,6 +253,7 @@ export const getProjectsMember = async (cookie) => {
     });
 }
 
+
 export const submitDScoreVotes = async (cookie, projectId, votes) => {
     return axios.post(`${API_URL}/project/vote_on_severities`, {
       cookie,
@@ -292,3 +293,10 @@ export const submitDScoreVotes = async (cookie, projectId, votes) => {
       };
     }
   };
+
+export const getProjectsScore = async (cookie, pid) => {
+    return await axios.get(`${API_URL}/project/score`, {
+        params: { cookie, pid }
+    });
+}
+
