@@ -1,9 +1,10 @@
-import { getProjectProgress, getProjectsScore, getProjectFactors } from "../api/ProjectApi";
+import { getProjectProgress, getProjectsScore, getProjectFactors, getProjectSeverityFactors } from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 import "./ProjectStatusPopup.css";
 import ProgressBar from '../Components/ProgressBar'; //Component for secondary popups
 import './AnalyzeResult.css';
 import Histogram from "./Histogram";
+import SeverityHistogram from "./SeverityHistogram";
 import FormulaDisplay from "./FormulaDisplay";
 
 const AnalyzeResult = ({
@@ -14,6 +15,7 @@ const AnalyzeResult = ({
     const [projectsProgress, setProjectsProgress] = useState({});
     const [projectsScore, setProjectsScore] = useState({});
     const [projectFactors, setProjectFactors] = useState({});
+    const [projectSeverityFactors, setProjectSeverityFactors] = useState({});
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -27,6 +29,7 @@ const AnalyzeResult = ({
         fetch_project_progress();
         fetch_project_score();
         fetch_project_factors();
+        fetch_project_severity_factors();
     }, []);
 
     const fetch_project_progress = async () => {
@@ -85,6 +88,24 @@ const AnalyzeResult = ({
             alert(error);
         }
     };
+
+    const fetch_project_severity_factors = async () =>{
+        let cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+        try{
+            let res = await getProjectSeverityFactors(cookie, projectId);
+            if (res.data.success) {
+                setProjectSeverityFactors(res.data.severityFactors);
+            }
+        } catch (error) {
+            alert(error);
+        }
+    }
 
     const ProjectScore = () => {
         let totalSum = Object.values(projectsScore.factors)
@@ -158,6 +179,11 @@ const AnalyzeResult = ({
                     <div>
                         <p>Current d-Score: {Object.keys(projectsScore).length > 0 ? projectsScore.d_score : "No available d-Score"}</p>
                         <p>Number of assessors that gave the d-Score: {projectsProgress.voted_amount} </p>
+
+                        {Object.keys(projectsScore).length > 0 ? 
+                             (<SeverityHistogram severityfactors = {projectsScore.severity_damage} severityfactorslist = {projectSeverityFactors}/>) 
+                            :
+                             null}
                     </div> 
                 </div>
                 );
