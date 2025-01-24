@@ -1,7 +1,6 @@
-import { getProjectProgress, getProjectsScore, getProjectFactors, getProjectSeverityFactors } from "../api/ProjectApi";
+import { getProjectProgress, getProjectsScore, getProjectFactors } from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 import "./ProjectStatusPopup.css";
-import ProgressBar from '../Components/ProgressBar'; //Component for secondary popups
 import './AnalyzeResult.css';
 import Histogram from "./Histogram";
 import SeverityHistogram from "./SeverityHistogram";
