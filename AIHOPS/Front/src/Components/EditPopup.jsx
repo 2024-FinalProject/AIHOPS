@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMember,
         get_project_to_invite, setProjectFactors, addProjectFactor, updateProjectFactor, deleteProjectFactor,
         getProjectFactors, getProjectSeverityFactors, get_pending_requests_for_project, getFactorsPoolOfMember,
-        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool
+        getProjectsFactorsPoolOfMember, confirmSeverityFactors, confirmProjectFactors, deleteFactorFromPool, 
+        getProjectProgress
  } from "../api/ProjectApi";
 import "./EditPopup.css";
+import AnalyzeResult from './AnalyzeResult';
 
 
 const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg,
@@ -25,7 +27,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [factorStartIndex, setFactorStartIndex] = useState(0); // Counter for selectedProject.factors
     const [poolStartIndex, setPoolStartIndex] = useState(0); // Counter for factorsPool
     const itemsPerPage = 3; // Number of items to display at a time
-
+    const [analyzePopupType, setAnalyzePopupType] = useState("");
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -35,7 +37,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         setIsSuccess(false);
         return;
         }
-
+        
         fetch_pending_invites(cookie, selectedProject.id);
         fetch_pending_requests(cookie, selectedProject.id);
         fetch_factors_pool();
@@ -493,519 +495,524 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
     const getPopupContent = () => {
         switch (popupType) {
-        case 'editName':
-            return (
-            <div>
-                <h3>Edit Project's Name</h3>
-                <textarea
-                defaultValue={selectedProject.name}
-                onChange={(e) => setName(e.target.value)}
-                ></textarea>
-                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
-            </div>
-            );
-        case 'editDescription':
-            return (
-            <div>
-                <h3>Edit Project's Description</h3>
-                <textarea
-                defaultValue={selectedProject.description}
-                onChange={(e) => setDescription(e.target.value)}
-                ></textarea>
-                <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
-            </div>
-            );
-        case 'editContentFactors':
-            return (
+            case 'analyzeResult':
+                return (
                 <div>
-                    {/* Existing Content Factors Section */}
-                    {showExistingContentFactors && (
-                        <div>
-                            <div style={{alignItmes: 'center', display: 'flex', justifyContent: 'center'}}>
-                                 <h2>Project Factors:</h2>
-                            </div>
-                            {selectedProject.factors.length > 0 ? (
-                                <>
-                                    {selectedProject.factors
-                                        .slice(factorStartIndex, factorStartIndex + itemsPerPage)
-                                        .map((factor, index) => (
-                                            <div
-                                                key={index}
-                                                className="factor-item"
-                                                style={{
-                                                    display: 'flex',
-                                                    gap: '10px',
-                                                    marginBottom: '10px',
-                                                    alignItems: 'center',
-                                                    backgroundColor: '#f9f9f9',
-                                                }}
-                                            >
-                                                <div style={{ flex: 1 }}>
-                                                    <strong>{factor.name}</strong>: {factor.description}
-                                                </div>
-                                                <button
-                                                    className="action-btn delete-btn"
-                                                    onClick={() => handleDeleteFactor(factor.name, factor.id)}
+                    <h1>Project's Status:</h1>
+                    <div>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showCurrentScore')}}
+                        >
+                            Show Current Score
+                        </button>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showAssessorsInfo')}}
+                        >
+                            Show Assessors Info
+                        </button>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showContentFactorsScore')}}
+                        >
+                            Show Content Factors Score
+                        </button>
+                        <button
+                            className="action-btn edit-btn"
+                            onClick={() => {setAnalyzePopupType('showSeverityFactorsScore')}}
+                        >
+                            Show d-Score (Severity Factors)
+                        </button>
+                        <AnalyzeResult analyzePopupType = {analyzePopupType} closePopup = {closePopup} projectId={selectedProject.id} />
+                    </div>
+                </div>
+                );
+
+            case 'editName':
+                return (
+                    <div className="edit-project-popup">
+                        <h3>Edit Project's Name:</h3>
+                        <textarea
+                            className="edit-textarea"
+                            defaultValue={selectedProject.name}
+                            onChange={(e) => setName(e.target.value)}
+                        ></textarea>
+                        <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
+                            Save
+                        </button>
+                    </div>
+                );
+            case 'editDescription':
+                return (
+                    <div className="edit-project-popup">
+                        <h3>Edit Project's Description:</h3>
+                        <textarea
+                            className="edit-textarea"
+                            defaultValue={selectedProject.description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        ></textarea>
+                        <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
+                            Save
+                        </button>
+                    </div>
+                );
+            case 'editContentFactors':
+                return (
+                    <div>
+                        {showExistingContentFactors && (
+                            <div>
+                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center'}}>
+                                    <h2>Project Factors:</h2>
+                                </div>
+                                {selectedProject.factors.length > 0 ? (
+                                    <>
+                                        {selectedProject.factors
+                                            .slice(factorStartIndex, factorStartIndex + itemsPerPage)
+                                            .map((factor, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="factor-item"
                                                     style={{
-                                                        padding: '5px 15px',
-                                                        backgroundColor: '#ff4444',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '4px',
-                                                        cursor: 'pointer',
+                                                        display: 'flex',
+                                                        gap: '10px',
+                                                        marginBottom: '10px',
+                                                        alignItems: 'center',
+                                                        backgroundColor: '#f9f9f9',
                                                     }}
                                                 >
-                                                    Delete
-                                                </button>
-                                            </div>
-                                        ))}
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            marginTop: '10px',
-                                        }}
-                                    >
-                                        <button
-                                            className="action-btn edit-btn"
-                                            onClick={() => handlePrevious('factors')}
-                                            disabled={factorStartIndex === 0}
-                                            style={{
-                                                cursor: factorStartIndex === 0 ? 'not-allowed' : 'pointer',
-                                            }}
-                                        >
-                                            Previous
-                                        </button>
-
-                                        {/* Confirm Content Factors */}
+                                                    <div style={{ flex: 1 }}>
+                                                        <strong>{factor.name}</strong>: {factor.description}
+                                                    </div>
+                                                    <button
+                                                        className="action-btn delete-btn"
+                                                        onClick={() => handleDeleteFactor(factor.name, factor.id)}
+                                                        style={{
+                                                            padding: '5px 15px',
+                                                            backgroundColor: '#ff4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                        }}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            ))}
                                         <div
                                             style={{
                                                 display: 'flex',
-                                                justifyContent: 'center', // Center the button
-                                                padding: '10px 0', // Add some space above and below
+                                                justifyContent: 'space-between',
+                                                marginTop: '10px',
                                             }}
                                         >
                                             <button
-                                                disabled={selectedProject.isActive}
                                                 className="action-btn edit-btn"
-                                                onClick={() =>
-                                                    handleConfirmFactors(selectedProject.id, selectedProject.name)
-                                                }
+                                                onClick={() => handlePrevious('factors')}
+                                                disabled={factorStartIndex === 0}
                                                 style={{
-                                                    background: "#2e8b57",
+                                                    cursor: factorStartIndex === 0 ? 'not-allowed' : 'pointer',
                                                 }}
                                             >
-                                                Confirm Content Factors
+                                                Previous
                                             </button>
-                                        </div>
-
-                                        <button
-                                            className="action-btn edit-btn"
-                                            onClick={() => handleNext('factors')}
-                                            disabled={
-                                                factorStartIndex + itemsPerPage >=
-                                                selectedProject.factors.length
-                                            }
-                                            style={{
-                                                cursor:
-                                                    factorStartIndex + itemsPerPage >=
-                                                    selectedProject.factors.length
-                                                        ? 'not-allowed'
-                                                        : 'pointer',
-                                            }}
-                                        >
-                                            Next
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <p>No factors available in the project.</p>
-                            )}
-        
-                            {/* Add New Factor */}
-                            <div
-                                className="factor-item"
-                                style={{
-                                    display: 'flex',
-                                    gap: '10px',
-                                    marginTop: '20px',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <div
-                                    className="factor-inputs"
-                                    style={{ flex: 1, display: 'flex', gap: '10px' }}
-                                >
-                                    <input
-                                        type="text"
-                                        value={newFactorName}
-                                        onChange={(e) => setNewFactorName(e.target.value)}
-                                        className="factor-name-input"
-                                        placeholder="New factor name"
-                                        style={{ flex: '1' }}
-                                    />
-                                    <input
-                                        type="text"
-                                        value={newFactorDescription}
-                                        onChange={(e) => setNewFactorDescription(e.target.value)}
-                                        className="factor-desc-input"
-                                        placeholder="New factor description"
-                                        style={{ flex: '2' }}
-                                    />
-                                    <button
-                                        className="action-btn view-edit-btn"
-                                        onClick={handleAddFactor}
-                                        style={{
-                                            padding: '5px 15px',
-                                            backgroundColor: '#88cd8d',
-                                            color: 'white',
-                                            border: 'none',
-                                            borderRadius: '4px',
-                                            cursor: 'pointer',
-                                        }}
-                                    >
-                                        Add New Factor
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-        
-                    {/* Factors Pool Section */}
-                    {showPoolContentFactors && (
-                        <div>
-                            <div style={{alignItmes: 'center', display: 'flex', justifyContent: 'center'}}>
-                                 <h2>Factors Pool:</h2>
-                            </div>
-                            {factorsPool.length > 0 ? (
-                                <>
-                                    {factorsPool
-                                        .slice(poolStartIndex, poolStartIndex + itemsPerPage)
-                                        .map((factor) => (
                                             <div
-                                                key={factor.id}
-                                                className="factor-item"
                                                 style={{
                                                     display: 'flex',
-                                                    gap: '10px',
-                                                    alignItems: 'center',
-                                                    marginBottom: '10px',
-                                                    backgroundColor: '#f9f9f9',
+                                                    justifyContent: 'center',
+                                                    padding: '10px 0',
                                                 }}
                                             >
-                                                <input
-                                                    type="checkbox"
-                                                    id={`factor-${factor.id}`}
-                                                    onChange={() => handleCheckboxChange(factor)}
-                                                    checked={selectedFactors.some((selected) => selected.id === factor.id)}
-                                                />
-                                                <label htmlFor={`factor-${factor.id}`} style={{ flex: 1 }}>
-                                                    <strong>{factor.name}</strong>: {factor.description}
-                                                </label>
                                                 <button
-                                                    className="action-btn delete-btn"
+                                                    disabled={selectedProject.isActive}
+                                                    className="action-btn edit-btn"
                                                     onClick={() =>
-                                                        handleDeleteFactorFromPool(factor.name, factor.id)
+                                                        handleConfirmFactors(selectedProject.id, selectedProject.name)
                                                     }
                                                     style={{
-                                                        padding: '5px 15px',
-                                                        backgroundColor: '#ff4444',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '4px',
-                                                        cursor: 'pointer',
+                                                        background: "#2e8b57",
                                                     }}
                                                 >
-                                                    Delete From Pool
+                                                    Confirm Content Factors
                                                 </button>
                                             </div>
-                                        ))}
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            marginTop: '10px',
-                                        }}
-                                    >
+                                            <button
+                                                className="action-btn edit-btn"
+                                                onClick={() => handleNext('factors')}
+                                                disabled={factorStartIndex + itemsPerPage >= selectedProject.factors.length}
+                                                style={{
+                                                    cursor:
+                                                        factorStartIndex + itemsPerPage >= selectedProject.factors.length
+                                                            ? 'not-allowed'
+                                                            : 'pointer',
+                                                }}
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p>No factors available in the project.</p>
+                                )}
+                                <div
+                                    className="factor-item"
+                                    style={{
+                                        display: 'flex',
+                                        gap: '10px',
+                                        marginTop: '20px',
+                                        alignItems: 'center',
+                                    }}
+                                >
+                                    <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
+                                        <input
+                                            type="text"
+                                            value={newFactorName}
+                                            onChange={(e) => setNewFactorName(e.target.value)}
+                                            className="factor-name-input"
+                                            placeholder="New factor name"
+                                            style={{ flex: '1' }}
+                                        />
+                                        <input
+                                            type="text"
+                                            value={newFactorDescription}
+                                            onChange={(e) => setNewFactorDescription(e.target.value)}
+                                            className="factor-desc-input"
+                                            placeholder="New factor description"
+                                            style={{ flex: '2' }}
+                                        />
                                         <button
-                                            className="action-btn edit-btn"
-                                            onClick={() => handlePrevious('pool')}
-                                            disabled={poolStartIndex === 0}
+                                            className="action-btn view-edit-btn"
+                                            onClick={handleAddFactor}
                                             style={{
-                                                cursor: poolStartIndex === 0 ? 'not-allowed' : 'pointer',
-                                            }}
-                                        >
-                                            Previous
-                                        </button>
-
-                                        {/* Add Selected Factors */}
-                                        <button
-                                            className="action-btn edit-btn"
-                                            onClick={handleSubmit}
-                                            style={{
-                                                marginTop: '10px',
-                                                padding: '10px 20px',
-                                                backgroundColor: 'blue',
+                                                padding: '5px 15px',
+                                                backgroundColor: '#88cd8d',
                                                 color: 'white',
                                                 border: 'none',
-                                                borderRadius: '5px',
+                                                borderRadius: '4px',
                                                 cursor: 'pointer',
                                             }}
                                         >
-                                            Add Selected Factors
-                                        </button>
-
-                                        <button
-                                            className="action-btn edit-btn"
-                                            onClick={() => handleNext('pool')}
-                                            disabled={
-                                                poolStartIndex + itemsPerPage >= factorsPool.length
-                                            }
-                                            style={{
-                                                cursor:
-                                                    poolStartIndex + itemsPerPage >= factorsPool.length
-                                                        ? 'not-allowed'
-                                                        : 'pointer',
-                                            }}
-                                        >
-                                            Next
+                                            Add New Factor
                                         </button>
                                     </div>
-                                </>
-                            ) : (
-                                <p>No factors available in the pool.</p>
+                                </div>
+                            </div>
+                        )}
+                        {showPoolContentFactors && (
+                            <div>
+                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center'}}>
+                                    <h2>Factors Pool:</h2>
+                                </div>
+                                {factorsPool.length > 0 ? (
+                                    <>
+                                        {factorsPool
+                                            .slice(poolStartIndex, poolStartIndex + itemsPerPage)
+                                            .map((factor) => (
+                                                <div
+                                                    key={factor.id}
+                                                    className="factor-item"
+                                                    style={{
+                                                        display: 'flex',
+                                                        gap: '10px',
+                                                        alignItems: 'center',
+                                                        marginBottom: '10px',
+                                                        backgroundColor: '#f9f9f9',
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`factor-${factor.id}`}
+                                                        onChange={() => handleCheckboxChange(factor)}
+                                                        checked={selectedFactors.some((selected) => selected.id === factor.id)}
+                                                    />
+                                                    <label htmlFor={`factor-${factor.id}`} style={{ flex: 1 }}>
+                                                        <strong>{factor.name}</strong>: {factor.description}
+                                                    </label>
+                                                    <button
+                                                        className="action-btn delete-btn"
+                                                        onClick={() =>
+                                                            handleDeleteFactorFromPool(factor.name, factor.id)
+                                                        }
+                                                        style={{
+                                                            padding: '5px 15px',
+                                                            backgroundColor: '#ff4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                        }}
+                                                    >
+                                                        Delete From Pool
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                marginTop: '10px',
+                                            }}
+                                        >
+                                            <button
+                                                className="action-btn edit-btn"
+                                                onClick={() => handlePrevious('pool')}
+                                                disabled={poolStartIndex === 0}
+                                                style={{
+                                                    cursor: poolStartIndex === 0 ? 'not-allowed' : 'pointer',
+                                                }}
+                                            >
+                                                Previous
+                                            </button>
+                                            <button
+                                                className="action-btn edit-btn"
+                                                onClick={handleSubmit}
+                                                style={{
+                                                    marginTop: '10px',
+                                                    padding: '10px 20px',
+                                                    backgroundColor: 'blue',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '5px',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                Add Selected Factors
+                                            </button>
+                                            <button
+                                                className="action-btn edit-btn"
+                                                onClick={() => handleNext('pool')}
+                                                disabled={poolStartIndex + itemsPerPage >= factorsPool.length}
+                                                style={{
+                                                    cursor:
+                                                        poolStartIndex + itemsPerPage >= factorsPool.length
+                                                            ? 'not-allowed'
+                                                            : 'pointer',
+                                                }}
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <p>No factors available in the pool.</p>
+                                )}
+                            </div>
+                        )}
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: '15px',
+                                padding: '15px 0',
+                                marginTop: '50px',
+                            }}
+                        >
+                            {!showExistingContentFactors && (
+                                <button
+                                    className="action-btn edit-btn"
+                                    onClick={() => {
+                                        setShowExistingContentFactors(true);
+                                        setShowPoolContentFactors(false);
+                                    }}
+                                    style={{
+                                        padding: '20px 30px',
+                                        fontSize: '16px',
+                                        background: 'linear-gradient(145deg, #5D9CEC, #4A89DC)',
+                                        color: 'white',
+                                        border: '1px solid #4A89DC',
+                                        borderRadius: '25px',
+                                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        outline: 'none',
+                                    }}
+                                    onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                    onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
+                                >
+                                    Show Existing Content Factors
+                                </button>
+                            )}
+                            {!showPoolContentFactors && (
+                                <button
+                                    className="action-btn edit-btn"
+                                    onClick={() => {
+                                        setShowPoolContentFactors(true);
+                                        setShowExistingContentFactors(false);
+                                    }}
+                                    style={{
+                                        padding: '20px 30px',
+                                        fontSize: '16px',
+                                        background: 'linear-gradient(145deg, #FFB6C1, #FF6F91)',
+                                        color: 'white',
+                                        border: '1px solid #FF6F91',
+                                        borderRadius: '25px',
+                                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        outline: 'none',
+                                    }}
+                                    onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                    onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
+                                >
+                                    Show Factors Pool
+                                </button>
                             )}
                         </div>
-                    )}
-        
-                    {/* Buttons to Toggle Sections */}
-                    <div
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center',
-                            gap: '15px', // Increased space between buttons for a more spacious look
-                            padding: '15px 0', // Padding above and below
-                            marginTop: '50px',
-                        }}
-                    >
-                        {!showExistingContentFactors && (
-                            <button
-                                className="action-btn edit-btn"
-                                onClick={() => {
-                                    setShowExistingContentFactors(true);
-                                    setShowPoolContentFactors(false);
-                                }}
-                                style={{
-                                    padding: '20px 30px',
-                                    fontSize: '16px',
-                                    background: 'linear-gradient(145deg, #5D9CEC, #4A89DC)', // Soft gradient background
-                                    color: 'white',
-                                    border: '1px solid #4A89DC', // Slightly darker border for definition
-                                    borderRadius: '25px', // Rounded corners for a modern look
-                                    boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)', // Light shadow to make it pop
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
-                                    outline: 'none',
-                                }}
-                                onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')} // Hover effect: slight scale increase
-                                onMouseOut={(e) => (e.target.style.transform = 'scale(1)')} // Revert scale when mouse leaves
-                            >
-                                Show Existing Content Factors
-                            </button>
-                        )}
-                        {!showPoolContentFactors && (
-                            <button
-                                className="action-btn edit-btn"
-                                onClick={() => {
-                                    setShowPoolContentFactors(true);
-                                    setShowExistingContentFactors(false);
-                                }}
-                                style={{
-                                    padding: '20px 30px',
-                                    fontSize: '16px',
-                                    background: 'linear-gradient(145deg, #FFB6C1, #FF6F91)', // Soft gradient background for variety
-                                    color: 'white',
-                                    border: '1px solid #FF6F91',
-                                    borderRadius: '25px',
-                                    boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.3s ease',
-                                    outline: 'none',
-                                }}
-                                onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
-                                onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
-                            >
-                                Show Factors Pool
-                            </button>
-                        )}
                     </div>
-
-                </div>
-            );
-            
-        case 'editSeverityFactors':
-            return (
-                <div>
-                    <div style={{alignItmes: 'center', display: 'flex', justifyContent: 'center'}}>
-                        <h2>Edit d-score (Severity Factors):</h2>
-                    </div>
-                    <table className="severity-table">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Level Name</th>
-                                <th>Level Description</th>
-                                <th>Severity Factor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {selectedProject.severity_factors.map((severity, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td>Level {index + 1}</td>
-                                    <td>
-                                        {[
-                                            "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
-                                            "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
-                                            "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
-                                            "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
-                                            "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention."
-                                        ][index]}
-                                    </td>
-                                    <td>
-                                        {selectedProject.isActive ? (
-                                            <span>{severity}</span>
-                                        ) : (
-                                            <input
-                                                type="number"
-                                                defaultValue={severity}
-                                                className="severity-input"
-                                                onChange={(e) => {
-                                                    const updates = { ...severityUpdates };
-                                                    updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1-5
-                                                    setSeverityUpdates(updates);
-                                                }}
-                                            />
-                                        )}
-                                    </td>
+                ); 
+            case 'editSeverityFactors':
+                return (
+                    <div>
+                        <h3>Edit d-score (Severity Factors)</h3>
+                        <table className="severity-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Level Name</th>
+                                    <th>Level Description</th>
+                                    <th>Severity Factor</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    <div className="severity-factors-warning">
-                        <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
-                    </div>
-                    <div  
-                        style={{
-                            display: 'flex',
-                            justifyContent: 'center', // Center horizontally
-                            alignItems: 'center',    // Center vertically
-                            textAlign: 'center',     // Ensure text inside the heading is centered
-                            height: '100%',          // Optional: Ensures the div takes up full height for vertical centering
-                        }}
-                    >
-                        <button disabled = {selectedProject.isActive}
-                            className="action-btn edit-btn"
-                            onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
-                            style = {{backgroundColor: "#2e8b57"}}
-                        >
-                            Confirm Severity Factors
-                        </button>
-                    </div>
-                </div>
-        );
-
-        case 'manageAssessors':
-            return (
-                <div>
-                    {/* Members Section */}
-                    <p>
-                    <strong>Members:</strong>
-                    </p>
-                    {Object.keys(selectedProject.members).length > 0 ? (
-                    <ul className="members-list">
-                    {selectedProject.members.map((memberItem, index) => (
-                        <li key={index} className="member-item">
-                        <span className="member-name">{memberItem}</span>
-                        {selectedProject.founder != memberItem && (
-                            <button
-                            className="remove-btn"
-                            onClick={() => handleRemoveMember(memberItem)}
+                            </thead>
+                            <tbody>
+                                {selectedProject.severity_factors.map((severity, index) => (
+                                    <tr key={index}>
+                                        <td>{index + 1}</td>
+                                        <td>Level {index + 1}</td>
+                                        <td>
+                                            {[
+                                                "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
+                                                "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
+                                                "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
+                                                "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
+                                                "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention."
+                                            ][index]}
+                                        </td>
+                                        <td>
+                                            {selectedProject.isActive ? (
+                                                <span>{severity}</span>
+                                            ) : (
+                                                <input
+                                                    type="number"
+                                                    defaultValue={severity}
+                                                    className="severity-input"
+                                                    onChange={(e) => {
+                                                        const updates = { ...severityUpdates };
+                                                        updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1-5
+                                                        setSeverityUpdates(updates);
+                                                    }}
+                                                />
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="severity-factors-warning">
+                            <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
+                        </div>
+                        <div className="parent-container">
+                            <button disabled={selectedProject.isActive}
+                                className="action-btn edit-btn"
+                                onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
                             >
-                            Remove Member
+                                Confirm Severity Factors
                             </button>
-                        )}
-                        </li>
-                    ))}
-                    </ul>
-                    ) : (
-                    <p>No members added yet.</p>
-                    )}
-
-                    {/* Remove invited members section: */}
-                    <p>
-                    {!selectedProject.isActive && <strong>Invited Members:</strong>}
-                    </p>
-                    {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
-                        <ul className="members-list">
-                        {projectsPendingInvites.map((pendingMember, index) => (
-                            <li key={index} className="member-item">
-                            <span className="member-name">{pendingMember}</span>
-                            {<button
-                                className="remove-btn"
-                                onClick={() => handleRemoveMember(pendingMember)}
-                            >
-                            Remove Invited Member
-                            </button>}
-                            </li>
-                        ))}
-                        </ul>
-                    )}
-                    {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p> There are currently no invited members </p>)}
-                    
-
-                    <p>
-                    {selectedProject.isActive && <strong>Pending Members:</strong>}
-                    </p>
-                    {selectedProject.isActive && projectsPendingRequests != null && projectsPendingRequests.length > 0 && (
-                        <ul className="members-list">
-                        {projectsPendingRequests.map((pendingMember, index) => (
-                            <li key={index} className="member-item">
-                            <span className="member-name">{pendingMember}</span>
-                            {<button
-                                className="remove-btn"
-                                onClick={() => handleRemoveMember(pendingMember)}
-                            >
-                            Remove Pending Member
-                            </button>}
-                            </li>
-                        ))}
-                        </ul>
-                    )}
-                    {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p> There are currently no pending requests </p>)}
-
-                    {/* Add member section */}
-                    <div className="add-member-container">
-                        <input
-                        type="text"
-                        className="add-member-input"
-                        placeholder="New member's name"
-                        value={newMemberName}
-                        onChange={(e) => setNewMemberName(e.target.value)}
-                        style={{ flex: '1' }}
-                        />
-                        <button
-                        className="action-btn add-member-btn"
-                        onClick={handleAddMember}
-                        >
-                        Add Member
-                        </button>
+                        </div>
                     </div>
-                </div>
-        );
-        default:
-            return <p>Invalid popup type</p>;
-        }
+            );
+
+            case 'manageAssessors':
+                return (
+                    <div>
+                        {/* Members Section */}
+                        <p>
+                        <strong>Members:</strong>
+                        </p>
+                        {Object.keys(selectedProject.members).length > 0 ? (
+                        <ul className="members-list">
+                        {selectedProject.members.map((memberItem, index) => (
+                            <li key={index} className="member-item">
+                            <span className="member-name">{memberItem}</span>
+                            {selectedProject.founder != memberItem && (
+                                <button
+                                className="remove-btn"
+                                onClick={() => handleRemoveMember(memberItem)}
+                                >
+                                Remove Member
+                                </button>
+                            )}
+                            </li>
+                        ))}
+                        </ul>
+                        ) : (
+                        <p>No members added yet.</p>
+                        )}
+
+                        {/* Remove invited members section: */}
+                        <p>
+                        {!selectedProject.isActive && <strong>Invited Members:</strong>}
+                        </p>
+                        {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
+                            <ul className="members-list">
+                            {projectsPendingInvites.map((pendingMember, index) => (
+                                <li key={index} className="member-item">
+                                <span className="member-name">{pendingMember}</span>
+                                {<button
+                                    className="remove-btn"
+                                    onClick={() => handleRemoveMember(pendingMember)}
+                                >
+                                Remove Invited Member
+                                </button>}
+                                </li>
+                            ))}
+                            </ul>
+                        )}
+                        {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p> There are currently no invited members </p>)}
+                        
+
+                        <p>
+                        {selectedProject.isActive && <strong>Pending Members:</strong>}
+                        </p>
+                        {selectedProject.isActive && projectsPendingRequests != null && projectsPendingRequests.length > 0 && (
+                            <ul className="members-list">
+                            {projectsPendingRequests.map((pendingMember, index) => (
+                                <li key={index} className="member-item">
+                                <span className="member-name">{pendingMember}</span>
+                                {<button
+                                    className="remove-btn"
+                                    onClick={() => handleRemoveMember(pendingMember)}
+                                >
+                                Remove Pending Member
+                                </button>}
+                                </li>
+                            ))}
+                            </ul>
+                        )}
+                        {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p> There are currently no pending requests </p>)}
+
+                        {/* Add member section */}
+                        <div className="add-member-container">
+                            <input
+                            type="text"
+                            className="add-member-input"
+                            placeholder="New member's name"
+                            value={newMemberName}
+                            onChange={(e) => setNewMemberName(e.target.value)}
+                            style={{ flex: '1' }}
+                            />
+                            <button
+                            className="action-btn add-member-btn"
+                            onClick={handleAddMember}
+                            >
+                            Add Member
+                            </button>
+                        </div>
+                    </div>
+            );
+            default:
+                return <p>Invalid popup type</p>;
+            }
     };
 
     return (
