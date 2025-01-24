@@ -2,7 +2,7 @@ import './ProgressBar.css';
 import { getProjectProgress } from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 
-const ProgressBar = ({ project }) => {
+const ProgressBar = ({ project, handleAnalyzeResult }) => {
     const [projectsProgress, setProjectsProgress] = useState({});
 
     useEffect(() => {
@@ -51,8 +51,6 @@ const ProgressBar = ({ project }) => {
       case 'invite':
         return Boolean(projectsProgress.invited_members || projectsProgress.pending_amount > 0
                       || projectsProgress.member_count > 1);
-      case 'analyzed':
-        return Boolean(project?.analyzed);
       default:
         return false;
     }
@@ -141,9 +139,12 @@ const ProgressBar = ({ project }) => {
         </div>
         
         <div className="result-section">
-          <div className={`progress-step ${isStepActive('analyzed') ? 'active' : ''}`}>
-            Analyze{'\n'}Results
-          </div>
+          <button
+              className="action-btn analyze-btn"
+              onClick={() => {handleAnalyzeResult()}}
+          >
+              Analyze Result
+          </button>
         </div>
       </div>
     </div>

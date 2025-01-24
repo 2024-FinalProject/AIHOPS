@@ -1,83 +1,43 @@
 import React, { useState, useEffect } from "react";
-import FactorVote from "../components/FactorVote";
-import { getProjectsMember, submitFactorVote, checkFactorVotingStatus } from "../api/ProjectApi";
+import VotingTypeSelector from "../components/VotingTypeSelector";
+import DGraph from "../Components/DGraph";
+import { getProjectsMember, submitFactorVote, getMemberVoteOnProject, submitDScoreVotes, checkProjectVotingStatus} from "../api/ProjectApi";
+
+
+import ProjectList from "../components/ProjectList";
+import VotePopup from "../components/VotePopup";
+import FactorVotingModal from "../components/FactorVotingModal";
 import "./MyProjects.css";
 
-// const dummyProjects = [
-//   {
-//     id: 1,
-//     name: "Project Alpha",
-//     description: "Description of Project Alpha.",
-//     founder: "John Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: false },
-//       { userId: 3, name: "Mike Smith", hasVoted: false },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 2,
-//     name: "Project Beta",
-//     description: "Description of Project Beta.",
-//     founder: "Jane Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: false },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 3,
-//     name: "Project Gamma",
-//     description: "Description of Project Gamma.",
-//     founder: "Mike Smith",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: true },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-//   {
-//     id: 4,
-//     name: "Project Delta",
-//     description: "Description of Project Delta.",
-//     founder: "John Doe",
-//     members: [
-//       { userId: 1, name: "John Doe", hasVoted: true },
-//       { userId: 2, name: "Jane Doe", hasVoted: true },
-//       { userId: 3, name: "Mike Smith", hasVoted: true },
-//     ],
-//     factors: [
-//       { id: 1, name: "Factor 1", description: "Description of Factor 1" },
-//       { id: 2, name: "Factor 2", description: "Description of Factor 2" },
-//     ],
-//   },
-// ];
-
 const MyProjects = () => {
+  // State Management
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
   const [factorVotes, setFactorVotes] = useState({});
-  const [submittedVotes, setSubmittedVotes] = useState({}); // Track successfully submitted votes
+  const [submittedVotes, setSubmittedVotes] = useState({});
   const [currentFactorIndex, setCurrentFactorIndex] = useState(0);
   const [isVoteStarted, setIsVoteStarted] = useState(false);
   const [showVotePopup, setShowVotePopup] = useState(false);
   const [severityLevel, setSeverityLevel] = useState(false);
   const [projectVotingStatus, setProjectVotingStatus] = useState({});
+  const [showDScoreVote, setShowDScoreVote] = useState(false);
+  const [currentVotingType, setCurrentVotingType] = useState(null); // 'factors' or 'dscore'
 
+  // Utility Functions
+  const calculateProgress = (votedCount, totalCount) => {
+    return totalCount > 0 ? votedCount / totalCount : 0;
+  };
 
+  const countVotedFactors = () => {
+    return Object.keys(submittedVotes).length;
+  };
+
+  const isBothStatusesComplete = (project) => {
+    const status = projectVotingStatus[project.id];
+    return status && status.votingStatus === 1 && status.severitiesStatus === 1;
+  };
+
+  // Project Fetching and Initialization
   const fetchProjects = async () => {
     try {
       const cookie = localStorage.getItem("authToken");
@@ -85,9 +45,11 @@ const MyProjects = () => {
         alert("Authentication token not found");
         return;
       }
+
       const response = await getProjectsMember(cookie);
-      if(response.data.success) {
+      if (response.data.success) {
         setProjects(response.data.projects);
+        await initializeProjectVotingStatuses(response.data.projects, cookie);
       } else {
         alert(response.data.message || "Failed to fetch projects");
       }
@@ -97,15 +59,56 @@ const MyProjects = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
+  const initializeProjectVotingStatuses = async (projects, cookie) => {
+    const initialStatus = {};
 
+    await Promise.all(
+      projects.map(async (project) => {
+        try {
+          const voteResponse = await getMemberVoteOnProject(cookie, project.id);
+          if (voteResponse.data.success) {
+            const factorVotes = voteResponse.data.votes.factor_votes || {};
+            const severityVotes = voteResponse.data.votes.severity_votes || [];
 
+            const validVotesCount = Object.values(factorVotes).length;
+            const validSeverityCount = severityVotes.length;
+
+            initialStatus[project.id] = {
+              votingStatus: validVotesCount / project.factors.length,
+              severitiesStatus: validSeverityCount / 5,
+            };
+          } else {
+            initialStatus[project.id] = {
+              votingStatus: 0,
+              severitiesStatus: 0,
+            };
+          }
+        } catch (error) {
+          console.error(`Error fetching votes for project ${project.id}:`, error);
+          initialStatus[project.id] = {
+            votingStatus: 0,
+            severitiesStatus: 0,
+          };
+        }
+      })
+    );
+
+    setProjectVotingStatus(initialStatus);
+  };
+
+  // Voting Handlers
   const handleVoteClick = (project) => {
     setCurrentProject(project);
     setShowVotePopup(true);
+    updateFactorsVotes(project.id);
   };
+
+  /*const handleStartVoting = () => {
+    setIsVoteStarted(true);
+    setShowVotePopup(false);
+    setCurrentFactorIndex(0);
+    setSubmittedVotes({}); 
+  };*/
 
   const handleFactorVoteChange = (factorId, value) => {
     setFactorVotes((prev) => ({ ...prev, [factorId]: value }));
@@ -114,10 +117,8 @@ const MyProjects = () => {
   const handleFactorSubmit = async () => {
     try {
       const cookie = localStorage.getItem("authToken");
-      if (!cookie) {
-        alert("Authentication token not found");
-        return false;
-      }
+      if (!cookie) return false;
+
       const currentFactorId = currentProject.factors[currentFactorIndex].id;
       const response = await submitFactorVote(
         cookie,
@@ -125,15 +126,24 @@ const MyProjects = () => {
         currentFactorId,
         factorVotes[currentFactorId]
       );
-     
-
 
       if (response.data.success) {
-        // Only update submitted votes after successful API call
         setSubmittedVotes((prev) => ({
           ...prev,
           [currentFactorId]: factorVotes[currentFactorId],
         }));
+
+        const votedCount = Object.keys(submittedVotes).length + 1;
+        const totalFactors = currentProject.factors.length;
+
+        setProjectVotingStatus((prev) => ({
+          ...prev,
+          [currentProject.id]: {
+            ...prev[currentProject.id],
+            votingStatus: calculateProgress(votedCount, totalFactors),
+          },
+        }));
+
         return true;
       } else {
         alert(response.data.message || "Failed to submit vote for factor");
@@ -144,44 +154,6 @@ const MyProjects = () => {
       console.error(error);
       return false;
     }
-  };
-
-  const handleStartVoting = () => {
-    setIsVoteStarted(true);
-    setShowVotePopup(false);
-    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
-  };
-
-  const checkProjectVotingStatus = async (projectId) => {
-    try {
-      const cookie = localStorage.getItem("authToken");
-      if (!cookie) {
-        alert("Authentication token not found");
-        return;
-      }
-
-      const response = await checkFactorVotingStatus(cookie, projectId);
-      const respone = null;
-      if (response.data.success) {
-        setProjectVotingStatus((prev) => ({
-          ...prev,
-          [projectId]: response.data.voted,
-        }));
-      }
-    } catch (error) {
-      console.error("Error checking voting status:", error);
-    }
-  };
-
-  const handleCloseVoting = async (projectId) => {
-    setShowVotePopup(false);
-    setCurrentProject(null);
-    setIsVoteStarted(false);
-    setFactorVotes({});
-    setSubmittedVotes({});
-    setCurrentFactorIndex(0);
-
-    await checkProjectVotingStatus(projectId);
   };
 
   const handleNextFactor = async () => {
@@ -202,138 +174,165 @@ const MyProjects = () => {
     }
   };
 
-  const countVotedFactors = () => {
-    // Count only successfully submitted votes
-    return Object.keys(submittedVotes).length;
+  /*const handleCloseVoting = async (projectId) => {
+    setShowVotePopup(false);
+    setCurrentProject(null);
+    setIsVoteStarted(false);
+    setSubmittedVotes({});
+    setCurrentFactorIndex(0);
+
+    await checkProjectVotingStatus(projectId);
+  };*/
+
+  const updateFactorsVotes = async (projectId) => {
+    try {
+      const cookie = localStorage.getItem("authToken");
+      if (!cookie) {
+        alert("Authentication token not found");
+        return;
+      }
+      const response = await getMemberVoteOnProject(cookie, projectId);
+      if (response.data.success) {
+        const factorVotes = response.data.votes.factor_votes || {};
+        setFactorVotes(factorVotes);
+      } else {
+        alert(response.data.message || "Failed to fetch votes for project");
+      }
+    } catch (error) {
+      alert("Failed to fetch votes for project");
+      console.error(error);
+    }
+  };
+  /*const handleStartVoting = () => {
+    setIsVoteStarted(true);
+    setShowVotePopup(false);
+    setCurrentFactorIndex(0);
+    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
+  };*/
+
+  const handleStartVoting = (type) => {
+    setCurrentVotingType(type);
+    if (type === 'factors') {
+      setIsVoteStarted(true);
+      setShowDScoreVote(false);
+      setCurrentFactorIndex(0);
+    } else if (type === 'dscore') {
+      setIsVoteStarted(false);
+      setShowDScoreVote(true);
+    }
+    setShowVotePopup(false);
+    //setSubmittedVotes({});
   };
 
-  const isBothCheckboxesChecked = (project) => {
-    return projectVotingStatus[project.id] && severityLevel;
+  const handleCloseVoting = async (projectId) => {
+    setShowVotePopup(false);
+    setShowDScoreVote(false);
+    setCurrentProject(null);
+    setIsVoteStarted(false);
+    
+    setSubmittedVotes({});
+    setCurrentFactorIndex(0);
+    setCurrentVotingType(null);
+
+    await checkProjectVotingStatus(projectId);
   };
+
+  // Function to handle D-score vote completion
+  const handleDScoreVoteComplete = async (percentages) => {
+    try{
+      const cookie = localStorage.getItem("authToken");
+      const response = await submitDScoreVotes(cookie, currentProject.id, percentages);
+      if (response.data.success) {
+        setProjectVotingStatus(prev => ({
+          ...prev,
+          [currentProject.id]: {
+            ...prev[currentProject.id],
+            severitiesStatus: 1
+          }
+        }));
+        setShowDScoreVote(false);
+        await handleCloseVoting(currentProject.id);
+      }
+      //setSeverityLevel(true);
+    }
+    catch (error) {
+      alert("Failed to submit D-score votes");
+    }
+  };
+
+  // Lifecycle Hook
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  /*const handleSubmitAllVotes = async () => {
+    try {
+      if (!currentProject) return;
+      const cookie = localStorage.getItem("authToken");
+      
+      // Check if both votes are complete
+      const status = projectVotingStatus[currentProject.id];
+      if (!isBothStatusesComplete(currentProject)) {
+        alert("Please complete both factor and D-score voting first");
+        return;
+      }
+  
+      // Add final submission logic here
+      setShowVotePopup(false);
+      await fetchProjects(); // Refresh status
+    } catch (error) {
+      alert("Failed to submit all votes");
+    }
+  };*/
 
   return (
     <div className="my-projects-container">
       <h1 className="page-heading">My Projects</h1>
 
-      <div className="projects-list">
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="project-card"
-            onClick={() => handleVoteClick(project)}
-          >
-            <h3 className="text-xl font-semibold">{project.name}:</h3>
-            <p>{project.description}</p>
-            <p>Founder: {project.founder}</p>
-
-            {/* Display checkmark if both checkboxes are checked */}
-            {isBothCheckboxesChecked(project) && (
-              <div clasName="checkmark"> ✓ </div>
-            )}
-
-            <div className="checkboxes">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={projectVotingStatus[project.id] || false}
-                  disabled
-                />
-                Factors Voted
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={severityLevel}
-                  onChange={() => setSeverityLevel(!severityLevel)}
-                  disabled
-                />
-                D.Score Voted
-              </label>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ProjectList 
+        projects={projects}
+        projectVotingStatus={projectVotingStatus}
+        isBothStatusesComplete={isBothStatusesComplete}
+        onVoteClick={handleVoteClick}
+      />
 
       {showVotePopup && (
         <div className="popup-overlay">
           <div className="popup-content">
-            <button
-              className="close-popup"
-              onClick={() => handleCloseVoting(currentProject.id)}
-            >
-              ×
-            </button>
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              Start Voting on {currentProject.name}
-            </h2>
-            <p className="mb-4 text-center">
-              Explanation on the Project ......
-            </p>
-            <div className="start-vote-container">
-              <button onClick={handleStartVoting} className="start-vote-btn">
-                Start Voting
-              </button>
-            </div>
+            <VotingTypeSelector 
+              projectName={currentProject.name}
+              onSelectVotingType={handleStartVoting}
+              isFactorsVoted={projectVotingStatus[currentProject?.id]?.votingStatus === 1}
+              isDScoreVoted={projectVotingStatus[currentProject?.id]?.severitiesStatus === 1}
+              onClose={() => handleCloseVoting(currentProject.id)}
+            />
           </div>
         </div>
       )}
 
       {currentProject && isVoteStarted && (
+        <FactorVotingModal
+          project={currentProject}
+          currentFactorIndex={currentFactorIndex}
+          factorVotes={factorVotes}
+          submittedVotes={submittedVotes}
+          onClose={() => handleCloseVoting(currentProject.id)}
+          onFactorVoteChange={handleFactorVoteChange}
+          onNextFactor={handleNextFactor}
+          onPrevFactor={handlePrevFactor}
+          countVotedFactors={countVotedFactors}
+        />
+      )}
+      
+      {/* D-score voting popup */}
+      {showDScoreVote && (
         <div className="popup-overlay">
-          <div className="popup-content">
-            <button
-              className="close-popup"
-              onClick={() => handleCloseVoting(currentProject.id)}
-            >
-              ×
-            </button>
-
+          <div className="popup-content wide">
+            <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
             <h2 className="text-2xl font-bold mb-4 text-center">
-              Vote on {currentProject.name}
+              D-Score Voting for {currentProject.name}
             </h2>
-
-            <div className="vote-container">
-              {currentProject.factors.length > 0 && (
-                <FactorVote
-                  factor={currentProject.factors[currentFactorIndex]}
-                  factorVotes={factorVotes}
-                  handleFactorVoteChange={handleFactorVoteChange}
-                />
-              )}
-
-              <div className="factor-navigation">
-                <button
-                  className="prev-factor-btn"
-                  onClick={handlePrevFactor}
-                  disabled={currentFactorIndex === 0}
-                >
-                  Back
-                </button>
-                <button className="next-factor-btn" onClick={handleNextFactor}>
-                  {currentFactorIndex === currentProject.factors.length - 1
-                    ? "Submit Vote"
-                    : "Next"}
-                </button>
-              </div>
-            </div>
-
-            <div className="vote-progress-container">
-              <div className="progress-bar">
-                <div
-                  className="progress-bar-fill"
-                  style={{
-                    width: `${
-                      (countVotedFactors() / currentProject.factors.length) *
-                      100
-                    }%`,
-                  }}
-                ></div>
-              </div>
-              <p className="vote-progress-text">
-                {countVotedFactors()} / {currentProject.factors.length} factors
-                have been voted
-              </p>
-            </div>
+            <DGraph onVoteComplete={handleDScoreVoteComplete} />
           </div>
         </div>
       )}
