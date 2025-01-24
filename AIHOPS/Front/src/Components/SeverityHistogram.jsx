@@ -5,18 +5,16 @@ import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip } fro
 // Register required components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
-const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
-    // Ensure severityfactors is an array
-    const factorsArray = Array.isArray(severityfactors) ? severityfactors : [];
+const SeverityHistogram = ({ severityfactors }) => {
 
-    // Extract data for the chart
-    const data = severityfactorslist?.avg || [];
-    const voteCount = severityfactorslist?.vote_count || 0;
+    // Extract average scores and vote count
+    const data = severityfactors?.avg || []; // Use the avg array
+    const voteCount = severityfactors?.vote_count || 0;
 
-    // Generate factor names based on the number of factors
-    const factorNames = Array.from({ length: data.length }, (_, index) => `Level ${index + 1}`);
+    // Generate factor names for levels
+    const factorNames = data.map((_, index) => `Level ${index + 1}`);
 
-    // Chart data
+    // Chart data configuration
     const chartData = {
         labels: factorNames,
         datasets: [
@@ -30,7 +28,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
         ],
     };
 
-    // Chart options with tooltips displaying additional information
+    // Chart options with customized tooltip
     const options = {
         responsive: true,
         maintainAspectRatio: false,
@@ -51,12 +49,11 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
             x: {
                 title: {
                     display: true,
-                    text: 'Severity Factors',
+                    text: 'Severity Levels',
                     font: { size: 16 },
                 },
                 ticks: {
                     font: { size: 14 },
-                    callback: (value, index) => `Level ${index + 1}`,
                 },
             },
             y: {
