@@ -501,7 +501,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             className="action-btn edit-btn"
                             onClick={() => {setAnalyzePopupType('showSeverityFactorsScore')}}
                         >
-                            Show d-Score (Severity Factors)
+                            Show d-Score
                         </button>
                         <AnalyzeResult analyzePopupType = {analyzePopupType} closePopup = {closePopup} projectId={selectedProject.id} />
                     </div>
