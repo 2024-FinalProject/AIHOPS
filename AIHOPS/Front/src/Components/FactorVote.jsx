@@ -2,25 +2,32 @@ import React from "react";
 import "./FactorVote.css";
 
 const FactorVote = ({ factor, factorVotes, handleFactorVoteChange }) => {
+  const handleChange = (e) => {
+    const value = parseInt(e.target.value);
+    handleFactorVoteChange(factor.id, value);
+  };
+
   return (
-    <div key={factor.id} className="factor-item">
+    <div className="factor-item">
       <div className="factor-name">
-        <span>{factor.name}</span> {":"}
-        <span>{factor.description}</span>
+        <span className="factor-title">{factor.name}</span>
+        <span className="factor-description">{factor.description}</span>
       </div>
-      <input
-        type="range"
-        min="0"
-        max="4"
-        value={factorVotes[factor.id] || 0}
-        onChange={(e) => handleFactorVoteChange(factor.id, e.target.value)}
-        className="factor-range"
-      />
-      <span>{factorVotes[factor.id] || 0}</span>
+      <div className="factor-voting">
+        <input
+          type="range"
+          min="0"
+          max="4"
+          value={factorVotes[factor.id] || 0}
+          onChange={handleChange}
+          className="factor-range"
+        />
+        <div className="factor-value">
+          <span>{factorVotes[factor.id] || 0}</span>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default FactorVote;
-
-

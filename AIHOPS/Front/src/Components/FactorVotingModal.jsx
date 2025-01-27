@@ -1,5 +1,5 @@
 import React from "react";
-import FactorVote from "../components/FactorVote";
+import FactorVote from "../Components/FactorVote";
 
 const FactorVotingModal = ({
   project,
