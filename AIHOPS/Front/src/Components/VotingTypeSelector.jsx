@@ -1,36 +1,37 @@
+// VotingTypeSelector.jsx
 import React from 'react';
 import './VotingTypeSelector.css'; 
+import { Card, CardHeader, CardTitle, CardContent} from './ui/card';
 
 const VotingTypeSelector = ({ 
   projectName, 
-  onSelectVotingType,  // Changed from onSelectVoteType to match parent
+  onSelectVotingType, 
   isFactorsVoted, 
   isDScoreVoted, 
   onClose 
 }) => {
   return (
-    <div className="voting-type-selector">
-      <button className="close-popup" onClick={onClose}>×</button>
-      <h2 className="voting-type-title">
-        Choose Voting Type for {projectName}
-      </h2>
-      <div className="voting-buttons-container">
+    <Card className="voting-selector-card">
+      <CardHeader>
+        <CardTitle>Choose Voting Type for {projectName}</CardTitle>
+      </CardHeader>
+      <CardContent className="voting-buttons-container">
         <button 
           className={`voting-type-btn ${isFactorsVoted ? 'completed' : ''}`}
           onClick={() => onSelectVotingType('factors')}
         >
-          Vote on Factors
+          Content Factors Vote
           {isFactorsVoted && <span className="check-mark">✓</span>}
         </button>
         <button 
           className={`voting-type-btn ${isDScoreVoted ? 'completed' : ''}`}
           onClick={() => onSelectVotingType('dscore')} 
         >
-          Vote on D-Score
+          Severity Levels Vote
           {isDScoreVoted && <span className="check-mark">✓</span>}
         </button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

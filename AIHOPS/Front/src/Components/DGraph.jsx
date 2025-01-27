@@ -163,7 +163,7 @@ const DGraph = ({ onVoteComplete }) => {
                 name="Percentage"
                 dot={{ fill: '#2563eb', strokeWidth: 2 }}
                 activeDot={(props) => {
-                  const { cx, cy, payload, index } = props;
+                  const { cx, cy, index } = props;
                   
                   const handleDrag = (e) => {
                     const svg = e.target.ownerSVGElement;
