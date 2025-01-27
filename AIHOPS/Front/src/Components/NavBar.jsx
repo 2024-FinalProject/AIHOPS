@@ -33,11 +33,11 @@ const NavBar = () => {
                 </li>
 
                 {/* _old Projects Management button */}
-                <li className="nav-item">
+                {/* <li className="nav-item">
                   <Link to="/projectsmanagement_old" className="nav-link nav-button">
                     Projects Management _old
                   </Link>
-                </li>
+                </li> */}
 
                 {/* MyProjects button */}
                 <li className="nav-item">

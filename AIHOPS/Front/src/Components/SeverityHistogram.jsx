@@ -5,24 +5,22 @@ import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip } fro
 // Register required components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
-const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
-    // Ensure severityfactors is an array
-    const factorsArray = Array.isArray(severityfactors) ? severityfactors : [];
+const SeverityHistogram = ({ severityfactors }) => {
 
-    // Extract data for the chart
-    const data = severityfactorslist.avg || []; // Use avg array from severityfactorslist
-    const voteCount = severityfactorslist.vote_count || 0; // Single vote_count
+    // Extract average scores and vote count
+    const data = severityfactors?.avg || []; // Use the avg array
+    const voteCount = severityfactors?.vote_count || 0;
 
-    // Generate factor names dynamically if not provided
-    const factorNames = factorsArray.map((_, index) => `Factor ${index + 1}`);
+    // Generate factor names for levels
+    const factorNames = data.map((_, index) => `Level ${index + 1}`);
 
-    // Chart data
+    // Chart data configuration
     const chartData = {
-        labels: factorNames, // Dynamic factor names
+        labels: factorNames,
         datasets: [
             {
                 label: "Average Score",
-                data: data, // Use avg data
+                data: data,
                 backgroundColor: "rgba(153, 102, 255, 0.5)",
                 borderColor: "rgba(153, 102, 255, 1)",
                 borderWidth: 1,
@@ -30,7 +28,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
         ],
     };
 
-    // Chart options with tooltips displaying additional information
+    // Chart options with customized tooltip
     const options = {
         responsive: true,
         maintainAspectRatio: false,
@@ -39,7 +37,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
             tooltip: {
                 enabled: true,
                 callbacks: {
-                    title: (context) => context[0].label, // Factor name as title
+                    title: (context) => context[0].label,
                     label: (context) => [
                         `Average Score: ${context.parsed.y.toFixed(2)}`,
                         `Total Votes: ${voteCount}`,
@@ -51,7 +49,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorslist }) => {
             x: {
                 title: {
                     display: true,
-                    text: 'Severity Factors',
+                    text: 'Severity Levels',
                     font: { size: 16 },
                 },
                 ticks: {

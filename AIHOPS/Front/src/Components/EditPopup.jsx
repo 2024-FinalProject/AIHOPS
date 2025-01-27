@@ -32,7 +32,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         setIsSuccess(false);
         return;
         }
-
+        
         fetch_pending_invites(cookie, selectedProject.id);
         fetch_pending_requests(cookie, selectedProject.id);
         fetch_factors_pool();
@@ -501,7 +501,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             className="action-btn edit-btn"
                             onClick={() => {setAnalyzePopupType('showSeverityFactorsScore')}}
                         >
-                            Show d-Score (Severity Factors)
+                            Show d-Score
                         </button>
                         <AnalyzeResult analyzePopupType = {analyzePopupType} closePopup = {closePopup} projectId={selectedProject.id} />
                     </div>
@@ -510,25 +510,31 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
             case 'editName':
                 return (
-                <div>
-                    <h3>Edit Project's Name</h3>
-                    <textarea
-                    defaultValue={selectedProject.name}
-                    onChange={(e) => setName(e.target.value)}
-                    ></textarea>
-                    <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
-                </div>
+                    <div className="edit-project-popup">
+                        <h3>Edit Project's Name:</h3>
+                        <textarea
+                            className="edit-textarea"
+                            defaultValue={selectedProject.name}
+                            onChange={(e) => setName(e.target.value)}
+                        ></textarea>
+                        <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
+                            Save
+                        </button>
+                    </div>
                 );
             case 'editDescription':
                 return (
-                <div>
-                    <h3>Edit Project's Description</h3>
-                    <textarea
-                    defaultValue={selectedProject.description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    ></textarea>
-                    <button className = "edit-btn" onClick={updateProjectsNameOrDesc}>Save</button>
-                </div>
+                    <div className="edit-project-popup">
+                        <h3>Edit Project's Description:</h3>
+                        <textarea
+                            className="edit-textarea"
+                            defaultValue={selectedProject.description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        ></textarea>
+                        <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
+                            Save
+                        </button>
+                    </div>
                 );
             case 'editContentFactors':
                 return (
@@ -794,12 +800,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         <div className="severity-factors-warning">
                             <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
                         </div>
-                        <button disabled = {selectedProject.isActive}
-                            className="action-btn edit-btn"
-                            onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
-                        >
-                            Confirm Severity Factors
-                        </button>
+                        <div className="parent-container">
+                            <button disabled={selectedProject.isActive}
+                                className="action-btn edit-btn"
+                                onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
+                            >
+                                Confirm Severity Factors
+                            </button>
+                        </div>
                     </div>
             );
 
