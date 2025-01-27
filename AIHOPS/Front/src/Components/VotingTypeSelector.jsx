@@ -18,7 +18,6 @@ const VotingTypeSelector = ({
         <button 
           className={`voting-type-btn ${isFactorsVoted ? 'completed' : ''}`}
           onClick={() => onSelectVotingType('factors')}
-          disabled = {isFactorsVoted}
         >
           Vote on Factors
           {isFactorsVoted && <span className="check-mark">✓</span>}
@@ -26,7 +25,6 @@ const VotingTypeSelector = ({
         <button 
           className={`voting-type-btn ${isDScoreVoted ? 'completed' : ''}`}
           onClick={() => onSelectVotingType('dscore')} 
-          disabled = {isDScoreVoted} // Changed to match prop name
         >
           Vote on D-Score
           {isDScoreVoted && <span className="check-mark">✓</span>}
