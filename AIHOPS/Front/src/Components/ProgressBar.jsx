@@ -59,9 +59,9 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
   return (
     <div className="progress-container">
       <div className="sections-header">
-        <div className="section-title design">Design Project</div>
-        <div className="section-title data">Data Collection</div>
-        <div className="section-title result">Result Analysis</div>
+        <div className="section-title design" style={{ fontWeight: 'bold', color: 'black' }}>Design Project</div>
+        <div className="section-title data" style={{ fontWeight: 'bold', color: 'black' }}>Data Collection</div>
+        <div className="section-title result" style={{ fontWeight: 'bold', color: 'black' }}>Result Analysis</div>
       </div>
       
       <div className="progress-steps">

@@ -20,19 +20,19 @@
 .section-title.design {
   background-color: #e8f5e9;
   margin-right: 5px;
-  width: 585px; /* Set a specific width */
+  width: 587px; /* Set a specific width */
 }
 
 .section-title.data {
   background-color: #f3e5f5;
   margin: 0 0px;
-  width: 443px; /* Set a specific width */
+  width: 442px; /* Set a specific width */
 }
 
 .section-title.result {
   background-color: #ffebee;
   margin-left: 5px;
-  width: 147px; /* Set a specific width */
+  width: 146px; /* Set a specific width */
 }
 
 .progress-steps {
@@ -165,5 +165,5 @@
 }
 
 .analyze-btn:hover {
-  background-color: #4b8383;
+  background-color: #50c1c1;
 }
