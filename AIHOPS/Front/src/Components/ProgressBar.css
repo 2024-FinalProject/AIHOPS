@@ -1,82 +1,82 @@
 .progress-container {
-    width: 100%;
-    padding: 0 10px;
-    box-sizing: border-box;
-  }
-  
-  .sections-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  
-  .section-title {
-    text-align: center;
-    font-size: 14px;
-    color: #333;
-    padding: 5px 0;
-  }
-  
-  .section-title.design {
-    background-color: #e8f5e9;
-    margin-right: 0px;
-    width: 735px; /* Set a specific width */
-  }
-  
-  .section-title.data {
-    background-color: #f3e5f5;
-    margin: 0 0px;
-    width: 290px; /* Set a specific width */
-  }
-  
-  .section-title.result {
-    background-color: #ffebee;
-    margin-left: 0px;
-    width: 145px; /* Set a specific width */
-  }
-  
-  .progress-steps {
-    display: flex;
-    gap: 4px;
-    width: 100%;
-  }
-  
-  .progress-step {
-    flex: 1;
-    min-height: 60px; /* Increased height for multi-line text */
-    padding: 8px 6px;
-    background-color: #e0e0e0;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1.2;
-    word-break: break-word;
-  }
-  
-  .progress-step.active {
-    background-color: #4CAF50;
-    color: white;
-  }
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
 
-  .progress-step-container {
-    position: relative;
-    flex: 1;
-    min-height: 30px; /* Match the new height */
+.sections-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+  padding: 5px 0;
+}
+
+.section-title.design {
+  background-color: #e8f5e9;
+  margin-right: 0px;
+  width: 735px; /* Set a specific width */
+}
+
+.section-title.data {
+  background-color: #f3e5f5;
+  margin: 0 0px;
+  width: 290px; /* Set a specific width */
+}
+
+.section-title.result {
+  background-color: #ffebee;
+  margin-left: 0px;
+  width: 145px; /* Set a specific width */
+}
+
+.progress-steps {
+  display: flex;
+  gap: 4px;
+  width: 100%;
 }
   
-  .progress-step-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%; /* Ensure it can fill the full width */
-    background-color: #4CAF50;
-    transition: width 0.3s ease;
-    border-radius: 4px;
-    z-index: 1;
+.progress-step {
+  flex: 1;
+  min-height: 32px; /* Increased height for multi-line text */
+  padding: 8px 6px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+.progress-step.active {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.progress-step-container {
+  position: relative;
+  flex: 1;
+  min-height: 30px; /* Match the new height */
+}
+  
+.progress-step-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%; /* Ensure it can fill the full width */
+  background-color: #4CAF50;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+  z-index: 1;
 }
   
 .progress-step-content {
@@ -99,70 +99,70 @@
   color: black; /* Ensure text is visible */
 }
   
-  .progress-step.assessor-progress {
-    padding: 0;
-    overflow: hidden;
-    background-color: #e0e0e0;
-    height: 30px; /* Half the original height since we're stacking */
-}
-  
-  .design-section {
-    flex: 4;
-    display: flex;
-    gap: 4px;
-  }
-  
-  .data-section {
-    flex: 3;
-    display: flex;
-    flex-direction: column; /* Change to column to stack vertically */
-    gap: 4px;
-}
-  
-  .result-section {
-    flex: 1;
-    display: flex;
-    gap: 4px;
-    width: 145px; /* Match the width from section-title.result */
-}
-  
-  /* Make sure section headers align with their content */
-  .section-headers {
-    display: flex;
-    width: 100%;
-  }
-  
-  .design-header {
-    flex: 4;
-  }
-  
-  .data-header {
-    flex: 3;
-  }
-  
-  .result-header {
-    flex: 1;
-  }
-
-  .analyze-btn {
-    width: 100%;
-    background-color: #75b7b7;
-    padding: 8px 6px;
-    margin: 0;
-    font-size: 13px;
-    min-height: 60px; /* Use min-height like other progress steps */
-    line-height: 1.2;
-    box-sizing: border-box;
-    font-family: "Courier New", Courier, monospace;
-    border: none;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    word-break: break-word;
-    flex: 1; /* Make it take full space in flex container */
+.progress-step.assessor-progress {
+  padding: 0;
+  overflow: hidden;
+  background-color: #e0e0e0;
+  height: 30px; /* Half the original height since we're stacking */
 }
 
-  .analyze-btn:hover {
-    background-color: #4b8383;
-  }
+.design-section {
+  flex: 4;
+  display: flex;
+  gap: 4px;
+}
+
+.data-section {
+  flex: 3;
+  display: flex;
+  flex-direction: column; /* Change to column to stack vertically */
+  gap: 4px;
+}
+  
+.result-section {
+  flex: 1;
+  display: flex;
+  gap: 4px;
+  width: 145px; /* Match the width from section-title.result */
+}
+
+/* Make sure section headers align with their content */
+.section-headers {
+  display: flex;
+  width: 100%;
+}
+
+.design-header {
+  flex: 4;
+}
+
+.data-header {
+  flex: 3;
+}
+
+.result-header {
+  flex: 1;
+}
+
+.analyze-btn {
+  width: 100%;
+  background-color: #75b7b7;
+  padding: 8px 6px;
+  margin: 0;
+  font-size: 13px;
+  min-height: 60px; /* Use min-height like other progress steps */
+  line-height: 1.2;
+  box-sizing: border-box;
+  font-family: "Courier New", Courier, monospace;
+  border: none;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  word-break: break-word;
+  flex: 1; /* Make it take full space in flex container */
+}
+
+.analyze-btn:hover {
+  background-color: #4b8383;
+}
