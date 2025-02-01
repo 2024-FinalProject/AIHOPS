@@ -78,11 +78,14 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
           <div className={`progress-step ${isStepActive('severity') ? 'active' : ''}`}>
             Confirm{'\n'}d Score
           </div>
+          <div className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}>
+            Invite{'\n'}Assessors
+          </div>
         </div>
         
         <div className="data-section">
           <div className="progress-step assessor-progress">
-            <div className="progress-step-container">
+            <div className={"progress-step-container"}>
               <div 
                 className="progress-step-background"
                 style={{
@@ -145,7 +148,7 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
         
         <div className="result-section">
           <button
-              className="action-btn analyze-btn"
+              className="analyze-btn action-btn"
               onClick={() => {handleAnalyzeResult()}}
           >
               Analyze{'\n'}Result

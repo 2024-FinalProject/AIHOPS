@@ -19,20 +19,20 @@
 
 .section-title.design {
   background-color: #e8f5e9;
-  margin-right: 0px;
-  width: 735px; /* Set a specific width */
+  margin-right: 5px;
+  width: 585px; /* Set a specific width */
 }
 
 .section-title.data {
   background-color: #f3e5f5;
   margin: 0 0px;
-  width: 290px; /* Set a specific width */
+  width: 443px; /* Set a specific width */
 }
 
 .section-title.result {
   background-color: #ffebee;
-  margin-left: 0px;
-  width: 145px; /* Set a specific width */
+  margin-left: 5px;
+  width: 147px; /* Set a specific width */
 }
 
 .progress-steps {
@@ -58,7 +58,7 @@
 
 .progress-step.active {
   background-color: #4CAF50;
-  color: white;
+  color: rgb(0, 0, 0);
 }
 
 .progress-step-container {
@@ -161,6 +161,7 @@
   justify-content: center;
   word-break: break-word;
   flex: 1; /* Make it take full space in flex container */
+  color: black !important;
 }
 
 .analyze-btn:hover {
