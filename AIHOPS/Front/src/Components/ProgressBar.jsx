@@ -143,7 +143,7 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
               className="action-btn analyze-btn"
               onClick={() => {handleAnalyzeResult()}}
           >
-              Analyze Result
+              Analyze{'\n'}Result
           </button>
         </div>
       </div>
