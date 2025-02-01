@@ -534,6 +534,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <div className="edit-project-popup">
                         <h3>Edit Project's Name:</h3>
                         <textarea
+                            style = {{fontFamily: '"Courier New", Courier, monospace'}}
                             className="edit-textarea"
                             defaultValue={selectedProject.name}
                             onChange={(e) => setName(e.target.value)}
@@ -548,6 +549,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <div className="edit-project-popup">
                         <h3>Edit Project's Description:</h3>
                         <textarea
+                            style = {{fontSize: '"Courier New", Courier, monospace'}}
                             className="edit-textarea"
                             defaultValue={selectedProject.description}
                             onChange={(e) => setDescription(e.target.value)}
@@ -632,6 +634,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     }
                                                     style={{
                                                         background: "#2e8b57",
+                                                        fontFamily: '"Courier New", Courier, monospace',
                                                     }}
                                                 >
                                                     Confirm Content Factors
@@ -671,7 +674,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                             onChange={(e) => setNewFactorName(e.target.value)}
                                             className="factor-name-input"
                                             placeholder="New factor name"
-                                            style={{ flex: '1' }}
+                                            style={{ flex: '1', fontFamily: '"Courier New", Courier, monospace' }}
                                         />
                                         <input
                                             type="text"
@@ -679,7 +682,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                             onChange={(e) => setNewFactorDescription(e.target.value)}
                                             className="factor-desc-input"
                                             placeholder="New factor description"
-                                            style={{ flex: '2' }}
+                                            style={{ flex: '2', fontFamily: '"Courier New", Courier, monospace' }}
                                         />
                                         <button
                                             className="action-btn view-edit-btn"
@@ -691,6 +694,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 border: 'none',
                                                 borderRadius: '4px',
                                                 cursor: 'pointer',
+                                                fontFamily: '"Courier New", Courier, monospace',
+                                                fontSize: '15px',
                                             }}
                                         >
                                             Add New Factor
@@ -741,6 +746,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                             border: 'none',
                                                             borderRadius: '4px',
                                                             cursor: 'pointer',
+                                                            fontFamily: '"Courier New", Courier, monospace',
                                                         }}
                                                     >
                                                         Delete From Pool
@@ -775,6 +781,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     border: 'none',
                                                     borderRadius: '5px',
                                                     cursor: 'pointer',
+                                                    fontFamily: '"Courier New", Courier, monospace',
                                                 }}
                                             >
                                                 Add Selected Factors
@@ -826,6 +833,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         cursor: 'pointer',
                                         transition: 'all 0.3s ease',
                                         outline: 'none',
+                                        fontFamily: '"Courier New", Courier, monospace',
                                     }}
                                     onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
                                     onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
@@ -851,6 +859,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         cursor: 'pointer',
                                         transition: 'all 0.3s ease',
                                         outline: 'none',
+                                        fontFamily: '"Courier New", Courier, monospace',
                                     }}
                                     onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
                                     onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
@@ -864,7 +873,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'editSeverityFactors':
                 return (
                     <div>
-                        <h3>Edit d-score (Severity Factors)</h3>
+                        <h2 style={{ textAlign: 'center' }}>Edit d-score:</h2>
                         <table className="severity-table">
                             <thead>
                                 <tr>
@@ -909,7 +918,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             </tbody>
                         </table>
                         <div className="severity-factors-warning">
-                            <p>Note: You cannot add or remove severity factors. You can only update their values.</p>
+                            <p style={{ textAlign: 'center' }}>Note: You cannot add or remove severity factors. You can only update their values.</p>
                         </div>
                         <div className="parent-container">
                             <button disabled={selectedProject.isActive}
@@ -999,7 +1008,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             placeholder="New member's name"
                             value={newMemberName}
                             onChange={(e) => setNewMemberName(e.target.value)}
-                            style={{ flex: '1' }}
+                            style={{ flex: '1', fontFamily: '"Courier New", Courier, monospace' }}
                             />
                             <button
                             className="action-btn add-member-btn"

@@ -124,3 +124,13 @@ body {
     align-items: center;          /* Center the button vertically */
     height: 10vh;                /* Make sure it takes full viewport height */
 }
+
+.remove-btn {
+    font-family: "Courier New", Courier, monospace !important;
+    font-size: 14px !important;
+}
+
+.add-member-btn {
+    font-family: "Courier New", Courier, monospace !important;
+    font-size: 14px !important;
+}
