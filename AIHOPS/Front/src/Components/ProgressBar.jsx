@@ -81,9 +81,6 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
         </div>
         
         <div className="data-section">
-          <div className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}>
-            Invite{'\n'}Assessors
-          </div>
           <div className="progress-step assessor-progress">
             <div className="progress-step-container">
               <div 
