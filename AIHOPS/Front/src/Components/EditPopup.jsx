@@ -960,7 +960,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
                         {/* Remove invited members section: */}
                         <p>
-                        {!selectedProject.isActive && <strong>Invited Members:</strong>}
+                        {!selectedProject.isActive && <strong>To be invited members:</strong>}
                         </p>
                         {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
                             <ul className="members-list">
@@ -971,12 +971,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                     className="remove-btn"
                                     onClick={() => handleRemoveMember(pendingMember)}
                                 >
-                                Remove Invited Member
+                                Remove Invitation
                                 </button>}
                                 </li>
                             ))}
                             </ul>
                         )}
+                        {!selectedProject.isActive && <div className="severity-factors-warning">
+                            <p style={{ textAlign: 'center', fontSize: '17px'}}>Note: To be invited members will be invited only once the project has been published.</p>
+                        </div>}
                         {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p> There are currently no invited members </p>)}
                         
 
