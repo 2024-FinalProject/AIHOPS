@@ -84,57 +84,65 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
           <div className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}>
             Invite{'\n'}Assessors
           </div>
-          <div
-            className={`progress-step ${
-              projectsProgress.pending_amount + projectsProgress.member_count - 1 > 0 &&
-              (projectsProgress.member_count - 1) / (projectsProgress.pending_amount + projectsProgress.member_count - 1) === 1
-                ? 'active' // Add green background only if 100%
-                : ''
-            }`}
-          >
-            Assessors{'\n'}Confirmed
-            <span>
-              {(() => {
-                /* Subtract 1 from the amount and from the member.count (owner doesn't count here)*/
-                const totalMembers = projectsProgress.pending_amount + projectsProgress.member_count -1;
-
-                if (totalMembers === 0) {
-                  return `0% (0/0)`; // No members or pending invites
-                }
-
-                const percentage = Math.round(((projectsProgress.member_count - 1) / totalMembers) * 100);
-
-                if (projectsProgress.member_count - 1 === 0) {
-                  return `0% (0/${projectsProgress.pending_amount})`; // No confirmed members
-                }
-
-                return `${percentage}% (${projectsProgress.member_count - 1}/${totalMembers})`; // Normal case
-              })()}
-            </span>
+          <div className="progress-step assessor-progress">
+            <div className="progress-step-container">
+              <div 
+                className="progress-step-background"
+                style={{
+                  width: (() => {
+                    const totalMembers = projectsProgress.pending_amount + projectsProgress.member_count - 1;
+                    if (totalMembers === 0) return '0%';
+                    const percentage = ((projectsProgress.member_count - 1) / totalMembers) * 100;
+                    return `${percentage}%`;
+                  })()
+                }}
+              />
+              <div className="progress-step-content">
+                Assessors{'\n'}Confirmed
+                <span>
+                  {(() => {
+                    const totalMembers = projectsProgress.pending_amount + projectsProgress.member_count - 1;
+                    if (totalMembers === 0) {
+                      return `0% (0/0)`;
+                    }
+                    const percentage = Math.round(((projectsProgress.member_count - 1) / totalMembers) * 100);
+                    if (projectsProgress.member_count - 1 === 0) {
+                      return `0% (0/${projectsProgress.pending_amount})`;
+                    }
+                    return `${percentage}% (${projectsProgress.member_count - 1}/${totalMembers})`;
+                  })()}
+                </span>
+              </div>
+            </div>
           </div>
-          <div
-            className={`progress-step ${
-              projectsProgress.member_count > 0 &&
-              projectsProgress.voted_amount / projectsProgress.member_count === 1
-                ? 'active' // Green background only if 100%
-                : ''
-            }`}
-          >
-            Survey{'\n'}Completed
-            <span>
-              {(() => {
-                const totalMembers = projectsProgress.member_count || 0;
-                const votedAmount = projectsProgress.voted_amount || 0;
-
-                if (totalMembers === 0) {
-                  return `0% (0/0)`; // No members
-                }
-
-                const percentage = Math.round((votedAmount / totalMembers) * 100);
-
-                return `${percentage}% (${votedAmount}/${totalMembers})`; // Display percentage and fraction
-              })()}
-            </span>
+          <div className="progress-step assessor-progress">
+            <div className="progress-step-container">
+              <div 
+                className="progress-step-background"
+                style={{
+                  width: (() => {
+                    const totalMembers = projectsProgress.member_count || 0;
+                    const votedAmount = projectsProgress.voted_amount || 0;
+                    if (totalMembers === 0) return '0%';
+                    return `${(votedAmount / totalMembers) * 100}%`;
+                  })()
+                }}
+              />
+              <div className="progress-step-content">
+                Survey{'\n'}Completed
+                <span>
+                  {(() => {
+                    const totalMembers = projectsProgress.member_count || 0;
+                    const votedAmount = projectsProgress.voted_amount || 0;
+                    if (totalMembers === 0) {
+                      return `0% (0/0)`;
+                    }
+                    const percentage = Math.round((votedAmount / totalMembers) * 100);
+                    return `${percentage}% (${votedAmount}/${totalMembers})`;
+                  })()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
         
