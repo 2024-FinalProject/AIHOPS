@@ -114,3 +114,9 @@ button:disabled {
   width: 20px;
   background-color: #aaa;
 }
+
+.edit-btn {
+  font-family: "Courier New", Courier, monospace !important;
+  width: auto !important;                /* Allows width to adjust based on content */
+  max-width: 400px !important;           /* Maximum width for the button */
+}

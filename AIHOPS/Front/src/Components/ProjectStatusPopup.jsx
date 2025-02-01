@@ -70,7 +70,7 @@ const ProjectStatusPopup = ({
             className="action-btn edit-btn"
             onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
           >
-            Edit d-score (Severity Factors)
+            Edit d-Score
           </button>
         </div>
         <div>
@@ -84,7 +84,7 @@ const ProjectStatusPopup = ({
         <div>
           {selectedProject.isActive && (
             <button
-              className="action-btn archive-btn"
+              className="action-btn edit-btn"
               onClick={() => handleArchive(selectedProject.id, selectedProject.name)}
             >
               Archive
@@ -92,7 +92,7 @@ const ProjectStatusPopup = ({
           )}
           {!selectedProject.isActive && (
             <button
-              className="action-btn publish-btn"
+              className="action-btn edit-btn"
               onClick={() => handlePublish(selectedProject.id, selectedProject.name)}
             >
               Publish
