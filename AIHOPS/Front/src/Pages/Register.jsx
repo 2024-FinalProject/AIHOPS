@@ -44,7 +44,6 @@ const Register = () => {
   return (
     <div className="register-container">
       <div className="register-card">
-        <h2 className="text-center mb-4">Register</h2>
         <form onSubmit={handleRegister}>
           <div className="register-form-group">
             <input
@@ -54,6 +53,7 @@ const Register = () => {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               required
+              style = {{fontFamily: '"Courier New", Courier, monospace'}}
             />
           </div>
 
@@ -65,10 +65,11 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              style = {{fontFamily: '"Courier New", Courier, monospace'}}
             />
           </div>
 
-          <button type="submit" className="register-submit-btn">
+          <button type="submit" className="register-submit-btn" style = {{fontFamily: '"Courier New", Courier, monospace'}}>
             Register
           </button>
         </form>
