@@ -365,6 +365,12 @@ def get_member_votes():
     res = server.get_member_vote_on_project(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "votes": res.result if res.success else None})
 
+@app.route("/project/get-factor-votes", methods=["GET"])
+def get_project_factors_votes():
+    cookie = request.args.get("cookie", type=int)
+    pid = request.args.get("pid", type=int)
+    res = server.get_project_factors_votes(cookie, pid)
+    return jsonify({"message": res.msg, "success": res.success, "votes": res.result if res.success else None})
 
 
 # run the backed server

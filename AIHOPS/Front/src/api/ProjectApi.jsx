@@ -233,25 +233,39 @@ export const submitFactorVote = async (cookie, pid, factorId, score) => {
     });
 }
 
-  export const getMemberVoteOnProject = async (cookie, projectId) => {
+export const getMemberVoteOnProject = async (cookie, projectId) => {
     try {
-      const response = await axios.get(`${API_URL}/project/get-member-votes`, {
+        const response = await axios.get(`${API_URL}/project/get-member-votes`, {
         params: { cookie,
             pid: projectId //explicitly pass the project id because type mismatch, don't change this!
-         }
-      });
-      return response;
+            }
+        });
+        return response;
     } catch (error) {
-      throw error;
+        throw error;
     }
-  };
+};
+
+
+export const getProjectFactorVotes = async (cookie, projectId) => {
+    try {
+        const response = await axios.get(`${API_URL}/project/get-factor-votes`, {
+        params: { cookie,
+            pid: projectId //explicitly pass the project id because type mismatch, don't change this!
+            }
+        });
+        return response;
+    } catch (error) {
+        throw error;
+    }
+};
 
 
 export const getProjectsMember = async (cookie) => {
     return await axios.get(`${API_URL}/project/get-projects-member`, {
         params: { cookie }
     });
-}
+};
 
 
 export const submitDScoreVotes = async (cookie, projectId, votes) => {

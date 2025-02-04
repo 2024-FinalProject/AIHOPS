@@ -164,6 +164,12 @@ class VoteManager:
                     }
         return results
 
+    def get_project_factors_votes(self):
+        fids = list(self.factors.getKeys())  # Ensure it's a list
+        return {
+            fid: [scores[fid] for scores in self.factors_votes.values() if fid in scores]
+            for fid in fids
+        }
 
     def load_factors(self):
         join_condition = DBProjectFactors.factor_id == DBFactors.id

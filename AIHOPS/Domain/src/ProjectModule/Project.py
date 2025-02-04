@@ -206,12 +206,13 @@ class Project:
         score_res = self.vote_manager.get_score(copy.deepcopy(self.severity_factors))
         score_res["assessors"] = [pending_amount, self.members.size(), voted_amount]
         return ResponseSuccessObj(f"retrieving score for {self.pid}",score_res)
+    
+    def get_project_factors_votes(self):
+        return ResponseSuccessObj(f"retriveing scores for factors for project id {self.pid}", self.vote_manager.get_project_factors_votes())
 
     def get_member_votes(self, actor):
         self._verify_member(actor)
         return self.vote_manager.get_member_votes(actor)
-
-
 
     def __eq__(self, other):
         return (

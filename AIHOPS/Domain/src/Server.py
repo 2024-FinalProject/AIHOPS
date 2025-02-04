@@ -383,6 +383,16 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get score: {e}")
         
+    def get_project_factors_votes(self, cookie, pid):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.project_manager.get_project_factors_votes(pid, session.user_name)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get project factors votes: {e}")
+        
     def approve_member(self, cookie, pid):
         try:
             res = self.get_session_member(cookie)
