@@ -309,11 +309,13 @@ const ProjectsManagement = () => {
                         )}
     
                         {projects.length > 0 && (
-                            <h2 style={{ textAlign: 'center' }}>Manage Existing Projects:</h2>
+                            <h2 style={{ textAlign: 'center', fontFamily: '"Courier New", Courier, monospace'}}>
+                              Manage Existing Projects:
+                            </h2>
                         )}
     
                         {sortProjects.map((project) => (
-                            <div key={project.id} className="project-card">
+                            <div key={project.id} className="project-card" style={{fontFamily: '"Courier New", Courier, monospace'}}>
                                 <div className="project-info">
                                     <span style={{ display: 'block' }}>
                                         <strong>Name:</strong> {project.name}

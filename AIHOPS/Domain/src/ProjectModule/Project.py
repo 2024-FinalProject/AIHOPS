@@ -203,7 +203,7 @@ class Project:
         voted_amount = self.vote_manager.get_partially_voted_amount()
         if voted_amount == 0:
             return ResponseFailMsg(f"voted amount is 0")
-        score_res = self.vote_manager.get_score(self.severity_factors)
+        score_res = self.vote_manager.get_score(copy.deepcopy(self.severity_factors))
         score_res["assessors"] = [pending_amount, self.members.size(), voted_amount]
         return ResponseSuccessObj(f"retrieving score for {self.pid}",score_res)
 

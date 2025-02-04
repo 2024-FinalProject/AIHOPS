@@ -1,7 +1,7 @@
 /* General Navbar Styling */
 .navbar {
     background-color: #8d99a5; /* Dark background */
-    padding: 0 20px; /* Padding for top and bottom, left and right */
+    padding: 0 0px; /* Padding for top and bottom, left and right */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
     font-family: 'Courier New', Courier, monospace;
 }
