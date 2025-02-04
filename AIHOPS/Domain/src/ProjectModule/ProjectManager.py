@@ -326,6 +326,10 @@ class ProjectManager():
     def get_member_votes(self, pid, actor):
         project = self._find_project(pid)
         return project.get_member_votes(actor)
+    
+    def get_project_factors_votes(self, pid, actor):
+        project = self._verify_owner(pid, actor)
+        return project.get_project_factors_votes()
 
     # --------  data collection ----------------------
     # TODO: remove?

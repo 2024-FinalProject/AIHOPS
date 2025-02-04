@@ -5,55 +5,71 @@ import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip } fro
 // Register required components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
-const Histogram = ({ factors, factorslist }) => {
-    // Convert factors to an array if it's not already one
-    const factorsArray = Array.isArray(factors) ? factors : Object.values(factors);
-
-    // Extract average values
-    const data = factorsArray.map(factor => factor.avg);
-    const voteCounts = factorsArray.map(factor => factor.vote_count);
-
-    // Create bins dynamically based on min and max values
-    const minValue = 1;
-    const maxValue = data.length;
-    const bins = Array.from({ length: maxValue - minValue + 1 }, (_, i) => minValue + i);
+const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
+    // Convert factors object to an array
+    const factorsArray = Array.isArray(factors)
+        ? factors
+        : Object.entries(factors).map(([key, value]) => ({
+            ...value,
+            fid: parseInt(key) // Convert key to integer
+        }));
 
     // Ensure factorslist is an array and extract names
-    const factorNames = Array.isArray(factorslist) 
+    const factorNames = Array.isArray(factorslist)
         ? factorslist.map(factor => factor.name)
         : factorsArray.map(factor => factor.name);
 
-    // Chart data
+    // Standard deviation calculation function
+    const calculateStdDev = (fid, votes) => {
+        if (!votes || votes.length === 0) return 0;
+
+        // Compute mean
+        const avg = votes.reduce((sum, v) => sum + v, 0) / votes.length;
+
+        // Compute standard deviation
+        const squaredDiffs = votes.map(vote => Math.pow(vote - avg, 2));
+        const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / votes.length;
+        return Math.sqrt(variance);
+    };
+
+    // Extract average scores and compute standard deviations
+    const data = factorsArray.map(factor => factor.avg);
+    const standardDeviations = factorsArray.map(factor => {
+        const votes = factorVotes[factor.fid] || [];
+        return calculateStdDev(factor.fid, votes);
+    });
+
+    // Chart data configuration
     const chartData = {
-        labels: factorNames, // Use factor names as labels
+        labels: factorNames,
         datasets: [
             {
-                label: "Score",
+                label: "Average Score",
                 data: data,
-                backgroundColor: "rgba(75, 192, 192, 0.5)",
-                borderColor: "rgba(75, 192, 192, 1)",
-                borderWidth: 1,
+                backgroundColor: "rgba(75, 192, 192, 0.8)", // Main color for the average score
+            },
+            {
+                label: "Deviation",
+                data: standardDeviations,
+                backgroundColor: "rgba(255, 99, 132, 0.8)", // Color for deviation
             },
         ],
     };
 
-    // Chart options with tooltips displaying factor names when hovering over bars
+    // Chart options configuration
     const options = {
         responsive: true,
         maintainAspectRatio: false,
-        aspectRatio: 1,
         plugins: {
             tooltip: {
                 enabled: true,
                 callbacks: {
-                    // Customize the tooltip content
-                    title: (context) => {
-                        return context[0].label; // Show factor name as title
-                    },
+                    title: (context) => context[0].label,
                     label: (context) => {
+                        const index = context.dataIndex;
                         return [
-                            `Score: ${context.parsed.y}`,
-                            `Votes: ${voteCounts[context.dataIndex]}`
+                            `Avg: ${data[index].toFixed(2)}`,
+                            `Std Dev: ${standardDeviations[index].toFixed(2)}`,
                         ];
                     },
                 },
@@ -61,6 +77,7 @@ const Histogram = ({ factors, factorslist }) => {
         },
         scales: {
             x: {
+                stacked: true, // Enables stacking
                 title: {
                     display: true,
                     text: 'Factors',
@@ -71,6 +88,7 @@ const Histogram = ({ factors, factorslist }) => {
                 },
             },
             y: {
+                stacked: true, // Enables stacking
                 title: {
                     display: true,
                     text: 'Score',
