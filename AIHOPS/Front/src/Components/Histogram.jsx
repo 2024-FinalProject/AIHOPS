@@ -12,11 +12,11 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
 const errorBarPlugin = {
     id: "errorBars",
-    afterDraw(chart) {
+    beforeDatasetsDraw(chart) {  // Ensure error bars are drawn before the datasets
         const ctx = chart.ctx;
         const chartArea = chart.chartArea;
         ctx.save();
-        ctx.strokeStyle = "black";
+        ctx.strokeStyle = "#d32f2f";
         ctx.lineWidth = 2;
 
         chart.data.datasets[0].data.forEach((value, index) => {
@@ -26,8 +26,7 @@ const errorBarPlugin = {
             if (!bar) return;
 
             const stdDev = chart.data.datasets[0].errorBars[index] || 0;
-            
-            // Skip drawing error bars if standard deviation is 0
+
             if (stdDev === 0) return;
 
             const x = bar.x;
@@ -60,13 +59,18 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
             fid: parseInt(key)
         }));
 
-    const factorNames = Array.isArray(factorslist)
-        ? factorslist.map(factor => factor.name)
+    // For x-axis labels, split factor names by space (so they will appear like this: "Factor One")
+    const factorNamesForXAxis = Array.isArray(factorslist)
+        ? factorslist.map(factor => factor.name.split(" ")) // Splitting for x-axis labels
+        : factorsArray.map(factor => factor.name.split(" "));
+
+    // For tooltip, use the factor name directly (without splitting)
+    const factorNamesForTooltip = Array.isArray(factorslist)
+        ? factorslist.map(factor => factor.name) // Direct factor names for tooltip
         : factorsArray.map(factor => factor.name);
 
     const calculateStdDev = (fid, votes) => {
         if (!votes || votes.length === 0) return 0;
-
         const avg = votes.reduce((sum, v) => sum + v, 0) / votes.length;
         const squaredDiffs = votes.map(vote => Math.pow(vote - avg, 2));
         const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / votes.length;
@@ -79,20 +83,19 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
         return calculateStdDev(factor.fid, votes);
     });
 
-    // Calculate the maximum value including standard deviation
     const maxValueWithError = Math.max(...data.map((value, index) => value + standardDeviations[index]));
-    // Add some padding (10%) to the maximum value
     const yAxisMax = Math.ceil(maxValueWithError * 1.1);
 
     const chartData = {
-        labels: factorNames,
+        labels: factorNamesForXAxis, // Use split factor names for x-axis
         datasets: [
             {
                 label: "Average Score",
                 data: data,
                 backgroundColor: "rgba(75, 192, 192, 0.8)",
-                errorBars: standardDeviations
-            }
+                errorBars: standardDeviations,
+                zIndex: 2, // Set bars with higher zIndex than error bars
+            },
         ],
     };
 
@@ -102,8 +105,12 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
         plugins: {
             tooltip: {
                 enabled: true,
+                zIndex: 100, // Ensure tooltip is above other elements
                 callbacks: {
-                    title: (context) => context[0].label,
+                    title: (context) => {
+                        // Use the factor name without splitting for the tooltip title
+                        return factorNamesForTooltip[context[0].dataIndex]; // Get full name from tooltip data
+                    },
                     label: (context) => {
                         const index = context.dataIndex;
                         return [
@@ -119,30 +126,39 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                 title: {
                     display: true,
                     text: 'Factors',
-                    font: { size: 16 }
-                },
-                ticks: {
                     font: { size: 14 },
                 },
+                ticks: {
+                    font: { size: 12 },
+                    autoSkip: false,
+                    maxRotation: 90,
+                    minRotation: 70,
+                },
+                barPercentage: 0.6,
+                categoryPercentage: 0.8,
             },
             y: {
                 title: {
                     display: true,
                     text: 'Score',
-                    font: { size: 16 }
-                },
-                ticks: {
                     font: { size: 14 },
                 },
-                max: yAxisMax,
-                min: 0
+                ticks: {
+                    font: { size: 12 },
+                },
+            },
+        },
+        elements: {
+            bar: {
+                // Set a lower zIndex for bars to ensure error bars are behind tooltips
+                zIndex: 1,
             },
         },
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-            <div style={{ width: "70%", height: "300px" }}>
+        <div style={{ display: "flex", justifyContent: "center", fontFamily: 'Verdana, sans-serif'}}>
+            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px', fontFamily: 'Verdana, sans-serif', }}>
                 <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
             </div>
         </div>

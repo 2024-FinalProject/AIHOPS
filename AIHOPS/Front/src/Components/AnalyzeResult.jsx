@@ -161,22 +161,36 @@ const AnalyzeResult = ({
                         </div>
                     </div>
                 );                
-            case 'showContentFactorsScore':
-                return (
-                <div style={{textAlign: 'center'}} >
-                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u>Content Factors Score</u>:</h2>
-                    <div>
-                        {Object.keys(projectsScore).length > 0 ?
-                                         ProjectScore()
-                                        : "Content Factors Score not available"}
-                        
-                        {Object.keys(projectsScore).length > 0 ? 
-                             (<Histogram factors = {projectsScore.factors} factorslist = {projectFactors}  factorVotes={projectFactorsVotes}/>) 
-                            :
-                             null}
-                    </div>
-                </div>
-                );
+                case 'showContentFactorsScore':
+                    return (
+                        <div style={{
+                            textAlign: 'center',
+                            height: '100%',      // Take full height
+                            display: 'flex',     // Use flex layout
+                            flexDirection: 'column',
+                            justifyContent: 'flex-start'
+                        }}>
+                            <h2 style={{ 
+                                fontSize: '24px', 
+                                color: '#333', 
+                                marginBottom: '10px',
+                                marginTop: '10px'  // Add top margin
+                            }}><u>Content Factors Score</u>:</h2>
+                            <div style={{flex: 1}}>
+                                {Object.keys(projectsScore).length > 0 ?
+                                    ProjectScore()
+                                    : "Content Factors Score not available"}
+                                
+                                {Object.keys(projectsScore).length > 0 ? 
+                                    <Histogram 
+                                        factors={projectsScore.factors} 
+                                        factorslist={projectFactors}  
+                                        factorVotes={projectFactorsVotes}
+                                    /> 
+                                    : null}
+                            </div>
+                        </div>
+                    );
             case 'showSeverityFactorsScore':
                 return (
                 <div style ={{textAlign: 'center'}}>
