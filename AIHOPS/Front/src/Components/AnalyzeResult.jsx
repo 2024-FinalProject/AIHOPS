@@ -116,7 +116,7 @@ const AnalyzeResult = ({
         let averageScore = numFactors > 0 ? totalSum / numFactors : 0;
       
         return (
-          <h2>Current Content Factors Score: {averageScore}</h2>
+          <p style = {{fontSize: '18px'}}><b>Current Content Factors Score:</b> {averageScore}</p>
         );
     };
       
@@ -125,8 +125,10 @@ const AnalyzeResult = ({
         switch (analyzePopupType) {
             case 'showCurrentScore':
                 return (
-                <div>
-                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>Project's Score:</h2>
+                <div style={{textAlign: 'center'}} >
+                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '30px'}}>
+                         <u>Current Project Score</u>:
+                    </h2>
                     <div>
                          { Object.keys(projectsScore).length > 0 ?
                             <FormulaDisplay nominator={projectsScore.nominator} 
@@ -140,26 +142,29 @@ const AnalyzeResult = ({
                 );
             case 'showAssessorsInfo':
                 return (
-                    <div style={{ lineHeight: '1.8', margin: '20px' }}>
-                        <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>Assessors Info:</h2>
+                    <div style={{ lineHeight: '1.8', margin: '20px', textAlign: 'center'}} >
+                        <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u> Assessors Info</u>:</h2>
                         <div style={{ marginBottom: '10px' }}>
-                            <p>Number of assessors that were invited to the project: 
-                             {projectsProgress.pending_amount + projectsProgress.member_count - 1} </p>
+                            <p>Number of assessors that were invited to the project:  
+                                <span> {projectsProgress.pending_amount + projectsProgress.member_count - 1}</span>
+                            </p> 
                         </div>
                         <div style={{ marginBottom: '10px' }}>
                             <p>Number of assessors that registered to the project:
-                            {projectsProgress.member_count - 1} </p>
+                                <span> {projectsProgress.member_count - 1} </span> 
+                            </p>
                         </div>
                         <div>
                             <p>Number of assessors that assessed the innovation:
-                            {projectsProgress.voted_amount} </p>
+                                <span> {projectsProgress.voted_amount} </span>
+                            </p>
                         </div>
                     </div>
                 );                
             case 'showContentFactorsScore':
                 return (
-                <div>
-                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>Content Factors Score:</h2>
+                <div style={{textAlign: 'center'}} >
+                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u>Content Factors Score</u>:</h2>
                     <div>
                         {Object.keys(projectsScore).length > 0 ?
                                          ProjectScore()
@@ -174,11 +179,11 @@ const AnalyzeResult = ({
                 );
             case 'showSeverityFactorsScore':
                 return (
-                <div>
-                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}>d-Score (Severity Factors):</h2>
+                <div style ={{textAlign: 'center'}}>
+                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u>d-Score</u>:</h2>
                     <div>
-                        <p>Current d-Score: {Object.keys(projectsScore).length > 0 ? projectsScore.d_score : "No available d-Score"}</p>
-                        <p>Number of assessors that gave the d-Score: {projectsProgress.voted_amount} </p>
+                        <p><b>Current d-Score:</b> {Object.keys(projectsScore).length > 0 ? projectsScore.d_score : "No available d-Score"}</p>
+                        <p><b>Number of assessors that gave the d-Score:</b> {projectsProgress.voted_amount} </p>
 
                         {Object.keys(projectsScore).length > 0 ? 
                              (<SeverityHistogram severityfactors = {projectsScore.severity_damage}/>) 
