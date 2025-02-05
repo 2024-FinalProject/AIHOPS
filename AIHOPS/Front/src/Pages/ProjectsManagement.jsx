@@ -309,13 +309,13 @@ const ProjectsManagement = () => {
                         )}
     
                         {projects.length > 0 && (
-                            <h2 style={{ textAlign: 'center', fontFamily: '"Courier New", Courier, monospace'}}>
+                            <h2 style={{ textAlign: 'center'}}>
                               Manage Existing Projects:
                             </h2>
                         )}
     
                         {sortProjects.map((project) => (
-                            <div key={project.id} className="project-card" style={{fontFamily: '"Courier New", Courier, monospace'}}>
+                            <div key={project.id} className="project-card">
                                 <div className="project-info">
                                     <span style={{ display: 'block' }}>
                                         <strong>Name:</strong> {project.name}
@@ -329,14 +329,12 @@ const ProjectsManagement = () => {
                                 </div>
                                 <div className="project-actions">
                                     <button
-                                        style = {{fontFamily: '"Courier New", Courier, monospace'}}
                                         className="action-btn view-edit-btn"
                                         onClick={() => openPopup(project)}
                                     >
                                         View/Edit
                                     </button>
                                     <button
-                                        style = {{fontFamily: '"Courier New", Courier, monospace'}}
                                         className="action-btn delete-btn"
                                         onClick={() => handleDelete(project.name)}
                                     >

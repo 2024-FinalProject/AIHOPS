@@ -55,7 +55,7 @@ const Login = () => {
   return (
     <section>
       <div className="auth-container">
-        <p style = {{fontFamily: '"Courier New", Courier, monospace'}}>
+        <p>
           Don't have an account? <a href="/Register">Sign up</a>
         </p>
         <form onSubmit={handleLogin}>
@@ -64,7 +64,6 @@ const Login = () => {
             onChange={(e) => setUserName(e.target.value)}
             value={userName}
             placeholder="Enter username"
-            style = {{fontFamily: '"Courier New", Courier, monospace'}}
             required
           />
 
@@ -73,11 +72,10 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             placeholder="Enter password"
-            style = {{fontFamily: '"Courier New", Courier, monospace'}}
             required
           />
 
-          <button type="submit" style = {{fontFamily: '"Courier New", Courier, monospace'}}>Login</button>
+          <button type="submit">Login</button>
 
           {msg && <p className="error-message">{msg}</p>}
         </form>

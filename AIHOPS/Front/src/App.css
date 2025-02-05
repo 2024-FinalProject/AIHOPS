@@ -1,7 +1,12 @@
 /* src/App.css */
+
+html {
+  font-family: Verdana, sans-serif !important;
+}
+
 body {
   background-color: #f5f5f5;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Verdana, sans-serif !important;
 }
 
 .container {
