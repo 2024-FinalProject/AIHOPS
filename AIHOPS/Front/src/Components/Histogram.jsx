@@ -1,62 +1,101 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
-import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip } from "chart.js";
+import {
+    Chart as ChartJS,
+    BarElement,
+    CategoryScale,
+    LinearScale,
+    Tooltip
+} from "chart.js";
 
-// Register required components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
+const errorBarPlugin = {
+    id: "errorBars",
+    afterDraw(chart) {
+        const ctx = chart.ctx;
+        const chartArea = chart.chartArea;
+        ctx.save();
+        ctx.strokeStyle = "black";
+        ctx.lineWidth = 2;
+
+        chart.data.datasets[0].data.forEach((value, index) => {
+            const meta = chart.getDatasetMeta(0);
+            const bar = meta.data[index];
+
+            if (!bar) return;
+
+            const stdDev = chart.data.datasets[0].errorBars[index] || 0;
+            
+            // Skip drawing error bars if standard deviation is 0
+            if (stdDev === 0) return;
+
+            const x = bar.x;
+            const yTop = bar.y - stdDev * (chartArea.bottom - chartArea.top) / chart.scales.y.max;
+            const yBottom = bar.y + stdDev * (chartArea.bottom - chartArea.top) / chart.scales.y.max;
+
+            ctx.beginPath();
+            ctx.moveTo(x, yTop);
+            ctx.lineTo(x, yBottom);
+            ctx.stroke();
+
+            const capWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(x - capWidth, yTop);
+            ctx.lineTo(x + capWidth, yTop);
+            ctx.moveTo(x - capWidth, yBottom);
+            ctx.lineTo(x + capWidth, yBottom);
+            ctx.stroke();
+        });
+
+        ctx.restore();
+    }
+};
+
 const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
-    // Convert factors object to an array
     const factorsArray = Array.isArray(factors)
         ? factors
         : Object.entries(factors).map(([key, value]) => ({
             ...value,
-            fid: parseInt(key) // Convert key to integer
+            fid: parseInt(key)
         }));
 
-    // Ensure factorslist is an array and extract names
     const factorNames = Array.isArray(factorslist)
         ? factorslist.map(factor => factor.name)
         : factorsArray.map(factor => factor.name);
 
-    // Standard deviation calculation function
     const calculateStdDev = (fid, votes) => {
         if (!votes || votes.length === 0) return 0;
 
-        // Compute mean
         const avg = votes.reduce((sum, v) => sum + v, 0) / votes.length;
-
-        // Compute standard deviation
         const squaredDiffs = votes.map(vote => Math.pow(vote - avg, 2));
         const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / votes.length;
         return Math.sqrt(variance);
     };
 
-    // Extract average scores and compute standard deviations
     const data = factorsArray.map(factor => factor.avg);
     const standardDeviations = factorsArray.map(factor => {
         const votes = factorVotes[factor.fid] || [];
         return calculateStdDev(factor.fid, votes);
     });
 
-    // Chart data configuration
+    // Calculate the maximum value including standard deviation
+    const maxValueWithError = Math.max(...data.map((value, index) => value + standardDeviations[index]));
+    // Add some padding (10%) to the maximum value
+    const yAxisMax = Math.ceil(maxValueWithError * 1.1);
+
     const chartData = {
         labels: factorNames,
         datasets: [
             {
                 label: "Average Score",
                 data: data,
-                backgroundColor: "rgba(75, 192, 192, 0.8)", // Main color for the average score
-            },
-            {
-                label: "Deviation",
-                data: standardDeviations,
-                backgroundColor: "rgba(255, 99, 132, 0.8)", // Color for deviation
-            },
+                backgroundColor: "rgba(75, 192, 192, 0.8)",
+                errorBars: standardDeviations
+            }
         ],
     };
 
-    // Chart options configuration
     const options = {
         responsive: true,
         maintainAspectRatio: false,
@@ -77,7 +116,6 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
         },
         scales: {
             x: {
-                stacked: true, // Enables stacking
                 title: {
                     display: true,
                     text: 'Factors',
@@ -88,7 +126,6 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                 },
             },
             y: {
-                stacked: true, // Enables stacking
                 title: {
                     display: true,
                     text: 'Score',
@@ -97,6 +134,8 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                 ticks: {
                     font: { size: 14 },
                 },
+                max: yAxisMax,
+                min: 0
             },
         },
     };
@@ -104,7 +143,7 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
     return (
         <div style={{ display: "flex", justifyContent: "center" }}>
             <div style={{ width: "70%", height: "300px" }}>
-                <Bar data={chartData} options={options} />
+                <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
             </div>
         </div>
     );
