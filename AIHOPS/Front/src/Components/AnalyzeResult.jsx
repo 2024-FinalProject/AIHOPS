@@ -113,7 +113,7 @@ const AnalyzeResult = ({
       
         let numFactors = Object.keys(projectsScore.factors).length;
       
-        let averageScore = numFactors > 0 ? totalSum / numFactors : 0;
+        let averageScore = numFactors > 0 ? (totalSum / numFactors).toFixed(3) : 0;
       
         return (
           <p style = {{fontSize: '18px'}}><b>Current Content Factors Score:</b> {averageScore}</p>
@@ -196,7 +196,8 @@ const AnalyzeResult = ({
                 <div style ={{textAlign: 'center'}}>
                     <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u>d-Score</u>:</h2>
                     <div>
-                        <p><b>Current d-Score:</b> {Object.keys(projectsScore).length > 0 ? projectsScore.d_score : "No available d-Score"}</p>
+                        <p><b>Current d-Score:</b> {Object.keys(projectsScore).length > 0 ? (projectsScore.d_score ? parseFloat(projectsScore.d_score.toFixed(3)) : "No available d-Score") : "No available d-Score"}
+                        </p>
                         <p><b>Number of assessors that gave the d-Score:</b> {projectsProgress.voted_amount} </p>
 
                         {Object.keys(projectsScore).length > 0 ? 

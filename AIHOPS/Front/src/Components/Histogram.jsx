@@ -1,13 +1,8 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
-import {
-    Chart as ChartJS,
-    BarElement,
-    CategoryScale,
-    LinearScale,
-    Tooltip
-} from "chart.js";
+import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip } from "chart.js";
 
+// Register required components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
 const errorBarPlugin = {
@@ -108,7 +103,6 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                 zIndex: 100, // Ensure tooltip is above other elements
                 callbacks: {
                     title: (context) => {
-                        // Use the factor name without splitting for the tooltip title
                         return factorNamesForTooltip[context[0].dataIndex]; // Get full name from tooltip data
                     },
                     label: (context) => {
@@ -118,6 +112,12 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                             `Std Dev: ${standardDeviations[index].toFixed(2)}`,
                         ];
                     },
+                },
+                titleFont: {
+                    family: 'Verdana, sans-serif',
+                },
+                bodyFont: {
+                    family: 'Verdana, sans-serif',
                 },
             },
         },
@@ -132,7 +132,8 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                     font: { size: 12 },
                     autoSkip: false,
                     maxRotation: 90,
-                    minRotation: 70,
+                    minRotation: 0,
+                    align: 'left',
                 },
                 barPercentage: 0.6,
                 categoryPercentage: 0.8,
@@ -150,15 +151,14 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
         },
         elements: {
             bar: {
-                // Set a lower zIndex for bars to ensure error bars are behind tooltips
                 zIndex: 1,
             },
         },
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center", fontFamily: 'Verdana, sans-serif'}}>
-            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px', fontFamily: 'Verdana, sans-serif', }}>
+        <div style={{ display: "flex", justifyContent: "center", fontFamily: 'Verdana, sans-serif' }}>
+            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px', fontFamily: 'Verdana, sans-serif' }}>
                 <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
             </div>
         </div>

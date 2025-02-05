@@ -43,6 +43,12 @@ const SeverityHistogram = ({ severityfactors }) => {
                         `Total Votes: ${voteCount}`,
                     ],
                 },
+                titleFont: {
+                    family: 'Verdana, sans-serif',
+                },
+                bodyFont: {
+                    family: 'Verdana, sans-serif',
+                },
             },
         },
         scales: {
@@ -73,7 +79,7 @@ const SeverityHistogram = ({ severityfactors }) => {
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center" }}>
+        <div style={{ display: "flex", justifyContent: "center", fontFamily: 'Verdana, sans-serif' }}>
             <div style={{ width: "70%", height: "300px" }}>
                 <Bar data={chartData} options={options} />
             </div>
