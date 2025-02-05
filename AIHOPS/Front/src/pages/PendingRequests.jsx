@@ -160,7 +160,7 @@ const PendingRequestList = () => {
 
       {/* No Requests */}
       {!isLoading && !error && requestList.length === 0 && (
-        <p>No pending requests</p>
+        <p style = {{textAlign: 'center'}}>There are currently no pending requests</p>
       )}
 
       {/* Display Pending Requests */}
@@ -180,8 +180,7 @@ const PendingRequestList = () => {
               <div className="email-header">
                 <h4 className="email-subject">
                   <span className="underline ">Project Name:</span>
-                  <span className="underline ">{request.name}</span>
-                  {", "} {request.description}
+                  {request.name}
                 </h4>
                 <h4 className="email-subject">
                   <span className="underline ">Project Description:</span>{" "}

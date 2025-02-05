@@ -42,7 +42,7 @@ const NavBar = () => {
                 {/* MyProjects button */}
                 <li className="nav-item">
                   <Link to="/myprojects" className="nav-link nav-button">
-                    MyProjects
+                    Vote On Projects
                   </Link>
                 </li>
 
@@ -59,7 +59,7 @@ const NavBar = () => {
 
                 {/* Logout button */}
                 <li className="nav-item">
-                  <button className="nav-link nav-button logout" onClick={logout} style = {{fontFamily: '"Courier New", Courier, monospace'}}>
+                  <button className="nav-link nav-button logout" onClick={logout}>
                     Logout
                   </button>
                 </li>

@@ -36,11 +36,11 @@ const ProjectStatusPopup = ({
         <span className="close-popup" onClick={closePopup}>
           &times;
         </span>
-        <h3>Project's Status:</h3>
+        <h3><u>Project's Status</u>:</h3>
         <div className="project-edit-container">
         <ProgressBar project={selectedProject} handleAnalyzeResult = {handleAnalyzeResult} />
         </div>
-        <h3>Project's Actions:</h3>
+        <h3><u>Project's Actions</u>:</h3>
         <div>
           <button disabled = {selectedProject.isActive}
             className="action-btn edit-btn"

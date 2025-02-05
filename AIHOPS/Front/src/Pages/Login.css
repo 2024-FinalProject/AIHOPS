@@ -2,11 +2,13 @@
 .auth-container {
     max-width: 400px;
     margin: 100px auto;
-    padding: 2rem;
+    padding: 1.5rem;
+    padding-top: 0.5rem;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     background-color: #f5f5f5;
     text-align: center;
+    font-family: Verdana, sans-serif !important;
 }
 
 .auth-container h2 {
@@ -28,6 +30,7 @@
     margin-bottom: 1rem;
     border-radius: 4px;
     border: 1px solid #ddd;
+    font-family: Verdana, sans-serif !important;
 }
 
 .auth-container button {
@@ -39,6 +42,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-family: Verdana, sans-serif !important;
 }
 
 .auth-container button:hover {

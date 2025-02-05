@@ -53,7 +53,6 @@ const Register = () => {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               required
-              style = {{fontFamily: '"Courier New", Courier, monospace'}}
             />
           </div>
 
@@ -65,11 +64,10 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              style = {{fontFamily: '"Courier New", Courier, monospace'}}
             />
           </div>
 
-          <button type="submit" className="register-submit-btn" style = {{fontFamily: '"Courier New", Courier, monospace'}}>
+          <button type="submit" className="register-submit-btn">
             Register
           </button>
         </form>

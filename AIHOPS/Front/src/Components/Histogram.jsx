@@ -5,66 +5,106 @@ import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip } fro
 // Register required components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
+const errorBarPlugin = {
+    id: "errorBars",
+    beforeDatasetsDraw(chart) {  // Ensure error bars are drawn before the datasets
+        const ctx = chart.ctx;
+        const chartArea = chart.chartArea;
+        ctx.save();
+        ctx.strokeStyle = "#d32f2f";
+        ctx.lineWidth = 2;
+
+        chart.data.datasets[0].data.forEach((value, index) => {
+            const meta = chart.getDatasetMeta(0);
+            const bar = meta.data[index];
+
+            if (!bar) return;
+
+            const stdDev = chart.data.datasets[0].errorBars[index] || 0;
+
+            if (stdDev === 0) return;
+
+            const x = bar.x;
+            const yTop = bar.y - stdDev * (chartArea.bottom - chartArea.top) / chart.scales.y.max;
+            const yBottom = bar.y + stdDev * (chartArea.bottom - chartArea.top) / chart.scales.y.max;
+
+            ctx.beginPath();
+            ctx.moveTo(x, yTop);
+            ctx.lineTo(x, yBottom);
+            ctx.stroke();
+
+            const capWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(x - capWidth, yTop);
+            ctx.lineTo(x + capWidth, yTop);
+            ctx.moveTo(x - capWidth, yBottom);
+            ctx.lineTo(x + capWidth, yBottom);
+            ctx.stroke();
+        });
+
+        ctx.restore();
+    }
+};
+
 const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
-    // Convert factors object to an array
     const factorsArray = Array.isArray(factors)
         ? factors
         : Object.entries(factors).map(([key, value]) => ({
             ...value,
-            fid: parseInt(key) // Convert key to integer
+            fid: parseInt(key)
         }));
 
-    // Ensure factorslist is an array and extract names
-    const factorNames = Array.isArray(factorslist)
-        ? factorslist.map(factor => factor.name)
+    // For x-axis labels, split factor names by space (so they will appear like this: "Factor One")
+    const factorNamesForXAxis = Array.isArray(factorslist)
+        ? factorslist.map(factor => factor.name.split(" ")) // Splitting for x-axis labels
+        : factorsArray.map(factor => factor.name.split(" "));
+
+    // For tooltip, use the factor name directly (without splitting)
+    const factorNamesForTooltip = Array.isArray(factorslist)
+        ? factorslist.map(factor => factor.name) // Direct factor names for tooltip
         : factorsArray.map(factor => factor.name);
 
-    // Standard deviation calculation function
     const calculateStdDev = (fid, votes) => {
         if (!votes || votes.length === 0) return 0;
-
-        // Compute mean
         const avg = votes.reduce((sum, v) => sum + v, 0) / votes.length;
-
-        // Compute standard deviation
         const squaredDiffs = votes.map(vote => Math.pow(vote - avg, 2));
         const variance = squaredDiffs.reduce((sum, diff) => sum + diff, 0) / votes.length;
         return Math.sqrt(variance);
     };
 
-    // Extract average scores and compute standard deviations
     const data = factorsArray.map(factor => factor.avg);
     const standardDeviations = factorsArray.map(factor => {
         const votes = factorVotes[factor.fid] || [];
         return calculateStdDev(factor.fid, votes);
     });
 
-    // Chart data configuration
+    const maxValueWithError = Math.max(...data.map((value, index) => value + standardDeviations[index]));
+    const yAxisMax = Math.ceil(maxValueWithError * 1.1);
+
     const chartData = {
-        labels: factorNames,
+        labels: factorNamesForXAxis, // Use split factor names for x-axis
         datasets: [
             {
                 label: "Average Score",
                 data: data,
-                backgroundColor: "rgba(75, 192, 192, 0.8)", // Main color for the average score
-            },
-            {
-                label: "Deviation",
-                data: standardDeviations,
-                backgroundColor: "rgba(255, 99, 132, 0.8)", // Color for deviation
+                backgroundColor: "rgba(75, 192, 192, 0.8)",
+                errorBars: standardDeviations,
+                zIndex: 2, // Set bars with higher zIndex than error bars
             },
         ],
     };
 
-    // Chart options configuration
     const options = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             tooltip: {
                 enabled: true,
+                zIndex: 100, // Ensure tooltip is above other elements
                 callbacks: {
-                    title: (context) => context[0].label,
+                    title: (context) => {
+                        return factorNamesForTooltip[context[0].dataIndex]; // Get full name from tooltip data
+                    },
                     label: (context) => {
                         const index = context.dataIndex;
                         return [
@@ -73,38 +113,53 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                         ];
                     },
                 },
+                titleFont: {
+                    family: 'Verdana, sans-serif',
+                },
+                bodyFont: {
+                    family: 'Verdana, sans-serif',
+                },
             },
         },
         scales: {
             x: {
-                stacked: true, // Enables stacking
                 title: {
                     display: true,
                     text: 'Factors',
-                    font: { size: 16 }
-                },
-                ticks: {
                     font: { size: 14 },
                 },
+                ticks: {
+                    font: { size: 12 },
+                    autoSkip: false,
+                    maxRotation: 90,
+                    minRotation: 0,
+                    align: 'left',
+                },
+                barPercentage: 0.6,
+                categoryPercentage: 0.8,
             },
             y: {
-                stacked: true, // Enables stacking
                 title: {
                     display: true,
                     text: 'Score',
-                    font: { size: 16 }
-                },
-                ticks: {
                     font: { size: 14 },
                 },
+                ticks: {
+                    font: { size: 12 },
+                },
+            },
+        },
+        elements: {
+            bar: {
+                zIndex: 1,
             },
         },
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-            <div style={{ width: "70%", height: "300px" }}>
-                <Bar data={chartData} options={options} />
+        <div style={{ display: "flex", justifyContent: "center", fontFamily: 'Verdana, sans-serif' }}>
+            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px', fontFamily: 'Verdana, sans-serif' }}>
+                <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
             </div>
         </div>
     );

@@ -116,7 +116,7 @@ button:disabled {
 }
 
 .edit-btn {
-  font-family: "Courier New", Courier, monospace !important;
+  font-family: Verdana, sans-serif !important;
   width: auto !important;                /* Allows width to adjust based on content */
   max-width: 400px !important;           /* Maximum width for the button */
 }

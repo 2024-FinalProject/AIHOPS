@@ -16,6 +16,7 @@ html, body {
   width: 100%;
   background-color: #f5f5f5;
   padding-top: 10%; /* Add padding to move the content below the navbar */
+  font-family: Verdana, sans-serif !important;
 }
 
 .welcome-header {
@@ -23,8 +24,6 @@ html, body {
   margin-bottom: 5%;
   height: 100%;
   width: 100%;
-  font-family: 'Courier New', Courier, monospace;
-  
 }
 
 .welcome-title {
@@ -51,8 +50,6 @@ html, body {
   max-width: 60%; /* Using percentages to control max-width */
   color: #666;
   padding-bottom: 5%;
-  font-family: 'Courier New', Courier, monospace;
-
 }
 
 .pdf-link-container {

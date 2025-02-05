@@ -32,10 +32,12 @@
 .severity-input {
     width: 100%;
     padding: 5px;
+    font-family: Verdana, sans-serif !important;
 }
 
 /* Center the content and adjust the size */
 .edit-project-popup {
+    font-family: Verdana, sans-serif !important;
     position: fixed; /* Use fixed to keep the pop-up centered even when scrolling */
     top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
@@ -93,10 +95,12 @@
     padding: 12px 24px;
     font-size: 1.2rem;
     cursor: pointer;
+    max-height:fit-content;
     transition: background-color 0.3s ease, transform 0.2s ease;
     width: 100%; /* Ensures full width if you want it stretched */
     max-width: 250px; /* Limits the maximum width of the button */
     margin-top: 10px; /* Adds some spacing above the button */
+    font-family: Verdana, sans-serif !important;
 }
 
 /* Button hover effect */
@@ -126,11 +130,37 @@ body {
 }
 
 .remove-btn {
-    font-family: "Courier New", Courier, monospace !important;
+    font-family: Verdana, sans-serif !important;
     font-size: 14px !important;
 }
 
 .add-member-btn {
-    font-family: "Courier New", Courier, monospace !important;
+    font-family: Verdana, sans-serif !important;
     font-size: 14px !important;
+}
+
+.default-div{
+    font-family: Verdana, sans-serif !important;
+    font-size: 15px !important;
+}
+
+.view-edit-btn{
+    font-family: Verdana, sans-serif !important;
+}
+
+.factor-name-input{
+    font-family: Verdana, sans-serif !important;
+}
+
+.factor-desc-input{
+    font-family: Verdana, sans-serif !important;
+}
+
+.member-name{
+    font-family: Verdana, sans-serif !important;
+    font-size: 15px !important;
+}
+
+.add-member-input{
+    font-family: Verdana, sans-serif !important;
 }

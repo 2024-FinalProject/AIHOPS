@@ -1,13 +1,18 @@
 /* General Layout */
 body {
-    font-family: Arial, sans-serif;
+  font-family: Verdana, sans-serif !important;
     margin: 0;
     padding: 0;
     background-color: #f4f4f9;
   }
+
+  html{
+    font-family: Verdana, sans-serif !important;
+  }
   
   .container {
     padding: 20px;
+    font-family: Verdana, sans-serif !important;
   }
   
   .header {
@@ -29,7 +34,7 @@ body {
   /* Stylish loading text */
   .loading-text {
     font-size: 24px;
-    font-family: 'Arial', sans-serif;
+    font-family: Verdana, sans-serif !important;
     font-weight: bold;
     color: #333;
     letter-spacing: 2px;
@@ -104,6 +109,7 @@ body {
     font-weight: 500;
     transition: all 0.2s ease;
     color: white;
+    font-family: Verdana, sans-serif !important;
   }
   
   .view-edit-btn {

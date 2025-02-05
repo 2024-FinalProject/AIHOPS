@@ -284,7 +284,7 @@ const ProjectsManagement = () => {
                                     fontWeight: 'bold',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                                     transition: 'all 0.3s ease',
-                                    fontFamily: '"Courier New", Courier, monospace',
+                                    fontFamily: 'Verdana, sans-serif',
                                 }}
                                 onMouseOver={(e) => {
                                     e.target.style.transform = 'translateY(-2px)';
@@ -309,13 +309,13 @@ const ProjectsManagement = () => {
                         )}
     
                         {projects.length > 0 && (
-                            <h2 style={{ textAlign: 'center', fontFamily: '"Courier New", Courier, monospace'}}>
-                              Manage Existing Projects:
+                            <h2 style={{ textAlign: 'center'}}>
+                              <u>Manage Existing Projects:</u>
                             </h2>
                         )}
     
                         {sortProjects.map((project) => (
-                            <div key={project.id} className="project-card" style={{fontFamily: '"Courier New", Courier, monospace'}}>
+                            <div key={project.id} className="project-card">
                                 <div className="project-info">
                                     <span style={{ display: 'block' }}>
                                         <strong>Name:</strong> {project.name}
@@ -329,14 +329,12 @@ const ProjectsManagement = () => {
                                 </div>
                                 <div className="project-actions">
                                     <button
-                                        style = {{fontFamily: '"Courier New", Courier, monospace'}}
                                         className="action-btn view-edit-btn"
                                         onClick={() => openPopup(project)}
                                     >
                                         View/Edit
                                     </button>
                                     <button
-                                        style = {{fontFamily: '"Courier New", Courier, monospace'}}
                                         className="action-btn delete-btn"
                                         onClick={() => handleDelete(project.name)}
                                     >

@@ -2,7 +2,7 @@
 .email-subject,
 .email-sender,
 .email-actions button {
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Verdana, sans-serif !important;
 }
 
 
@@ -13,7 +13,7 @@
   font-weight: bold;
   color: #333;
   text-align: center;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Verdana, sans-serif !important;
   padding-top: 3cqw;
 }
 
@@ -75,7 +75,7 @@
   font-weight: bold;
   color: #333;
   text-align: center;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Verdana, sans-serif !important;
 }
 
 .email-sender {
@@ -83,7 +83,7 @@
   font-weight: bold;
   color: #333;
   text-align: center;
-  font-family: 'Courier New', Courier, monospace;
+  font-family: Verdana, sans-serif !important;
 }
 
 
