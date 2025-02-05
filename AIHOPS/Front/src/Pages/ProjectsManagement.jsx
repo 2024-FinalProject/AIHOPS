@@ -310,7 +310,7 @@ const ProjectsManagement = () => {
     
                         {projects.length > 0 && (
                             <h2 style={{ textAlign: 'center'}}>
-                              Manage Existing Projects:
+                              <u>Manage Existing Projects:</u>
                             </h2>
                         )}
     
