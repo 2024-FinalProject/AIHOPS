@@ -498,7 +498,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'analyzeResult':
                 return (
                 <div className = "default-div">
-                    <h1>Project's Status:</h1>
+                    <h1><u>Project's Status</u>:</h1>
                     <div>
                         <button
                             className="action-btn edit-btn"
@@ -532,7 +532,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'editName':
                 return (
                     <div className="edit-project-popup">
-                        <h3>Edit Project's Name:</h3>
+                        <h3 style = {{fontSize: '24px'}}><u>Edit Project's Name</u>:</h3>
                         <textarea
                             className="edit-textarea"
                             defaultValue={selectedProject.name}
@@ -546,7 +546,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'editDescription':
                 return (
                     <div className="edit-project-popup">
-                        <h3>Edit Project's Description:</h3>
+                        <h3 style = {{fontSize: '24px'}}><u>Edit Project's Description</u>:</h3>
                         <textarea
                             className="edit-textarea"
                             defaultValue={selectedProject.description}
@@ -563,7 +563,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         {showExistingContentFactors && (
                             <div>
                                 <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '10px'}}>
-                                    <b><u> Project Factors: </u></b>
+                                    <b><u> Project Factors</u>:</b>
                                 </div>
                                 {selectedProject.factors.length > 0 ? (
                                     <>
@@ -703,7 +703,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         {showPoolContentFactors && (
                             <div>
                                 <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '10px'}}>
-                                    <b><u> Factors Pool: </u></b>
+                                    <b><u> Factors Pool</u>:</b>
                                 </div>
                                 {factorsPool.length > 0 ? (
                                     <>
@@ -866,7 +866,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'editSeverityFactors':
                 return (
                     <div>
-                        <h2 style={{ textAlign: 'center' }}>Edit d-score:</h2>
+                        <h2 style={{ textAlign: 'center' }}><u>Edit d-score</u>:</h2>
                         <table className="severity-table">
                             <thead>
                                 <tr>
@@ -926,10 +926,10 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
             case 'manageAssessors':
                 return (
-                    <div className = "default-div">
+                    <div className = "default-div" style = {{textAlign: 'center'}}>
                         {/* Members Section */}
                         <p>
-                        <strong>Members:</strong>
+                        <strong><u>Members</u>:</strong>
                         </p>
                         {Object.keys(selectedProject.members).length > 0 ? (
                         <ul className="members-list">
@@ -953,7 +953,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
                         {/* Remove invited members section: */}
                         <p>
-                        {!selectedProject.isActive && <strong>To be invited members:</strong>}
+                        {!selectedProject.isActive && <strong><u>To be invited members</u>:</strong>}
                         </p>
                         {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
                             <ul className="members-list">
@@ -977,7 +977,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         
 
                         <p>
-                        {selectedProject.isActive && <strong>Pending Members:</strong>}
+                        {selectedProject.isActive && <strong><u>Pending Members</u>:</strong>}
                         </p>
                         {selectedProject.isActive && projectsPendingRequests != null && projectsPendingRequests.length > 0 && (
                             <ul className="members-list">
@@ -996,6 +996,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         )}
                         {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p> There are currently no pending requests </p>)}
 
+                        <p>
+                            <strong><u>Add New Members</u>:</strong>
+                        </p>
                         {/* Add member section */}
                         <div className="add-member-container">
                             <input
