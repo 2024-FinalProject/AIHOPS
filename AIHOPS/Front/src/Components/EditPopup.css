@@ -32,6 +32,7 @@
 .severity-input {
     width: 100%;
     padding: 5px;
+    font-family: Verdana, sans-serif !important;
 }
 
 /* Center the content and adjust the size */
@@ -152,5 +153,14 @@ body {
 }
 
 .factor-desc-input{
+    font-family: Verdana, sans-serif !important;
+}
+
+.member-name{
+    font-family: Verdana, sans-serif !important;
+    font-size: 15px !important;
+}
+
+.add-member-input{
     font-family: Verdana, sans-serif !important;
 }

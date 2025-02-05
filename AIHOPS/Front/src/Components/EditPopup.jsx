@@ -911,7 +911,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             </tbody>
                         </table>
                         <div className="severity-factors-warning">
-                            <p style={{ textAlign: 'center' }}>Note: You cannot add or remove severity factors. You can only update their values.</p>
+                            <p style={{ textAlign: 'center'}}><b>Note</b>: You cannot add or remove severity factors. You can only update their values.</p>
                         </div>
                         <div className="parent-container">
                             <button disabled={selectedProject.isActive}
@@ -926,7 +926,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
             case 'manageAssessors':
                 return (
-                    <div>
+                    <div className = "default-div">
                         {/* Members Section */}
                         <p>
                         <strong>Members:</strong>

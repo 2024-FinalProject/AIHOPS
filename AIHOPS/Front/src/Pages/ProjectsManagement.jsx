@@ -284,7 +284,7 @@ const ProjectsManagement = () => {
                                     fontWeight: 'bold',
                                     boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
                                     transition: 'all 0.3s ease',
-                                    fontFamily: '"Courier New", Courier, monospace',
+                                    fontFamily: 'Verdana, sans-serif',
                                 }}
                                 onMouseOver={(e) => {
                                     e.target.style.transform = 'translateY(-2px)';

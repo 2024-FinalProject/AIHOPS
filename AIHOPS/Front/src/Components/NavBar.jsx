@@ -59,7 +59,7 @@ const NavBar = () => {
 
                 {/* Logout button */}
                 <li className="nav-item">
-                  <button className="nav-link nav-button logout" onClick={logout} style = {{fontFamily: '"Courier New", Courier, monospace'}}>
+                  <button className="nav-link nav-button logout" onClick={logout}>
                     Logout
                   </button>
                 </li>
