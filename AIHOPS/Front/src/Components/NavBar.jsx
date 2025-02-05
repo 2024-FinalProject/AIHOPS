@@ -42,7 +42,7 @@ const NavBar = () => {
                 {/* MyProjects button */}
                 <li className="nav-item">
                   <Link to="/myprojects" className="nav-link nav-button">
-                    MyProjects
+                    Vote On Projects
                   </Link>
                 </li>
 
