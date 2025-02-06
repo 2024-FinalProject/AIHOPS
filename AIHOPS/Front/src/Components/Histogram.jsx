@@ -78,8 +78,11 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
         return calculateStdDev(factor.fid, votes);
     });
 
-    const maxValueWithError = Math.max(...data.map((value, index) => value + standardDeviations[index]));
-    const yAxisMax = Math.ceil(maxValueWithError * 1.1);
+    const maxValueWithError = Math.max(
+        ...data.map((value, index) => value + standardDeviations[index])
+    );
+    
+    const yAxisMax = Math.ceil(maxValueWithError * 1.1 * 2) / 2;  // Round to the nearest 0.5 or 1
 
     const chartData = {
         labels: factorNamesForXAxis, // Use split factor names for x-axis
@@ -100,11 +103,8 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
         plugins: {
             tooltip: {
                 enabled: true,
-                zIndex: 100, // Ensure tooltip is above other elements
                 callbacks: {
-                    title: (context) => {
-                        return factorNamesForTooltip[context[0].dataIndex]; // Get full name from tooltip data
-                    },
+                    title: (context) => factorNamesForTooltip[context[0].dataIndex],
                     label: (context) => {
                         const index = context.dataIndex;
                         return [
@@ -147,6 +147,8 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                 ticks: {
                     font: { size: 12 },
                 },
+                beginAtZero: true,
+                max: yAxisMax,  // Apply the computed y-axis max here
             },
         },
         elements: {
