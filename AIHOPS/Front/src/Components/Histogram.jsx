@@ -109,9 +109,9 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                 callbacks: {
                     title: (context) => factorNamesForTooltip[context[0].dataIndex],
                     label: (context) => {
-                        const index = context.dataIndex;
+                        const index = context.dataIndex; 
                         return [
-                            `Avg: ${data[index].toFixed(2)}`,
+                            `Average Score: ${data[index].toFixed(2)}`,
                             `Std Dev: ${standardDeviations[index].toFixed(2)}`,
                         ];
                     },

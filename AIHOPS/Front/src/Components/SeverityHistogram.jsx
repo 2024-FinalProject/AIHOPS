@@ -30,29 +30,29 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
       return (
         <div className="custom-tooltip" style={{
           backgroundColor: 'white',
-          padding: '16px',
+          padding: '10px',
           border: '1px solid #e2e8f0',
-          borderRadius: '8px',
+          borderRadius: '6px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           position: 'absolute',
-          left: `${coordinate?.x - 150}px`,
-          top: `${coordinate?.y + 50}px`,
-          width: '300px',
+          left: `${coordinate?.x - 120}px`,
+          top: `${coordinate?.y + 40}px`,
+          width: '240px',
           zIndex: 1000
         }}>
-          <h4 style={{ margin: '0 0 -10px 0', fontSize: '16px', fontWeight: 'bold' }}>
+          <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold' }}>
             {data.level}
           </h4>
-          ________________________________
-          <div style={{ margin: '8px 0' }}>
-            <p style={{ margin: '4px 0' }}>Average Score: {data.average.toFixed(3)}</p>
-            <p style={{ margin: '4px 0' }}>Weight Factor: {data.weightFactor}</p>
-            <p style={{ margin: '4px 0 -15px 0' }}>Weighted Value: {(data.average * data.weightFactor).toFixed(2)}</p>
+          <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
+          <div style={{ margin: '6px 0' }}>
+            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Average Score</u>: {data.average.toFixed(3)}</p>
+            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weight Factor</u>: {data.weightFactor}</p>
+            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weighted Value</u>: {(data.average * data.weightFactor).toFixed(2)}</p>
           </div>
-          ________________________________
+          <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
           <p style={{ 
-            margin: '2px 0 0 0',
-            fontSize: '14px',
+            margin: '4px 0 0 0',
+            fontSize: '12px',
             color: '#666'
           }}>
             {data.description}
