@@ -5,9 +5,12 @@ import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, Tooltip } fro
 // Register required components
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
+// Set the global font family for all elements
+ChartJS.defaults.font.family = 'Verdana, sans-serif';
+
 const errorBarPlugin = {
     id: "errorBars",
-    beforeDatasetsDraw(chart) {  // Ensure error bars are drawn before the datasets
+    beforeDatasetsDraw(chart) {
         const ctx = chart.ctx;
         const chartArea = chart.chartArea;
         ctx.save();
@@ -81,7 +84,7 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
     const maxValueWithError = Math.max(
         ...data.map((value, index) => value + standardDeviations[index])
     );
-    
+
     const yAxisMax = Math.ceil(maxValueWithError * 1.1 * 2) / 2;  // Round to the nearest 0.5 or 1
 
     const chartData = {
@@ -125,8 +128,11 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
             x: {
                 title: {
                     display: true,
-                    text: 'Factors',
-                    font: { size: 14 },
+                    text: 'Content Factors',
+                    font: {
+                        size: 14,
+                        weight: 'bold',  // Apply bold styling here
+                    },
                 },
                 ticks: {
                     font: { size: 12 },
@@ -137,19 +143,24 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                 },
                 barPercentage: 0.6,
                 categoryPercentage: 0.8,
-            },
+            },            
             y: {
                 title: {
                     display: true,
-                    text: 'Score',
-                    font: { size: 14 },
+                    text: 'Average Score',
+                    font: {
+                        size: 14,
+                        weight: 'bold',
+                    },
+                    position: 'left',  // Align to the left, might need fine-tuning
+                    rotation: -90,     // Ensure proper rotation to match your desired angle
                 },
                 ticks: {
                     font: { size: 12 },
                 },
                 beginAtZero: true,
-                max: yAxisMax,  // Apply the computed y-axis max here
-            },
+                max: yAxisMax,
+            },                                                 
         },
         elements: {
             bar: {
@@ -159,8 +170,8 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center", fontFamily: 'Verdana, sans-serif' }}>
-            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px', fontFamily: 'Verdana, sans-serif' }}>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px' }}>
                 <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
             </div>
         </div>

@@ -142,6 +142,7 @@ body {
 .default-div{
     font-family: Verdana, sans-serif !important;
     font-size: 15px !important;
+    margin-top: -20px;
 }
 
 .view-edit-btn{
