@@ -1,4 +1,4 @@
-import { getProjectProgress, getProjectsScore, getProjectFactors, getProjectFactorVotes } from "../api/ProjectApi";
+import { getProjectProgress, getProjectsScore, getProjectFactors, getProjectSeverityFactors, getProjectFactorVotes } from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 import "./ProjectStatusPopup.css";
 import './AnalyzeResult.css';
@@ -14,6 +14,7 @@ const AnalyzeResult = ({
     const [projectsProgress, setProjectsProgress] = useState({});
     const [projectsScore, setProjectsScore] = useState({});
     const [projectFactors, setProjectFactors] = useState({});
+    const [projectSeverityFactors, setProjectSeverityFactors] = useState({});
     const [projectFactorsVotes, setProjectFactorsVotes] = useState([]);
 
     useEffect(() => {
@@ -29,6 +30,7 @@ const AnalyzeResult = ({
         fetch_project_score();
         fetch_project_factors();
         fetch_project_factors_votes();
+        fetch_project_severity_factors();
     }, []);
 
     const fetch_project_progress = async () => {
@@ -82,6 +84,24 @@ const AnalyzeResult = ({
             let res = await getProjectFactors(cookie, projectId);
             if (res.data.success) {
                 setProjectFactors(res.data.factors);
+            }
+        } catch (error) {
+            alert(error);
+        }
+    };
+
+    const fetch_project_severity_factors = async () => {
+        let cookie = localStorage.getItem("authToken");
+        
+        if (!cookie) {
+            setMsg("No authentication token found. Please log in again.");
+            setIsSuccess(false);
+            return;
+        }
+        try{
+            let res = await getProjectSeverityFactors(cookie, projectId);
+            if (res.data.success) {
+                setProjectSeverityFactors(res.data.severityFactors);
             }
         } catch (error) {
             alert(error);
@@ -201,7 +221,7 @@ const AnalyzeResult = ({
                         <p><b>Number of assessors that gave the d-Score:</b> {projectsProgress.voted_amount} </p>
 
                         {Object.keys(projectsScore).length > 0 ? 
-                             (<SeverityHistogram severityfactors = {projectsScore.severity_damage}/>) 
+                             (<SeverityHistogram severityfactors = {projectsScore.severity_damage} severityfactorsValues = {projectSeverityFactors}/>) 
                             :
                              null}
                     </div> 
