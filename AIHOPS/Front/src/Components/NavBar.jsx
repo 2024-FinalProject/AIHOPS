@@ -20,8 +20,8 @@ const NavBar = () => {
               <>
                 {/* Profile button */}
                 <li className="nav-item">
-                  <Link to="/profile" className="nav-link nav-button">
-                    Profile
+                  <Link to="/settings" className="nav-link nav-button">
+                    Settings
                   </Link>
                 </li>
 

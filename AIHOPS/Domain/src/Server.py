@@ -109,6 +109,16 @@ class Server:
             return session.logout()
         except Exception as e:
             return ResponseFailMsg(f"Failed to logout: {e}")
+        
+    def update_password(self, cookie, old_passwd, new_passwd):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.user_controller.update_password(session.user_name, old_passwd, new_passwd)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to update password: {e}")
     
     # ------------- Project ------------------
     def create_project(self, cookie, name, description, use_default_factors=False):

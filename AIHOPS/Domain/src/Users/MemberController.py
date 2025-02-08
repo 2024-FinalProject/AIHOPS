@@ -58,6 +58,23 @@ class MemberController:
         if member is None:
             return ResponseFailMsg(f'invalid user: {email}')
         return ResponseSuccessMsg(f'member {email} is valid')
+    
+    def update_password(self, email, old_passwd, new_passwd):
+        with self.register_lock:
+            member = self.members.get(email)
+            if member is None:
+                return ResponseFailMsg(f'invalid user: {email}')
+            temp_res = member.update_password(email, old_passwd, new_passwd)
+            if(temp_res.success == False):
+                return temp_res
+            updated_member = Member(email, new_passwd, member.id)
+            #update db
+            res = self.db_access.update(DBMember(member.id, email, member.encrypted_passwd))
+            if not res.success:
+                return res
+            self.members.insert(email, updated_member)
+        return ResponseSuccessMsg(f'password updated for {email}')
+        
 
     
 
