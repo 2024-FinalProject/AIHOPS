@@ -83,7 +83,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <div className="settings-container">
+    <div className="settings-container" style = {{fontFamily: 'Verdana, sans-serif'}}>
       <div className="settings-box">
         <h2 style={{ textAlign: 'center'}}>
           <u>Settings:</u>
@@ -115,7 +115,7 @@ const SettingsPage = () => {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     className="w-full px-4 py-2 border rounded-lg"
-                    style={{ marginLeft: '10px' }}
+                    style={{ marginLeft: '10px', fontFamily: 'Verdana, sans-serif'}}
                   />
                   <input
                     type={'password'}
@@ -123,12 +123,12 @@ const SettingsPage = () => {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="w-full px-4 py-2 border rounded-lg"
-                    style={{ marginLeft: '10px' }}
+                    style={{ marginLeft: '10px', fontFamily: 'Verdana, sans-serif'}}
                   />
                   <button
                     onClick={handlePasswordChange}
                     className="button button-green"
-                    style={{ marginLeft: '10px' }}
+                    style={{ marginLeft: '10px', fontFamily: 'Verdana, sans-serif'}}
                   >
                     Update Password
                   </button>

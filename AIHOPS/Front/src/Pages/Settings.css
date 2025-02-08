@@ -5,6 +5,7 @@
     align-items: center;
     min-height: 80vh;
     background-color: #f4f4f9;
+    font-family: Verdana, sans-serif !important;
   }
   
   .settings-box {
@@ -86,6 +87,7 @@
   .button-blue {
     background-color: #3b82f6;
     color: white;
+    font-family: Verdana, sans-serif !important;
   }
   
   .button-blue:hover {
@@ -95,6 +97,7 @@
   .button-red {
     background-color: #f44336;
     color: white;
+    font-family: Verdana, sans-serif !important;
   }
   
   .button-red:hover {
@@ -103,6 +106,7 @@
   
   .button-green {
     background-color: #4caf50;
+    font-family: Verdana, sans-serif !important;
     color: white;
   }
   
