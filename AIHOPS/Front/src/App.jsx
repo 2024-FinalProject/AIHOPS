@@ -14,6 +14,7 @@ import Notification from "./Pages/PendingRequests";
 import ProjectsManagement_old from "./Pages/ProjectsManagement_old";
 import ProjectsManagement from "./Pages/ProjectsManagement";
 import MyProjects from "./Pages/MyProjects";
+import Settings from "./Pages/Settings";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -44,6 +45,7 @@ const AppContent = () => {
         <Route path="/projectsmanagement" element={<ProjectsManagement />} />
         <Route path="/projectsmanagement_old" element={<ProjectsManagement_old />} />
         <Route path="/myprojects" element={<MyProjects />} />
+        <Route path = "/settings" element = {<Settings />} />
       </Routes>
     </>
   );
