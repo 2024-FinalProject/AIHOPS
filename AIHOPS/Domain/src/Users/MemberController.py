@@ -69,7 +69,7 @@ class MemberController:
                 return temp_res
             updated_member = Member(email, new_passwd, member.id)
             #update db
-            res = self.db_access.update(DBMember(member.id, email, member.encrypted_passwd))
+            res = self.db_access.update(DBMember(member.id, email, updated_member.encrypted_passwd))
             if not res.success:
                 return res
             self.members.insert(email, updated_member)
