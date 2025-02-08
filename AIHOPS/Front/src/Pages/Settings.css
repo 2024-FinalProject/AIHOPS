@@ -1,0 +1,140 @@
+/* General Settings Page Styles */
+.settings-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    background-color: #f4f4f9;
+  }
+  
+  .settings-box {
+    width: 100%;
+    max-width: 800px;
+    background-color: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .settings-header {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+  
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem;
+    background-color: #f2f6fc;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .section-header:hover {
+    background-color: #e1ecfd;
+  }
+  
+  .section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .toggle-button {
+    background-color: transparent;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .section-content {
+    padding: 1.5rem;
+    background-color: #fafafa;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+  
+  /* Buttons */
+  .button {
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    display: inline-block;
+    margin-top: 1rem;
+  }
+  
+  .button:hover {
+    transform: translateY(-3px);
+  }
+  
+  .button-blue {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  .button-blue:hover {
+    background-color: #2563eb;
+  }
+  
+  .button-red {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .button-red:hover {
+    background-color: #d32f2f;
+  }
+  
+  .button-green {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  .button-green:hover {
+    background-color: #388e3c;
+  }
+  
+  /* Privacy Section Checkbox */
+  .checkbox-label {
+    font-size: 1.1rem;
+    color: #555;
+    margin-left: 0.8rem;
+    font-weight: 400;
+  }
+  
+  .checkbox-input {
+    width: 20px;
+    height: 12px;
+    background-color: #4caf50;
+    border-radius: 50%;
+    border: 2px solid #4caf50;
+  }
+  
+  /* Smooth Transitions for Section Expansions */
+  .section-content {
+    opacity: 0;
+    max-height: 0;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+  }
+  
+  .section-header.open + .section-content {
+    opacity: 1;
+    max-height: 500px;
+  }
+  

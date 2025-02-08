@@ -43,6 +43,13 @@ def logout():
     res = server.logout(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/update-password", methods=["POST"])
+# expecting json with {cookie, oldPasswd, newPasswd}
+def update_password():
+    data = request.json
+    res = server.update_password(int(data["cookie"]), data["oldPasswd"], data["newPasswd"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 # -------- Project Management ---------------
 
 @app.route("/project/create", methods=["POST"])

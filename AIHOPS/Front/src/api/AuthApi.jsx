@@ -16,3 +16,7 @@ export const logoutUser = async (cookie) => {
 export const startSession = async () => {
     return await axios.get(`${API_URL}/enter`);
 };
+
+export const updatePassword = async (cookie, oldPasswd, newPasswd) => {
+    return await axios.post(`${API_URL}/update-password`, { cookie, oldPasswd, newPasswd });
+}
