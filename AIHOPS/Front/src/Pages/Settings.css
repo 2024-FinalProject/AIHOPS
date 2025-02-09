@@ -77,7 +77,7 @@
     transition: all 0.3s ease;
     border: none;
     display: inline-block;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
   
   .button:hover {
@@ -108,6 +108,7 @@
     background-color: #4caf50;
     font-family: Verdana, sans-serif !important;
     color: white;
+    margin-bottom: 0.5rem;
   }
   
   .button-green:hover {
@@ -122,12 +123,20 @@
     font-weight: 400;
   }
   
+  privacy-content {
+    text-align: left;
+  }
+  
+  .privacy-option {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
   .checkbox-input {
-    width: 20px;
-    height: 12px;
-    background-color: #4caf50;
-    border-radius: 50%;
-    border: 2px solid #4caf50;
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
   }
   
   /* Smooth Transitions for Section Expansions */
@@ -142,3 +151,21 @@
     max-height: 500px;
   }
   
+  inner-section-content {
+    padding: 10px;
+    background-color: #f8f8f8;
+    border-left: 4px solid #3b82f6;
+    margin-left: 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+  
+  .password-input {
+    display: block;
+    width: 98%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 10px;
+  }
