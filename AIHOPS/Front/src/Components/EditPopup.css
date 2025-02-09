@@ -19,19 +19,24 @@
 }
 
 .severity-table th, .severity-table td {
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-color) !important;
     padding: 8px;
     text-align: left;
 }
 
 .severity-table th {
-    background-color: #f4f4f4;
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
     font-weight: bold;
 }
 
 .severity-input {
     width: 100%;
     padding: 5px;
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
     font-family: Verdana, sans-serif !important;
 }
 
@@ -48,7 +53,9 @@
     justify-content: center; /* Center align items vertically */
     gap: 20px;
     padding: 30px;
-    background-color: #ffffff;
+    background-color: var(--pop-up-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 10px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     width: 100%;
@@ -60,7 +67,7 @@
 /* Larger heading */
 .edit-project-popup h3 {
     font-size: 2rem;
-    color: #333; /* Darker text for readability */
+    color: var(--text-color) !important;
     margin-bottom: 16px;
     text-align: center; /* Center align the heading */
 }
@@ -71,7 +78,9 @@
     height: 150px; /* Larger height for more text space */
     padding: 16px; /* Comfortable padding */
     font-size: 1.2rem; /* Larger font size */
-    border: 1px solid #ccc;
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 6px;
     resize: none; /* Disable resizing */
     outline: none;
@@ -151,17 +160,40 @@ body {
 
 .factor-name-input{
     font-family: Verdana, sans-serif !important;
+    background-color: var(--input-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
 }
 
 .factor-desc-input{
     font-family: Verdana, sans-serif !important;
+    background-color: var(--input-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
 }
 
 .member-name{
     font-family: Verdana, sans-serif !important;
     font-size: 15px !important;
+    color: var(--text-color) !important;
 }
 
 .add-member-input{
     font-family: Verdana, sans-serif !important;
+    color: var(--text-color) !important;
 }
+
+.default-text {
+    color: var(--header-color) !important;
+}
+
+.factor-item {
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+input::placeholder {
+    color: var(--place-holder-text-color) !important;
+    opacity: 1; /* Ensures full visibility */
+  }

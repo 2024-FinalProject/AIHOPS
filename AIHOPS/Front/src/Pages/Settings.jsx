@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import './Settings.css'; // Import the CSS
 import { updatePassword } from "../api/AuthApi";
+import { useAuth } from '../context/AuthContext';
 
 const SettingsPage = () => {
+  const { theme, toggleTheme } = useAuth();
   const [openSections, setOpenSections] = useState({
     security: false,
     changePassword: false,
@@ -134,8 +136,12 @@ const SettingsPage = () => {
         <SectionHeader title="Appearance" section="appearance" isOpen={openSections.appearance} />
         {openSections.appearance && (
           <div className="section-content">
-            <button className="button button-blue" onClick={() => alert("Toggle Light/Dark Theme Not Implemented Yet!")}>
-              Toggle Light/Dark Theme
+            <button 
+              className="button button-blue" 
+              onClick={toggleTheme}
+              style={{ width: 'auto', padding: '10px 20px' }}
+            >
+              Toggle {theme === 'light' ? 'Dark' : 'Light'} Theme
             </button>
           </div>
         )}

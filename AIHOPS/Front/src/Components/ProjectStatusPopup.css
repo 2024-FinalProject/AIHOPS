@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--input-background);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,7 +17,9 @@
   min-height: 600px;
   min-width: 1200px;
   max-height: 95vh;  
-  background-color: white;
+  background-color: var(--pop-up-background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
   border-radius: 8px;
   padding: 20px 30px;
   position: relative;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import './SeverityHistogram.css';
 
 const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
   const severityLevels = [
@@ -29,9 +30,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip" style={{
-          backgroundColor: 'white',
           padding: '10px',
-          border: '1px solid #e2e8f0',
           borderRadius: '6px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           position: 'absolute',
@@ -40,20 +39,19 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
           width: '240px',
           zIndex: 1000
         }}>
-          <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold' }}>
+          <h4 className="default-text" style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold' }}>
             {data.level}
           </h4>
           <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
           <div style={{ margin: '6px 0' }}>
-            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Average Score</u>: {data.average.toFixed(3)}</p>
-            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weight Factor</u>: {data.weightFactor}</p>
-            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weighted Value</u>: {(data.average * data.weightFactor).toFixed(2)}</p>
+            <p className="default-text" style={{ margin: '2px 0', fontSize: '12px' }}><u>Average Score</u>: {data.average.toFixed(3)}</p>
+            <p className="default-text" style={{ margin: '2px 0', fontSize: '12px' }}><u>Weight Factor</u>: {data.weightFactor}</p>
+            <p className="default-text" style={{ margin: '2px 0', fontSize: '12px' }}><u>Weighted Value</u>: {(data.average * data.weightFactor).toFixed(2)}</p>
           </div>
           <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
           <p style={{ 
             margin: '4px 0 0 0',
             fontSize: '12px',
-            color: '#666'
           }}>
             {data.description}
           </p>
@@ -86,10 +84,10 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
             interval={0}
             tick={({ x, y, payload }) => (
               <g transform={`translate(${x},${y})`}>
-                <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
+                <text className="default-text" x={0} y={0} dy={16} textAnchor="middle" fill="#666">
                   {payload.value}
                 </text>
-                <text x={0} y={20} dy={16} textAnchor="middle" fill="#666" fontSize="12">
+                <text className="default-text" x={0} y={20} dy={16} textAnchor="middle" fill="#666" fontSize="12">
                   {severityLevels[parseInt(payload.value.split(' ')[1]) - 1].name}
                 </text>
               </g>

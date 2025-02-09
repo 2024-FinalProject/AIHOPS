@@ -4,10 +4,7 @@ import { useNavigate } from "react-router-dom";
 const AuthContext = createContext(null);
 
 const validateAuthToken = async (token) => {
-  // Simple validation: Check if the token is not null and not empty
-  // Replace this with an actual API request if needed
   if (!token) return false;
-  // For now, we're assuming if the token exists, it's valid
   return true;
 };
 
@@ -15,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
   const [userName, setUserName] = useState(localStorage.getItem('userName') || null);
   const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('authToken'));
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const navigate = useNavigate();
 
   const login = (token, username) => {
@@ -34,31 +32,51 @@ export const AuthProvider = ({ children }) => {
     navigate("/");
   };
 
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
+    // Force a background color update
+    document.body.style.backgroundColor = '';
+    document.documentElement.style.backgroundColor = '';
+  };
+
   useEffect(() => {
+    // Set initial theme
+    document.documentElement.setAttribute('data-theme', theme);
+    // Force initial background color update
+    document.body.style.backgroundColor = '';
+    document.documentElement.style.backgroundColor = '';
+
     const validateToken = async () => {
       const token = localStorage.getItem('authToken');
       if (!token || !(await validateAuthToken(token))) {
-        logout();  // If no token or invalid token, logout
+        logout();
       } else {
-        setIsAuthenticated(true);  // If valid, stay authenticated
+        setIsAuthenticated(true);
       }
     };
 
     validateToken();
 
-    // Listen for storage changes in other tabs/windows
     const handleStorageChange = (e) => {
       if (e.key === 'authToken' && !e.newValue) {
         logout();
+      }
+      if (e.key === 'theme') {
+        const newTheme = e.newValue || 'light';
+        setTheme(newTheme);
+        document.documentElement.setAttribute('data-theme', newTheme);
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [theme]); // Added theme as dependency
 
   return (
-    <AuthContext.Provider value={{ authToken, userName, isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ authToken, userName, isAuthenticated, theme, login, logout, toggleTheme }}>
       {children}
     </AuthContext.Provider>
   );

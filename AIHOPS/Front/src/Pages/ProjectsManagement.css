@@ -69,9 +69,11 @@ body {
   
   /* Project Cards */
   .project-card {
-    background-color: white;
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 8px var(--shadow-color);
     margin-bottom: 20px;
     padding: 10px;
     transition: all 0.3s ease;
@@ -148,7 +150,9 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: var(--input-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -156,7 +160,9 @@ body {
   }
   
   .popup-content {
-    background-color: #fff;
+    background-color: var(--input-background);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
     padding: 25px;
     max-width: 700px;
     width: 90%;
@@ -551,6 +557,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    color: var(--text-color) !important;
   }
   
   /* Sort Button Styling */
@@ -559,6 +566,33 @@ body {
     border: none;
     cursor: pointer;
     font-size: 20px;
-    color: #333;
+    color: var(--text-color) !important;
     transition: color 0.3s;
   }
+
+.factors-list,
+.severity-factors-container,
+.member-item,
+.pending-member-item {
+  background-color: var(--section-background);
+  border: 1px solid var(--border-color);
+}
+
+.factor-item,
+.severity-item {
+  background-color: var(--card-background);
+  border: 1px solid var(--border-color);
+}
+
+.factor-inputs input,
+.severity-input,
+.add-member-input {
+  background-color: var(--input-background);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+/* Add transition for smooth theme switching */
+* {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
+}

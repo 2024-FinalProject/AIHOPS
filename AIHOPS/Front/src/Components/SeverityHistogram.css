@@ -1,0 +1,9 @@
+.custom-tooltip{
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.default-text {
+    color: var(--header-color) !important;
+}

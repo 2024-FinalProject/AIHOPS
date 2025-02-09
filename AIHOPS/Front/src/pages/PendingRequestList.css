@@ -11,7 +11,7 @@
 .pending-request-title {
   font-size: 1.5em;
   font-weight: bold;
-  color: #333;
+  color: var(--header-color) !important;
   text-align: center;
   font-family: Verdana, sans-serif !important;
   padding-top: 3cqw;
@@ -63,10 +63,11 @@
 .email-list-container {
   width: 40%;
   margin: auto;
-  border: 1px solid #ccc;
   border-radius: 8px;
   overflow: hidden;
-  background-color: #fff;
+  background-color: var(--card-background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
   margin-top: 20px;
 }
 
@@ -105,7 +106,7 @@
 }
 
 .email-item:hover {
-  background-color: #f9f9f9;
+  background-color: var(--pop-up-background) !important;
 }
 
 .email-item.selected {
