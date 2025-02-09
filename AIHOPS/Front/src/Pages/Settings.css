@@ -4,14 +4,18 @@
     justify-content: center;
     align-items: center;
     min-height: 80vh;
-    background-color: #f4f4f9;
+    background-color: var(--background-color) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
     font-family: Verdana, sans-serif !important;
   }
   
   .settings-box {
     width: 100%;
     max-width: 800px;
-    background-color: white;
+    background-color: var(--pop-up-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
     padding: 2rem;
     border-radius: 16px;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
@@ -23,7 +27,7 @@
   .settings-header {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #222;
+    color: var(--text-color) !important;
     text-align: center;
     margin-bottom: 0.5rem;
     letter-spacing: 1px;
@@ -34,20 +38,23 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.2rem;
-    background-color: #f2f6fc;
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
   }
   
   .section-header:hover {
-    background-color: #e1ecfd;
+    background-color: var(--input-background);
   }
   
   .section-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text-color) !important;
+    border: none !important
   }
   
   .toggle-button {
@@ -55,12 +62,12 @@
     border: none;
     font-size: 1.1rem;
     font-weight: bold;
-    color: #333;
+    color: var(--text-color) !important;
   }
   
   .section-content {
     padding: 1.5rem;
-    background-color: #fafafa;
+    background-color: var(--background-color);
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
@@ -86,7 +93,7 @@
   
   .button-blue {
     background-color: #3b82f6;
-    color: white;
+    color: var(--text-color) !important;
     font-family: Verdana, sans-serif !important;
   }
   
@@ -96,7 +103,7 @@
   
   .button-red {
     background-color: #f44336;
-    color: white;
+    color: var(--text-color) !important;
     font-family: Verdana, sans-serif !important;
   }
   
@@ -107,7 +114,7 @@
   .button-green {
     background-color: #4caf50;
     font-family: Verdana, sans-serif !important;
-    color: white;
+    color: var(--text-color) !important;
     margin-bottom: 0.5rem;
   }
   
@@ -168,4 +175,5 @@
     border: 1px solid #ccc;
     border-radius: 6px;
     margin-top: 10px;
+    color: var(--text-color) !important;
   }

@@ -170,8 +170,8 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px' }}>
+        <div style={{ display: "flex", justifyContent: "center"}}>
+            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px', backgroundColor: '#fffafa'}}>
                 <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
             </div>
         </div>

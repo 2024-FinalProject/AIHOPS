@@ -3,12 +3,14 @@
     --background-color: #f5f5f5;
     --text-color: #333;
     --card-background: white;
-    --border-color: #ddd;
+    --border-color: #ffffff;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --button-text: white;
     --section-background: #f8f9fa;
     --input-background: white;
     --header-color: #343a40;
+    --pop-up-background: rgb(211, 211, 211);
+    --place-holder-text-color: rgb(125, 124, 124);
   }
   
   /* Dark theme */

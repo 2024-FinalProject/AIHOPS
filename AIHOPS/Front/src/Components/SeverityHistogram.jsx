@@ -44,9 +44,9 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
           </h4>
           <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
           <div style={{ margin: '6px 0' }}>
-            <p className="default-text" style={{ margin: '2px 0', fontSize: '12px' }}><u>Average Score</u>: {data.average.toFixed(3)}</p>
-            <p className="default-text" style={{ margin: '2px 0', fontSize: '12px' }}><u>Weight Factor</u>: {data.weightFactor}</p>
-            <p className="default-text" style={{ margin: '2px 0', fontSize: '12px' }}><u>Weighted Value</u>: {(data.average * data.weightFactor).toFixed(2)}</p>
+            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Average Score</u>: {data.average.toFixed(3)}</p>
+            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weight Factor</u>: {data.weightFactor}</p>
+            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weighted Value</u>: {(data.average * data.weightFactor).toFixed(2)}</p>
           </div>
           <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
           <p style={{ 
@@ -70,6 +70,8 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
       height: '345px',
       margin: '0 auto',
       fontFamily: 'Verdana, sans-serif',
+      backgroundColor: '#fffafa',
+      marginBottom: '20px'
     }}>
       <ResponsiveContainer>
         <ComposedChart 
@@ -84,10 +86,10 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
             interval={0}
             tick={({ x, y, payload }) => (
               <g transform={`translate(${x},${y})`}>
-                <text className="default-text" x={0} y={0} dy={16} textAnchor="middle" fill="#666">
+                <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
                   {payload.value}
                 </text>
-                <text className="default-text" x={0} y={20} dy={16} textAnchor="middle" fill="#666" fontSize="12">
+                <text x={0} y={20} dy={16} textAnchor="middle" fill="#666" fontSize="12">
                   {severityLevels[parseInt(payload.value.split(' ')[1]) - 1].name}
                 </text>
               </g>
