@@ -2,8 +2,10 @@ import React from "react";
 import "./FactorVote.css";
 
 const FactorVote = ({ factor, factorVotes, handleFactorVoteChange }) => {
-  const handleChange = (e) => {
-    const value = parseInt(e.target.value);
+  // Ensure that a vote of 0 is considered a valid selection.
+  const currentValue = factorVotes[factor.id] !== undefined ? factorVotes[factor.id] : null;
+
+  const handleClick = (value) => {
     handleFactorVoteChange(factor.id, value);
   };
 
@@ -14,16 +16,16 @@ const FactorVote = ({ factor, factorVotes, handleFactorVoteChange }) => {
         <span className="factor-description">{factor.description}</span>
       </div>
       <div className="factor-voting">
-        <input
-          type="range"
-          min="0"
-          max="4"
-          value={factorVotes[factor.id] || 0}
-          onChange={handleChange}
-          className="factor-range"
-        />
-        <div className="factor-value">
-          <span>{factorVotes[factor.id] || 0}</span>
+        <div className="factor-options">
+          {[0, 1, 2, 3, 4].map((value) => (
+            <div 
+              key={value} 
+              className={`factor-option ${currentValue === value ? 'selected' : ''}`}
+              onClick={() => handleClick(value)}
+            >
+              {value}
+            </div>
+          ))}
         </div>
       </div>
     </div>

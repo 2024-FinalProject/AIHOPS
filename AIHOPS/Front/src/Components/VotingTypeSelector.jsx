@@ -1,7 +1,6 @@
-// VotingTypeSelector.jsx
 import React from 'react';
 import './VotingTypeSelector.css'; 
-import { Card, CardHeader, CardTitle, CardContent} from './ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 
 const VotingTypeSelector = ({ 
   projectName, 
@@ -12,8 +11,9 @@ const VotingTypeSelector = ({
 }) => {
   return (
     <Card className="voting-selector-card">
-      <CardHeader>
-        <CardTitle>Choose Voting Type for {projectName}</CardTitle>
+      <CardHeader className="card-header">
+        <CardTitle>Choose Voting Type for {projectName}:</CardTitle>
+        <button className="close-btn" onClick={onClose}>×</button>
       </CardHeader>
       <CardContent className="voting-buttons-container">
         <button 
