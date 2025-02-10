@@ -25,8 +25,8 @@ const FactorVotingModal = ({
           ×
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-center">
-          Vote on {project.name}
+        <h2 className="text-2xl font-bold mb-4 text-center" style={{textAlign: 'center'}}>
+          <u>Vote on {project.name}</u>:
         </h2>
 
         <div className="vote-container">
@@ -64,9 +64,9 @@ const FactorVotingModal = ({
               }}
             ></div>
           </div>
-          <p className="vote-progress-text">
-            {votedFactors} / {totalFactors} Factors
-          </p>
+          <div className="vote-progress-text" style={{textAlign: 'center', marginTop: '10px'}}>
+            <b><u>Voted on</u>: {votedFactors}/{totalFactors} Factors</b>
+          </div>
         </div>
       </div>
     </div>

@@ -1,17 +1,16 @@
-/* src/App.css */
-
 html {
   font-family: Verdana, sans-serif !important;
 }
 
+/* Remove or modify this to use theme variable */
 body {
-  background-color: #f5f5f5;
+  background-color: var(--background-color) !important; /* Added !important and using theme variable */
   font-family: Verdana, sans-serif !important;
+  transition: background-color 0.3s ease;
 }
 
 .container {
   padding-top: 50px;
-  
 }
 
 .navbar-brand {
@@ -20,5 +19,5 @@ body {
 }
 
 h2 {
-  color: #343a40;
+  color: var(--header-color);
 }

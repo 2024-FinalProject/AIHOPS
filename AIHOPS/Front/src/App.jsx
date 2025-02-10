@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import './theme.css';
 
 // Importing the components
 import NavBar from "./Components/NavBar";

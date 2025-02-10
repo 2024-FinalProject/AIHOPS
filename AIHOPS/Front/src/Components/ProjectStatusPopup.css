@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: var(--pop-up-background);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,7 +17,9 @@
   min-height: 600px;
   min-width: 1200px;
   max-height: 95vh;  
-  background-color: white;
+  background-color: var(--card-background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
   border-radius: 8px;
   padding: 20px 30px;
   position: relative;
@@ -119,4 +121,7 @@ button:disabled {
   font-family: Verdana, sans-serif !important;
   width: auto !important;                /* Allows width to adjust based on content */
   max-width: 400px !important;           /* Maximum width for the button */
+  background-color: var(--button-color) !important;
+  border: var(--border-color) !important;
+  text-shadow: var(--shadow-color) 1px 1px 1px !important;
 }

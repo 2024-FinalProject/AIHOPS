@@ -1,7 +1,12 @@
 import React from 'react';
 import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import './SeverityHistogram.css';
 
 const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
+  const theme = localStorage.getItem('theme') || 'light';
+  const textColor = theme === 'light' ? '#333' : '#fff';
+  const backgroundColor = 'transparent';
+
   const severityLevels = [
     { level: 1, name: "No to Negligible Damage", value: severityfactorsValues[0], color: "#4ade80", 
       description: "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement." },
@@ -29,34 +34,22 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
       const data = payload[0].payload;
       return (
         <div className="custom-tooltip" style={{
-          backgroundColor: 'white',
           padding: '10px',
-          border: '1px solid #e2e8f0',
           borderRadius: '6px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           position: 'absolute',
           left: `${coordinate?.x - 120}px`,
           top: `${coordinate?.y + 40}px`,
           width: '240px',
-          zIndex: 1000
+          zIndex: 1000,
+          backgroundColor: theme === 'light' ? '#fff' : '#222',
+          color: textColor,
         }}>
-          <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold' }}>
+          <h4 style={{ margin: '0 0 4px 0', fontSize: '14px', fontWeight: 'bold', color: textColor }}>
             {data.level}
           </h4>
-          <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
-          <div style={{ margin: '6px 0' }}>
-            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Average Score</u>: {data.average.toFixed(3)}</p>
-            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weight Factor</u>: {data.weightFactor}</p>
-            <p style={{ margin: '2px 0', fontSize: '12px' }}><u>Weighted Value</u>: {(data.average * data.weightFactor).toFixed(2)}</p>
-          </div>
-          <hr style={{ margin: '6px 0', borderTop: '1px solid #e2e8f0' }} />
-          <p style={{ 
-            margin: '4px 0 0 0',
-            fontSize: '12px',
-            color: '#666'
-          }}>
-            {data.description}
-          </p>
+          <hr style={{ margin: '6px 0', borderTop: `1px solid ${theme === 'light' ? '#e2e8f0' : '#444'}` }} />
+          <p style={{ margin: '4px 0', fontSize: '12px', color: textColor }}>{data.description}</p>
         </div>
       );
     }
@@ -72,6 +65,8 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
       height: '345px',
       margin: '0 auto',
       fontFamily: 'Verdana, sans-serif',
+      backgroundColor: backgroundColor,
+      marginBottom: '20px'
     }}>
       <ResponsiveContainer>
         <ComposedChart 
@@ -79,44 +74,35 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
           margin={{ top: 20, right: 30, left: 40, bottom: 30 }}
           barSize={30}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+          <CartesianGrid strokeDasharray="3 3" stroke={theme === 'light' ? '#e5e7eb' : '#444'} />
           <XAxis 
             dataKey="name" 
             height={100}
             interval={0}
-            tick={({ x, y, payload }) => (
-              <g transform={`translate(${x},${y})`}>
-                <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
-                  {payload.value}
-                </text>
-                <text x={0} y={20} dy={16} textAnchor="middle" fill="#666" fontSize="12">
-                  {severityLevels[parseInt(payload.value.split(' ')[1]) - 1].name}
-                </text>
-              </g>
-            )}
+            tick={{ fill: textColor }}
             label={{
                 value: 'Severity Levels',
                 position: 'insideBottom',
                 offset: 0,
-                fontSize: 14,
-                fill: '#666',
+                fontSize: 15,
+                fill: textColor,
                 fontWeight: 'bold',
+                dy: -40,
             }}
           />
           <YAxis
             domain={[0, maxValue]}
             ticks={yAxisTicks}
             tickFormatter={(value) => value.toFixed(2)}
-            axisLine={{ stroke: '#e5e7eb' }}
-            tick={{ fill: '#6b7280', fontSize: 11 }}
+            tick={{ fill: textColor, fontSize: 11 }}
             label={{
                 value: 'Average Score',
                 angle: -90,
                 position: 'outsideLeft',
-                fontSize: 14,
-                fill: '#666',
-                dx: -20,  // Adjust this value to push the label further left or right
+                fontSize: 15,
+                fill: textColor,
                 fontWeight: 'bold',
+                dx: -30,  // Adjust this value to push the label further left or right
             }}
           />
           <Tooltip 

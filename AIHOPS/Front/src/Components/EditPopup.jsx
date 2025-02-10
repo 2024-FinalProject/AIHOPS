@@ -563,7 +563,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         {showExistingContentFactors && (
                             <div>
                                 <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '10px'}}>
-                                    <b><u> Project Factors</u>:</b>
+                                    <b><u className = "default-text"> Project Factors</u>:</b>
                                 </div>
                                 {selectedProject.factors.length > 0 ? (
                                     <>
@@ -866,7 +866,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'editSeverityFactors':
                 return (
                     <div>
-                        <h2 style={{ textAlign: 'center' }}><u>Edit d-score</u>:</h2>
+                        <h2 className = "default-text" style={{ textAlign: 'center' }}><u>Edit d-score</u>:</h2>
                         <table className="severity-table">
                             <thead>
                                 <tr>
@@ -929,7 +929,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <div className = "default-div" style = {{textAlign: 'center'}}>
                         {/* Members Section */}
                         <p>
-                        <strong><u>Members</u>:</strong>
+                        <strong className = "default-text"><u>Members</u>:</strong>
                         </p>
                         {Object.keys(selectedProject.members).length > 0 ? (
                         <ul className="members-list">
@@ -953,7 +953,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
                         {/* Remove invited members section: */}
                         <p>
-                        {!selectedProject.isActive && <strong><u>To be invited members</u>:</strong>}
+                        {!selectedProject.isActive && <strong className = "default-text"><u>To be invited members</u>:</strong>}
                         </p>
                         {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
                             <ul className="members-list">
@@ -971,13 +971,13 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             </ul>
                         )}
                         {!selectedProject.isActive && <div className="severity-factors-warning">
-                            <p style={{ textAlign: 'center', fontSize: '17px'}}>Note: To be invited members will be invited only once the project has been published.</p>
+                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> To be invited members will be invited only once the project has been published.</p>
                         </div>}
-                        {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p> There are currently no invited members </p>)}
+                        {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p className = "default-text"> There are currently no invited members </p>)}
                         
 
                         <p>
-                        {selectedProject.isActive && <strong><u>Pending Members</u>:</strong>}
+                        {selectedProject.isActive && <strong className = "default-text"><u>Pending Members</u>:</strong>}
                         </p>
                         {selectedProject.isActive && projectsPendingRequests != null && projectsPendingRequests.length > 0 && (
                             <ul className="members-list">
@@ -994,10 +994,10 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             ))}
                             </ul>
                         )}
-                        {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p> There are currently no pending requests </p>)}
+                        {selectedProject.isActive && (projectsPendingRequests == null || !(projectsPendingRequests.length > 0)) && (<p className = "default-text"> There are currently no pending requests </p>)}
 
                         <p>
-                            <strong><u>Add New Members</u>:</strong>
+                            <strong className = "default-text"><u>Add New Members</u>:</strong>
                         </p>
                         {/* Add member section */}
                         <div className="add-member-container">

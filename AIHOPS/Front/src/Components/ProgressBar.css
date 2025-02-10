@@ -7,30 +7,31 @@
 .sections-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .section-title {
   text-align: center;
-  font-size: 14px;
+  font-size: 15px !important;
   color: #333;
   padding: 5px 0;
+  border: 1px solid var(--border-color) !important;
 }
 
 .section-title.design {
-  background-color: #e8f5e9;
+  background-color: #b3dcb7;
   margin-right: 5px;
   width: 587px; /* Set a specific width */
 }
 
 .section-title.data {
-  background-color: #f3e5f5;
+  background-color: #debee3;
   margin: 0 0px;
   width: 442px; /* Set a specific width */
 }
 
 .section-title.result {
-  background-color: #ffebee;
+  background-color: #ebc5cb;
   margin-left: 5px;
   width: 146px; /* Set a specific width */
 }
@@ -54,6 +55,7 @@
   justify-content: center;
   line-height: 1.2;
   word-break: break-word;
+  border: 1px solid var(--border-color) !important;
 }
 
 .progress-step.active {
@@ -71,7 +73,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
+  height: 120%;
   width: 100%; /* Ensure it can fill the full width */
   background-color: #4CAF50;
   transition: width 0.3s ease;

@@ -136,7 +136,7 @@ const AnalyzeResult = ({
         let averageScore = numFactors > 0 ? (totalSum / numFactors).toFixed(3) : 0;
       
         return (
-          <p style = {{fontSize: '18px'}}><b>Current Content Factors Score:</b> {averageScore}</p>
+          <p className="default-text" style = {{fontSize: '18px'}}><b>Current Content Factors Score:</b> {averageScore}</p>
         );
     };
       
@@ -146,10 +146,10 @@ const AnalyzeResult = ({
             case 'showCurrentScore':
                 return (
                 <div style={{textAlign: 'center'}} >
-                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '30px'}}>
+                    <h2 className = "default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '30px'}}>
                          <u>Current Project Score</u>:
                     </h2>
-                    <div>
+                    <div className="default-text">
                          { Object.keys(projectsScore).length > 0 ?
                             <FormulaDisplay nominator={projectsScore.nominator} 
                                             denominator={projectsScore.denominator}
@@ -163,19 +163,19 @@ const AnalyzeResult = ({
             case 'showAssessorsInfo':
                 return (
                     <div style={{ lineHeight: '1.8', margin: '20px', textAlign: 'center'}} >
-                        <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u> Assessors Info</u>:</h2>
+                        <h2 className="default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u> Assessors Info</u>:</h2>
                         <div style={{ marginBottom: '10px' }}>
-                            <p>Number of assessors that were invited to the project:  
+                            <p className="default-text">Number of assessors that were invited to the project:  
                                 <span> {projectsProgress.pending_amount + projectsProgress.member_count - 1}</span>
                             </p> 
                         </div>
                         <div style={{ marginBottom: '10px' }}>
-                            <p>Number of assessors that registered to the project:
+                            <p className="default-text">Number of assessors that registered to the project:
                                 <span> {projectsProgress.member_count - 1} </span> 
                             </p>
                         </div>
                         <div>
-                            <p>Number of assessors that assessed the innovation:
+                            <p className="default-text">Number of assessors that assessed the innovation:
                                 <span> {projectsProgress.voted_amount} </span>
                             </p>
                         </div>
@@ -190,13 +190,13 @@ const AnalyzeResult = ({
                             flexDirection: 'column',
                             justifyContent: 'flex-start'
                         }}>
-                            <h2 style={{ 
+                            <h2 className="default-text" style={{ 
                                 fontSize: '24px', 
                                 color: '#333', 
                                 marginBottom: '10px',
                                 marginTop: '10px'  // Add top margin
                             }}><u>Content Factors Score</u>:</h2>
-                            <div style={{flex: 1}}>
+                            <div className="default-text" style={{flex: 1}}>
                                 {Object.keys(projectsScore).length > 0 ?
                                     ProjectScore()
                                     : "Content Factors Score not available"}
@@ -214,11 +214,11 @@ const AnalyzeResult = ({
             case 'showSeverityFactorsScore':
                 return (
                 <div style ={{textAlign: 'center'}}>
-                    <h2 style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u>d-Score</u>:</h2>
+                    <h2 className="default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u>d-Score</u>:</h2>
                     <div>
-                        <p><b>Current d-Score:</b> {Object.keys(projectsScore).length > 0 ? (projectsScore.d_score ? parseFloat(projectsScore.d_score.toFixed(3)) : "No available d-Score") : "No available d-Score"}
+                        <p className="default-text"><b>Current d-Score:</b> {Object.keys(projectsScore).length > 0 ? (projectsScore.d_score ? parseFloat(projectsScore.d_score.toFixed(3)) : "No available d-Score") : "No available d-Score"}
                         </p>
-                        <p><b>Number of assessors that gave the d-Score:</b> {projectsProgress.voted_amount} </p>
+                        <p className="default-text"><b>Number of assessors that gave the d-Score:</b> {projectsProgress.voted_amount} </p>
 
                         {Object.keys(projectsScore).length > 0 ? 
                              (<SeverityHistogram severityfactors = {projectsScore.severity_damage} severityfactorsValues = {projectSeverityFactors}/>) 

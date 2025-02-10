@@ -50,6 +50,10 @@ const errorBarPlugin = {
 };
 
 const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
+    const theme = localStorage.getItem("theme") || "light";
+    const textColor = theme === "light" ? '#333' : '#fff';
+    const backgroundColor = 'transparent';
+
     const factorsArray = Array.isArray(factors)
         ? factors
         : Object.entries(factors).map(([key, value]) => ({
@@ -57,14 +61,12 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
             fid: parseInt(key)
         }));
 
-    // For x-axis labels, split factor names by space (so they will appear like this: "Factor One")
     const factorNamesForXAxis = Array.isArray(factorslist)
-        ? factorslist.map(factor => factor.name.split(" ")) // Splitting for x-axis labels
+        ? factorslist.map(factor => factor.name.split(" "))
         : factorsArray.map(factor => factor.name.split(" "));
 
-    // For tooltip, use the factor name directly (without splitting)
     const factorNamesForTooltip = Array.isArray(factorslist)
-        ? factorslist.map(factor => factor.name) // Direct factor names for tooltip
+        ? factorslist.map(factor => factor.name)
         : factorsArray.map(factor => factor.name);
 
     const calculateStdDev = (fid, votes) => {
@@ -85,17 +87,17 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
         ...data.map((value, index) => value + standardDeviations[index])
     );
 
-    const yAxisMax = Math.ceil(maxValueWithError * 1.1 * 2) / 2;  // Round to the nearest 0.5 or 1
+    const yAxisMax = Math.ceil(maxValueWithError * 1.1 * 2) / 2;
 
     const chartData = {
-        labels: factorNamesForXAxis, // Use split factor names for x-axis
+        labels: factorNamesForXAxis,
         datasets: [
             {
                 label: "Average Score",
                 data: data,
                 backgroundColor: "rgba(75, 192, 192, 0.8)",
                 errorBars: standardDeviations,
-                zIndex: 2, // Set bars with higher zIndex than error bars
+                zIndex: 2,
             },
         ],
     };
@@ -131,18 +133,14 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                     text: 'Content Factors',
                     font: {
                         size: 14,
-                        weight: 'bold',  // Apply bold styling here
+                        weight: 'bold',
                     },
+                    color: textColor,
                 },
                 ticks: {
                     font: { size: 12 },
-                    autoSkip: false,
-                    maxRotation: 90,
-                    minRotation: 0,
-                    align: 'left',
+                    color: textColor,
                 },
-                barPercentage: 0.6,
-                categoryPercentage: 0.8,
             },            
             y: {
                 title: {
@@ -152,26 +150,21 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
                         size: 14,
                         weight: 'bold',
                     },
-                    position: 'left',  // Align to the left, might need fine-tuning
-                    rotation: -90,     // Ensure proper rotation to match your desired angle
+                    color: textColor,
                 },
                 ticks: {
                     font: { size: 12 },
+                    color: textColor,
                 },
                 beginAtZero: true,
                 max: yAxisMax,
             },                                                 
         },
-        elements: {
-            bar: {
-                zIndex: 1,
-            },
-        },
     };
 
     return (
-        <div style={{ display: "flex", justifyContent: "center" }}>
-            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px' }}>
+        <div style={{ display: "flex", justifyContent: "center"}}>
+            <div style={{ width: "80%", height: "345px", marginTop: '20px', marginBottom: '20px', backgroundColor: backgroundColor}}>
                 <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
             </div>
         </div>
