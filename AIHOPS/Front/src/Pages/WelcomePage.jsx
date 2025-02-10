@@ -9,29 +9,31 @@ const WelcomePage = () => {
 
   return (
     <div>
-      <div className="welcome-container">
-        <header className="welcome-header">
-          <h1 className="welcome-title">AIHOPS</h1>
-          <p className="welcome-subtitle">
-            Adoption of Innovation by Healthcare Organizations Prerequisites
-            Scale
-          </p>
-        </header>
-        <div className="upper-subtitle-container">
-          <span className="lower-subtitle">About: .....</span>
-        </div>
-        {/* PDF Link */}
-        <div className="pdf-link-container">
-          <h2 className="pdf-headline">
-            <a
-              href={aihops_article}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pdf-link"
-            >
-              AIHOPS article
-            </a>
-          </h2>
+      <div className="welcome-page-wrapper">
+        <div className="welcome-container">
+          <header className="welcome-header">
+            <h1 className="welcome-title">AIHOPS</h1>
+            <p className="welcome-subtitle">
+              Adoption of Innovation by Healthcare Organizations Prerequisites
+              Scale
+            </p>
+          </header>
+          <div className="upper-subtitle-container">
+            <span className="lower-subtitle">About: .....</span>
+          </div>
+          {/* PDF Link */}
+          <div className="pdf-link-container">
+            <h2 className="pdf-headline">
+              <a
+                href={aihops_article}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pdf-link"
+              >
+                AIHOPS article
+              </a>
+            </h2>
+          </div>
         </div>
       </div>
     </div>
