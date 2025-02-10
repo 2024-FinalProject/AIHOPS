@@ -322,3 +322,7 @@ body {
   background-color: green !important; /* Force color */
   transition: width 0.5s ease-in-out;
 }
+
+.default-text {
+  color: var(--header-color) !important;
+}

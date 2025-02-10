@@ -329,10 +329,12 @@ const MyProjects = () => {
         <div className="popup-overlay">
           <div className="popup-content wide">
             <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
-            <h2 className="text-2xl font-bold mb-4 text-center">
-              D-Score Voting for {currentProject.name}
-            </h2>
-            <DGraph onVoteComplete={handleDScoreVoteComplete} />
+            <div style={{fontFamily: 'Verdana, sans-serif' }}>
+              <h2 className="text-2xl font-bold mb-4 text-center default-text" style={{margin: '0 auto', textAlign: 'center', fontFamily: 'Verdana, sans-serif' }}>
+                <u>D-Score Voting for {currentProject.name}</u>:
+              </h2>
+              <DGraph onVoteComplete={handleDScoreVoteComplete} />
+            </div>
           </div>
         </div>
       )}

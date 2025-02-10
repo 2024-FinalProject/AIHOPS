@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Bar, Cell } from 'recharts';
 import './DGraph.css';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent} from './ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
 
 const DGraph = ({ onVoteComplete }) => {
   const severityLevels = [
@@ -16,9 +16,11 @@ const DGraph = ({ onVoteComplete }) => {
     { level: 5, name: "Catastrophic Damage", value: 400, color: "#ef4444",
       description: "Impacts result in extensive disruption, likely overwhelming available resources." }
   ];
-  
+
   const [percentages, setPercentages] = useState(Array(5).fill(0));
   const [weightedValues, setWeightedValues] = useState([]);
+  const theme = localStorage.getItem('theme') || 'light';
+  const textColor = theme === 'light' ? '#333' : '#fff';
 
   useEffect(() => {
     const newWeightedValues = severityLevels.map((level, index) => ({
@@ -32,6 +34,35 @@ const DGraph = ({ onVoteComplete }) => {
     }));
     setWeightedValues(newWeightedValues);
   }, [percentages]);
+
+  const handleDrag = (e, index) => {
+    // Prevent text selection during drag
+    document.body.classList.add('no-select');
+  
+    const svg = e.target.ownerSVGElement;
+    const svgRect = svg.getBoundingClientRect();
+    const startY = e.clientY;
+    const startPercentage = percentages[index];
+  
+    const handleMove = (moveEvent) => {
+      const deltaY = startY - moveEvent.clientY;
+      const chartHeight = svgRect.height - 120; // Adjust for margins
+      const percentageDelta = (deltaY / chartHeight) * 100;
+      const newPercentage = Math.min(100, Math.max(0, 
+        Math.round(startPercentage + percentageDelta)
+      ));
+      handlePercentageChange(index, newPercentage);
+    };
+  
+    const handleUp = () => {
+      document.body.classList.remove('no-select');
+      document.removeEventListener('mousemove', handleMove);
+      document.removeEventListener('mouseup', handleUp);
+    };
+  
+    document.addEventListener('mousemove', handleMove);
+    document.addEventListener('mouseup', handleUp);
+  };
 
   const handlePercentageChange = (index, value) => {
     const newValue = Math.min(100, Math.max(0, Number(value) || 0));
@@ -62,15 +93,17 @@ const DGraph = ({ onVoteComplete }) => {
           position: 'absolute',
           left: `${coordinate?.x - 150}px`,
           top: `${coordinate?.y + 50}px`, // Position below the point
-          width: '300px'
+          width: '300px',
+          fontSize: '12px',
+          padding: '10px',
         }}>
           <h4 className="tooltip-title">{data.level}</h4>
           <div className="tooltip-content">
-            <p>Percentage: {data.percentage.toFixed(1)}%</p>
-            <p>Weight Factor: {severityLevels[data.levelIndex].value}</p>
-            <p>Weighted Value: {data.weightedValue.toFixed(2)}</p>
+            <div><u>Percentage</u>: {data.percentage.toFixed(1)}%</div>
+            <div><u>Weight Factor</u>: {severityLevels[data.levelIndex].value}</div>
+            <div><u>Weighted Value</u>: {data.weightedValue.toFixed(2)}</div>
           </div>
-          <p className="tooltip-description">{data.description}</p>
+          <div className="tooltip-description">{data.description}</div>
         </div>
       );
     }
@@ -78,19 +111,18 @@ const DGraph = ({ onVoteComplete }) => {
   };
 
   return (
-    <Card className="severity-card">
-      <CardHeader>
-        <CardTitle>D-Score Voting</CardTitle>
-        <CardDescription>
+    <Card className="severity-card" style={{ margin: 0, padding: 0, fontFamily: 'Verdana, sans-serif' }}>
+      <CardHeader style={{ margin: 0, padding: '0 0 0 0', textAlign: 'center' }}>
+        <CardDescription style={{ color: textColor, marginBottom: 0, paddingBottom: 0 }}>
           Allocate probability percentages across severity levels (total must be 100%)
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="severity-graph">
-          <ResponsiveContainer width="100%" height={400}>
+      <CardContent style={{ padding: 0, marginTop: 20, maxHeight: '130vh' }}>
+        <div className="severity-graph" style={{ padding: 0, margin: 0 }}>
+          <ResponsiveContainer width="100%" height={370} style={{ padding: 0, margin: 0 }}>
             <ComposedChart 
               data={weightedValues} 
-              margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+              margin={{ top: 0, right: 20, left: 20, bottom: 10 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
@@ -98,17 +130,16 @@ const DGraph = ({ onVoteComplete }) => {
                 interval={0}
                 tick={({ x, y, payload }) => (
                   <g transform={`translate(${x},${y})`}>
-                    <text x={0} y={0} dy={16} textAnchor="middle" fill="#666">
+                    <text x={0} y={0} dy={16} textAnchor="middle" fill={textColor}>
                       {`Level ${payload.value.split(' ')[1]}`}
                     </text>
-                    <text x={0} y={20} dy={16} textAnchor="middle" fill="#666" fontSize="12">
+                    <text x={0} y={20} dy={16} textAnchor="middle" fill={textColor} fontSize="12">
                       {severityLevels[parseInt(payload.value.split(' ')[1]) - 1].name}
                     </text>
-                    {/* Add input box below the level name */}
                     <foreignObject 
                       x="-30" 
                       y="50" 
-                      width="60" 
+                      width="70" 
                       height="30"
                     >
                       <div className="input-group-chart">
@@ -130,13 +161,16 @@ const DGraph = ({ onVoteComplete }) => {
                 yAxisId="left"
                 orientation="left" 
                 domain={[0, 100]}
-                label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft' }} 
+                label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft', fill: textColor, dy: 40 }} 
+                tick={{ fill: textColor }}
+                padding={{ top: 3 }}
               />
               <YAxis 
                 yAxisId="right"
                 orientation="right" 
                 domain={[0, 400]}
-                label={{ value: 'Weighted Value', angle: 90, position: 'insideRight' }} 
+                label={{ value: 'Weighted Value', angle: 90, position: 'insideRight', fill: textColor, dy: 40 }} 
+                tick={{ fill: textColor }}
               />
               <Tooltip 
                 content={<CustomTooltip />} 
@@ -164,32 +198,6 @@ const DGraph = ({ onVoteComplete }) => {
                 dot={{ fill: '#2563eb', strokeWidth: 2 }}
                 activeDot={(props) => {
                   const { cx, cy, index } = props;
-                  
-                  const handleDrag = (e) => {
-                    const svg = e.target.ownerSVGElement;
-                    const svgRect = svg.getBoundingClientRect();
-                    const startY = e.clientY;
-                    const startPercentage = percentages[index];
-                    
-                    const handleMove = (moveEvent) => {
-                      const deltaY = startY - moveEvent.clientY;
-                      const chartHeight = svgRect.height - 120; // Adjust for margins
-                      const percentageDelta = (deltaY / chartHeight) * 100;
-                      const newPercentage = Math.min(100, Math.max(0, 
-                        Math.round(startPercentage + percentageDelta)
-                      ));
-                      handlePercentageChange(index, newPercentage);
-                    };
-                    
-                    const handleUp = () => {
-                      document.removeEventListener('mousemove', handleMove);
-                      document.removeEventListener('mouseup', handleUp);
-                    };
-                    
-                    document.addEventListener('mousemove', handleMove);
-                    document.addEventListener('mouseup', handleUp);
-                  };
-
                   return (
                     <circle
                       cx={cx}
@@ -197,7 +205,7 @@ const DGraph = ({ onVoteComplete }) => {
                       r={8}
                       fill="#2563eb"
                       style={{ cursor: 'grab' }}
-                      onMouseDown={handleDrag}
+                      onMouseDown={(e) => handleDrag(e, index)}
                     />
                   );
                 }}
@@ -208,8 +216,8 @@ const DGraph = ({ onVoteComplete }) => {
 
         {Math.abs(totalPercentage - 100) > 0.1 && (
           <div className="percentage-alert">
-            <div className="alert-content">
-              Current total: {totalPercentage}% (Need 100%)
+            <div className="alert-content" style={{ textAlign: 'center' }}>
+              <u>Current total</u>: <b>{totalPercentage}%</b> (Need 100%)
             </div>
             <div className="alert-bar">
               <div 
@@ -228,7 +236,7 @@ const DGraph = ({ onVoteComplete }) => {
           disabled={Math.abs(totalPercentage - 100) > 0.1}
           onClick={handleSubmit}
         >
-          Submit D-Score Votes
+          <b>Submit D-Score Votes</b>
         </button>
       </CardContent>
     </Card>
