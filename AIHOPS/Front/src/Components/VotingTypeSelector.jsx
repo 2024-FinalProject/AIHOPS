@@ -12,7 +12,7 @@ const VotingTypeSelector = ({
   return (
     <Card className="voting-selector-card">
       <CardHeader className="card-header">
-        <CardTitle><u>Choose Voting Type for {projectName}</u>:</CardTitle>
+        <CardTitle style={{fontSize: '24px'}}><u>Choose Voting Type for {projectName}</u>:</CardTitle>
         <button className="close-btn" onClick={onClose}>×</button>
       </CardHeader>
       <CardContent className="voting-buttons-container">

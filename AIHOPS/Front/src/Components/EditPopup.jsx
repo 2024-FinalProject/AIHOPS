@@ -626,7 +626,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                             >
                                                 <button
                                                     disabled={selectedProject.isActive}
-                                                    className="action-btn edit-btn"
+                                                    className="action-btn confirm-btn"
                                                     onClick={() =>
                                                         handleConfirmFactors(selectedProject.id, selectedProject.name)
                                                     }
@@ -766,7 +766,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 Previous
                                             </button>
                                             <button
-                                                className="action-btn edit-btn"
+                                                className="action-btn confirm-btn"
                                                 onClick={handleSubmit}
                                                 style={{
                                                     marginTop: '10px',
@@ -915,8 +915,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         </div>
                         <div className="parent-container">
                             <button disabled={selectedProject.isActive}
-                                className="action-btn edit-btn"
+                                className="action-btn confirm-btn"
                                 onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
+                                style={{
+                                    background: "#2e8b57",
+                                }}
                             >
                                 Confirm Severity Factors
                             </button>

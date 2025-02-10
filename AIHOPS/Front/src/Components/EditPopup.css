@@ -198,3 +198,18 @@ input::placeholder {
     color: var(--place-holder-text-color) !important;
     opacity: 1; /* Ensures full visibility */
   }
+
+.confirm-btn {
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    cursor: pointer;
+    max-height:fit-content;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%; /* Ensures full width if you want it stretched */
+    max-width: 250px; /* Limits the maximum width of the button */
+    margin-top: -5px;
+    font-family: Verdana, sans-serif !important;
+}
