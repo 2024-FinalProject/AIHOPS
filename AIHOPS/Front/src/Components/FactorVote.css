@@ -42,7 +42,7 @@
   display: flex;
   justify-content: center; /* Center the options horizontally */
   align-items: center;
-  gap: 1rem;  /* Increase space between the circles */
+  gap: 1.5rem;  /* Increase space between the circles */
 }
 
 /* Style each option as a round circle */

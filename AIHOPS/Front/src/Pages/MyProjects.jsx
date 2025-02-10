@@ -287,7 +287,7 @@ const MyProjects = () => {
 
   return (
     <div className="my-projects-container">
-      <h1 className="page-heading"><u>Voting on projects</u></h1>
+      <h1 className="page-heading" style ={{marginBottom:'-70px'}}><u>Voting on projects</u>:</h1>
 
       <ProjectList 
         projects={projects}

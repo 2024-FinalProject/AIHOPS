@@ -14,9 +14,9 @@ const ProjectList = ({
           className="project-card"
           onClick={() => onVoteClick(project)}
         >
-          <h3 className="text-xl font-semibold">{project.name}:</h3>
+          <h3 className="text-xl font-semibold"><u>{project.name}</u>:</h3>
           <p>{project.description}</p>
-          <p>Owner: {project.owner}</p>
+          <p><u>Founder</u>: {project.founder}</p>
 
           {isBothStatusesComplete(project) && (
             <div className="checkmark"> ✓ </div>
