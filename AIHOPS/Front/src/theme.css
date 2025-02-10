@@ -3,7 +3,7 @@
     --background-color: #f5f5f5;
     --text-color: #333;
     --card-background: white;
-    --border-color: #ffffff;
+    --border-color: #e3e3e3;
     --shadow-color: rgba(0, 0, 0, 0.1);
     --button-text: white;
     --section-background: #f8f9fa;
@@ -11,6 +11,7 @@
     --header-color: #343a40;
     --pop-up-background: rgb(211, 211, 211);
     --place-holder-text-color: rgb(125, 124, 124);
+    --button-color: #b2b2b2;
   }
   
   /* Dark theme */
@@ -26,6 +27,7 @@
     --header-color: #e0e0e0;
     --pop-up-background: #808080;
     --place-holder-text-color: rgb(206, 205, 205);
+    --button-color: #bcbcbc;
   }
   
   /* Base styles */

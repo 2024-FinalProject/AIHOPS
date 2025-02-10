@@ -17,5 +17,5 @@
 }
 
 .default-text {
-  color: var(--header-color) !important;
+  color: var(--text-color) !important;
 }
