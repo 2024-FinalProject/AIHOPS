@@ -310,6 +310,12 @@ const MyProjects = () => {
         </div>
       )}
 
+      {(currentProject == null || currentProject.length === 0) && (
+        <div className="default-text" style={{marginTop: '-30px', textAlign: 'center'}}>
+          <div className="default-text" style={{fontSize:'17px'}}><i>There are currently no projects to vote on</i>...</div>
+        </div>
+      ) }
+
       {currentProject && isVoteStarted && (
         <FactorVotingModal
           project={currentProject}

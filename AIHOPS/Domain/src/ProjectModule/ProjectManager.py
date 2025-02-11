@@ -282,7 +282,7 @@ class ProjectManager():
         pids_with_member = []
         for pid in pids:
             project = self._find_project(pid)
-            if project.has_member(actor):
+            if project.has_member(actor) and project.is_published():
                 projects.append(project.to_dict())
                 pids_with_member.append(pid)
         return ResponseSuccessObj(f"projects for actor {actor} : {pids_with_member}", projects)
