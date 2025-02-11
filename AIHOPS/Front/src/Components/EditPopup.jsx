@@ -29,9 +29,16 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [showPoolContentFactors, setShowPoolContentFactors] = useState(false);
     const [factorStartIndex, setFactorStartIndex] = useState(0); // Counter for selectedProject.factors
     const [poolStartIndex, setPoolStartIndex] = useState(0); // Counter for factorsPool
-    const itemsPerPage = 3; // Number of items to display at a time
+    const itemsPerPage = 2; // Number of items to display at a time
     const [analyzePopupType, setAnalyzePopupType] = useState("");
     const [addNewFactorShow, setAddNewFactorShow] = useState(false);
+    const [editingFactor, setEditingFactor] = useState(null);
+    const [editedFactorName, setEditedFactorName] = useState("");
+    const [editedFactorDescription, setEditedFactorDescription] = useState("");
+    const [editedScaleDescriptions, setEditedScaleDescriptions] = useState(Array(5).fill(""));
+    const [editedScaleExplanations, setEditedScaleExplanations] = useState(Array(5).fill(""));
+    const [fromExistingFactorsPage, setFromExistingFactorsPage] = useState(true);
+
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -457,6 +464,129 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
+    const handleStartEditFactor = (factor) => {
+        setEditingFactor(factor);
+        setEditedFactorName(factor.name);
+        setEditedFactorDescription(factor.description);
+        setEditedScaleDescriptions(factor.scales_desc || Array(5).fill(""));
+        setEditedScaleExplanations(factor.scales_explanation || Array(5).fill(""));
+        setShowExistingContentFactors(false);
+        setShowPoolContentFactors(false);
+        setAddNewFactorShow(false);
+    };
+
+    
+    const handleCancelEdit = () => {
+        setEditingFactor(null);
+        if(fromExistingFactorsPage){
+            setShowExistingContentFactors(true);
+        }
+        else{
+            setShowPoolContentFactors(true);
+        }
+    };
+
+    const handleUpdateEditedFactor = async () => {
+        if (window.confirm(`Are you sure you want to update the factor "${editedFactorName}"?`)) {
+            let cookie = localStorage.getItem("authToken");
+            if (!cookie) {
+                setMsg("No authentication token found. Please log in again.");
+                setIsSuccess(false);
+                return;
+            }
+
+            // TODO: Implement the actual API call here
+            alert("Not implemented yet!");
+        }
+    };
+
+    const getEditFactorContent = () => {
+        return (
+            <div className="factor-form-container">
+                <div className="factor-card">
+                    <div className="factor-header">
+                        Edit Content Factor: {editingFactor.name}
+                    </div>
+                    <div className="factor-grid">
+                        <div className="factor-input-group factor-name-group">
+                            <label className="factor-input-label"><b><u>Factor Name</u>:</b></label>
+                            <input
+                                type="text"
+                                className="factor-input"
+                                value={editedFactorName}
+                                onChange={(e) => setEditedFactorName(e.target.value)}
+                            />
+                        </div>
+                        <div className="factor-input-group">
+                            <label className="factor-input-label"><b><u>Description</u>:</b></label>
+                            <textarea
+                                className="factor-input"
+                                value={editedFactorDescription}
+                                onChange={(e) => setEditedFactorDescription(e.target.value)}
+                                rows={3}
+                            />
+                        </div>
+                        <table className="factor-table">
+                            <thead className="factor-table-header">
+                                <tr>
+                                    <th>Score</th>
+                                    <th>Description</th>
+                                    <th>Explanation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {[1, 2, 3, 4, 5].map((score, index) => (
+                                    <tr key={score} className="factor-table-row">
+                                        <td className="factor-table-cell factor-score-cell">{score}</td>
+                                        <td className="factor-table-cell">
+                                            <textarea
+                                                className="factor-table-input"
+                                                value={editedScaleDescriptions[index]}
+                                                onChange={(e) => {
+                                                    const newDesc = [...editedScaleDescriptions];
+                                                    newDesc[index] = e.target.value;
+                                                    setEditedScaleDescriptions(newDesc);
+                                                }}
+                                                placeholder={`Description for score ${score}`}
+                                            />
+                                        </td>
+                                        <td className="factor-table-cell">
+                                            <textarea
+                                                className="factor-table-input"
+                                                value={editedScaleExplanations[index]}
+                                                onChange={(e) => {
+                                                    const newExp = [...editedScaleExplanations];
+                                                    newExp[index] = e.target.value;
+                                                    setEditedScaleExplanations(newExp);
+                                                }}
+                                                placeholder={`Explanation for score ${score}`}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <div className="factor-button-group">
+                            <button 
+                                className="factor-button factor-cancel-button"
+                                onClick={handleCancelEdit}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                className="factor-button factor-submit-button"
+                                onClick={handleUpdateEditedFactor}
+                            >
+                                Update Factor
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    /*TODO: delete this later - when the above has been implemented*/
     const handleUpdateFactor = async (factorId) => {
         if (window.confirm(`Are you sure you want to update the factor "${factorUpdates.name}"?`)) {
             let cookie = localStorage.getItem("authToken");
@@ -566,12 +696,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     </div>
                 );
             case 'editContentFactors':
+                if (editingFactor) {
+                    return getEditFactorContent();
+                }
                 return (
                     <div className = "default-div">
                         {showExistingContentFactors && (
                             <div>
                                 <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '10px'}}>
-                                    <b><u className = "default-text"> Project Factors</u>:</b>
+                                    <b><u className="default-text">Project Factors</u>:</b>
                                 </div>
                                 {selectedProject.factors.length > 0 ? (
                                     <>
@@ -589,9 +722,24 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                         backgroundColor: '#f9f9f9',
                                                     }}
                                                 >
-                                                    <div style={{ flex: 1 }}>
-                                                        <strong>{factor.name}</strong>: {factor.description}
+                                                    <div style={{ flex: 1, textAlign:'center' }}>
+                                                        <strong><u>{factor.name}</u>:</strong>
+                                                        <div style={{marginTop: '10px'}}>{factor.description}</div>
                                                     </div>
+                                                    <button
+                                                        className="action-btn"
+                                                        onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(true)}}
+                                                        style={{
+                                                            padding: '5px 15px',
+                                                            backgroundColor: '#20b2aa',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                        }}
+                                                    >
+                                                        Edit
+                                                    </button>
                                                     <button
                                                         className="action-btn delete-btn"
                                                         onClick={() => handleDeleteFactor(factor.name, factor.id)}
@@ -604,7 +752,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                             cursor: 'pointer',
                                                         }}
                                                     >
-                                                        Delete
+                                                        Delete From Project
                                                     </button>
                                                 </div>
                                             ))}
@@ -686,15 +834,42 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                         backgroundColor: '#f9f9f9',
                                                     }}
                                                 >
-                                                    <input
-                                                        type="checkbox"
-                                                        id={`factor-${factor.id}`}
-                                                        onChange={() => handleCheckboxChange(factor)}
-                                                        checked={selectedFactors.some((selected) => selected.id === factor.id)}
-                                                    />
-                                                    <label htmlFor={`factor-${factor.id}`} style={{ flex: 1 }}>
-                                                        <strong>{factor.name}</strong>: {factor.description}
+                                                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                                        <div style={{
+                                                            position: 'absolute', 
+                                                            top: 0, 
+                                                            left: 0, 
+                                                            margin: 0, 
+                                                            padding: 0,
+                                                            transform: 'scale(1.6)'
+                                                        }}>
+                                                            <input
+                                                                type="checkbox"
+                                                                id={`factor-${factor.id}`}
+                                                                onChange={() => handleCheckboxChange(factor)}
+                                                                checked={selectedFactors.some((selected) => selected.id === factor.id)}
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <label htmlFor={`factor-${factor.id}`} style={{ flex: 1, textAlign: 'center'}}>
+                                                        <strong><u>{factor.name}</u>:</strong>
+                                                        <div style={{marginTop: '10px'}}>{factor.description}</div>
                                                     </label>
+                                                    <button
+                                                        className="action-btn"
+                                                        onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(false)}}
+                                                        style={{
+                                                            padding: '5px 15px',
+                                                            backgroundColor: '#20b2aa',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            cursor: 'pointer',
+                                                        }}
+                                                    >
+                                                        Edit
+                                                    </button>
                                                     <button
                                                         className="action-btn delete-btn"
                                                         onClick={() =>
@@ -761,7 +936,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         </div>
                                     </>
                                 ) : (
-                                    <p style={{textAlign: 'center'}}>No factors available in the pool.</p>
+                                    <div className="default-div" style={{textAlign: 'center', marginTop:'20px'}}>No factors available in the factors pool.</div>
                                 )}
                             </div>
                         )}
