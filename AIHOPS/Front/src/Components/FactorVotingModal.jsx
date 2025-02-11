@@ -29,7 +29,7 @@ const FactorVotingModal = ({
           ×
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-center" style={{textAlign: 'center'}}>
+        <h2 className="text-2xl font-bold mb-4 text-center" style={{textAlign: 'center', marginTop:'-10px'}}>
           <u>Vote on {project.name}</u>:
         </h2>
 
