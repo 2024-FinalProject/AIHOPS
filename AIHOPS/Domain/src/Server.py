@@ -144,13 +144,13 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project factors: {e}")
 
-    def add_project_factor(self, cookie, pid, factor_name, factor_desc):
+    def add_project_factor(self, cookie, pid, factor_name, factor_desc, scales_desc, scales_explanation):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res.result
-            return self.project_manager.add_project_factor(pid, session.user_name, factor_name, factor_desc)
+            return self.project_manager.add_project_factor(pid, session.user_name, factor_name, factor_desc, scales_desc, scales_explanation)
         except Exception as e:
             return ResponseFailMsg(f"Failed to set project factor: {e}")
 

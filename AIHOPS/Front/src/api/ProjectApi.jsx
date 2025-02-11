@@ -54,12 +54,14 @@ export const setProjectFactors = async(cookie, project_id, factors) => {
     });
 };
 
-export const addProjectFactor = async (cookie, project_id, factor_name, factor_desc) => {
+export const addProjectFactor = async (cookie, project_id, factor_name, factor_desc, scales_desc, scales_explanation) => {
     return await axios.post(`${API_URL}/project/factor`, {
         cookie: cookie,
         pid: project_id,
         factor_name: factor_name,
-        factor_desc: factor_desc
+        factor_desc: factor_desc,
+        scales_desc: scales_desc,
+        scales_explanation: scales_explanation
     });
 };
 

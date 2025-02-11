@@ -26,11 +26,12 @@ const AnalyzeResult = ({
         return;
         }
 
-        fetch_project_progress();
         fetch_project_score();
+        fetch_project_progress();
         fetch_project_factors();
         fetch_project_factors_votes();
         fetch_project_severity_factors();
+        console.log(projectsScore);
     }, []);
 
     const fetch_project_progress = async () => {
@@ -67,6 +68,7 @@ const AnalyzeResult = ({
             if (res.data.success) {
                 setProjectsScore(res.data.score);
             }
+            console.log(res.data.message)
         } catch (error) {
             alert(error);
         }

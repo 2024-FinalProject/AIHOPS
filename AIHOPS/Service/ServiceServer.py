@@ -60,10 +60,11 @@ def create_project():
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
 @app.route("/project/factor", methods=["POST"])
-# expecting json with {cookie, pid, factor_name, factor_desc}
+# expecting json with {cookie, pid, factor_name, factor_desc, scales_desc, scales_explanation}
 def add_project_factor():
     data = request.json
-    res = server.add_project_factor(int(data["cookie"]), int(data["pid"]), data["factor_name"], data["factor_desc"])
+    res = server.add_project_factor(int(data["cookie"]), int(data["pid"]), data["factor_name"], data["factor_desc"], 
+                                    data["scales_desc"], data["scales_explanation"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/factors", methods=["POST"])

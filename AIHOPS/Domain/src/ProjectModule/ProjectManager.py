@@ -62,13 +62,13 @@ class ProjectManager():
             msg += res_facts.msg
         return ResponseSuccessObj(msg, pid)
 
-    def add_project_factor(self, pid, actor, factor_name, factor_desc):
+    def add_project_factor(self, pid, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
         """ adds of factor to a project"""
         # check valid project, and owned by owner
         if(factor_name == "" or factor_desc == ""):
             return ResponseFailMsg("factor name and description cannot be empty")
         project = self._verify_owner(pid, actor)
-        factor = self.factor_pool.add_factor(actor, factor_name, factor_desc)
+        factor = self.factor_pool.add_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
         project.add_factor(factor)
         return ResponseSuccessMsg(f"actor: {actor} added factor {factor.name} to project {project.name}")
 
@@ -282,7 +282,7 @@ class ProjectManager():
         pids_with_member = []
         for pid in pids:
             project = self._find_project(pid)
-            if project.has_member(actor):
+            if project.has_member(actor) and project.is_published():
                 projects.append(project.to_dict())
                 pids_with_member.append(pid)
         return ResponseSuccessObj(f"projects for actor {actor} : {pids_with_member}", projects)
