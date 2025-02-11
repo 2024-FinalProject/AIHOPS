@@ -75,7 +75,6 @@
     color: var(--text-color) !important;
     font-family: Verdana, sans-serif !important;
     table-layout: fixed;
-    padding-left: 4px;
   }
   
   .factor-table-header {

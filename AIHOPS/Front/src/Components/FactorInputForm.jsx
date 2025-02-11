@@ -63,51 +63,52 @@ const FactorInputForm = ({
                 />
               </div>
             </div>
-
-            <table className="factor-table">
-              <thead className="factor-table-header">
-                <tr>
-                  <th>Score</th>
-                  <th>Description</th>
-                  <th>Explanation</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[4, 3, 2, 1, 0].map((score, idx) => (
-                  <tr key={score} className="factor-table-row">
-                    <td className="factor-score-cell">
-                      {score}
-                    </td>
-                    <td className="factor-table-cell">
-                      <textarea
-                        value={scaleDescriptions[4 - score]}
-                        onChange={(e) => {
-                          const newDescs = [...scaleDescriptions];
-                          newDescs[4 - score] = e.target.value;
-                          setScaleDescriptions(newDescs);
-                        }}
-                        className="factor-table-input"
-                        placeholder="Enter description"
-                        rows="2"
-                      />
-                    </td>
-                    <td className="factor-table-cell">
-                      <textarea
-                        value={scaleExplanations[4 - score]}
-                        onChange={(e) => {
-                          const newExps = [...scaleExplanations];
-                          newExps[4 - score] = e.target.value;
-                          setScaleExplanations(newExps);
-                        }}
-                        className="factor-table-input"
-                        placeholder="Enter explanation"
-                        rows="2"
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div style={{paddingLeft: '10px'}}>
+                <table className="factor-table">
+                <thead className="factor-table-header">
+                    <tr>
+                    <th>Score</th>
+                    <th>Description</th>
+                    <th>Explanation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {[4, 3, 2, 1, 0].map((score, idx) => (
+                    <tr key={score} className="factor-table-row">
+                        <td className="factor-score-cell">
+                        {score}
+                        </td>
+                        <td className="factor-table-cell">
+                        <textarea
+                            value={scaleDescriptions[4 - score]}
+                            onChange={(e) => {
+                            const newDescs = [...scaleDescriptions];
+                            newDescs[4 - score] = e.target.value;
+                            setScaleDescriptions(newDescs);
+                            }}
+                            className="factor-table-input"
+                            placeholder="Enter description"
+                            rows="2"
+                        />
+                        </td>
+                        <td className="factor-table-cell">
+                        <textarea
+                            value={scaleExplanations[4 - score]}
+                            onChange={(e) => {
+                            const newExps = [...scaleExplanations];
+                            newExps[4 - score] = e.target.value;
+                            setScaleExplanations(newExps);
+                            }}
+                            className="factor-table-input"
+                            placeholder="Enter explanation"
+                            rows="2"
+                        />
+                        </td>
+                    </tr>
+                    ))}
+                </tbody>
+                </table>
+            </div>
 
             <div className="factor-button-group">
               <button
