@@ -213,3 +213,10 @@ input::placeholder {
     margin-top: -5px;
     font-family: Verdana, sans-serif !important;
 }
+
+.factor-inputs{
+    font-family: Verdana, sans-serif !important;
+    background-color: var(--input-background) !important;
+    color: var(--text-color) !important;
+    border: 1px solid var(--border-color) !important;
+}

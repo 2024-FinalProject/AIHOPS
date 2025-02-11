@@ -7,6 +7,7 @@ import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMem
  } from "../api/ProjectApi";
 import "./EditPopup.css";
 import AnalyzeResult from './AnalyzeResult';
+import FactorInputForm from './FactorInputForm';
 
 
 const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg,
@@ -19,6 +20,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
     const [newFactorDescription, setNewFactorDescription] = useState("");
     const [newFactorName, setNewFactorName] = useState("");
+    const [scaleDescriptions, setScaleDescriptions] = useState(Array(5).fill(""));
+    const [scaleExplanations, setScaleExplanations] = useState(Array(5).fill(""));
     const [factorUpdates, setFactorUpdates] = useState({});
     const [factorsPool, setFactorsPool] = useState([]);
     const [selectedFactors, setSelectedFactors] = useState([]);
@@ -28,6 +31,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [poolStartIndex, setPoolStartIndex] = useState(0); // Counter for factorsPool
     const itemsPerPage = 3; // Number of items to display at a time
     const [analyzePopupType, setAnalyzePopupType] = useState("");
+    const [addNewFactorShow, setAddNewFactorShow] = useState(false);
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -377,8 +381,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
-    const handleAddFactor = async () => {
-        console.log(selectedProject.factors);
+    const handleAddFactor = async (formData) => {
         if (!window.confirm("Are you sure you want to add this factor?")) {
             return;
         }
@@ -389,24 +392,29 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             setIsSuccess(false);
             return;
         }
-
-        if(newFactorName === "" || newFactorDescription === ""){
-            alert("Please enter a valid factor name and description.");
-            return;
-        }
         
         try {
-            const response = await addProjectFactor(cookie, selectedProject.id, newFactorName, newFactorDescription);
+            const response = await addProjectFactor(
+                cookie, 
+                selectedProject.id, 
+                formData.name,
+                formData.description,
+                formData.scaleDescriptions,
+                formData.scaleExplanations
+            );
         
             if (response.data.success) {
                 setIsSuccess(true);
-                
-                //Get fresh project data
-                await fetchProjects(); // Refresh projects after adding the member
+                await fetchProjects();
                 await fetch_selected_project(selectedProject);
                 selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+                
+                // Reset all form fields
                 setNewFactorName('');
                 setNewFactorDescription('');
+                setScaleDescriptions(Array(5).fill(""));
+                setScaleExplanations(Array(5).fill(""));
+                setAddNewFactorShow(false);
             } else {
                 setMsg(response.data.message);
                 alert(response.data.message);
@@ -655,49 +663,6 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 ) : (
                                     <p>No factors available in the project.</p>
                                 )}
-                                <div
-                                    className="factor-item"
-                                    style={{
-                                        display: 'flex',
-                                        gap: '10px',
-                                        marginTop: '20px',
-                                        alignItems: 'center',
-                                    }}
-                                >
-                                    <div className="factor-inputs" style={{ flex: 1, display: 'flex', gap: '10px' }}>
-                                        <input
-                                            type="text"
-                                            value={newFactorName}
-                                            onChange={(e) => setNewFactorName(e.target.value)}
-                                            className="factor-name-input"
-                                            placeholder="New factor name"
-                                            style={{ flex: '1'}}
-                                        />
-                                        <input
-                                            type="text"
-                                            value={newFactorDescription}
-                                            onChange={(e) => setNewFactorDescription(e.target.value)}
-                                            className="factor-desc-input"
-                                            placeholder="New factor description"
-                                            style={{ flex: '2'}}
-                                        />
-                                        <button
-                                            className="action-btn view-edit-btn"
-                                            onClick={handleAddFactor}
-                                            style={{
-                                                padding: '5px 15px',
-                                                backgroundColor: '#88cd8d',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: 'pointer',
-                                                fontSize: '15px',
-                                            }}
-                                        >
-                                            Add New Factor
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         )}
                         {showPoolContentFactors && (
@@ -796,10 +761,22 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         </div>
                                     </>
                                 ) : (
-                                    <p>No factors available in the pool.</p>
+                                    <p style={{textAlign: 'center'}}>No factors available in the pool.</p>
                                 )}
                             </div>
                         )}
+
+                        {addNewFactorShow && (
+                            <FactorInputForm 
+                                onSubmit={handleAddFactor}
+                                onCancel={() => setAddNewFactorShow(false)}
+                                scaleDescriptions={scaleDescriptions}
+                                setScaleDescriptions={setScaleDescriptions}
+                                scaleExplanations={scaleExplanations}
+                                setScaleExplanations={setScaleExplanations}
+                            />
+                        )}
+
                         <div
                             style={{
                                 display: 'flex',
@@ -810,12 +787,13 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 marginBottom: '-2px',
                             }}
                         >
-                            {!showExistingContentFactors && (
+                            {!showExistingContentFactors && !addNewFactorShow && (
                                 <button
                                     className="action-btn edit-btn"
                                     onClick={() => {
                                         setShowExistingContentFactors(true);
                                         setShowPoolContentFactors(false);
+                                        setAddNewFactorShow(false);
                                     }}
                                     style={{
                                         padding: '20px 30px',
@@ -835,7 +813,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                     Show Existing Content Factors
                                 </button>
                             )}
-                            {!showPoolContentFactors && (
+                            {!showPoolContentFactors && !addNewFactorShow && (
                                 <button
                                     className="action-btn edit-btn"
                                     onClick={() => {
@@ -858,6 +836,33 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                     onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
                                 >
                                     Show Factors Pool
+                                </button>
+                            )}
+
+                            {!addNewFactorShow && !showPoolContentFactors && (
+                                <button
+                                    className="action-btn edit-btn"
+                                    onClick={() => {
+                                        setShowPoolContentFactors(false);
+                                        setShowExistingContentFactors(false);
+                                        setAddNewFactorShow(true);
+                                    }}
+                                    style={{
+                                        padding: '20px 30px',
+                                        fontSize: '16px',
+                                        background: 'linear-gradient(145deg,rgb(186, 255, 182),rgb(111, 255, 142))',
+                                        color: 'white',
+                                        border: '1px solidrgb(111, 255, 183)',
+                                        borderRadius: '25px',
+                                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease',
+                                        outline: 'none',
+                                    }}
+                                    onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                    onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
+                                >
+                                    Add New Content Factor
                                 </button>
                             )}
                         </div>

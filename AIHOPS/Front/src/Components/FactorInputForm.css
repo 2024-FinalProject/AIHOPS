@@ -1,0 +1,188 @@
+.factor-form-container {
+    max-width: 1200px;
+    padding: 0 2rem;
+    color: var(--text-color) !important;
+    background-color: transparent;
+    font-family: Verdana, sans-serif !important;
+    margin-bottom: -60px;
+    margin-top: -5px;
+  }
+  
+  .factor-card {
+    background: linear-gradient(to bottom right, var(--card-background), #f8fafc);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-color) !important;
+    overflow: hidden;
+    color: var(--text-color) !important;
+    font-family: Verdana, sans-serif !important;
+  }
+  
+  .factor-header {
+    background: linear-gradient(to right, #1e40af, #3b82f6);
+    color: white;
+    padding: 0.75rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  
+  .factor-input-group {
+    position: relative;
+    margin-bottom: 0.75rem;
+    width: 95%;
+    color: var(--text-color) !important;
+    font-family: Verdana, sans-serif !important;
+  }
+  
+  .factor-name-group {
+    width: 40%;
+  }
+  
+  .factor-input-label {
+    display: block;
+    font-weight: 500;
+    color: var(--text-color) !important;
+    margin-bottom: 0.5rem;
+    padding-left: 7px;
+    font-family: Verdana, sans-serif !important;
+  }
+  
+  .factor-input {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    background: var(--input-background) !important;
+    color: var(--text-color) !important;
+    font-family: Verdana, sans-serif !important;
+  }
+  
+  .factor-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    outline: none;
+  }
+  
+  .factor-table {
+    width: 99%;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin: 1rem 0;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+    font-family: Verdana, sans-serif !important;
+    table-layout: fixed;
+    padding-left: 4px;
+  }
+  
+  .factor-table-header {
+    color: var(--text-color) !important;
+    background: #869ad9 !important;
+    font-family: Verdana, sans-serif !important;
+  }
+  
+  .factor-table-header th {
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    color: var(--text-color) !important;
+    font-family: Verdana, sans-serif !important;
+    text-align: left;
+  }
+  
+  .factor-table-header th:first-child {
+    width: 60px;
+  }
+  
+  .factor-table-header th:nth-child(2),
+  .factor-table-header th:nth-child(3) {
+    width: calc((100% - 60px) / 2);
+  }
+  
+  .factor-table-cell {
+    padding: 0.375rem 0.75rem;
+    border: 1px solid var(--border-color) !important;
+    vertical-align: top;
+  }
+  
+  .factor-score-cell {
+    font-weight: 600;
+    color: var(--text-color) !important;
+    background: #869ad9;
+    width: 60px;
+    text-align: center;
+    font-family: Verdana, sans-serif !important;
+  }
+  
+  .factor-button-group {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: -1rem;
+    padding: 0.5rem;
+  }
+  
+  .factor-button {
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: pointer;
+    font-family: Verdana, sans-serif !important;
+    font-size: 15px;
+  }
+  
+  .factor-cancel-button {
+    background: white;
+    border: 2px solid #e5e7eb;
+    color: #374151;
+    font-family: Verdana, sans-serif !important;
+  }
+  
+  .factor-cancel-button:hover {
+    background: #f3f4f6;
+  }
+  
+  .factor-submit-button {
+    background: #059669;
+    color: white;
+    border: none;
+  }
+  
+  .factor-submit-button:hover {
+    background: #047857;
+  }
+  
+  .factor-table-row:hover {
+    background: #f8fafc;
+  }
+  
+  .factor-table-input {
+    width: 98%;
+    min-height: 38px;
+    padding: 0.375rem 0.5rem;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+    resize: vertical;
+    color: var(--text-color) !important;
+    font-family: Verdana, sans-serif !important;
+    background-color: var(--input-background) !important;
+  }
+  
+  .factor-table-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    outline: none;
+  }
+
+  .factor-table-input::placeholder {
+    color: var(--place-holder-text-color); /* Define this variable in your root styles */
+    opacity: 1; /* Ensures full visibility */
+}
+  
+  .factor-grid {
+    padding: 0 1rem;
+  }
