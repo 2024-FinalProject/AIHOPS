@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent } from './ui/card';
+import { Card, CardContent } from "../Components/ui/card";
 import './FactorInputForm.css';
 
 const FactorInputForm = ({ 

@@ -1,6 +1,6 @@
 import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from "../Components/ui/card";
 import './VotingTypeSelector.css'; 
-import { Card, CardHeader, CardTitle, CardContent } from './ui/card';
 
 const VotingTypeSelector = ({ 
   projectName, 

@@ -1,4 +1,6 @@
 import React from "react";
+import FactorVote from "../Components/FactorVote"; // Reintegrated FactorVote
+import "./FactorVotingModal.css"; // Added for better styling
 
 const FactorVotingModal = ({
   project,
@@ -17,12 +19,8 @@ const FactorVotingModal = ({
   const progressPercentage =
     totalFactors > 0 ? (votedFactors / totalFactors) * 100 : 0;
 
-  // Get the current factor and its current vote value
+  // Get the current factor
   const currentFactor = project.factors[currentFactorIndex];
-  const currentValue =
-    factorVotes[currentFactor.id] !== undefined
-      ? factorVotes[currentFactor.id]
-      : null;
 
   return (
     <div className="popup-overlay">
@@ -31,76 +29,43 @@ const FactorVotingModal = ({
           ×
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-center" style={{ textAlign: "center" }}>
+        <h2 className="text-2xl font-bold mb-4 text-center" style={{textAlign: 'center'}}>
           <u>Vote on {project.name}</u>:
         </h2>
 
         <div className="vote-container">
-          {project.factors.length > 0 && currentFactor && (
-            <div className="vote-factor">
-              <div className="factor-name" style={{ textAlign: "center" }}>
-                <span className="factor-title">{currentFactor.name}</span>
-                <span className="factor-description">
-                  {currentFactor.description}
-                </span>
-              </div>
+          {currentFactor && (
+            <>
+              {/* FactorVote component (Handles the actual voting) */}
+              <FactorVote
+                factor={currentFactor}
+                factorVotes={factorVotes}
+                handleFactorVoteChange={onFactorVoteChange}
+              />
 
-              {/* Table layout for score selection */}
-              <table className="factor-table" style={{ margin: "0 auto" }}>
-                <thead className="factor-table-header">
+              {/* Enhanced table-based display */}
+              <table className="factor-table">
+                <thead>
                   <tr>
-                    <th style={{ textAlign: "center" }}>Score</th>
-                    <th style={{ textAlign: "center" }}>Description</th>
-                    <th style={{ textAlign: "center" }}>Explanation</th>
+                    <th>Score</th>
+                    <th>Description</th>
+                    <th>Explanation</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[0, 1, 2, 3, 4].map((score) => (
-                    <tr key={score} className="factor-table-row">
-                      <td
-                        className="factor-score-cell"
-                        style={{ textAlign: "center", verticalAlign: "middle" }}
-                      >
-                        <div
-                          className={`factor-option ${currentValue === score ? "selected" : ""}`}
-                          onClick={() =>
-                            onFactorVoteChange(currentFactor.id, score)
-                          }
-                          style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            width: "40px",
-                            height: "40px",
-                            margin: "0 auto",
-                            textAlign: "center",
-                          }}
-                        >
-                          {score}
-                        </div>
-                      </td>
-                      <td
-                        className="factor-table-cell"
-                        style={{ textAlign: "center", verticalAlign: "middle" }}
-                      >
-                        {currentFactor.scales_desc &&
-                          currentFactor.scales_desc[score]}
-                      </td>
-                      <td
-                        className="factor-table-cell"
-                        style={{ textAlign: "center", verticalAlign: "middle" }}
-                      >
-                        {currentFactor.scales_explanation &&
-                          currentFactor.scales_explanation[score]}
-                      </td>
+                    <tr key={score}>
+                      <td className="score-cell">{score}</td>
+                      <td>{currentFactor.scales_desc?.[score]}</td>
+                      <td>{currentFactor.scales_explanation?.[score]}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            </div>
+            </>
           )}
 
-          {/* Navigation buttons remain unchanged */}
+          {/* Navigation buttons */}
           <div className="factor-navigation">
             <button
               className="prev-factor-btn"
@@ -117,6 +82,7 @@ const FactorVotingModal = ({
           </div>
         </div>
 
+        {/* Progress bar */}
         <div className="vote-progress-container">
           <div className="progress-bar">
             <div
@@ -127,7 +93,7 @@ const FactorVotingModal = ({
               }}
             ></div>
           </div>
-          <div className="vote-progress-text" style={{ textAlign: "center", marginTop: "10px" }}>
+          <div className="vote-progress-text">
             <b>
               <u>Voted on</u>: {votedFactors}/{totalFactors} Factors
             </b>
