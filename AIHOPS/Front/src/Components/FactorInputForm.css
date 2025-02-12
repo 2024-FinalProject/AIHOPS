@@ -111,7 +111,7 @@
     color: var(--text-color) !important;
     background: #869ad9;
     width: 60px;
-    text-align: center;
+    text-align: center !important;
     font-family: Verdana, sans-serif !important;
   }
   

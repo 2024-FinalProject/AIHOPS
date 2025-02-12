@@ -28,7 +28,7 @@ const FactorInputForm = ({
             name: newFactorName,
             description: newFactorDescription,
             scaleDescriptions: scaleDescriptions.slice().reverse(),
-            scaleExplanations: scaleExplanations.slice().reverse()
+            scaleExplanations: scaleExplanations.slice().reverse(),
         });
     };      
     
@@ -73,7 +73,7 @@ const FactorInputForm = ({
                     </tr>
                 </thead>
                 <tbody>
-                    {[4, 3, 2, 1, 0].map((score, idx) => (
+                    {[0, 1, 2, 3, 4].map((score, idx) => (
                     <tr key={score} className="factor-table-row">
                         <td className="factor-score-cell">
                         {score}

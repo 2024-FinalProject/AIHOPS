@@ -1,34 +1,50 @@
 .factor-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-  }
-  
-  .factor-table th,
-  .factor-table td {
-    padding: 12px;
-    text-align: left;
-    border: 1px solid var(--border-color) !important; /* Adds column separation */
-  }
-  
-  .factor-table th {
-    background-color: #92b7e1;
-    font-weight: bold;
-    text-align: center;
-  }
-  
-  .factor-table .score-cell {
-    text-align: center;
-    font-weight: bold;
-  }
-  
-  .factor-table tbody tr:nth-child(even) {
-    background-color: #b3b3b3;
-  }
-  
-  .factor-table tbody tr:hover {
-    background-color: #60b1d6;
-  }
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.factor-table th,
+.factor-table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid var(--border-color) !important; /* Adds column separation */
+}
+
+.factor-table th {
+  background-color: #92b7e1;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Adjusted column widths */
+.factor-table th:first-child,
+.factor-table td:first-child {
+  width: 10%;
+}
+
+.factor-table th:nth-child(2),
+.factor-table td:nth-child(2) {
+  width: 35%;
+}
+
+.factor-table th:nth-child(3),
+.factor-table td:nth-child(3) {
+  width: 55%;
+}
+
+.factor-table .score-cell {
+  text-align: center;
+  font-weight: bold;
+}
+
+.factor-table tbody tr:nth-child(even) {
+  background-color: #b3b3b3;
+}
+
+.factor-table tbody tr:hover {
+  background-color: #60b1d6;
+}
   
   /* Progress Bar Styling */
   .vote-progress-container {
