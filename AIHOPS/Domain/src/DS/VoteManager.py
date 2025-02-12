@@ -115,22 +115,25 @@ class VoteManager:
     def _factors_score_data(self):
         factors_res = self._sum_score_by_factor()
 
+        # Calculate averages for each factor
         for fid, res in factors_res.items():
             if res["vote_count"] > 0:
                 avg = res["score"] / res["vote_count"]
                 factors_res[fid] = {"avg": avg, "vote_count": res["vote_count"]}
 
         N = 0
-        Sa_max = 0
+        Sa_max = 4  # Maximum possible score is always 4 according to documentation
+        
+        # Calculate N by summing all assessor scores
         for assessor, vote_dict in self.factors_votes.items():
-            if 0 not in vote_dict.values():
+            if 0 in vote_dict.values():
+                Sa = 0  # If any factor is scored 0, the assessor's total score is 0
+            else:
                 Sa = sum(list(vote_dict.values())) / len(vote_dict.values())
-                if Sa > Sa_max:
-                    Sa_max = Sa
-                N += Sa
+            N += Sa
 
         m = len(self.factors_votes.keys())
-        D = Sa_max * m
+        D = Sa_max * m  # D will never be 0 as long as m > 0
 
         return factors_res, N, D
 
