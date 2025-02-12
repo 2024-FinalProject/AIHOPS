@@ -535,9 +535,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 </tr>
                             </thead>
                             <tbody>
-                                {[1, 2, 3, 4, 5].map((score, index) => (
+                                {[0, 1, 2, 3, 4].map((score, index) => (
                                     <tr key={score} className="factor-table-row">
-                                        <td className="factor-table-cell factor-score-cell">{score}</td>
+                                        <td className="factor-score-cell">{score}</td>
                                         <td className="factor-table-cell">
                                             <textarea
                                                 className="factor-table-input"
@@ -703,7 +703,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <div className = "default-div">
                         {showExistingContentFactors && (
                             <div>
-                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '10px'}}>
+                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '30px'}}>
                                     <b><u className="default-text">Project Factors</u>:</b>
                                 </div>
                                 {selectedProject.factors.length > 0 ? (
@@ -738,7 +738,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                             cursor: 'pointer',
                                                         }}
                                                     >
-                                                        Edit
+                                                        View/Edit
                                                     </button>
                                                     <button
                                                         className="action-btn delete-btn"
@@ -815,7 +815,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         )}
                         {showPoolContentFactors && (
                             <div>
-                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '10px'}}>
+                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '30px'}}>
                                     <b><u> Factors Pool</u>:</b>
                                 </div>
                                 {factorsPool.length > 0 ? (
@@ -868,7 +868,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                             cursor: 'pointer',
                                                         }}
                                                     >
-                                                        Edit
+                                                        View/Edit
                                                     </button>
                                                     <button
                                                         className="action-btn delete-btn"
