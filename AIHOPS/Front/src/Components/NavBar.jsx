@@ -31,14 +31,12 @@ const NavBar = () => {
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav">
             <li className="nav-item">
-              <a
-                href={aihops_article}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nav-link nav-button"
+              <Link
+                to="/about"
+                className={`nav-link nav-button ${location.pathname === '/about' ? 'active' : ''}`}
               >
                 About
-              </a>
+              </Link>
             </li>
             {isAuthenticated ? (
               <>
