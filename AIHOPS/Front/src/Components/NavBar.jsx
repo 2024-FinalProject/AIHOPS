@@ -1,65 +1,89 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./NavBar.css";
+import aihops_article from "../assets/AIHOPS.pdf";
 
 const NavBar = () => {
   const { isAuthenticated, logout } = useAuth();
   const { user: userName } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/"); // Redirect to homepage after logout
+  };
+
+  const handleLogin = () => {
+    navigate("/"); // Redirect to homepage after login
+  };
 
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-home">
-          {" "}
-          AIHOPS{" "}
+        <Link
+          to="/"
+          className={`navbar-home ${location.pathname === "/" ? "active" : ""}`}
+        >
+          AIHOPS
         </Link>
         <div className="collapse navbar-collapse">
-          <ul className="navbar-nav ms-auto">
+          <ul className="navbar-nav">
+            <li className="nav-item">
+              <a
+                href={aihops_article}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-link nav-button"
+              >
+                About
+              </a>
+            </li>
             {isAuthenticated ? (
               <>
-                {/* Profile button */}
                 <li className="nav-item">
-                  <Link to="/settings" className="nav-link nav-button">
+                  <Link
+                    to="/settings"
+                    className={`nav-link nav-button ${location.pathname === '/settings' ? 'active' : ''}`}
+                  >
                     Settings
                   </Link>
                 </li>
 
-                {/* Projects Management button */}
                 <li className="nav-item">
-                  <Link to="/projectsmanagement" className="nav-link nav-button">
+                  <Link
+                    to="/projectsmanagement"
+                    className={`nav-link nav-button ${location.pathname === '/projectsmanagement' ? 'active' : ''}`}
+                  >
                     Projects Management
                   </Link>
                 </li>
 
-                {/* _old Projects Management button */}
-                {/* <li className="nav-item">
-                  <Link to="/projectsmanagement_old" className="nav-link nav-button">
-                    Projects Management _old
-                  </Link>
-                </li> */}
-
-                {/* MyProjects button */}
                 <li className="nav-item">
-                  <Link to="/myprojects" className="nav-link nav-button">
+                  <Link
+                    to="/myprojects"
+                    className={`nav-link nav-button ${location.pathname === '/myprojects' ? 'active' : ''}`}
+                  >
                     Vote On Projects
                   </Link>
                 </li>
 
-                {/* Notification button */}
                 <li className="nav-item">
                   <Link
                     to="/notification"
-                    className="nav-link nav-button"
-                    state={{ triggerFetch: true }} // Passing state to trigger the fetch
+                    className={`nav-link nav-button ${location.pathname === '/notification' ? 'active' : ''}`}
+                    state={{ triggerFetch: true }}
                   >
                     Notification
                   </Link>
                 </li>
 
-                {/* Logout button */}
                 <li className="nav-item">
-                  <button className="nav-link nav-button logout" onClick={logout}>
+                  <button
+                    className="nav-link nav-button"
+                    onClick={handleLogout}
+                  >
                     Logout
                   </button>
                 </li>
@@ -67,12 +91,19 @@ const NavBar = () => {
             ) : (
               <>
                 <li className="nav-item">
-                  <Link to="/login" className="nav-link">
+                  <Link
+                    to="/login"
+                    className={`nav-link nav-button ${location.pathname === '/login' ? 'active' : ''}`}
+                    onClick={handleLogin} // Redirect to homepage after login
+                  >
                     Login
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link to="/register" className="nav-link">
+                  <Link
+                    to="/register"
+                    className={`nav-link nav-button ${location.pathname === '/register' ? 'active' : ''}`}
+                  >
                     Register
                   </Link>
                 </li>

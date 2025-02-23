@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import aihops_article from "../assets/AIHOPS.pdf";
 import "./WelcomePage.css";
 
 const WelcomePage = () => {
@@ -12,28 +11,12 @@ const WelcomePage = () => {
       <div className="welcome-page-wrapper">
         <div className="welcome-container">
           <header className="welcome-header">
-            <h1 className="welcome-title">AIHOPS</h1>
+            <h1 className="welcome-title"><u>AIHOPS</u></h1>
             <p className="welcome-subtitle">
-              Adoption of Innovation by Healthcare Organizations Prerequisites
-              Scale
+              <b>A</b>doption of <b>I</b>nnovation by <b>H</b>ealthcare <b>O</b>rganizations 
+              <div><b>P</b>rerequisites <b>S</b>cale</div>
             </p>
           </header>
-          <div className="upper-subtitle-container">
-            <span className="lower-subtitle">About: .....</span>
-          </div>
-          {/* PDF Link */}
-          <div className="pdf-link-container">
-            <h2 className="pdf-headline">
-              <a
-                href={aihops_article}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="pdf-link"
-              >
-                AIHOPS article
-              </a>
-            </h2>
-          </div>
         </div>
       </div>
     </div>
