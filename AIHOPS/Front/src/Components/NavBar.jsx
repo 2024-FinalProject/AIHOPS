@@ -65,7 +65,7 @@ const NavBar = () => {
                     to="/myprojects"
                     className={`nav-link nav-button ${location.pathname === '/myprojects' ? 'active' : ''}`}
                   >
-                    Vote On Projects
+                    Vote
                   </Link>
                 </li>
 
