@@ -75,7 +75,7 @@ const NavBar = () => {
                     className={`nav-link nav-button ${location.pathname === '/notification' ? 'active' : ''}`}
                     state={{ triggerFetch: true }}
                   >
-                    Notification
+                    Notifications
                   </Link>
                 </li>
 
