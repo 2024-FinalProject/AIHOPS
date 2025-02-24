@@ -636,7 +636,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'analyzeResult':
                 return (
                 <div className = "default-div">
-                    <h1><u>Project's Status</u>:</h1>
+                    <h1><u>Results</u>:</h1>
                     <div>
                         <button
                             className="action-btn edit-btn"
