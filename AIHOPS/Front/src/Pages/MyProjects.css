@@ -1,3 +1,7 @@
+* {
+  box-sizing: border-box;
+}
+
 /* General Styles */
 body {
   font-family: Verdana, sans-serif !important;
