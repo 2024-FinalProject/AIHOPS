@@ -36,8 +36,8 @@ const FactorVotingModal = ({
           {currentFactor && (
             <>
               <div className="factor-header">
-                <h3 className="factor-title">{currentFactor.name}</h3>
-                <p className="factor-description">{currentFactor.description}</p>
+                <h3 className="default-text factor-title">{currentFactor.name}</h3>
+                <p className="default-text factor-description">{currentFactor.description}</p>
               </div>
 
               {/* Integrated voting table - combines descriptions and voting buttons */}
