@@ -22,6 +22,7 @@ const MyProjects = () => {
   const [projectVotingStatus, setProjectVotingStatus] = useState({});
   const [showDScoreVote, setShowDScoreVote] = useState(false);
   const [currentVotingType, setCurrentVotingType] = useState(null); // 'factors' or 'dscore'
+  const [loading, setLoading] = useState(true);
 
   // Utility Functions
   const calculateProgress = (votedCount, totalCount) => {
@@ -56,6 +57,9 @@ const MyProjects = () => {
     } catch (error) {
       alert("Failed to fetch projects");
       console.error(error);
+    }
+    finally {
+      setLoading(false); // Stop loading after the request completes
     }
   };
 
@@ -287,62 +291,70 @@ const MyProjects = () => {
 
   return (
     <div className="my-projects-container">
-      <h1 className="page-heading" style ={{marginBottom:'-70px'}}><u>Voting on projects</u></h1>
+      {loading ? (
+      <div className="loading-container">
+        <div className="loading-text">Loading...</div>
+      </div>
+    ) : (
+      <>
+        <h1 className="page-heading" style ={{marginBottom:'-70px'}}><u>Voting on projects</u></h1>
 
-      <ProjectList 
-        projects={projects}
-        projectVotingStatus={projectVotingStatus}
-        isBothStatusesComplete={isBothStatusesComplete}
-        onVoteClick={handleVoteClick}
-      />
-
-      {showVotePopup && (
-        <div className="popup-overlay">
-          <div className="popup-content">
-            <VotingTypeSelector 
-              projectName={currentProject.name}
-              onSelectVotingType={handleStartVoting}
-              isFactorsVoted={projectVotingStatus[currentProject?.id]?.votingStatus === 1}
-              isDScoreVoted={projectVotingStatus[currentProject?.id]?.severitiesStatus === 1}
-              onClose={() => handleCloseVoting(currentProject.id)}
-            />
-          </div>
-        </div>
-      )}
-
-      {(projects == null || projects.length === 0) && (
-        <div className="default-text" style={{marginTop: '-30px', textAlign: 'center'}}>
-          <div className="default-text" style={{fontSize:'17px'}}><i>There are currently no projects to vote on</i>...</div>
-        </div>
-      ) }
-
-      {currentProject && isVoteStarted && (
-        <FactorVotingModal
-          project={currentProject}
-          currentFactorIndex={currentFactorIndex}
-          factorVotes={factorVotes}
-          submittedVotes={submittedVotes}
-          onClose={() => handleCloseVoting(currentProject.id)}
-          onFactorVoteChange={handleFactorVoteChange}
-          onNextFactor={handleNextFactor}
-          onPrevFactor={handlePrevFactor}
-          countVotedFactors={countVotedFactors}
+        <ProjectList 
+          projects={projects}
+          projectVotingStatus={projectVotingStatus}
+          isBothStatusesComplete={isBothStatusesComplete}
+          onVoteClick={handleVoteClick}
         />
-      )}
-      
-      {/* D-score voting popup */}
-      {showDScoreVote && (
-        <div className="popup-overlay">
-          <div className="popup-content wide">
-            <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
-            <div style={{fontFamily: 'Verdana, sans-serif' }}>
-              <h2 className="text-2xl font-bold mb-4 text-center default-text" style={{margin: '0 auto', textAlign: 'center', fontFamily: 'Verdana, sans-serif' }}>
-                <u>D-Score Voting for {currentProject.name}</u>:
-              </h2>
-              <DGraph onVoteComplete={handleDScoreVoteComplete} />
+
+        {showVotePopup && (
+          <div className="popup-overlay">
+            <div className="popup-content">
+              <VotingTypeSelector 
+                projectName={currentProject.name}
+                onSelectVotingType={handleStartVoting}
+                isFactorsVoted={projectVotingStatus[currentProject?.id]?.votingStatus === 1}
+                isDScoreVoted={projectVotingStatus[currentProject?.id]?.severitiesStatus === 1}
+                onClose={() => handleCloseVoting(currentProject.id)}
+              />
             </div>
           </div>
-        </div>
+        )}
+
+        {(projects == null || projects.length === 0) && (
+          <div className="default-text" style={{marginTop: '-30px', textAlign: 'center'}}>
+            <div className="default-text" style={{fontSize:'17px'}}><i>There are currently no projects to vote on</i>...</div>
+          </div>
+        ) }
+
+        {currentProject && isVoteStarted && (
+          <FactorVotingModal
+            project={currentProject}
+            currentFactorIndex={currentFactorIndex}
+            factorVotes={factorVotes}
+            submittedVotes={submittedVotes}
+            onClose={() => handleCloseVoting(currentProject.id)}
+            onFactorVoteChange={handleFactorVoteChange}
+            onNextFactor={handleNextFactor}
+            onPrevFactor={handlePrevFactor}
+            countVotedFactors={countVotedFactors}
+          />
+        )}
+        
+        {/* D-score voting popup */}
+        {showDScoreVote && (
+          <div className="popup-overlay">
+            <div className="popup-content wide">
+              <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
+              <div style={{fontFamily: 'Verdana, sans-serif' }}>
+                <h2 className="text-2xl font-bold mb-4 text-center default-text" style={{margin: '0 auto', textAlign: 'center', fontFamily: 'Verdana, sans-serif' }}>
+                  <u>D-Score Voting for {currentProject.name}</u>:
+                </h2>
+                <DGraph onVoteComplete={handleDScoreVoteComplete} />
+              </div>
+            </div>
+          </div>
+        )}
+      </>
       )}
     </div>
   );
