@@ -3,7 +3,7 @@
     background-color: #343a40; /* Dark grey background */
     padding: 6px 16px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow for depth */
-    font-family: 'Roboto', sans-serif; /* Modern font */
+    font-family: 'Verdana', sans-serif; /* Modern font */
     transition: background-color 0.3s ease-in-out; /* Smooth transition */
 }
 
@@ -72,7 +72,7 @@
     background-color: rgba(73, 80, 87, 0.2);
     color: white;
     font-size: 20px; /* Slightly larger */
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Verdana', sans-serif;
     padding: 10px 18px; /* Increased button size */
     border: none;
     cursor: pointer;
