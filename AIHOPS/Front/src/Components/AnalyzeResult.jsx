@@ -147,7 +147,7 @@ const AnalyzeResult = ({
         switch (analyzePopupType) {
             case 'showCurrentScore':
                 return (
-                <div style={{textAlign: 'center'}} >
+                <div style={{textAlign: 'center', marginTop: '70x'}} >
                     <h2 className = "default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '30px'}}>
                          <u>Current Project Score</u>:
                     </h2>
