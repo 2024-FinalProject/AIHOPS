@@ -1,12 +1,12 @@
 .factor-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .factor-table th,
 .factor-table td {
-  padding: 12px;
+  padding: 8px;
   text-align: left;
   border: 1px solid var(--border-color) !important; /* Adds column separation */
 }
@@ -15,6 +15,7 @@
   background-color: #92b7e1;
   font-weight: bold;
   text-align: center;
+  width: 70px;
 }
 
 /* Adjusted column widths */
@@ -43,7 +44,7 @@
 }
 
 .factor-table tbody tr:hover {
-  background-color: #60b1d6;
+  background-color: #77caf173;
 }
   
   /* Progress Bar Styling */
@@ -94,4 +95,36 @@
     background-color: #ccc;
     cursor: not-allowed;
   }
+
+  .factor-option {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    margin: 0 auto;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
+  .factor-option:hover {
+    background-color: #e0e0e0;
+  }
   
+  .factor-option.selected {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #2563eb;
+  }
+
+  /* Highlight the selected row */
+.selected-row {
+  background-color: rgb(60, 187, 223) !important;
+}
+
+.default-text{
+  color: var(--text-color) !important;
+}
