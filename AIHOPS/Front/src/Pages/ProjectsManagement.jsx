@@ -315,33 +315,33 @@ const ProjectsManagement = () => {
                         )}
     
                         {sortProjects.map((project) => (
-                            <div key={project.id} className="project-card">
-                                <div className="project-info">
-                                    <span style={{ display: 'block' }}>
-                                        <strong>Name:</strong> {project.name}
-                                    </span>
-                                    <span style={{ display: 'block' }}>
-                                        <strong>Description:</strong> {project.description}
-                                    </span>
-                                    <span style={{ display: 'block' }}>
-                                        <strong>Published:</strong> {project.isActive ? "Yes" : "No"}
-                                    </span>
+                          <div key={project.id} className="project-card">
+                            <div className="project-info">
+                                <div>
+                                    <strong>Name:</strong> {project.name}
                                 </div>
-                                <div className="project-actions">
-                                    <button
-                                        className="action-btn view-edit-btn"
-                                        onClick={() => openPopup(project)}
-                                    >
-                                        View/Edit
-                                    </button>
-                                    <button
-                                        className="action-btn delete-btn"
-                                        onClick={() => handleDelete(project.name)}
-                                    >
-                                        Delete
-                                    </button>
+                                <div style={{ margin: '10px 0' }}>
+                                    <strong>Description:</strong> {project.description}
+                                </div>
+                                <div>
+                                    <strong>Published:</strong> {project.isActive ? "Yes" : "No"}
                                 </div>
                             </div>
+                            <div className="project-actions">
+                                <button
+                                    className="action-btn view-edit-btn"
+                                    onClick={() => openPopup(project)}
+                                >
+                                    View/Edit
+                                </button>
+                                <button
+                                    className="action-btn delete-btn"
+                                    onClick={() => handleDelete(project.name)}
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
                         ))}
                     </div>
                 ) : isSuccess === false ? (
