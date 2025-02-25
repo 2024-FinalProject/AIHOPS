@@ -40,12 +40,12 @@ welcome-container {
 }
 
 .welcome-title {
-  font-size: 250%; /* Adjusted font size to percentage */
+  font-size: 500%; /* Adjusted font size to percentage */
   font-weight: bold;
 }
 
 .welcome-subtitle {
-  font-size: 150%; /* Adjusted font size to percentage */
+  font-size: 230%; /* Adjusted font size to percentage */
   margin-top: 2%;
   
 }

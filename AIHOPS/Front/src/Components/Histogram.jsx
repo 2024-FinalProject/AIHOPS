@@ -10,11 +10,11 @@ ChartJS.defaults.font.family = 'Verdana, sans-serif';
 
 const errorBarPlugin = {
     id: "errorBars",
-    beforeDatasetsDraw(chart) {
+    afterDatasetsDraw(chart) {
         const ctx = chart.ctx;
         const chartArea = chart.chartArea;
         ctx.save();
-        ctx.strokeStyle = "#d32f2f";
+        ctx.strokeStyle = "#d32f2f"; // Red color for error bars
         ctx.lineWidth = 2;
 
         chart.data.datasets[0].data.forEach((value, index) => {
@@ -31,11 +31,13 @@ const errorBarPlugin = {
             const yTop = bar.y - stdDev * (chartArea.bottom - chartArea.top) / chart.scales.y.max;
             const yBottom = bar.y + stdDev * (chartArea.bottom - chartArea.top) / chart.scales.y.max;
 
+            // Draw vertical error line
             ctx.beginPath();
             ctx.moveTo(x, yTop);
             ctx.lineTo(x, yBottom);
             ctx.stroke();
 
+            // Draw caps
             const capWidth = 6;
             ctx.beginPath();
             ctx.moveTo(x - capWidth, yTop);

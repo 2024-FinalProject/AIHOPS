@@ -20,7 +20,7 @@
 
 .factor-title {
   font-weight: 600;
-  color: #1f2937;
+  color: var(--text-color) !important;
   font-size: 1.1rem;
 }
 

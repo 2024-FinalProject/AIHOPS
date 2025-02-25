@@ -89,14 +89,17 @@ const DGraph = ({ onVoteComplete }) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       return (
-        <div className="custom-tooltip" style={{
-          position: 'absolute',
-          left: `${coordinate?.x - 150}px`,
-          top: `${coordinate?.y + 50}px`, // Position below the point
-          width: '300px',
-          fontSize: '12px',
-          padding: '10px',
-        }}>
+        <div
+          className="custom-tooltip"
+          style={{
+            position: 'absolute',
+            left: `${coordinate?.x - 110}px`, // Adjusted for smaller width
+            top: `${coordinate?.y + 40}px`, // Positioned slightly closer
+            width: '220px', // Reduced width
+            fontSize: '11px', // Slightly smaller text
+            padding: '8px', // Reduced padding
+          }}
+        >
           <h4 className="tooltip-title">{data.level}</h4>
           <div className="tooltip-content">
             <div><u>Percentage</u>: {data.percentage.toFixed(1)}%</div>
@@ -109,6 +112,7 @@ const DGraph = ({ onVoteComplete }) => {
     }
     return null;
   };
+  
 
   return (
     <Card className="severity-card" style={{ margin: 0, padding: 0, fontFamily: 'Verdana, sans-serif' }}>

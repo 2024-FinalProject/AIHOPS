@@ -635,37 +635,41 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         switch (popupType) {
             case 'analyzeResult':
                 return (
-                <div className = "default-div">
-                    <h1><u>Project's Status</u>:</h1>
-                    <div>
-                        <button
-                            className="action-btn edit-btn"
-                            onClick={() => {setAnalyzePopupType('showCurrentScore')}}
-                        >
-                            Show Current Score
-                        </button>
-                        <button
-                            className="action-btn edit-btn"
-                            onClick={() => {setAnalyzePopupType('showAssessorsInfo')}}
-                        >
-                            Show Assessors Info
-                        </button>
-                        <button
-                            className="action-btn edit-btn"
-                            onClick={() => {setAnalyzePopupType('showContentFactorsScore')}}
-                        >
-                            Show Content Factors Score
-                        </button>
-                        <button
-                            className="action-btn edit-btn"
-                            onClick={() => {setAnalyzePopupType('showSeverityFactorsScore')}}
-                        >
-                            Show d-Score
-                        </button>
-                        <AnalyzeResult analyzePopupType = {analyzePopupType} closePopup = {closePopup} projectId={selectedProject.id} />
+                    <div className="default-div">
+                        <h1><u>Results</u>:</h1>
+                        <div>
+                            <button
+                                className={`action-btn edit-btn ${analyzePopupType === 'showCurrentScore' ? 'active' : ''}`}
+                                onClick={() => { setAnalyzePopupType('showCurrentScore') }}
+                            >
+                                Show Current Score
+                            </button>
+                            <button
+                                className={`action-btn edit-btn ${analyzePopupType === 'showAssessorsInfo' ? 'active' : ''}`}
+                                onClick={() => { setAnalyzePopupType('showAssessorsInfo') }}
+                            >
+                                Show Assessors Info
+                            </button>
+                            <button
+                                className={`action-btn edit-btn ${analyzePopupType === 'showContentFactorsScore' ? 'active' : ''}`}
+                                onClick={() => { setAnalyzePopupType('showContentFactorsScore') }}
+                            >
+                                Show Content Factors Score
+                            </button>
+                            <button
+                                className={`action-btn edit-btn ${analyzePopupType === 'showSeverityFactorsScore' ? 'active' : ''}`}
+                                onClick={() => { setAnalyzePopupType('showSeverityFactorsScore') }}
+                            >
+                                Show d-Score
+                            </button>
+                            <AnalyzeResult 
+                                analyzePopupType={analyzePopupType} 
+                                closePopup={closePopup} 
+                                projectId={selectedProject.id} 
+                            />
+                        </div>
                     </div>
-                </div>
-                );
+                );            
 
             case 'editName':
                 return (

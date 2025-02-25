@@ -147,7 +147,7 @@ const AnalyzeResult = ({
         switch (analyzePopupType) {
             case 'showCurrentScore':
                 return (
-                <div style={{textAlign: 'center'}} >
+                <div style={{textAlign: 'center', marginTop: '70px'}} >
                     <h2 className = "default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '30px'}}>
                          <u>Current Project Score</u>:
                     </h2>
@@ -164,7 +164,7 @@ const AnalyzeResult = ({
                 );
             case 'showAssessorsInfo':
                 return (
-                    <div style={{ lineHeight: '1.8', margin: '20px', textAlign: 'center'}} >
+                    <div style={{ lineHeight: '1.8', margin: '20px', textAlign: 'center', marginTop: '40px'}} >
                         <h2 className="default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '10px' }}><u> Assessors Info</u>:</h2>
                         <div style={{ marginBottom: '10px' }}>
                             <p className="default-text">Number of assessors that were invited to the project:  
@@ -220,7 +220,7 @@ const AnalyzeResult = ({
                     <div>
                         <p className="default-text"><b>Current d-Score:</b> {Object.keys(projectsScore).length > 0 ? (projectsScore.d_score ? parseFloat(projectsScore.d_score.toFixed(3)) : "No available d-Score") : "No available d-Score"}
                         </p>
-                        <p className="default-text"><b>Number of assessors that gave the d-Score:</b> {projectsProgress.voted_amount} </p>
+                        <p className="default-text"><b>Number of d-score assessors:</b> {projectsProgress.voted_amount} </p>
 
                         {Object.keys(projectsScore).length > 0 ? 
                              (<SeverityHistogram severityfactors = {projectsScore.severity_damage} severityfactorsValues = {projectSeverityFactors}/>) 

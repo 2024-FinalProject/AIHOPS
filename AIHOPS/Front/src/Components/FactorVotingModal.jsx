@@ -1,5 +1,4 @@
 import React from "react";
-import FactorVote from "../Components/FactorVote"; // Reintegrated FactorVote
 import "./FactorVotingModal.css"; // Added for better styling
 
 const FactorVotingModal = ({
@@ -29,37 +28,48 @@ const FactorVotingModal = ({
           ×
         </button>
 
-        <h2 className="text-2xl font-bold mb-4 text-center" style={{textAlign: 'center', marginTop:'-10px'}}>
+        <h2 className="default-text text-2xl font-bold mb-4 text-center" style={{textAlign: 'center', marginTop:'-10px'}}>
           <u>Vote on {project.name}</u>:
         </h2>
 
         <div className="vote-container">
           {currentFactor && (
             <>
-              {/* FactorVote component (Handles the actual voting) */}
-              <FactorVote
-                factor={currentFactor}
-                factorVotes={factorVotes}
-                handleFactorVoteChange={onFactorVoteChange}
-              />
+              <div className="factor-header">
+                <h3 className="default-text factor-title">{currentFactor.name}</h3>
+                <p className="default-text factor-description">{currentFactor.description}</p>
+              </div>
 
-              {/* Enhanced table-based display */}
+              {/* Integrated voting table - combines descriptions and voting buttons */}
               <table className="factor-table">
                 <thead>
                   <tr>
-                    <th>Score</th>
+                    <th>Vote</th>
                     <th>Description</th>
                     <th>Explanation</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[0, 1, 2, 3, 4].map((score) => (
-                    <tr key={score}>
-                      <td className="score-cell">{score}</td>
-                      <td>{currentFactor.scales_desc?.[score]}</td>
-                      <td>{currentFactor.scales_explanation?.[score]}</td>
-                    </tr>
-                  ))}
+                  {[0, 1, 2, 3, 4].map((score) => {
+                    // Get the current value for this factor
+                    const currentValue = factorVotes[currentFactor.id] !== undefined ? 
+                      factorVotes[currentFactor.id] : null;
+                    
+                    return (
+                      <tr key={score} className={currentValue === score ? "selected-row" : ""}>
+                        <td className="vote-cell">
+                          <div 
+                            className={`factor-option ${currentValue === score ? 'selected' : ''}`}
+                            onClick={() => onFactorVoteChange(currentFactor.id, score)}
+                          >
+                            {score}
+                          </div>
+                        </td>
+                        <td>{currentFactor.scales_desc?.[score]}</td>
+                        <td>{currentFactor.scales_explanation?.[score]}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </>

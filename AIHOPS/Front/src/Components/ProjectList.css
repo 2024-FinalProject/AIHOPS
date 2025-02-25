@@ -1,0 +1,61 @@
+.projects-list {
+    display: block !important;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+}
+
+
+.project-card {
+    background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 8px var(--shadow-color);
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    transition: all 0.3s ease;
+    width: 100% !important; /* Ensures it spans most of the container */
+    max-width: 900px !important; /* Prevents excessive width */
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* Create a fixed-width container for text */
+.project-content {
+  width: 100%;
+  text-align: center;
+}
+
+.project-card h3 {
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.project-description {
+  margin-bottom: 10px;
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+
+.checkmark {
+  color: green;
+  font-size: 24px;
+  margin: 10px 0;
+  text-align: center;
+}
+
+.checkboxes {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

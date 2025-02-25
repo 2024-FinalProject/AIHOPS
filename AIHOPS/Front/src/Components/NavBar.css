@@ -1,38 +1,41 @@
 /* General Navbar Styling */
 .navbar {
-    background-color: #8d99a5; /* Dark background */
-    padding: 0 0px; /* Padding for top and bottom, left and right */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-    font-family: Verdana, sans-serif !important;
+    background-color: #343a40; /* Dark grey background */
+    padding: 6px 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow for depth */
+    font-family: 'Verdana', sans-serif; /* Modern font */
+    transition: background-color 0.3s ease-in-out; /* Smooth transition */
 }
 
 .navbar-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px;
-    color: black;
+    color: white;
 }
 
+/* Home Link */
 .navbar-home {
-    color: black;
-    font-size: 30px;
+    color: white;
+    font-size: 28px;
     font-weight: bold;
     text-decoration: none;
-    padding: 5px 10px;
-    transition: background-color 0.3s ease;
+    padding: 6px 12px; /* Reduced padding */
+    transition: all 0.3s ease;
+    border-radius: 6px; /* Slightly rounded corners */
 }
 
 .navbar-home:hover {
     background-color: #495057; /* Lighten background on hover */
-    border-radius: 5px;
+    transform: translateY(-2px);
+}
+
+.navbar-home.active {
+    background-color: #495057; /* Match the active state color */
+    color: #f8f9fa; /* Ensure text contrast */
 }
 
 /* Navbar Items Container */
-.navbar-collapse {
-    display: flex;
-}
-
 .navbar-nav {
     list-style-type: none;
     display: flex;
@@ -41,42 +44,73 @@
 }
 
 .nav-item {
-    margin-left: 15px;
+    margin-left: 15px; /* Slightly reduced spacing */
 }
 
 /* Unified Button Styling */
 .nav-link {
-    color: black;
+    color: white !important;
     text-decoration: none;
-    font-size: 22px;
-    padding: 8px 12px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+    font-size: 20px; /* Made buttons slightly larger */
+    padding: 10px 18px; /* Increased button size */
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
 }
 
+/* Hover Effects */
 .nav-link:hover {
-    background-color: #495057; /* Lighten background on hover */
+    background-color: #495057; /* Lighten background */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Consistent Button Styling */
+/* Button-Specific Styles */
 .nav-button {
-    /* background-color: #495057; */
+    background-color: rgba(73, 80, 87, 0.2);
     color: white;
-    font-size: 18px;
-    padding: 8px 15px;
+    font-size: 18px; /* Slightly larger */
+    font-family: 'Verdana', sans-serif;
+    padding: 10px 18px; /* Increased button size */
     border: none;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    border-radius: 5px;
+    transition: all 0.3s ease;
+    border-radius: 6px;
+    text-decoration: none;
 }
 
 .nav-button:hover {
-    background-color: #6c757d;
+    background-color: rgba(73, 80, 87, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.nav-button.logout {
-    background-color: #0e0e0e43;
+/* Active Link Styling */
+.nav-link.active, .nav-button.active {
+    background-color: #495057; /* Highlight active item */
+    color: #f8f9fa; /* Light text color */
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Subtle depth effect */
 }
+
+/* Ensure "Aihops" button displays as active */
+.nav-button:focus, .nav-link:focus {
+    outline: none;
+    background-color: #495057; /* Matches active state */
+}
+
+/* Mobile-Friendly Styling */
+@media (max-width: 768px) {
+    .navbar-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-item {
+        margin-left: 0;
+        margin-bottom: 8px;
+    }
+}
+

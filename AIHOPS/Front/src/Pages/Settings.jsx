@@ -80,8 +80,8 @@ const SettingsPage = () => {
   return (
     <div className="settings-container">
       <div className="settings-box">
-        <h2 style={{ textAlign: "center" }}>
-          <u>Settings:</u>
+        <h2 style={{ textAlign: "center" ,marginTop: "-10px"}}>
+          <u>Settings</u>:
         </h2>
 
         {/* Security Section */}
