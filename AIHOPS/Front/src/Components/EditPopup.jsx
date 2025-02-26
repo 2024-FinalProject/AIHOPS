@@ -720,44 +720,48 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     className="factor-item"
                                                     style={{
                                                         display: 'flex',
-                                                        gap: '10px',
-                                                        marginBottom: '10px',
-                                                        alignItems: 'center',
+                                                        flexDirection: 'column',
+                                                        marginBottom: '20px',
                                                         backgroundColor: '#f9f9f9',
+                                                        borderRadius: '8px',
+                                                        padding: '15px',
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
                                                     }}
                                                 >
-                                                    <div style={{ flex: 1, textAlign:'center' }}>
-                                                        <strong><u>{factor.name}</u>:</strong>
-                                                        <div style={{marginTop: '10px'}}>{factor.description}</div>
+                                                    <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+                                                        <strong><u>{factor.name}</u></strong>
+                                                        <div style={{ marginTop: '10px' }}>{factor.description}</div>
                                                     </div>
-                                                    <button
-                                                        className="action-btn"
-                                                        onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(true)}}
-                                                        style={{
-                                                            padding: '5px 15px',
-                                                            backgroundColor: '#20b2aa',
-                                                            color: 'white',
-                                                            border: 'none',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        View/Edit
-                                                    </button>
-                                                    <button
-                                                        className="action-btn delete-btn"
-                                                        onClick={() => handleDeleteFactor(factor.name, factor.id)}
-                                                        style={{
-                                                            padding: '5px 15px',
-                                                            backgroundColor: '#ff4444',
-                                                            color: 'white',
-                                                            border: 'none',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        Delete From Project
-                                                    </button>
+                                                    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                                                        <button
+                                                            className="action-btn"
+                                                            onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(true)}}
+                                                            style={{
+                                                                padding: '8px 15px',
+                                                                backgroundColor: '#20b2aa',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                            }}
+                                                        >
+                                                            View/Edit
+                                                        </button>
+                                                        <button
+                                                            className="action-btn delete-btn"
+                                                            onClick={() => handleDeleteFactor(factor.name, factor.id)}
+                                                            style={{
+                                                                padding: '8px 15px',
+                                                                backgroundColor: '#ff4444',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                            }}
+                                                        >
+                                                            Delete From Project
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         <div
@@ -827,69 +831,91 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         {factorsPool
                                             .slice(poolStartIndex, poolStartIndex + itemsPerPage)
                                             .map((factor) => (
+                                                // For Factors Pool with checkbox in top left corner
                                                 <div
                                                     key={factor.id}
                                                     className="factor-item"
                                                     style={{
                                                         display: 'flex',
-                                                        gap: '10px',
-                                                        alignItems: 'center',
-                                                        marginBottom: '10px',
+                                                        flexDirection: 'column',
+                                                        marginBottom: '20px',
                                                         backgroundColor: '#f9f9f9',
+                                                        borderRadius: '8px',
+                                                        padding: '15px',
+                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                                        position: 'relative'  // Added for absolute positioning of checkbox
                                                     }}
                                                 >
-                                                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-                                                        <div style={{
-                                                            position: 'absolute', 
-                                                            top: 0, 
-                                                            left: 0, 
-                                                            margin: 0, 
-                                                            padding: 0,
-                                                            transform: 'scale(1.6)'
-                                                        }}>
-                                                            <input
-                                                                type="checkbox"
-                                                                id={`factor-${factor.id}`}
-                                                                onChange={() => handleCheckboxChange(factor)}
-                                                                checked={selectedFactors.some((selected) => selected.id === factor.id)}
-                                                            />
-                                                        </div>
+                                                    {/* Checkbox positioned in the top left corner */}
+                                                    <div style={{ 
+                                                        position: 'absolute', 
+                                                        top: '12px', 
+                                                        left: '12px'
+                                                    }}>
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`factor-${factor.id}`}
+                                                            onChange={() => handleCheckboxChange(factor)}
+                                                            checked={selectedFactors.some((selected) => selected.id === factor.id)}
+                                                            style={{ transform: 'scale(1.3)' }}
+                                                        />
                                                     </div>
-
-                                                    <label htmlFor={`factor-${factor.id}`} style={{ flex: 1, textAlign: 'center'}}>
-                                                        <strong><u>{factor.name}</u>:</strong>
-                                                        <div style={{marginTop: '10px'}}>{factor.description}</div>
-                                                    </label>
-                                                    <button
-                                                        className="action-btn"
-                                                        onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(false)}}
-                                                        style={{
-                                                            padding: '5px 15px',
-                                                            backgroundColor: '#20b2aa',
-                                                            color: 'white',
-                                                            border: 'none',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        View/Edit
-                                                    </button>
-                                                    <button
-                                                        className="action-btn delete-btn"
-                                                        onClick={() =>
-                                                            handleDeleteFactorFromPool(factor.name, factor.id)
-                                                        }
-                                                        style={{
-                                                            padding: '5px 15px',
-                                                            backgroundColor: '#ff4444',
-                                                            color: 'white',
-                                                            border: 'none',
-                                                            borderRadius: '4px',
-                                                            cursor: 'pointer',
-                                                        }}
-                                                    >
-                                                        Delete From Pool
-                                                    </button>
+                                                    
+                                                    {/* Name - centered but with space on left for checkbox */}
+                                                    <div style={{ 
+                                                        textAlign: 'center', 
+                                                        marginBottom: '10px',
+                                                        paddingLeft: '25px'  // Add padding to offset the checkbox
+                                                    }}>
+                                                        <label htmlFor={`factor-${factor.id}`}>
+                                                            <strong><u>{factor.name}</u></strong>
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    {/* Description - centered */}
+                                                    <div style={{ 
+                                                        textAlign: 'center', 
+                                                        marginBottom: '15px', 
+                                                        padding: '0 10px' 
+                                                    }}>
+                                                        {factor.description}
+                                                    </div>
+                                                    
+                                                    {/* Buttons - centered at bottom */}
+                                                    <div style={{ 
+                                                        display: 'flex', 
+                                                        justifyContent: 'center', 
+                                                        gap: '10px' 
+                                                    }}>
+                                                        <button
+                                                            className="action-btn"
+                                                            onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(false)}}
+                                                            style={{
+                                                                padding: '8px 15px',
+                                                                backgroundColor: '#20b2aa',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                            }}
+                                                        >
+                                                            View/Edit
+                                                        </button>
+                                                        <button
+                                                            className="action-btn delete-btn"
+                                                            onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
+                                                            style={{
+                                                                padding: '8px 15px',
+                                                                backgroundColor: '#ff4444',
+                                                                color: 'white',
+                                                                border: 'none',
+                                                                borderRadius: '4px',
+                                                                cursor: 'pointer',
+                                                            }}
+                                                        >
+                                                            Delete From Pool
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             ))}
                                         <div
