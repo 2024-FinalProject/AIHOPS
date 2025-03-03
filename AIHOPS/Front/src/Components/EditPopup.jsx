@@ -38,6 +38,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [editedScaleDescriptions, setEditedScaleDescriptions] = useState(Array(5).fill(""));
     const [editedScaleExplanations, setEditedScaleExplanations] = useState(Array(5).fill(""));
     const [fromExistingFactorsPage, setFromExistingFactorsPage] = useState(true);
+    
+    // Number of pages for the Project Factors
+    const totalPagesFactors = Math.ceil(selectedProject.factors.length / itemsPerPage);
+    // Current page index (0-based) for the Project Factors
+    const currentPageFactors = factorStartIndex / itemsPerPage;
+    // Number of pages for the Factors Pool
+    const totalPagesPool = Math.ceil(factorsPool.length / itemsPerPage);
+    const currentPagePool = poolStartIndex / itemsPerPage;
 
 
     useEffect(() => {
@@ -815,6 +823,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 Next
                                             </button>
                                         </div>
+                                        {/* Page indicator for Project Factors */}
+                                        {totalPagesFactors > 1 && <div className="pagination-indicator">
+                                            {Array.from({ length: totalPagesFactors }).map((_, i) => (
+                                                <span
+                                                key={i}
+                                                className={`pagination-dot ${i === currentPageFactors ? 'active' : ''}`}
+                                                />
+                                            ))}
+                                        </div>}
                                     </>
                                 ) : (
                                     <p>No factors available in the project.</p>
@@ -963,6 +980,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 Next
                                             </button>
                                         </div>
+                                        {/* Page indicator for Factors Pool */}
+                                        {totalPagesPool > 1 && <div className="pagination-indicator">
+                                            {Array.from({ length: totalPagesPool }).map((_, i) => (
+                                                <span
+                                                key={i}
+                                                className={`pagination-dot ${i === currentPagePool ? 'active' : ''}`}
+                                                />
+                                            ))}
+                                        </div>}
                                     </>
                                 ) : (
                                     <div className="default-div" style={{textAlign: 'center', marginTop:'20px'}}>No factors available in the factors pool.</div>

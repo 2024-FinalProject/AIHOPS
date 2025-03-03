@@ -249,3 +249,28 @@ input::placeholder {
 .action-btn.active:hover, .edit-btn.active:hover {
     background-color: #343a40;
 }
+
+/* Container that holds the row of circles */
+.pagination-indicator {
+    display: flex;
+    justify-content: center; 
+    margin: 10px 0;          /* Adjust spacing as needed */
+  }
+  
+  /* Each circle */
+  .pagination-dot {
+    width: 17px; 
+    height: 17px;
+    margin: 0 8px;
+    border-radius: 50%;
+    border: 2.5px solid var(--border-color) !important;  /* circle outline */
+    background-color: transparent;
+    display: inline-block;
+    transition: background-color 0.2s ease;
+  }
+  
+  /* Active (filled) circle */
+  .pagination-dot.active {
+    background-color: #0095ff;  /* fill color */
+  }
+  
