@@ -865,7 +865,6 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     <div style={{ 
                                                         textAlign: 'center', 
                                                         marginBottom: '10px',
-                                                        paddingLeft: '25px'  // Add padding to offset the checkbox
                                                     }}>
                                                         <label htmlFor={`factor-${factor.id}`}>
                                                             <strong><u>{factor.name}</u></strong>
@@ -1011,6 +1010,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         cursor: 'pointer',
                                         transition: 'all 0.3s ease',
                                         outline: 'none',
+                                        marginLeft: '25px',
                                     }}
                                     onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
                                     onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
