@@ -95,6 +95,11 @@ const FactorVotingModal = ({
 
         {/* Progress bar */}
         <div className="vote-progress-container">
+          <div className="vote-progress-text">
+              <b>
+                <u>Voted on</u>: {votedFactors}/{totalFactors} Factors
+              </b>
+            </div>
           <div className="progress-bar">
             <div
               className="progress-bar-fill"
@@ -103,11 +108,6 @@ const FactorVotingModal = ({
                 border: "8px solid green",
               }}
             ></div>
-          </div>
-          <div className="vote-progress-text">
-            <b>
-              <u>Voted on</u>: {votedFactors}/{totalFactors} Factors
-            </b>
           </div>
         </div>
       </div>
