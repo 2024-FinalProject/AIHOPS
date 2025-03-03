@@ -6,7 +6,7 @@ import { FaUser } from "react-icons/fa"; // <-- For user icon
 import aihops_article from "../assets/AIHOPS.pdf";
 
 const NavBar = () => {
-  // Pull out userName (instead of user) from the AuthContext
+  // Pull out userName from the AuthContext
   const { isAuthenticated, userName, logout } = useAuth();
 
   const location = useLocation();

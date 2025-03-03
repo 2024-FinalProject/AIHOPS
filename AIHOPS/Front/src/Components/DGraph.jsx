@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Bar, Cell } from 'recharts';
 import './DGraph.css';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
@@ -19,6 +19,15 @@ const DGraph = ({ onVoteComplete }) => {
 
   const [percentages, setPercentages] = useState(Array(5).fill(0));
   const [weightedValues, setWeightedValues] = useState([]);
+  const [selectedDot, setSelectedDot] = useState(null);
+  const chartRef = useRef(null);
+  const dragStateRef = useRef({
+    isDragging: false,
+    activeIndex: -1,
+    startY: 0,
+    startPercentage: 0,
+    chartHeight: 0
+  });
   const theme = localStorage.getItem('theme') || 'light';
   const textColor = theme === 'light' ? '#333' : '#fff';
 
@@ -35,34 +44,77 @@ const DGraph = ({ onVoteComplete }) => {
     setWeightedValues(newWeightedValues);
   }, [percentages]);
 
-  const handleDrag = (e, index) => {
-    // Prevent text selection during drag
-    document.body.classList.add('no-select');
-  
-    const svg = e.target.ownerSVGElement;
-    const svgRect = svg.getBoundingClientRect();
-    const startY = e.clientY;
-    const startPercentage = percentages[index];
-  
-    const handleMove = (moveEvent) => {
-      const deltaY = startY - moveEvent.clientY;
-      const chartHeight = svgRect.height - 120; // Adjust for margins
-      const percentageDelta = (deltaY / chartHeight) * 100;
+  // Set up drag handlers
+  useEffect(() => {
+    const handleMouseDown = (e) => {
+      // Check if this is a dot - look for circle elements
+      if (e.target.tagName === 'circle') {
+        const index = parseInt(e.target.getAttribute('data-index'));
+        if (!isNaN(index)) {
+          e.preventDefault();
+          
+          // Get chart container for scaling
+          const container = chartRef.current;
+          if (!container) return;
+          
+          const containerRect = container.getBoundingClientRect();
+          const availableHeight = containerRect.height - 150; // Adjust for padding and margins
+          
+          // Update drag state
+          dragStateRef.current = {
+            isDragging: true,
+            activeIndex: index,
+            startY: e.clientY,
+            startPercentage: percentages[index],
+            chartHeight: availableHeight
+          };
+          
+          document.body.classList.add('no-select');
+        }
+      }
+    };
+
+    const handleMouseMove = (e) => {
+      const { isDragging, activeIndex, startY, startPercentage, chartHeight } = dragStateRef.current;
+      
+      if (!isDragging || activeIndex === -1 || chartHeight === 0) return;
+      
+      // Calculate the change as a percentage of the available drag area
+      // Multiply by a sensitivity factor (e.g., 2) to make drag more responsive
+      const sensitivity = 0.8;
+      const deltaY = startY - e.clientY;
+      const percentageDelta = (deltaY / chartHeight) * 100 * sensitivity;
+      
       const newPercentage = Math.min(100, Math.max(0, 
         Math.round(startPercentage + percentageDelta)
       ));
-      handlePercentageChange(index, newPercentage);
+      
+      const newPercentages = [...percentages];
+      newPercentages[activeIndex] = newPercentage;
+      setPercentages(newPercentages);
     };
-  
-    const handleUp = () => {
+
+    const handleMouseUp = () => {
+      if (dragStateRef.current.isDragging) {
+        dragStateRef.current.isDragging = false;
+        dragStateRef.current.activeIndex = -1;
+        document.body.classList.remove('no-select');
+      }
+    };
+
+    // Add global listeners
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    // Cleanup
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
       document.body.classList.remove('no-select');
-      document.removeEventListener('mousemove', handleMove);
-      document.removeEventListener('mouseup', handleUp);
     };
-  
-    document.addEventListener('mousemove', handleMove);
-    document.addEventListener('mouseup', handleUp);
-  };
+  }, [percentages]);
 
   const handlePercentageChange = (index, value) => {
     const newValue = Math.min(100, Math.max(0, Number(value) || 0));
@@ -85,35 +137,40 @@ const DGraph = ({ onVoteComplete }) => {
 
   const totalPercentage = percentages.reduce((sum, p) => sum + p, 0);
 
-  const CustomTooltip = ({ active, payload, coordinate }) => {
-    if (active && payload && payload.length) {
-      const data = payload[0].payload;
-      return (
-        <div
-          className="custom-tooltip"
-          style={{
-            position: 'absolute',
-            left: `${coordinate?.x - 110}px`, // Adjusted for smaller width
-            top: `${coordinate?.y + 40}px`, // Positioned slightly closer
-            width: '220px', // Reduced width
-            fontSize: '11px', // Slightly smaller text
-            padding: '8px', // Reduced padding
-          }}
-        >
-          <h4 className="tooltip-title">{data.level}</h4>
-          <div className="tooltip-content">
-            <div><u>Percentage</u>: {data.percentage.toFixed(1)}%</div>
-            <div><u>Weight Factor</u>: {severityLevels[data.levelIndex].value}</div>
-            <div><u>Weighted Value</u>: {data.weightedValue.toFixed(2)}</div>
-          </div>
-          <div className="tooltip-description">{data.description}</div>
+  // Custom tooltip handler
+  const CustomTooltip = () => {
+    if (!selectedDot || dragStateRef.current.isDragging) return null;
+    
+    const data = weightedValues[selectedDot.index];
+    
+    return (
+      <div
+        className="custom-tooltip"
+        style={{
+          position: 'absolute',
+          left: `${selectedDot.x - 110}px`,
+          top: `${selectedDot.y + 40}px`,
+          width: '220px',
+          fontSize: '11px',
+          padding: '8px',
+          backgroundColor: 'white',
+          border: '1px solid #ccc',
+          borderRadius: '4px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+          zIndex: 1000,
+        }}
+      >
+        <h4 className="tooltip-title" style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>{data.level}</h4>
+        <div className="tooltip-content">
+          <div><u>Percentage</u>: {data.percentage.toFixed(1)}%</div>
+          <div><u>Weight Factor</u>: {severityLevels[data.levelIndex].value}</div>
+          <div><u>Weighted Value</u>: {data.weightedValue.toFixed(2)}</div>
         </div>
-      );
-    }
-    return null;
+        <div className="tooltip-description" style={{ marginTop: '4px', fontSize: '10px' }}>{data.description}</div>
+      </div>
+    );
   };
   
-
   return (
     <Card className="severity-card" style={{ margin: 0, padding: 0, fontFamily: 'Verdana, sans-serif' }}>
       <CardHeader style={{ margin: 0, padding: '0 0 0 0', textAlign: 'center' }}>
@@ -122,11 +179,17 @@ const DGraph = ({ onVoteComplete }) => {
         </CardDescription>
       </CardHeader>
       <CardContent style={{ padding: 0, marginTop: 20, maxHeight: '130vh' }}>
-        <div className="severity-graph" style={{ padding: 0, margin: 0 }}>
+        <div 
+          className="severity-graph" 
+          style={{ padding: 0, margin: 0, position: 'relative' }}
+          ref={chartRef}
+        >
+          <CustomTooltip />
           <ResponsiveContainer width="100%" height={370} style={{ padding: 0, margin: 0 }}>
             <ComposedChart 
               data={weightedValues} 
               margin={{ top: 0, right: 20, left: 20, bottom: 10 }}
+              onMouseMove={() => {}}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
@@ -159,7 +222,7 @@ const DGraph = ({ onVoteComplete }) => {
                     </foreignObject>
                   </g>
                 )}
-                height={100} // Increased height for input boxes
+                height={100}
               />
               <YAxis 
                 yAxisId="left"
@@ -176,17 +239,13 @@ const DGraph = ({ onVoteComplete }) => {
                 label={{ value: 'Weighted Value', angle: 90, position: 'insideRight', fill: textColor, dy: 40 }} 
                 tick={{ fill: textColor }}
               />
-              <Tooltip 
-                content={<CustomTooltip />} 
-                cursor={{ strokeDasharray: '3 3' }}
-                wrapperStyle={{ zIndex: 100 }}
-              />
               <Legend />
               <Bar
                 yAxisId="right"
                 dataKey="weightedValue"
                 fill="#82ca9d"
                 name="Weighted Value"
+                isAnimationActive={false}
               >
                 {weightedValues.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={severityLevels[index].color} />
@@ -199,20 +258,26 @@ const DGraph = ({ onVoteComplete }) => {
                 stroke="#2563eb"
                 strokeWidth={3}
                 name="Percentage"
-                dot={{ fill: '#2563eb', strokeWidth: 2 }}
-                activeDot={(props) => {
+                isAnimationActive={false}
+                dot={(props) => {
                   const { cx, cy, index } = props;
+                  const isDragging = dragStateRef.current.isDragging && dragStateRef.current.activeIndex === index;
                   return (
                     <circle
                       cx={cx}
                       cy={cy}
-                      r={8}
+                      r={isDragging ? 8 : 6}
                       fill="#2563eb"
-                      style={{ cursor: 'grab' }}
-                      onMouseDown={(e) => handleDrag(e, index)}
+                      stroke="#2563eb"
+                      strokeWidth={isDragging ? 3 : 2}
+                      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                      data-index={index}
+                      onMouseEnter={() => !dragStateRef.current.isDragging && setSelectedDot({ x: cx, y: cy, index })}
+                      onMouseLeave={() => !dragStateRef.current.isDragging && setSelectedDot(null)}
                     />
                   );
                 }}
+                activeDot={false}
               />
             </ComposedChart>
           </ResponsiveContainer>
