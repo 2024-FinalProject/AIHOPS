@@ -144,7 +144,7 @@
 }
 
 .email-button.reject {
-  background-color: #f44336;
+  background-color: #a02424;
   color: white;
 }
 
@@ -154,7 +154,7 @@
 }
 
 .email-button.reject:hover {
-  background-color: #d32f2f;
+  background-color: #b92828;
   zoom: 1.2;
 }
 
