@@ -14,6 +14,12 @@
     color: white;
 }
 
+/* Group the AIHOPS text and user info in the left section */
+.navbar-left {
+    display: flex;
+    align-items: center;
+  }
+
 /* Home Link */
 .navbar-home {
     color: white;
@@ -114,3 +120,20 @@
     }
 }
 
+/* Adjust spacing between AIHOPS and user info */
+.navbar-user-info {
+    display: flex;
+    align-items: center;
+    margin-left: 20px;
+    font-size: 0.9rem; /* slightly smaller text */
+    color: #fff;       /* or whatever text color you prefer */
+  }
+
+  .user-icon {
+    margin-right: 5px;
+    font-size: 1rem;
+  }
+  
+  .user-email {
+    font-size: 1rem;
+  }
