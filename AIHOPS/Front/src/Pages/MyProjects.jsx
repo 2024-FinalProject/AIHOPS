@@ -256,6 +256,10 @@ const MyProjects = () => {
         }));
         setShowDScoreVote(false);
         await handleCloseVoting(currentProject.id);
+        alert("D-score votes submitted successfully");
+      }
+      else{
+        alert(`Failed to submit D-score votes: ${response.data.message}`);
       }
       //setSeverityLevel(true);
     }
