@@ -360,6 +360,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             await fetch_selected_project(selectedProject);
             selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
             await fetch_factors_pool();
+            adjustPaginationAfterDeletion('pool', factorsPool.length - selectedFactors.length);
             setSelectedFactors([]);
         } else {
             setMsg(response.data.message);
@@ -367,6 +368,19 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             setIsSuccess(true);
         }
     };
+
+    const adjustPaginationAfterDeletion = (type, newCount) => {
+        if (type === 'factors') {
+          if (factorStartIndex >= newCount && factorStartIndex > 0) {
+            setFactorStartIndex(factorStartIndex - itemsPerPage);
+          }
+        } else if (type === 'pool') {
+          if (poolStartIndex >= newCount && poolStartIndex > 0) {
+            setPoolStartIndex(poolStartIndex - itemsPerPage);
+          }
+        }
+      };
+      
 
     const handleDeleteFactorFromPool = async (factorName, factorId) => {
         if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the pool"?`)) {
@@ -384,6 +398,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 await fetchProjects();
                 await fetch_selected_project(selectedProject);
                 await fetch_factors_pool();
+                adjustPaginationAfterDeletion('pool', factorsPool.length);
             } else {
                 alert(res.data.message);
             }
@@ -627,6 +642,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
                 await fetch_selected_project(selectedProject);
                 await fetch_factors_pool();
+                adjustPaginationAfterDeletion('factors', selectedProject.factors.length);
             } else {
                 alert(res.data.message);
             }
