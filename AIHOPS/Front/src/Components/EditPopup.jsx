@@ -1208,7 +1208,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
                         {/* Remove invited members section: */}
                         <p>
-                        {!selectedProject.isActive && <strong className = "default-text"><u>To be invited members</u>:</strong>}
+                        {!selectedProject.isActive && <strong className = "default-text"><u>Members to be invited</u>:</strong>}
                         </p>
                         {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
                             <ul className="members-list">
@@ -1226,7 +1226,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             </ul>
                         )}
                         {!selectedProject.isActive && <div className="severity-factors-warning">
-                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> To be invited members will be invited only once the project has been published.</p>
+                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> Members to be invited, will be invited only once the project has been published.</p>
                         </div>}
                         {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p className = "default-text"> There are currently no invited members </p>)}
                         
