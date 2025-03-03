@@ -1,5 +1,6 @@
 import React from "react";
 import "./FactorVotingModal.css"; // Added for better styling
+import { TbArrowBigDownLineFilled } from "react-icons/tb";
 
 const FactorVotingModal = ({
   project,
@@ -44,7 +45,7 @@ const FactorVotingModal = ({
               <table className="factor-table">
                 <thead>
                   <tr>
-                    <th>Vote</th>
+                    <th>Vote Here <TbArrowBigDownLineFilled color="#ffd700" size="20px"/></th>
                     <th>Description</th>
                     <th>Explanation</th>
                   </tr>
@@ -57,7 +58,7 @@ const FactorVotingModal = ({
                     
                     return (
                       <tr key={score} className={currentValue === score ? "selected-row" : ""}>
-                        <td className="vote-cell">
+                        <td className="vote-cell" style={{textAlign: 'center'}}>
                           <div 
                             className={`factor-option ${currentValue === score ? 'selected' : ''}`}
                             onClick={() => onFactorVoteChange(currentFactor.id, score)}
