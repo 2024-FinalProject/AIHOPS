@@ -38,6 +38,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [editedScaleDescriptions, setEditedScaleDescriptions] = useState(Array(5).fill(""));
     const [editedScaleExplanations, setEditedScaleExplanations] = useState(Array(5).fill(""));
     const [fromExistingFactorsPage, setFromExistingFactorsPage] = useState(true);
+    
+    // Number of pages for the Project Factors
+    const totalPagesFactors = Math.ceil(selectedProject.factors.length / itemsPerPage);
+    // Current page index (0-based) for the Project Factors
+    const currentPageFactors = factorStartIndex / itemsPerPage;
+    // Number of pages for the Factors Pool
+    const totalPagesPool = Math.ceil(factorsPool.length / itemsPerPage);
+    const currentPagePool = poolStartIndex / itemsPerPage;
 
 
     useEffect(() => {
@@ -352,6 +360,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             await fetch_selected_project(selectedProject);
             selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
             await fetch_factors_pool();
+            adjustPaginationAfterDeletion('pool', factorsPool.length - selectedFactors.length);
             setSelectedFactors([]);
         } else {
             setMsg(response.data.message);
@@ -359,6 +368,19 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             setIsSuccess(true);
         }
     };
+
+    const adjustPaginationAfterDeletion = (type, newCount) => {
+        if (type === 'factors') {
+          if (factorStartIndex >= newCount && factorStartIndex > 0) {
+            setFactorStartIndex(factorStartIndex - itemsPerPage);
+          }
+        } else if (type === 'pool') {
+          if (poolStartIndex >= newCount && poolStartIndex > 0) {
+            setPoolStartIndex(poolStartIndex - itemsPerPage);
+          }
+        }
+      };
+      
 
     const handleDeleteFactorFromPool = async (factorName, factorId) => {
         if (window.confirm(`Are you sure you want to delete the factor "${factorName} from the pool"?`)) {
@@ -376,6 +398,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 await fetchProjects();
                 await fetch_selected_project(selectedProject);
                 await fetch_factors_pool();
+                adjustPaginationAfterDeletion('pool', factorsPool.length);
             } else {
                 alert(res.data.message);
             }
@@ -619,6 +642,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
                 await fetch_selected_project(selectedProject);
                 await fetch_factors_pool();
+                adjustPaginationAfterDeletion('factors', selectedProject.factors.length);
             } else {
                 alert(res.data.message);
             }
@@ -815,6 +839,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 Next
                                             </button>
                                         </div>
+                                        {/* Page indicator for Project Factors */}
+                                        {totalPagesFactors > 1 && <div className="pagination-indicator">
+                                            {Array.from({ length: totalPagesFactors }).map((_, i) => (
+                                                <span
+                                                key={i}
+                                                className={`pagination-dot ${i === currentPageFactors ? 'active' : ''}`}
+                                                />
+                                            ))}
+                                        </div>}
                                     </>
                                 ) : (
                                     <p>No factors available in the project.</p>
@@ -963,6 +996,15 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 Next
                                             </button>
                                         </div>
+                                        {/* Page indicator for Factors Pool */}
+                                        {totalPagesPool > 1 && <div className="pagination-indicator">
+                                            {Array.from({ length: totalPagesPool }).map((_, i) => (
+                                                <span
+                                                key={i}
+                                                className={`pagination-dot ${i === currentPagePool ? 'active' : ''}`}
+                                                />
+                                            ))}
+                                        </div>}
                                     </>
                                 ) : (
                                     <div className="default-div" style={{textAlign: 'center', marginTop:'20px'}}>No factors available in the factors pool.</div>
@@ -1166,7 +1208,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
                         {/* Remove invited members section: */}
                         <p>
-                        {!selectedProject.isActive && <strong className = "default-text"><u>To be invited members</u>:</strong>}
+                        {!selectedProject.isActive && <strong className = "default-text"><u>Members to be invited</u>:</strong>}
                         </p>
                         {!selectedProject.isActive && projectsPendingInvites != null && projectsPendingInvites.length > 0 && (
                             <ul className="members-list">
@@ -1184,7 +1226,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             </ul>
                         )}
                         {!selectedProject.isActive && <div className="severity-factors-warning">
-                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> To be invited members will be invited only once the project has been published.</p>
+                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> Members to be invited, will be invited only once the project has been published.</p>
                         </div>}
                         {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p className = "default-text"> There are currently no invited members </p>)}
                         

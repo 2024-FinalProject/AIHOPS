@@ -2,11 +2,13 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./NavBar.css";
+import { FaUser } from "react-icons/fa"; // <-- For user icon
 import aihops_article from "../assets/AIHOPS.pdf";
 
 const NavBar = () => {
-  const { isAuthenticated, logout } = useAuth();
-  const { user: userName } = useAuth();
+  // Pull out userName from the AuthContext
+  const { isAuthenticated, userName, logout } = useAuth();
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -22,18 +24,34 @@ const NavBar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        <Link
-          to="/"
-          className={`navbar-home ${location.pathname === "/" ? "active" : ""}`}
-        >
-          AIHOPS
-        </Link>
+        
+        {/* Left side: AIHOPS + user icon/name (if logged in) */}
+        <div className="navbar-left">
+          <Link
+            to="/"
+            className={`navbar-home ${
+              location.pathname === "/" ? "active" : ""
+            }`}
+          >
+            AIHOPS
+          </Link>
+          {/* Only show if user is logged in AND userName is defined */}
+          {isAuthenticated && userName && (
+            <div className="navbar-user-info">
+              <FaUser className="user-icon" />
+              <span className="user-email">{userName}</span>
+            </div>
+          )}
+        </div>
+
         <div className="collapse navbar-collapse">
           <ul className="navbar-nav">
             <li className="nav-item">
               <Link
                 to="/about"
-                className={`nav-link nav-button ${location.pathname === '/about' ? 'active' : ''}`}
+                className={`nav-link nav-button ${
+                  location.pathname === "/about" ? "active" : ""
+                }`}
               >
                 About
               </Link>
@@ -43,7 +61,9 @@ const NavBar = () => {
                 <li className="nav-item">
                   <Link
                     to="/settings"
-                    className={`nav-link nav-button ${location.pathname === '/settings' ? 'active' : ''}`}
+                    className={`nav-link nav-button ${
+                      location.pathname === "/settings" ? "active" : ""
+                    }`}
                   >
                     Settings
                   </Link>
@@ -52,7 +72,9 @@ const NavBar = () => {
                 <li className="nav-item">
                   <Link
                     to="/projectsmanagement"
-                    className={`nav-link nav-button ${location.pathname === '/projectsmanagement' ? 'active' : ''}`}
+                    className={`nav-link nav-button ${
+                      location.pathname === "/projectsmanagement" ? "active" : ""
+                    }`}
                   >
                     Projects Management
                   </Link>
@@ -61,7 +83,9 @@ const NavBar = () => {
                 <li className="nav-item">
                   <Link
                     to="/myprojects"
-                    className={`nav-link nav-button ${location.pathname === '/myprojects' ? 'active' : ''}`}
+                    className={`nav-link nav-button ${
+                      location.pathname === "/myprojects" ? "active" : ""
+                    }`}
                   >
                     Vote
                   </Link>
@@ -70,7 +94,9 @@ const NavBar = () => {
                 <li className="nav-item">
                   <Link
                     to="/notification"
-                    className={`nav-link nav-button ${location.pathname === '/notification' ? 'active' : ''}`}
+                    className={`nav-link nav-button ${
+                      location.pathname === "/notification" ? "active" : ""
+                    }`}
                     state={{ triggerFetch: true }}
                   >
                     Notifications
@@ -78,10 +104,7 @@ const NavBar = () => {
                 </li>
 
                 <li className="nav-item">
-                  <button
-                    className="nav-link nav-button"
-                    onClick={handleLogout}
-                  >
+                  <button className="nav-link nav-button" onClick={handleLogout}>
                     Logout
                   </button>
                 </li>
@@ -91,8 +114,10 @@ const NavBar = () => {
                 <li className="nav-item">
                   <Link
                     to="/login"
-                    className={`nav-link nav-button ${location.pathname === '/login' ? 'active' : ''}`}
-                    onClick={handleLogin} // Redirect to homepage after login
+                    className={`nav-link nav-button ${
+                      location.pathname === "/login" ? "active" : ""
+                    }`}
+                    onClick={handleLogin}
                   >
                     Login
                   </Link>
@@ -100,7 +125,9 @@ const NavBar = () => {
                 <li className="nav-item">
                   <Link
                     to="/register"
-                    className={`nav-link nav-button ${location.pathname === '/register' ? 'active' : ''}`}
+                    className={`nav-link nav-button ${
+                      location.pathname === "/register" ? "active" : ""
+                    }`}
                   >
                     Register
                   </Link>

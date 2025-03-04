@@ -67,13 +67,37 @@ class VoteManager:
 
     def set_severity_vote(self, actor, severity_probs):
         with self.lock:
+            # Check if a severity vote already exists for this actor and project
+            existing_vote = self.db_access.load_by_query(DBSeverityVotes, {
+                "actor": actor,
+                "pid": self.pid
+            })
+
+            if existing_vote:
+                # If a vote exists, update the record
+                instance = DBSeverityVotes(actor, self.pid, *severity_probs)
+                try:
+                    res = self.db_access.update(instance)
+                    if not res.success:
+                        return res
+                except Exception as e:
+                    return ResponseFailMsg(f"Failed to update severity vote: {str(e)}")
+            else:
+                # If no vote exists, insert a new record
+                instance = DBSeverityVotes(actor, self.pid, *severity_probs)
+                try:
+                    res = self.db_access.insert(instance)
+                    if not res.success:
+                        return res
+                except Exception as e:
+                    return ResponseFailMsg(f"Failed to insert severity vote: {str(e)}")
+
+            # Insert or update successful, now update in local cache
             self.severity_votes.insert(actor, severity_probs)
-            instance = DBSeverityVotes(actor, self.pid, *severity_probs)
-            res = self.db_access.insert(instance)
-            if not res.success:
-                self.severity_votes.pop(actor)
-                return res
+
         return ResponseSuccessMsg(f"actor {actor}, voted on severities {severity_probs}")
+
+
 
 
     def get_factors(self):

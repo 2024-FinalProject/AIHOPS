@@ -69,8 +69,9 @@
   }
   
   .vote-progress-text {
-    margin-top: 10px;
+    margin-top:-30px;
     font-size: 16px;
+    margin-bottom:10px;
   }
   
   /* Navigation Buttons */
