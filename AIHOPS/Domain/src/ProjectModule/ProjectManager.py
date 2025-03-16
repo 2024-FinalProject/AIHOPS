@@ -180,14 +180,15 @@ class ProjectManager():
             self._add_member_after_verifying_owner(project, member)
         return ResponseSuccessMsg(f"members: {user_names} pending requests added for project {pid}: {project.name}")
 
-    def remove_member(self, actor, pid, member):
-        project = self._verify_owner(pid, actor)
-
+    def _remove_project_member_from_db(self, pid, member):
         res1 = self.db_access.delete_obj_by_query(DBPendingRequests, {"project_id": pid, "email": member})
         res2 = self.db_access.delete_obj_by_query(DBProjectMembers, {"project_id": pid, "member_email": member})
-
         if not res1.success and not res2.success:
-            return ResponseFailMsg(res1.msg + res2.msg)
+            raise Exception(f"project {pid} member {member} not found")
+
+    def remove_member(self, actor, pid, member):
+        project = self._verify_owner(pid, actor)
+        self._remove_project_member_from_db(pid, member)
 
         res = project.remove_member(member)
         if not res.success:
@@ -358,13 +359,12 @@ class ProjectManager():
 
 
     def archive_project(self, pid, actor):
-        """changes projects status to not published, members invited can no longer accept reject,
-            be saved and will be invited again if the project owner republished the project """
         project = self._verify_owner(pid, actor)
         pending_emails = self._get_pending_emails_by_projects_list(pid)
-        res = project.archive_project(pending_emails)
+        res = project.archive_project()
         if res.success:
             for email in pending_emails:
+                self._remove_project_member_from_db(pid, email)
                 self.pending_requests.remove(email, pid)
         return res
 

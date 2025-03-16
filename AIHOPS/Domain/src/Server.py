@@ -302,8 +302,7 @@ class Server:
         
     def archive_project(self, cookie, pid):
         """only allowed for project owner
-            after unapproved members cant join while archived, but savedd and f republished
-            they will be reinvited"""
+            """
         try:
             res = self.get_session_member(cookie)
             if not res.success:

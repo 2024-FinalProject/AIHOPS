@@ -12,6 +12,7 @@ class DBProject(Base):
     description = Column(String(1000))
     date_created = Column(DateTime, default=datetime.utcnow)
     published = Column(Boolean, default=False)
+    archived = Column(Boolean, default=False)
     factors_confirmed = Column(Boolean, default=False)
     severity_factors_confirmed = Column(Boolean, default=False)
 
@@ -26,5 +27,6 @@ class DBProject(Base):
         self.name = name
         self.description = description
         self.published = False
+        self.archived = False
         self.factors_confirmed = False
         self.severity_factors_confirmed = False
