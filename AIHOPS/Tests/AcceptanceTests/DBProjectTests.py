@@ -25,8 +25,7 @@ class DBProjectTests(unittest.TestCase):
         self.p1_data = ["project1", "desc1"]
         self.p2_data = ["project2", "desc2"]
         self.cookie = self.server.enter().result.cookie
-
-        self.factors = [["factor1", "desc1"], ["factor2", "desc2"], ["factor3", "desc3"], ["factor4", "desc4"]]
+        self.factors = ("factor1", "desc1", ["scale0", "scale1", "scale2", "scale3", "scale4"], ["explanation0", "explanation1", "explanation2", "explanation3", "explanation4"]),
         self.severities = [1,2,3,4,5]
 
 
@@ -71,7 +70,7 @@ class DBProjectTests(unittest.TestCase):
 
     def set_default_factors_for_project(self, cookie, pid):
         for f in self.factors:
-            self.server.add_project_factor(cookie, pid, f[0], f[1])
+            self.server.add_project_factor(cookie, pid, f[0], f[1], f[2], f[3])
 
     def set_default_severity_factors_for_project(self, cookie, pid):
         self.server.set_project_severity_factors(cookie, pid, self.severities)
