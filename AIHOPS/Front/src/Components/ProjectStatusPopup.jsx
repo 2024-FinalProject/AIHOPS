@@ -42,7 +42,7 @@ const ProjectStatusPopup = ({
         </div>
         <h3><u>Project's Actions</u>:</h3>
         <div>
-          <button disabled = {selectedProject.isActive}
+          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
             className="action-btn edit-btn"
             onClick={() => handleEditProjectsName(selectedProject.id, selectedProject.name)}
           >
@@ -50,7 +50,7 @@ const ProjectStatusPopup = ({
           </button>
         </div>
         <div>
-          <button disabled = {selectedProject.isActive}
+          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
             className="action-btn edit-btn"
             onClick={() => handleEditProjectsDescription(selectedProject.id, selectedProject.name)}
           >
@@ -58,7 +58,7 @@ const ProjectStatusPopup = ({
           </button>
         </div>
         <div>
-          <button disabled = {selectedProject.isActive}
+          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
             className="action-btn edit-btn"
             onClick={() => handleEditContentFactors(selectedProject.id, selectedProject.name)}
           >
@@ -66,7 +66,7 @@ const ProjectStatusPopup = ({
           </button>
         </div>
         <div>
-          <button disabled = {selectedProject.isActive}
+          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
             className="action-btn edit-btn"
             onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
           >
@@ -74,7 +74,7 @@ const ProjectStatusPopup = ({
           </button>
         </div>
         <div>
-          <button
+          <button disabled = {selectedProject.isArchived}
             className="action-btn edit-btn"
             onClick={() => handleManageAssessors(selectedProject.id, selectedProject.name)}
           >
@@ -90,8 +90,8 @@ const ProjectStatusPopup = ({
               Archive
             </button>
           )}
-          {!selectedProject.isActive && (
-            <button
+          {!selectedProject.isActive &&  (
+            <button disabled = {selectedProject.isArchived}
               className="action-btn edit-btn"
               onClick={() => handlePublish(selectedProject.id, selectedProject.name)}
             >

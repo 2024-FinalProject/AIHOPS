@@ -132,7 +132,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             if (!response.data.success) {
                 setMsg(response.data.message);
                 setIsSuccess(true);
-                alert(response.data.message);
+                //alert(response.data.message);
                 return;
             } else {
                 await fetchProjects();
@@ -165,7 +165,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
           }
           const response = await confirmSeverityFactors(cookie, pid);
           if (response.data.success) {
-            alert("Severity factors confirmed successfully");
+            //alert("Severity factors confirmed successfully");
             selectedProject.severity_factors_inited = true;
             fetch_selected_project(selectedProject);
           } else {
@@ -247,7 +247,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             const response = await removeMember(cookie, selectedProject.id, member);
         
             if (response.data.success) {
-                alert(`The member ${member} has been removed from the project.`);
+                //alert(`The member ${member} has been removed from the project.`);
                 await fetchProjects(); // Refresh the project data after removal
                 await fetch_pending_invites(cookie, selectedProject.id);
                 selectedProject.members = selectedProject.members.filter((memberItem) => memberItem !== member);
@@ -295,7 +295,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             const response = await addMembers(cookie, selectedProject.id, tempMembersList);
         
             if (response.data.success) {
-                alert(`An invitation has been sent to member ${newMemberName}.`);
+                //alert(`An invitation has been sent to member ${newMemberName}.`);
                 await fetchProjects(); // Refresh projects after adding the member
                 await fetch_pending_invites(cookie, selectedProject.id);
                 await fetch_pending_requests(cookie, selectedProject.id);
@@ -394,7 +394,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             try{
             const res = await deleteFactorFromPool(cookie, factorId);
             if (res.data.success) {
-                alert(`Factor "${factorName}" deleted successfully.`);
+                //alert(`Factor "${factorName}" deleted successfully.`);
                 await fetchProjects();
                 await fetch_selected_project(selectedProject);
                 await fetch_factors_pool();
@@ -477,7 +477,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
           if (response.data.success) {
             selectedProject.factors_inited = true;
             fetch_selected_project(selectedProject);
-            alert("Factors confirmed successfully");
+            //alert("Factors confirmed successfully");
             closePopup();
           } else {
             console.log("Error confirming project factors");
@@ -637,7 +637,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             try{
             const res = await deleteProjectFactor(cookie, selectedProject.id, factorId);
             if (res.data.success) {
-                alert(`Factor "${factorName}" deleted successfully.`);
+                //alert(`Factor "${factorName}" deleted successfully.`);
                 await fetchProjects();
                 selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
                 await fetch_selected_project(selectedProject);

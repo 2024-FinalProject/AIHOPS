@@ -277,6 +277,20 @@ class ProjectTests(unittest.TestCase):
         self.assertFalse(res_2.success, res_2.msg)
         self.server.logout(self.cookie1)
 
+    def test_publish_test_after_archiving_fail(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", True)
+        project_id = res.result
+        self.server.confirm_project_factors(self.cookie1, project_id)
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.confirm_project_severity_factors(self.cookie1, project_id)
+        self.server.add_member(self.cookie1, project_id, "Bob")
+        self.server.publish_project(self.cookie1, project_id)
+        self.server.archive_project(self.cookie1, project_id)
+        res = self.server.publish_project(self.cookie1, project_id)
+        self.assertFalse(res.success, res.msg)
+        self.server.logout(self.cookie1)
+
     def test_close_project_success(self):
         self.server.login(self.cookie1, "Alice", "")
         res = self.server.create_project(self.cookie1, "Project1", "Description1", True)
@@ -684,4 +698,91 @@ class ProjectTests(unittest.TestCase):
         self.server.login(self.cookie1, "Alice", "")
         res = self.server.reject_member(self.cookie1, -999)
         self.assertFalse(res.success, f'Reject member succeeded when it should have failed - request not found')
+        self.server.logout(self.cookie1)
+
+    def test_edit_projects_name_and_desc_after_archiving_fail(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", True)
+        project_id = res.result
+        #need to publish first
+        self.server.confirm_project_factors(self.cookie1, project_id)
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.confirm_project_severity_factors(self.cookie1, project_id)
+        self.server.add_member(self.cookie1, project_id, "Bob")
+        self.server.publish_project(self.cookie1, project_id)
+        #now archive
+        self.server.archive_project(self.cookie1, project_id)
+        res = self.server.update_project_name_and_desc(self.cookie1, project_id, "Project2", "Description2")
+        self.assertFalse(res.success, res.msg)
+        self.server.logout(self.cookie1)
+
+    def test_edit_projects_severity_factors_after_archiving_fail(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", True)
+        project_id = res.result
+        #need to publish first
+        self.server.confirm_project_factors(self.cookie1, project_id)
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.confirm_project_severity_factors(self.cookie1, project_id)
+        self.server.add_member(self.cookie1, project_id, "Bob")
+        self.server.publish_project(self.cookie1, project_id)
+        #now archive
+        self.server.archive_project(self.cookie1, project_id)
+        res = self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.assertFalse(res.success, res.msg)
+        self.server.logout(self.cookie1)
+
+    def test_add_factor_after_archiving_fail(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", True)
+        project_id = res.result
+        #need to publish first
+        self.server.confirm_project_factors(self.cookie1, project_id)
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.confirm_project_severity_factors(self.cookie1, project_id)
+        self.server.add_member(self.cookie1, project_id, "Bob")
+        self.server.publish_project(self.cookie1, project_id)
+        #now archive
+        self.server.archive_project(self.cookie1, project_id)
+        res = self.server.add_project_factor(self.cookie1, project_id, "factor1", "desc1", ["1", "2", "3", "4"], ["desc1", "desc2", "desc3", "desc4"])
+        self.assertFalse(res.success, res.msg)
+        self.server.logout(self.cookie1)
+
+    def test_invite_member_after_archiving_fail(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", True)
+        project_id = res.result
+        #need to publish first
+        self.server.confirm_project_factors(self.cookie1, project_id)
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.confirm_project_severity_factors(self.cookie1, project_id)
+        self.server.add_member(self.cookie1, project_id, "Bob")
+        self.server.publish_project(self.cookie1, project_id)
+        #now archive
+        self.server.archive_project(self.cookie1, project_id)
+        res = self.server.add_member(self.cookie1, project_id, "Chloe")
+        self.assertFalse(res.success, res.msg)
+        self.server.logout(self.cookie1)
+
+    def test_remove_member_after_archiving_fail(self):
+        self.server.login(self.cookie1, "Alice", "")
+        res = self.server.create_project(self.cookie1, "Project1", "Description1", True)
+        project_id = res.result
+        #need to publish first
+        self.server.confirm_project_factors(self.cookie1, project_id)
+        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+        self.server.confirm_project_severity_factors(self.cookie1, project_id)
+        self.server.add_member(self.cookie1, project_id, "Bob")
+        self.server.publish_project(self.cookie1, project_id)
+        #now log in with out member - Bob and accept the invitation
+        self.server.logout(self.cookie1)
+        self.server.login(self.cookie2, "Bob", "")
+        pending_requests = self.server.get_pending_requests(self.cookie2)
+        self.server.approve_member(self.cookie2, pending_requests.result[0]["id"])
+        self.server.logout(self.cookie2)
+        #now archive
+        self.server.login(self.cookie1, "Alice", "")
+        self.server.archive_project(self.cookie1, project_id)
+        res = self.server.remove_member(self.cookie1, project_id, "Bob")
+        self.assertFalse(res.success, res.msg)
         self.server.logout(self.cookie1)
