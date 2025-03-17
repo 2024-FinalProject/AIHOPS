@@ -19,7 +19,9 @@ if __name__ == '__main__':
     server.approve_member(cookie2, 0)
 
     server.archive_project(cookie1, 0)
-    server.update_project_name_and_desc(cookie1, 0, "asd", "desc")
+    res = server.add_member(cookie1, 0, "after")
+    print("sus")
+    # server.update_project_name_and_desc(cookie1, 0, "asd", "desc")
 
 
     # cookie2 = server.enter().result.cookie
