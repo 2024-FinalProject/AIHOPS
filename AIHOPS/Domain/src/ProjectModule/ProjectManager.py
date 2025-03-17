@@ -150,6 +150,8 @@ class ProjectManager():
             raise Exception(f"member: {member} already member, or invite, or pending for project {project.pid}")
 
     def _add_member_after_verifying_owner(self, project, member, persist=True):
+        if project.archived:
+            raise Exception("project already archived")
         db_instance = DBPendingRequests(project.pid, member)
         if persist:
             res = self.db_access.insert(db_instance)
