@@ -23,6 +23,7 @@ class Project:
         self.factors_inited = False
         self.severity_factors_inited = False
         self.published = False
+        self.archived = False
         self.severity_factors = DEFAULT_SEVERITY_FACTORS
 
         if db_instance is None:
@@ -32,8 +33,12 @@ class Project:
             self.db_instance = db_instance
             self.load_from_db()
 
+    def _verify_in_design(self):
+        if self.published or self.archived:
+            raise Exception("cant change project is not in design");
 
     def confirm_factors(self):
+        self._verify_in_design()
         if self.vote_manager.get_factors() == []:
             return ResponseFailMsg(f"project: {self.pid} has no factors to confirm")
         self.db_instance.factors_confirmed = True
@@ -42,6 +47,7 @@ class Project:
         return ResponseSuccessMsg(f"project: {self.pid} factors confirmed")
 
     def confirm_severity_factors(self):
+        self._verify_in_design()
         self.db_instance.severity_factors_confirmed = True
         self.db_access.update(self.db_instance)
         self.severity_factors_inited = True
@@ -59,20 +65,24 @@ class Project:
             self.severity_factors_inited = False
 
     def add_factor(self, factor):
+        self._verify_in_design()
         self._set_factors_inited_false()
         self.vote_manager.add_factor(factor)
 
+    """if factor have been updated (name or desc) after ddb load, factor pool and project dont have the same object,
+        so this function will replace the factor object in the project only if necessary"""
     def update_factor(self, factor):
-        """if factor have been updated (name or desc) after ddb load, factor pool and project dont have the same object,
-            so this function will replace the factor object in the project only if necessary"""
+        self._verify_in_design()
         self.vote_manager.update_factor(factor)
 
     def remove_factor(self, fid):
+        self._verify_in_design()
         self._set_factors_inited_false()
         self.vote_manager.remove_factor(fid)
         return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
 
     def set_severity_factors(self, severity_factors):
+        self._verify_in_design()
         self._set_severity_factors_inited_false()
         if len(severity_factors) != 5:
             return ResponseFailMsg(f"only 5 severity factors")
@@ -99,12 +109,14 @@ class Project:
         return self.members.contains(member)
 
     def update_name(self, name):
+        self._verify_in_design()
         self.db_instance.name = name
         self.db_access.update(self.db_instance)
         self.name = name
         return ResponseSuccessMsg(f"name {self.name} has been updated for project: {self.pid}")
 
     def update_desc(self, description):
+        self._verify_in_design()
         self.db_instance.description = description
         self.db_access.update(self.db_instance)
         self.desc = description
@@ -117,11 +129,18 @@ class Project:
                 "invited_members": invited_members, "published": self.published, "pending_amount": pending_amount,
                 "voted_amount": self.vote_manager.get_partially_voted_amount(), "member_count": self.members.size()}
 
+
+    def _verify_not_archived(self):
+        if self.archived:
+            raise Exception("Illegal action - archived project")
+
     def add_member_to_invite(self, member):
+        self._verify_not_archived()
         self.to_invite_when_published.append_unique(member)
 
 
     def remove_member(self, member):
+        self._verify_not_archived()
         try:
             self.members.remove(member)
             return ResponseSuccessMsg(f"member {member} has been removed from project {self.pid}")
@@ -152,6 +171,7 @@ class Project:
 
 
     def add_member(self, member):
+        self._verify_not_archived()
         self.members.append_unique(member)
 
     def _verify_member(self, actor):
@@ -159,11 +179,13 @@ class Project:
             raise ValueError(f"actor {actor} not in project {self.pid}")
 
     def vote_on_factor(self, actor, fid, score):
+        self._verify_not_archived()
         self._verify_member(actor)
         return self.vote_manager.set_factor_vote(actor, fid, score)
 
 
     def vote_severities(self, actor, severity_votes):
+        self._verify_not_archived()
         self._verify_member(actor)
         sum = 0
         for x in severity_votes:
@@ -173,6 +195,7 @@ class Project:
         return self.vote_manager.set_severity_vote(actor, severity_votes)
 
     def publish(self):
+        self._verify_not_archived()
         if self.published:
             return ResponseFailMsg(f"project {self.pid} has already been published")
         if not self.factors_inited:
@@ -188,15 +211,20 @@ class Project:
         self.to_invite_when_published.clear()
         return ResponseSuccessObj(f"project {self.pid} published", lst)
 
-    def archive_project(self, to_invite):
+    """ pre: isPublished()
+        post:  change projects status to archived
+             disable all operations changing project in any way, can only retrieve data by the manage
+             project wont appear for members projects, only fop the owner """
+    def archive_project(self):
+        self._verify_not_archived()
         if not self.published:
             return ResponseFailMsg(f"project {self.pid} has not been published")
         self.db_instance.published = False
+        self.db_instance.archived = True
         self.db_access.update(self.db_instance)
         self.published = False
+        self.archived = True
         self.to_invite_when_published.clear()
-        for invite in to_invite:
-            self.to_invite_when_published.append(invite)
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
     def get_score(self, pending_amount):
@@ -229,6 +257,7 @@ class Project:
             "description": self.desc,
             "founder": self.owner,
             "isActive": self.published,
+            "isArchived": self.archived,
             "factors": [f.to_dict() if hasattr(f, 'to_dict') else str(f) for f in self.vote_manager.get_factors()],
             "factors_inited": self.factors_inited,
             "severity_factors_inited": self.severity_factors_inited,
@@ -242,9 +271,10 @@ class Project:
         self.factors_inited = self.db_instance.factors_confirmed
         self.severity_factors_inited = self.db_instance.severity_factors_confirmed
         self.published = self.db_instance.published
+        self.archived = self.db_instance.archived
         # load severity factors
         self.load_severity_factors_from_db()
-        if self.published:
+        if self.published or self.archived:
             # load members if published
             self.load_members()
         else:
