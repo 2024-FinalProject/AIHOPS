@@ -165,10 +165,11 @@ const ProjectsManagement = () => {
               const response = await archiveProject(cookie, project.id);
       
               if (response.data.success) {
-                alert(`Archived project: "${project.name}".`);
+                //alert(`Archived project: "${project.name}".`);
                 setIsSuccess(true);
-                await fetchProjects(); // Ensure the projects list is refreshed
+                await fetchProjects(); // Refresh project list after archiving
                 selectedProject.isActive = false;
+                selectedProject.isArchived = true;
               } else {
                 setMsg(response.data.message);
                 setIsSuccess(false);
@@ -203,7 +204,7 @@ const ProjectsManagement = () => {
               const response = await publishProject(cookie, project.id);
       
               if (response.data.success) {
-                alert(`Published project: "${project.name}".`);
+                //alert(`Published project: "${project.name}".`);
                 setIsSuccess(true);
                 await fetchProjects(); // Refresh project list after publishing
                 selectedProject.isActive = true;
@@ -225,40 +226,38 @@ const ProjectsManagement = () => {
     };
 
     const handleCreateProject = async () => {
-        if (window.confirm("Are you sure you want to create this project?")) {
-          const cookie = localStorage.getItem("authToken");
-      
-          if (!cookie) {
-            setMsg("No authentication token found. Please log in again.");
-            setIsSuccess(false);
-            return;
-          }
+        const cookie = localStorage.getItem("authToken");
     
-          if(newProject.name === "" || newProject.description === "") {
-            alert("Please enter a valid project name and description.");
-            return;
+        if (!cookie) {
+          setMsg("No authentication token found. Please log in again.");
+          setIsSuccess(false);
+          return;
+        }
+  
+        if(newProject.name === "" || newProject.description === "") {
+          alert("Please enter a valid project name and description.");
+          return;
+        }
+    
+        try {
+          console.log(`Using default factors? : ${useDefaultFactors}`);
+          const response = await createProject(cookie, newProject.name, newProject.description, useDefaultFactors);
+    
+          if (response.data.success) {
+            //alert(`Created project: "${newProject.name}" successfully.`);
+            setIsSuccess(true);
+            setNewProject({ name: "", description: "" });
+            await fetchProjects();
+            setShowCreatePopup(false);
+          } else {
+            setMsg(response.data.message);
+            setIsSuccess(true);
           }
-      
-          try {
-            console.log(`Using default factors? : ${useDefaultFactors}`);
-            const response = await createProject(cookie, newProject.name, newProject.description, useDefaultFactors);
-      
-            if (response.data.success) {
-              alert(`Created project: "${newProject.name}" successfully.`);
-              setIsSuccess(true);
-              setNewProject({ name: "", description: "" });
-              await fetchProjects();
-              setShowCreatePopup(false);
-            } else {
-              setMsg(response.data.message);
-              setIsSuccess(true);
-            }
-          } catch (error) {
-            const errorMessage = error.response?.data?.message || error.message;
-            console.error("Error:", errorMessage);
-            setMsg(`Error fetching projects: ${errorMessage}`);
-            setIsSuccess(false);
-          }
+        } catch (error) {
+          const errorMessage = error.response?.data?.message || error.message;
+          console.error("Error:", errorMessage);
+          setMsg(`Error fetching projects: ${errorMessage}`);
+          setIsSuccess(false);
         }
     };
 
@@ -324,8 +323,9 @@ const ProjectsManagement = () => {
                                     <strong>Description:</strong> {project.description}
                                 </div>
                                 <div>
-                                    <strong>Published:</strong> {project.isActive ? "Yes" : "No"}
-                                </div>
+                                  <strong>Published:</strong> {project.isActive ? "Yes" : "No"} &nbsp;&nbsp;|&nbsp;&nbsp; 
+                                  <strong>Archived:</strong> {project.isArchived ? "Yes" : "No"}
+                              </div>
                             </div>
                             <div className="project-actions">
                                 <button
