@@ -17,6 +17,7 @@ import ProjectsManagement from "./Pages/ProjectsManagement";
 import MyProjects from "./Pages/MyProjects";
 import Settings from "./Pages/Settings";
 import About from './Pages/About';
+import Verify from "./Pages/Verify.jsx";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -42,6 +43,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify" element={<Verify />} />
         <Route path="/login" element={<Login />} />
         <Route path="/notification" element={<Notification />} />
         <Route path="/projectsmanagement" element={<ProjectsManagement />} />

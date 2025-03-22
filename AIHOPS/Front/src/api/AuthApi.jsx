@@ -1,6 +1,10 @@
 import axios from 'axios';
 const API_URL = "http://localhost:5555";
 
+export const verify = async (cookie, userName, passwd, code) => {
+    return await axios.post(`${API_URL}/verify`, { cookie, userName, passwd, code });
+};
+
 export const register = async (cookie, userName, passwd) => {
     return await axios.post(`${API_URL}/register`, { cookie, userName, passwd });
 };

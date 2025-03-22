@@ -5,6 +5,7 @@ from DAL.Objects import DBPendingRequests
 from DAL.Objects.DBMember import DBMember
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg
+from Domain.src.Users.Gmailor import Gmailor
 from Domain.src.Users.Member import Member
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
@@ -12,6 +13,7 @@ from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 class MemberController:
     def __init__(self, server, db_access):
         self.members = ThreadSafeDict()     # name: user
+        self.gmailor = Gmailor()
         self.register_lock = RLock()
         self.id_maker = IdMaker()
         self.db_access = db_access
@@ -41,7 +43,22 @@ class MemberController:
             if not res.success:
                 return res
             self.members.insert(email, member)
+
+        self.gmailor.register(email)
         return Response(True, f'new member {email} has been registered', member, False)
+
+    def verify(self, email, passwd, code):
+        # verify user exists
+        member = self.members.get(email)
+        if member is None:
+            return Response(False, f'incorrect username or password', None, False)
+        # verify correct passwd
+        member.verify_passwd(passwd)
+        res = self.gmailor.verify(email, code)
+        if not res.success:
+            return res
+        member.verify()
+        return res
 
     def login(self, email, encrypted_passwd):
         # verify user exists

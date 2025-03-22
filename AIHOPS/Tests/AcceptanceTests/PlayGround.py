@@ -1,26 +1,27 @@
 from Domain.src.Server import Server
 from Service.config import Base, engine
+import yagmail
 
 if __name__ == '__main__':
-    Base.metadata.create_all(engine)  # must initialize the database
-    server = Server()
-    cookie1 = server.enter().result.cookie
-    cookie2 = server.enter().result.cookie
-    server.register(cookie1, "alice", "")
-    server.register(cookie2, "sus_approved", "")
-    server.login(cookie2, "sus_approved", "")
-    server.login(cookie1, "alice", "")
-    server.create_project(cookie1, "alice", "desc", True)
-    server.confirm_project_factors(cookie1, 0)
-    server.confirm_project_severity_factors(cookie1, 0)
-    server.add_member(cookie1, 0, "sus_approved")
-    server.add_member(cookie1, 0, "sus_pending")
-    server.publish_project(cookie1, 0)
-    server.approve_member(cookie2, 0)
-
-    server.archive_project(cookie1, 0)
-    res = server.add_member(cookie1, 0, "after")
-    print("sus")
+    # Base.metadata.create_all(engine)  # must initialize the database
+    # server = Server()
+    # cookie1 = server.enter().result.cookie
+    # cookie2 = server.enter().result.cookie
+    # server.register(cookie1, "alice", "")
+    # server.register(cookie2, "sus_approved", "")
+    # server.login(cookie2, "sus_approved", "")
+    # server.login(cookie1, "alice", "")
+    # server.create_project(cookie1, "alice", "desc", True)
+    # server.confirm_project_factors(cookie1, 0)
+    # server.confirm_project_severity_factors(cookie1, 0)
+    # server.add_member(cookie1, 0, "sus_approved")
+    # server.add_member(cookie1, 0, "sus_pending")
+    # server.publish_project(cookie1, 0)
+    # server.approve_member(cookie2, 0)
+    #
+    # server.archive_project(cookie1, 0)
+    # res = server.add_member(cookie1, 0, "after")
+    # print("sus")
     # server.update_project_name_and_desc(cookie1, 0, "asd", "desc")
 
 
@@ -43,4 +44,11 @@ if __name__ == '__main__':
     # login_bob_res = server.login(cookie2, "Bob", "")
     # approve_res = server.approve_member(cookie2, project_id)
     # vote_res = server.vote(cookie2, project_id, [1,1,1,1], [10,70,10,5,5])
+
+
+    print ("starting")
+
+    yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
+    yag.send("testsemailaihops@gmail.com", "hello buuddy", "Hello from Python!")
+
     print("sus")

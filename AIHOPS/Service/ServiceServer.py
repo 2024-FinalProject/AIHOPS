@@ -27,6 +27,14 @@ def register():
     print("trying to register in service server")
     res = server.register(int(data["cookie"]), data["userName"], data["passwd"])
     return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/verify", methods=["POST"])
+# excpecting json with {cookie, user_name, passwd, code}
+def verify():
+    data = request.json
+    print("trying to register in service server")
+    res = server.verify(int(data["cookie"]), data["userName"], data["passwd"], data["code"])
+    return jsonify({"message": res.msg, "success": res.success})
     
 
 @app.route("/login", methods=["POST"])

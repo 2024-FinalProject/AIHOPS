@@ -12,12 +12,22 @@ class Member:
         else:
             self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()
         self.logged_in = False
+        self.verified = False
+
+    def verify(self):
+        self.verified = True
+
+    def verify_passwd(self, passwd):
+        if self.encrypted_passwd != hashlib.sha256(passwd.encode('utf8')).hexdigest():
+            raise Exception('incorrect credentials')
+
 
     def login(self, email, passwd):
+        if not self.verified:
+            return Response(False, f'{email} is not verified', None, False)
         if self.email != email:
             return Response(False, 'incorrect credentials', None, False)
-        if self.encrypted_passwd != hashlib.sha256(passwd.encode('utf8')).hexdigest():
-            return Response(False, 'incorrect credentials', None, False)
+        self.verify_passwd(passwd)
         self.logged_in = True
         return Response(True, f'user: {email} is now logged in', self, False)
 
