@@ -5,8 +5,7 @@ import { getProjectsMember, submitFactorVote, getMemberVoteOnProject, submitDSco
 
 
 import ProjectList from "../components/ProjectList";
-import VotePopup from "../components/VotePopup";
-import FactorVotingModal from "../components/FactorVotingModal";
+import FactorVotingModal from "../Components/FactorVotingModal";
 import "./MyProjects.css";
 
 const MyProjects = () => {
@@ -353,7 +352,10 @@ const MyProjects = () => {
                 <h2 className="text-2xl font-bold mb-4 text-center default-text" style={{margin: '0 auto', textAlign: 'center', fontFamily: 'Verdana, sans-serif' }}>
                   <u>D-Score Voting for {currentProject.name}</u>:
                 </h2>
-                <DGraph onVoteComplete={handleDScoreVoteComplete} />
+                <DGraph 
+                onVoteComplete={handleDScoreVoteComplete}
+                projectId={currentProject.id}
+                />
               </div>
             </div>
           </div>
