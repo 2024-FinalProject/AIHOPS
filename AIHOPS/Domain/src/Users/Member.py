@@ -4,7 +4,7 @@ from Domain.src.Loggs.Response import Response, ResponseSuccessObj
 
 
 class Member:
-    def __init__(self, email, passwd, uid, from_db=False):
+    def __init__(self, email, passwd, uid, from_db=False, verified=False):
         self.id = uid
         self.email = email
         if from_db:
@@ -12,7 +12,7 @@ class Member:
         else:
             self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()
         self.logged_in = False
-        self.verified = False
+        self.verified = verified
 
     def verify(self):
         self.verified = True

@@ -43,6 +43,15 @@ class Gmailor:
             self.codes_users.pop(code)
             return ResponseSuccessMsg(f"code verified for {email}")
 
+    def is_member_verifiable(self, email):
+        for code in self.codes_users.getKeys():
+            info = self.codes_users.get(code)
+            if info[0] == email and info[1]-datetime.now() < self.TIME_DELTA:
+                return True
+            if info[0] == email:
+                return False
+        return False
+
 
 
 
