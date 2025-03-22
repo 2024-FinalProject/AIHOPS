@@ -7,6 +7,29 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
   const textColor = theme === 'light' ? '#333' : '#fff';
   const backgroundColor = 'transparent';
 
+  const formatData = () => {
+    if(!severityfactors || !severityfactorsValues) return [];
+
+    return object.entries(severityfactors || {}).map(([level, percentage], index) => {
+      const levelValue = parseInt(level.replace('level', '')) - 1;
+      const SeverityValue = severityfactorsValues[levelValue] || 0;
+      const weightFactor = SeverityValue * percentage;
+
+      return {
+        name: `Level ${levelValue + 1}`,
+        percentage: parseFloat(percentage.toFixed(2)),
+        SeverityValue: SeverityValue,
+        weightFactor: parseFloat(weightFactor.toFixed(2)),
+        fill: getBarColor(levelValue)
+      };
+    });
+  };
+
+  const getBarColor = (level) => {
+    const colors = ["#4ade80", "#fbbf24", "#fb923c", "#f87171", "#ef4444"];
+    return colors[level] || "#82ca9d";
+  };
+
   const severityLevels = [
     { level: 1, name: "No to Negligible Damage", value: severityfactorsValues[0], color: "#4ade80", 
       description: "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement." },
@@ -20,14 +43,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
       description: "Impacts result in extensive disruption, likely overwhelming available resources." }
   ];
 
-  const data = (severityfactors?.avg || []).map((value, index) => ({
-    name: `Level ${index + 1}`,
-    average: value,
-    level: severityLevels[index].name,
-    weightFactor: severityLevels[index].value,
-    description: severityLevels[index].description,
-    color: severityLevels[index].color
-  }));
+  const data = formatData();
 
   const CustomTooltip = ({ active, payload, coordinate }) => {
     if (active && payload && payload.length) {
