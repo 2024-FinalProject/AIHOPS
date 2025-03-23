@@ -90,7 +90,7 @@ const ExportDataButton = ({
     
     // Add each factor as a row
     Object.entries(projectsScore.factors).forEach(([factorId, factor]) => {
-      const factorName = projectFactors[factorId] ? projectFactors[factorId] : `Factor ${factorId}`;
+      const factorName = projectFactors[factorId] ? projectFactors[factorId] : `Factor ${-factorId}`;
       
       // Make sure projectFactorsVotes is an array before using filter
       let votes = 0;
@@ -99,7 +99,7 @@ const ExportDataButton = ({
       }
       
       data.push([
-        factorId,
+        -factorId,
         factorName,
         factor.avg.toFixed(3),
         votes

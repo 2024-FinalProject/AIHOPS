@@ -471,7 +471,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
           <button className="reset-button" onClick={handleResetPercentages} style={{backgroundColor: '#6b7280', color: 'white', padding: '8px 16px', borderRadius: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer'}}>   
             <b>Reset</b>
           </button>
-          <button className="refresh-button" onClick={handleRefresh} style={{backgroundColor: '#6b7280', color: 'white', padding: '8px 16px', borderRadius: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer'}}>
+          <button className="refresh-button" onClick={handleRefresh} style={{backgroundColor: '#6b7280', color: 'white', padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer'}}>
             <b>Refresh Data</b>
           </button>
 
