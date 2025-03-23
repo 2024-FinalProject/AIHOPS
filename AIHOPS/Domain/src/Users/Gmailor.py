@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import yagmail
 
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
-from Domain.src.Loggs.Response import ResponseSuccessMsg, ResponseFailMsg
+from Domain.src.Loggs.Response import ResponseSuccessMsg, ResponseFailMsg, ResponseSuccessObj
 
 
 class Gmailor:
@@ -43,10 +43,23 @@ class Gmailor:
             self.codes_users.pop(code)
             return ResponseSuccessMsg(f"code verified for {email}")
 
+    def verify_automatic(self, code):
+        with self.lock:
+            info = self.codes_users.get(code)
+            if info is None:
+                raise Exception("invalid code -> try again")
+            email = info[0]
+            time = info[1]
+            if datetime.now() - time > self.TIME_DELTA:
+                raise Exception("code has expired, register again")
+
+            self.codes_users.pop(code)
+            return ResponseSuccessObj(f"code verified for {email}", email)
+
     def is_member_verifiable(self, email):
         for code in self.codes_users.getKeys():
             info = self.codes_users.get(code)
-            if info[0] == email and info[1]-datetime.now() < self.TIME_DELTA:
+            if info[0] == email and abs(info[1]-datetime.now()) < self.TIME_DELTA:
                 return True
             if info[0] == email:
                 return False

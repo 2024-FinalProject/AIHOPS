@@ -97,6 +97,16 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to register: {e}")
 
+    def verify_automatic(self, cookie, token):
+        try:
+            res = self.get_session_not_member(cookie)
+            if not res.success:
+                return res
+            res = self.user_controller.verify_automatic(token)
+            return res
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to register: {e}")
+
     def login(self, cookie, name, passwd):
         try:
             res = self.get_session(cookie)

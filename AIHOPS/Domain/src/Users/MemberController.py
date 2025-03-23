@@ -74,6 +74,16 @@ class MemberController:
         member.verify()
         return res
 
+    def verify_automatic(self, token):
+        res = self.gmailor.verify_automatic(token)
+        email = res.result
+        member = self.members.get(email)
+        res = self.db_access.update_by_query(DBMember, {"email": email}, {"verified": True})
+        if not res.success:
+            return res
+        member.verify()
+        return res
+
     def login(self, email, encrypted_passwd):
         # verify user exists
         member = self.members.get(email)

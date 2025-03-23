@@ -32,10 +32,17 @@ def register():
 # excpecting json with {cookie, user_name, passwd, code}
 def verify():
     data = request.json
-    print("trying to register in service server")
+    print("trying to verify in service server")
     res = server.verify(int(data["cookie"]), data["userName"], data["passwd"], data["code"])
     return jsonify({"message": res.msg, "success": res.success})
-    
+
+@app.route("/verify_automatic", methods=["POST"])
+# excpecting json with {cookie, token}
+def verify_automatic():
+    data = request.json
+    print("trying to verifyAutomatic in service server")
+    res = server.verify_automatic(int(data["cookie"]), data["token"])
+    return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/login", methods=["POST"])
 # excpecting json with {cookie, user_name, passwd}
