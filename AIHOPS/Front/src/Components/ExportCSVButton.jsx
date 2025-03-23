@@ -155,37 +155,40 @@ const ExportDataButton = ({
   return (
     <button 
       onClick={exportToExcel}
+      className="action-btn edit-btn"
       style={{
-        padding: '8px 16px',
+        padding: '12px 24px',
         backgroundColor: theme === 'light' ? '#3b82f6' : '#2563eb',
         color: 'white',
         border: 'none',
-        borderRadius: '4px',
+        borderRadius: '6px',
         cursor: 'pointer',
         fontFamily: 'Verdana, sans-serif',
-        fontSize: '14px',
+        fontSize: '16px',
         fontWeight: 'bold',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-        transition: 'all 0.2s ease',
-        marginTop: '10px'
+        transition: 'all 0.3s ease',
+        margin: '0 auto',
+        width: 'auto',
+        maxWidth: '250px'
       }}
       onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme === 'light' ? '#2563eb' : '#1d4ed8'}
       onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme === 'light' ? '#3b82f6' : '#2563eb'}
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="16" 
-        height="16" 
+        width="20" 
+        height="20" 
         viewBox="0 0 24 24" 
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
         strokeLinecap="round" 
         strokeLinejoin="round" 
-        style={{ marginRight: '8px' }}
+        style={{ marginRight: '10px' }}
       >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
         <polyline points="7 10 12 15 17 10"></polyline>

@@ -143,26 +143,6 @@ const AnalyzeResult = ({
         );
     };
 
-    const ExportButtonContainer = () => {
-        return (
-            <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                marginTop: '15px',
-                marginBottom: '10px'
-            }}>
-                <ExportDataButton 
-                    projectsScore={projectsScore}
-                    projectsProgress={projectsProgress}
-                    projectFactors={projectFactors}
-                    projectSeverityFactors={projectSeverityFactors}
-                    projectFactorsVotes={projectFactorsVotes}
-                    projectId={projectId}
-                />
-            </div>
-        );
-    };
-      
 
     const getPopupContent = () => {
         switch (analyzePopupType) {
@@ -250,6 +230,31 @@ const AnalyzeResult = ({
                     </div> 
                 </div>
                 );
+                case 'exportResults':
+                    return (
+                    <div style={{textAlign: 'center', marginTop: '70px'}}>
+                        <h2 className="default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '30px'}}>
+                            <u>Export Results</u>:
+                        </h2>
+                        <div className="default-text">
+                            {Object.keys(projectsScore).length > 0 ? (
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '20px' }}>
+                                    <p>Click the button below to export all project analysis data to Excel.</p>
+                                    <ExportDataButton 
+                                        projectsScore={projectsScore}
+                                        projectsProgress={projectsProgress}
+                                        projectFactors={projectFactors}
+                                        projectSeverityFactors={projectSeverityFactors}
+                                        projectFactorsVotes={projectFactorsVotes}
+                                        projectId={projectId}
+                                    />
+                                </div>
+                            ) : (
+                                "No data available to export"
+                            )}
+                        </div>
+                    </div>
+                    );
             default:
                 return null;
             }
@@ -265,6 +270,8 @@ const AnalyzeResult = ({
                     return 'Content Factors Score';
                 case 'showSeverityFactorsScore':
                     return 'd-Score';
+                case 'exportResults':
+                    return 'Export Results';
                 default:
                     return 'Project Analysis';
             }
@@ -274,16 +281,6 @@ const AnalyzeResult = ({
             <div className="analyzePopup-content">
                 <div className="analyzePopup-header">
                     <div className="analyzePopup-title">{getPopupTitle()}</div>
-                    {Object.keys(projectsScore).length > 0 && (
-                        <ExportDataButton 
-                            projectsScore={projectsScore}
-                            projectsProgress={projectsProgress}
-                            projectFactors={projectFactors}
-                            projectSeverityFactors={projectSeverityFactors}
-                            projectFactorsVotes={projectFactorsVotes}
-                            projectId={projectId}
-                        />
-                    )}
                 </div>
                 {getPopupContent()}
             </div>
