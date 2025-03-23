@@ -11,15 +11,18 @@ const validateAuthToken = async (token) => {
 export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
   const [userName, setUserName] = useState(localStorage.getItem('userName') || null);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('authToken'));
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Default to false
+  const [isValidatingToken, setIsValidatingToken] = useState(true);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const navigate = useNavigate();
 
   const login = (token, username) => {
-    setAuthToken(token);
+    if (token !== authToken) {
+      setAuthToken(token);
+      localStorage.setItem('authToken', token);
+    }
     setUserName(username);
     setIsAuthenticated(true);
-    localStorage.setItem('authToken', token);
     localStorage.setItem('userName', username);
   };
 
@@ -50,12 +53,18 @@ export const AuthProvider = ({ children }) => {
     document.documentElement.style.backgroundColor = '';
 
     const validateToken = async () => {
+      setIsValidatingToken(true);
       const token = localStorage.getItem('authToken');
       if (!token || !(await validateAuthToken(token))) {
-        logout();
+        setAuthToken(null);
+        setUserName(null);
+        setIsAuthenticated(false);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userName');
       } else {
         setIsAuthenticated(true);
       }
+      setIsValidatingToken(false);
     };
 
     validateToken();
@@ -76,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   }, [theme]); // Added theme as dependency
 
   return (
-    <AuthContext.Provider value={{ authToken, userName, isAuthenticated, theme, login, logout, toggleTheme }}>
+    <AuthContext.Provider value={{ authToken, userName, isAuthenticated, isValidatingToken, theme, login, logout, toggleTheme }}>
       {children}
     </AuthContext.Provider>
   );

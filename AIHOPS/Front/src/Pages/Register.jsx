@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { startSession, register } from "../api/AuthApi";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import "./Register.css";
 
@@ -9,6 +10,9 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(null); // null means no message initially
+  const [existingToken, setExistingToken] = useState(localStorage.getItem("authToken"));
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Update existingToken if it changes in localStorage
@@ -47,12 +51,16 @@ const Register = () => {
         localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);
         login(cookie, userName);
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);
       }
       
     } catch (error) {
+      console.error("Failed to register: ", error);
       setMsg("Failed to register");
       setIsSuccess(false);
     }

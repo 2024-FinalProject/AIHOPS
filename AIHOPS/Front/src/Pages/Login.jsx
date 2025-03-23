@@ -5,18 +5,20 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isValidatingToken } = useAuth();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
 
   // Redirect if already authenticated
-  // useEffect(() => {
-  //   if (isAuthenticated) {
-  //     navigate("/");
-  //   }
-  // }, [isAuthenticated, navigate]);
+  useEffect(() => {
+    console.log("isAuthenticated:", isAuthenticated);
+    if (!isValidatingToken && isAuthenticated) {
+      console.log("Redirecting to /");
+      navigate("/");
+    }
+  }, [isAuthenticated, isValidatingToken, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -51,6 +53,7 @@ const Login = () => {
 
         localStorage.setItem("userName", userName);
         login(cookie, userName);
+        console.log("Redirecting to /");
         navigate("/");
       } else {
         setMsg(response.data.message);
