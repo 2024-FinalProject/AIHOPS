@@ -3,3 +3,4 @@ Flask==3.0.3
 Flask-Cors==5.0.0
 npm install recharts
 npm install react-chartjs-2
+npm install xlsx

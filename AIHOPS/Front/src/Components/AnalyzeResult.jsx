@@ -5,6 +5,7 @@ import './AnalyzeResult.css';
 import Histogram from "./Histogram";
 import SeverityHistogram from "./SeverityHistogram";
 import FormulaDisplay from "./FormulaDisplay";
+import ExportDataButton from "./ExportCSVButton";
 
 const AnalyzeResult = ({
     analyzePopupType,
@@ -141,6 +142,26 @@ const AnalyzeResult = ({
           <p className="default-text" style = {{fontSize: '18px'}}><b>Current Content Factors Score:</b> {averageScore}</p>
         );
     };
+
+    const ExportButtonContainer = () => {
+        return (
+            <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                marginTop: '15px',
+                marginBottom: '10px'
+            }}>
+                <ExportDataButton 
+                    projectsScore={projectsScore}
+                    projectsProgress={projectsProgress}
+                    projectFactors={projectFactors}
+                    projectSeverityFactors={projectSeverityFactors}
+                    projectFactorsVotes={projectFactorsVotes}
+                    projectId={projectId}
+                />
+            </div>
+        );
+    };
       
 
     const getPopupContent = () => {
@@ -234,11 +255,39 @@ const AnalyzeResult = ({
             }
         };
 
-    return(
-        <div className="analyzePopup-content">
-            {getPopupContent()}
-        </div>
-    );
-};
+        const getPopupTitle = () => {
+            switch (analyzePopupType) {
+                case 'showCurrentScore':
+                    return 'Current Project Score';
+                case 'showAssessorsInfo':
+                    return 'Assessors Information';
+                case 'showContentFactorsScore':
+                    return 'Content Factors Score';
+                case 'showSeverityFactorsScore':
+                    return 'd-Score';
+                default:
+                    return 'Project Analysis';
+            }
+        };
+    
+        return(
+            <div className="analyzePopup-content">
+                <div className="analyzePopup-header">
+                    <div className="analyzePopup-title">{getPopupTitle()}</div>
+                    {Object.keys(projectsScore).length > 0 && (
+                        <ExportDataButton 
+                            projectsScore={projectsScore}
+                            projectsProgress={projectsProgress}
+                            projectFactors={projectFactors}
+                            projectSeverityFactors={projectSeverityFactors}
+                            projectFactorsVotes={projectFactorsVotes}
+                            projectId={projectId}
+                        />
+                    )}
+                </div>
+                {getPopupContent()}
+            </div>
+        );
+    };
 
 export default AnalyzeResult;
