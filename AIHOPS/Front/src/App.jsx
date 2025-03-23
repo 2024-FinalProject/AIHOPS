@@ -6,6 +6,7 @@ import './theme.css';
 
 // Importing the components
 import NavBar from "./Components/NavBar";
+import AccessibilityMenu from './Components/AccessibilityMenu';
 
 // Importing the pages
 import WelcomePage from "./Pages/WelcomePage";
@@ -50,6 +51,7 @@ const AppContent = () => {
         <Route path = "/settings" element = {<Settings />} />
         <Route path = "/about" element = {<About />} />
       </Routes>
+      <AccessibilityMenu />
     </>
   );
 };

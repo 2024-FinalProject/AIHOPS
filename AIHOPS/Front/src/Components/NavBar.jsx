@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import "./NavBar.css";
 import { FaUser } from "react-icons/fa"; // <-- For user icon
 import aihops_article from "../assets/AIHOPS.pdf";
+import AccessibilityMenu from "./AccessibilityMenu";
 
 const NavBar = () => {
   // Pull out userName from the AuthContext

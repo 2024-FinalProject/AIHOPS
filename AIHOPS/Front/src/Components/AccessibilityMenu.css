@@ -1,0 +1,273 @@
+.accessibility-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    font-family: Verdana, sans-serif;
+  }
+  
+  .accessibility-toggle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .accessibility-toggle:hover {
+    background-color: #1d4ed8;
+    transform: scale(1.05);
+  }
+  
+  .accessibility-toggle:focus {
+    outline: 3px solid #4f46e5;
+    outline-offset: 2px;
+  }
+  
+  .accessibility-menu {
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    width: 300px;
+    background-color: var(--card-background, white);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 16px;
+    animation: slideIn 0.3s ease-out;
+    color: var(--text-color, #333);
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .accessibility-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    padding-bottom: 10px;
+  }
+  
+  .accessibility-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-color, #333);
+  }
+  
+  .accessibility-options {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .option input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color, #cbd5e1);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+  }
+  
+  .option input[type="checkbox"]:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
+  }
+  
+  .option input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  .option input[type="checkbox"]:focus {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+  }
+  
+  .option label {
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .reset-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #f3f4f6;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-color, #333);
+  }
+  
+  .reset-button:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .reset-button:focus {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+  }
+  
+  /* Accessibility CSS Variables */
+  
+  /* High Contrast Mode */
+  body.high-contrast {
+    --text-color: #ffffff !important;
+    --background-color: #000000 !important;
+    --border-color: #ffffff !important;
+    --pop-up-background: #000000 !important;
+    --card-background: #000000 !important;
+    --button-color: #ffffff !important;
+    --header-color: #ffffff !important;
+    --link-color: #ffff00 !important;
+    --input-background: #333333 !important;
+    --place-holder-text-color: #dddddd !important;
+  }
+  
+  body.high-contrast .navbar {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+  }
+  
+  body.high-contrast .nav-button,
+  body.high-contrast .nav-link,
+  body.high-contrast .edit-btn,
+  body.high-contrast .action-btn {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+  }
+  
+  body.high-contrast .nav-button:hover,
+  body.high-contrast .nav-link:hover,
+  body.high-contrast .edit-btn:hover,
+  body.high-contrast .action-btn:hover {
+    background-color: #333333 !important;
+  }
+  
+  body.high-contrast .nav-button.active,
+  body.high-contrast .nav-link.active,
+  body.high-contrast .edit-btn.active,
+  body.high-contrast .action-btn.active {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+  
+  /* Larger Text */
+  body.larger-text {
+    font-size: 125% !important;
+  }
+  
+  body.larger-text .nav-link,
+  body.larger-text .nav-button {
+    font-size: 125% !important;
+    padding: 12px 20px !important;
+  }
+  
+  body.larger-text .popup-content {
+    font-size: 125% !important;
+  }
+  
+  body.larger-text input,
+  body.larger-text button,
+  body.larger-text textarea {
+    font-size: 125% !important;
+  }
+  
+  /* Reduced Motion */
+  body.reduced-motion *,
+  body.reduced-motion *::before,
+  body.reduced-motion *::after {
+    animation-duration: 0.001s !important;
+    animation-delay: 0.001s !important;
+    transition-duration: 0.001s !important;
+    transition-delay: 0.001s !important;
+  }
+  
+  /* Dyslexia-Friendly Font */
+  body.dyslexia-font,
+  body.dyslexia-font *:not(i):not(.fa):not(.fas):not(.far):not(.fab) {
+    font-family: 'Comic Sans MS', 'OpenDyslexic', sans-serif !important;
+    letter-spacing: 0.05em !important;
+    word-spacing: 0.15em !important;
+    line-height: 1.5 !important;
+  }
+  
+  /* Keyboard Navigation Focus Styles */
+  body.keyboard-navigation a:focus,
+  body.keyboard-navigation button:focus,
+  body.keyboard-navigation input:focus,
+  body.keyboard-navigation select:focus,
+  body.keyboard-navigation textarea:focus {
+    outline: 3px solid #4f46e5 !important;
+    outline-offset: 3px !important;
+  }
+  
+  /* Screen Reader Optimizations */
+  body.screen-reader .sr-only {
+    display: inline-block !important;
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: initial !important;
+    margin: initial !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+    border: 0 !important;
+  }
+  
+  @media (max-width: 768px) {
+    .accessibility-menu {
+      width: 250px;
+      bottom: 70px;
+    }
+    
+    .accessibility-toggle {
+      width: 45px;
+      height: 45px;
+    }
+  }
