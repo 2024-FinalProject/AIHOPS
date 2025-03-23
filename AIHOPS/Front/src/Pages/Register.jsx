@@ -10,7 +10,13 @@ const Register = () => {
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(null); // null means no message initially
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    // Update existingToken if it changes in localStorage
+    const token = localStorage.getItem("authToken");
+    if (token !== existingToken) {
+      setExistingToken(token);
+    }
+  }, [existingToken]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -20,8 +26,17 @@ const Register = () => {
     setIsSuccess(null);  // Reset before starting the registration attempt
 
     try {
-      const session = await startSession();
-      const cookie = session.data.cookie;
+      let cookie;
+      
+      // Use existing token if available, otherwise create a new session
+      if (existingToken) {
+        cookie = existingToken;
+        console.log("Using existing token for registration");
+      } else {
+        const session = await startSession();
+        cookie = session.data.cookie;
+        console.log("New session created for registration");
+      }
 
       const response = await register(cookie, userName, password);
       
@@ -29,7 +44,9 @@ const Register = () => {
       if (response.data.success) {
         setMsg(response.data.message);
         setIsSuccess(true);
-        //navigate("/login");
+        localStorage.setItem("authToken", cookie);
+        localStorage.setItem("userName", userName);
+        login(cookie, userName);
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);

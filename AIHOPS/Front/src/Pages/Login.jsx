@@ -12,21 +12,30 @@ const Login = () => {
   const navigate = useNavigate();
 
   // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    }
-  }, [isAuthenticated, navigate]);
+  // useEffect(() => {
+  //   if (isAuthenticated) {
+  //     navigate("/");
+  //   }
+  // }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("");
 
     try {
-      const session = await startSession();
-      const cookie = session.data.cookie;
+      const existingToken = localStorage.getItem("authToken");
+      let cookie;
+      if (existingToken) {
+        // Use the existing token if available
+        cookie = existingToken;
+        console.log("Using existing token for login");
+      } else {
+        // Only start a new session if no token exists
+        const session = await startSession();
+        cookie = session.data.cookie;
+        console.log("New session created, cookie received:", cookie);
+      }
 
-      console.log("Cookie received from startSession:", cookie); // Debug log
 
       const response = await loginUser(cookie, userName, password);
 
