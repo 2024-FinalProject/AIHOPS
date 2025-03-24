@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
 const Login = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isValidatingToken } = useAuth();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
@@ -13,20 +13,31 @@ const Login = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
+    console.log("isAuthenticated:", isAuthenticated);
+    if (!isValidatingToken && isAuthenticated) {
+      console.log("Redirecting to /");
       navigate("/");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isValidatingToken, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("");
 
     try {
-      const session = await startSession();
-      const cookie = session.data.cookie;
+      const existingToken = localStorage.getItem("authToken");
+      let cookie;
+      if (existingToken) {
+        // Use the existing token if available
+        cookie = existingToken;
+        console.log("Using existing token for login");
+      } else {
+        // Only start a new session if no token exists
+        const session = await startSession();
+        cookie = session.data.cookie;
+        console.log("New session created, cookie received:", cookie);
+      }
 
-      console.log("Cookie received from startSession:", cookie); // Debug log
 
       const response = await loginUser(cookie, userName, password);
 
@@ -42,6 +53,7 @@ const Login = () => {
 
         localStorage.setItem("userName", userName);
         login(cookie, userName);
+        console.log("Redirecting to /");
         navigate("/");
       } else {
         setMsg(response.data.message);

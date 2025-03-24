@@ -5,6 +5,7 @@ import './AnalyzeResult.css';
 import Histogram from "./Histogram";
 import SeverityHistogram from "./SeverityHistogram";
 import FormulaDisplay from "./FormulaDisplay";
+import ExportDataButton from "./ExportCSVButton";
 
 const AnalyzeResult = ({
     analyzePopupType,
@@ -141,7 +142,7 @@ const AnalyzeResult = ({
           <p className="default-text" style = {{fontSize: '18px'}}><b>Current Content Factors Score:</b> {averageScore}</p>
         );
     };
-      
+
 
     const getPopupContent = () => {
         switch (analyzePopupType) {
@@ -229,16 +230,61 @@ const AnalyzeResult = ({
                     </div> 
                 </div>
                 );
+                case 'exportResults':
+                    return (
+                    <div style={{textAlign: 'center', marginTop: '70px'}}>
+                        <h2 className="default-text" style={{ fontSize: '24px', color: '#333', marginBottom: '30px'}}>
+                            <u>Export Results</u>:
+                        </h2>
+                        <div className="default-text">
+                            {Object.keys(projectsScore).length > 0 ? (
+                                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '20px' }}>
+                                    <p>Click the button below to export all project analysis data to Excel.</p>
+                                    <ExportDataButton 
+                                        projectsScore={projectsScore}
+                                        projectsProgress={projectsProgress}
+                                        projectFactors={projectFactors}
+                                        projectSeverityFactors={projectSeverityFactors}
+                                        projectFactorsVotes={projectFactorsVotes}
+                                        projectId={projectId}
+                                    />
+                                </div>
+                            ) : (
+                                "No data available to export"
+                            )}
+                        </div>
+                    </div>
+                    );
             default:
                 return null;
             }
         };
 
-    return(
-        <div className="analyzePopup-content">
-            {getPopupContent()}
-        </div>
-    );
-};
+        const getPopupTitle = () => {
+            switch (analyzePopupType) {
+                case 'showCurrentScore':
+                    return 'Current Project Score';
+                case 'showAssessorsInfo':
+                    return 'Assessors Information';
+                case 'showContentFactorsScore':
+                    return 'Content Factors Score';
+                case 'showSeverityFactorsScore':
+                    return 'd-Score';
+                case 'exportResults':
+                    return 'Export Results';
+                default:
+                    return 'Project Analysis';
+            }
+        };
+    
+        return(
+            <div className="analyzePopup-content">
+                <div className="analyzePopup-header">
+                    <div className="analyzePopup-title">{getPopupTitle()}</div>
+                </div>
+                {getPopupContent()}
+            </div>
+        );
+    };
 
 export default AnalyzeResult;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
+import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, LabelList  } from 'recharts';
 import './SeverityHistogram.css';
 
 const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
@@ -26,7 +26,8 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
     level: severityLevels[index].name,
     weightFactor: severityLevels[index].value,
     description: severityLevels[index].description,
-    color: severityLevels[index].color
+    color: severityLevels[index].color,
+    weightedScore: (value * severityLevels[index].value).toFixed(2)
   }));
 
   const CustomTooltip = ({ active, payload, coordinate }) => {
@@ -50,6 +51,16 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
           </h4>
           <hr style={{ margin: '6px 0', borderTop: `1px solid ${theme === 'light' ? '#e2e8f0' : '#444'}` }} />
           <p style={{ margin: '4px 0', fontSize: '12px', color: textColor }}>{data.description}</p>
+          <hr style={{ margin: '6px 0', borderTop: `1px solid ${theme === 'light' ? '#e2e8f0' : '#444'}` }} />
+          <p style={{ margin: '4px 0', fontSize: '12px', color: textColor }}>
+            <b>Average Score:</b> {data.average.toFixed(2)}
+          </p>
+          <p style={{ margin: '4px 0', fontSize: '12px', color: textColor }}>
+            <b>Weight Factor:</b> {data.weightFactor}
+          </p>
+          <p style={{ margin: '4px 0', fontSize: '12px', color: textColor }}>
+            <b>Calculation:</b> {data.average.toFixed(2)} × {data.weightFactor} = {data.weightedScore}
+          </p>
         </div>
       );
     }

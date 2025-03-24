@@ -1,0 +1,10 @@
+Factors votes and formula calculation:
+for each project member there will be a special factor for consistency properties with factor if -1
+its value will indicate successful or failed voting process
+    -1 will mean failed or incomplete voting
+    -2 will mean valid vote
+meaning:
+    -> when uploading from the system if for certain project member the -1 factor is -1 an indicating msg should be
+        sent to the member and the persisted vote should be deleted
+    -> when calculating the formula (kept as a list of values without their ids/names) we should not consider negative
+        values!

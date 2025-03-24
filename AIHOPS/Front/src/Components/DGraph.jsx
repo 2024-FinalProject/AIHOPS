@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Bar, Cell } from 'recharts';
 import './DGraph.css';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
+import { getProjectSeverityFactors, getMemberVoteOnProject } from "../api/ProjectApi";
 
-const DGraph = ({ onVoteComplete }) => {
-  const severityLevels = [
+const DGraph = ({ onVoteComplete, projectId }) => {
+  const [severityLevels, setSeverityLevels] = useState( [
     { level: 1, name: "No to Negligible Damage", value: 0.5, color: "#4ade80", 
       description: "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement." },
     { level: 2, name: "Minor Damage", value: 1, color: "#fbbf24",
@@ -15,7 +16,13 @@ const DGraph = ({ onVoteComplete }) => {
       description: "Impacts are substantial, disrupting core activities significantly." },
     { level: 5, name: "Catastrophic Damage", value: 400, color: "#ef4444",
       description: "Impacts result in extensive disruption, likely overwhelming available resources." }
-  ];
+  ]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [msg, setMsg] = useState("");
+  const [isSuccess, setIsSuccess] = useState(true);
+  const [hasVoted, setHasVoted] = useState(false);
 
   const [percentages, setPercentages] = useState(Array(5).fill(0));
   const [weightedValues, setWeightedValues] = useState([]);
@@ -32,6 +39,25 @@ const DGraph = ({ onVoteComplete }) => {
   const textColor = theme === 'light' ? '#333' : '#fff';
 
   useEffect(() => {
+    if(projectId != null)
+      loadData();
+  }, [projectId]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      await getSeverityFactors();
+      await fetchPreviousVotes();
+    } catch (error) {
+      console.error("Error loading severity factors:", error);
+      setMsg("An error occurred. Please try again later.");
+      setIsSuccess(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     const newWeightedValues = severityLevels.map((level, index) => ({
       name: `Level ${level.level}`,
       percentage: percentages[index],
@@ -42,7 +68,127 @@ const DGraph = ({ onVoteComplete }) => {
       levelIndex: index
     }));
     setWeightedValues(newWeightedValues);
-  }, [percentages]);
+  }, [percentages, severityLevels]);
+
+  const fetchPreviousVotes = async () => {
+    const authToken = localStorage.getItem('authToken');
+    if(!authToken) {
+      console.error("No authentication token found. Please log in again.");
+      return;
+    }
+    try {
+      console.log("Fetching previous votes for project:", projectId);
+      const response = await getMemberVoteOnProject(authToken, projectId);
+
+      if(response.data.success) {
+        console.log("Previous votes found:", response.data.votes);
+        const votes = response.data.votes;
+        const severityVotes = votes.severity_votes || [];
+        if(votes && severityVotes.length > 0 && Array.isArray(severityVotes)) {
+          console.log("Setting previous votes:", severityVotes);
+          setPercentages(severityVotes);
+          setHasVoted(true);
+        } else {
+          console.log("No previous votes found.");
+          setPercentages([20, 20, 20, 20, 20]);
+          setHasVoted(false);
+        }
+      } else {
+        console.error("Failed to fetch previous votes:", response.data.message);
+        setMsg("An error occurred. Please try again later.");
+        setIsSuccess(false);
+      }
+    } catch(error) {
+      console.error("Error fetching previous votes:", error);
+      setMsg("An error occurred. Please try again later.");
+      setIsSuccess(false);
+    }
+  };
+
+  const getSeverityFactors = async () => {
+    const authToken = localStorage.getItem('authToken');
+    if(!authToken) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      setLoading(false);
+      return;
+    }
+    try{
+      console.log("Calling getProjectSeverityFactors with:", authToken, projectId);
+      let response = await getProjectSeverityFactors(authToken, projectId);
+      console.log("Response from getProjectSeverityFactors:", response);
+      if(response.data.success) {
+        if(Array.isArray(response.data.severityFactors) && response.data.severityFactors.length > 0) {
+          console.log("Severity factors found:", response.data.severityFactors);
+          const defaultLevels = [
+            {
+              level: 1,
+              name: "No to Negligible Damage",
+              value: 0.5,
+              color: "#4ade80",
+              description: "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement."
+            },
+            {
+              level: 2,
+              name: "Minor Damage",
+              value: 1,
+              color: "#fbbf24",
+              description: "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources."
+            },
+            {
+              level: 3,
+              name: "Manageable Damage",
+              value: 25,
+              color: "#fb923c",
+              description: "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations."
+            },
+            {
+              level: 4,
+              name: "Severe Damage",
+              value: 100,
+              color: "#f87171",
+              description: "Impacts are substantial, disrupting core activities significantly."
+            },
+            {
+              level: 5,
+              name: "Catastrophic Damage",
+              value: 400,
+              color: "#ef4444",
+              description: "Impacts result in extensive disruption, likely overwhelming available resources."
+            }
+          ]
+        console.log("Severity factors from response:", response.data.severityFactors);
+        response.data.severityFactors.forEach((factor, index) => {
+          if(index >= defaultLevels.length) return;
+          defaultLevels[index].value = factor;
+        });
+        console.log("Updated severity factors:", defaultLevels);
+        setSeverityLevels(defaultLevels);
+
+        if(percentages.every(p => p === 0)) {
+          setPercentages([20, 20, 20, 20, 20]);
+        }
+      } else {
+        console.error("Invalid severity factors data:", response.data.severityFactors);
+        setError("The API returned invalid severity factors data.");
+      }
+    } else {
+      console.error("Failed to fetch severity factors:", response.data.message);
+      setError(response.data.message || "An error occurred. Please try again later.");
+      setMsg("An error occurred. Please try again later.");
+      setIsSuccess(false);
+    }
+    }
+    catch(error) {  
+      console.error("Error fetching severity factors:", error);
+      setMsg("An error occurred. Please try again later.");
+      setIsSuccess(false);
+      alert(error);
+    }
+    finally{
+      setLoading(false);
+    }
+  };
 
   // Set up drag handlers
   useEffect(() => {
@@ -73,6 +219,7 @@ const DGraph = ({ onVoteComplete }) => {
         }
       }
     };
+
 
     const handleMouseMove = (e) => {
       const { isDragging, activeIndex, startY, startPercentage, chartHeight } = dragStateRef.current;
@@ -135,6 +282,10 @@ const DGraph = ({ onVoteComplete }) => {
     }
   };
 
+  const handleResetPercentages = () => {
+    setPercentages([20, 20, 20, 20, 20]);
+  };
+
   const totalPercentage = percentages.reduce((sum, p) => sum + p, 0);
 
   // Custom tooltip handler
@@ -170,6 +321,47 @@ const DGraph = ({ onVoteComplete }) => {
       </div>
     );
   };
+
+  if(loading) {
+    return (
+      <Card className="severity-card">
+        <CardContent style={{ textAlign: 'center', padding: '40px 0' }}>
+          <div className="loading-spinner">
+            <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>
+              Loading severity factors...
+            </div>
+            <div className="spinner"></div>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if(error) { 
+    return (
+      <Card className="severity-card">
+      <CardContent style={{ textAlign: 'center', padding: '40px 0' }}>
+        <div className="error-message" style={{ color: '#ef4444' }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>
+            Error loading severity factors
+          </div>
+          <div style={{ marginBottom: '20px' }}>{error}</div>
+        </div>
+      </CardContent>
+    </Card>
+    );
+  }
+
+  if(!Array.isArray(severityLevels) || severityLevels.length === 0) {
+    return (
+      <Card className="severity-card" style={{ margin: 0, padding: 0, fontFamily: 'Verdana, sans-serif' }}>
+        <CardHeader style={{ margin: 0, padding: '0 0 0 0', textAlign: 'center' }}>
+          <CardTitle style={{ color: textColor }}>No Severity Factors Found</CardTitle>
+          <CardDescription style={{ color: textColor }}>Please contact the project owner to set up severity factors.</CardDescription>
+        </CardHeader>
+      </Card>
+    );
+  }
   
   return (
     <Card className="severity-card" style={{ margin: 0, padding: 0, fontFamily: 'Verdana, sans-serif' }}>
@@ -179,21 +371,31 @@ const DGraph = ({ onVoteComplete }) => {
         </CardDescription>
       </CardHeader>
       <CardContent style={{ padding: 0, marginTop: 20, maxHeight: '130vh' }}>
-        <div 
-          className="severity-graph" 
+        <div className='severity-levels-info' style={{ padding: '0 20px 15px 20px', textAlign:'center'}}>
+          <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>Current Severity Weight Factors:</p>
+          <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap' }}>
+            {severityLevels.map((level, index) => (
+              <div key={index} style={{ padding: '5px 10px', margin: '5px', backgroundColor: level.color, borderRadius: '4px',  fontSize: '12px', fontWeight: 'bold'}}>
+                Level {level.level}: {level.value}
+              </div>
+            ))}
+          </div>
+        </div>
+        <div
+          className="severity-graph"
           style={{ padding: 0, margin: 0, position: 'relative' }}
           ref={chartRef}
         >
           <CustomTooltip />
           <ResponsiveContainer width="100%" height={370} style={{ padding: 0, margin: 0 }}>
-            <ComposedChart 
-              data={weightedValues} 
+            <ComposedChart
+              data={weightedValues}
               margin={{ top: 0, right: 20, left: 20, bottom: 10 }}
               onMouseMove={() => {}}
             >
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="name" 
+              <XAxis
+                dataKey="name"
                 interval={0}
                 tick={({ x, y, payload }) => (
                   <g transform={`translate(${x},${y})`}>
@@ -203,10 +405,10 @@ const DGraph = ({ onVoteComplete }) => {
                     <text x={0} y={20} dy={16} textAnchor="middle" fill={textColor} fontSize="12">
                       {severityLevels[parseInt(payload.value.split(' ')[1]) - 1].name}
                     </text>
-                    <foreignObject 
-                      x="-30" 
-                      y="50" 
-                      width="70" 
+                    <foreignObject
+                      x="-30"
+                      y="50"
+                      width="70"
                       height="30"
                     >
                       <div className="input-group-chart">
@@ -224,20 +426,20 @@ const DGraph = ({ onVoteComplete }) => {
                 )}
                 height={100}
               />
-              <YAxis 
-                yAxisId="left"
-                orientation="left" 
+              <YAxis
+                yAxisId="right"
+                orientation="right"
+                domain={[0, Math.max(...severityLevels.map((level) => level.value)) * 1.1 || 400]}
+                label={{ value: 'Weighted Value', angle: 90, position: 'insideRight', fill: textColor, dy: 40 }}
+                tick={{ fill: textColor }}
+              />
+              <YAxis
+                yAxisId="left"  
+                orientation="left"
                 domain={[0, 100]}
-                label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft', fill: textColor, dy: 40 }} 
+                label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft', fill: textColor, dy: 40 }}
                 tick={{ fill: textColor }}
                 padding={{ top: 3 }}
-              />
-              <YAxis 
-                yAxisId="right"
-                orientation="right" 
-                domain={[0, 400]}
-                label={{ value: 'Weighted Value', angle: 90, position: 'insideRight', fill: textColor, dy: 40 }} 
-                tick={{ fill: textColor }}
               />
               <Legend />
               <Bar
@@ -251,10 +453,10 @@ const DGraph = ({ onVoteComplete }) => {
                   <Cell key={`cell-${index}`} fill={severityLevels[index].color} />
                 ))}
               </Bar>
-              <Line 
+              <Line
                 yAxisId="left"
-                type="monotone" 
-                dataKey="percentage" 
+                type="monotone"
+                dataKey="percentage"
                 stroke="#2563eb"
                 strokeWidth={3}
                 name="Percentage"
@@ -282,24 +484,26 @@ const DGraph = ({ onVoteComplete }) => {
             </ComposedChart>
           </ResponsiveContainer>
         </div>
-
         {Math.abs(totalPercentage - 100) > 0.1 && (
           <div className="percentage-alert">
             <div className="alert-content" style={{ textAlign: 'center' }}>
               <u>Current total</u>: <b>{totalPercentage}%</b> (Need 100%)
             </div>
             <div className="alert-bar">
-              <div 
-                className="alert-progress" 
-                style={{ 
+              <div
+                className="alert-progress"
+                style={{
                   width: `${Math.min(totalPercentage, 100)}%`,
                   backgroundColor: totalPercentage > 100 ? '#ef4444' : '#3b82f6'
-                }} 
-              />
+                }}
+              />  
             </div>
           </div>
         )}
-
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20, padding: '10px 20px' }}>
+          <button className="reset-button" onClick={handleResetPercentages} style={{backgroundColor: '#6b7280', color: 'white', padding: '8px 16px',  borderRadius: '4px', border: 'none', cursor: 'pointer'}}>   
+            <b>Reset</b>
+          </button>
         <button
           className="submit-button"
           disabled={Math.abs(totalPercentage - 100) > 0.1}
@@ -307,6 +511,7 @@ const DGraph = ({ onVoteComplete }) => {
         >
           <b>Submit D-Score Votes</b>
         </button>
+        </div>
       </CardContent>
     </Card>
   );

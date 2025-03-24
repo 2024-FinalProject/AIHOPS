@@ -686,6 +686,12 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             >
                                 Show d-Score
                             </button>
+                            <button
+                                className={`action-btn edit-btn ${analyzePopupType === 'exportResults' ? 'active' : ''}`}
+                                onClick={() => { setAnalyzePopupType('exportResults') }}
+                            >
+                                Export to Excel
+                            </button>
                             <AnalyzeResult 
                                 analyzePopupType={analyzePopupType} 
                                 closePopup={closePopup} 
