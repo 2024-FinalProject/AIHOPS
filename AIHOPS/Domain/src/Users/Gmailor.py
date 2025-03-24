@@ -25,7 +25,7 @@ class Gmailor:
                     self.codes_users.insert(code, [email, time])
 
                     yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
-                    yag.send(email, "AIHOPS verification email", f"Hello from AIHOPS!\nverification code: < {code} >")
+                    yag.send(email, "AIHOPS verification email", f"Hello from AIHOPS!\nverification code: < {code} >\nOr click here: http://localhost:5173/verifyautomatic?token={code}")
 
                     return ResponseSuccessMsg(f"an email with verification code has been sent to {email}, you have 5 minutes to validate your account")
 

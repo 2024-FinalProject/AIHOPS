@@ -10,12 +10,14 @@ const VerifyAutomatic = () => {
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(null); // null means no message initially
 
+   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
   useEffect(() => {
-    setToken(searchParams.get("token")) // Get token from URL
-    if (token) {
-      handleVerify(token);
-    }
-  }, []); // Run when search params change
+      setToken(searchParams.get("token")) // Get token from URL
+      if (token) {
+        handleVerify(token);
+      }
+  }, [searchParams]);
 
 
   const handleVerify = async (e) => {
