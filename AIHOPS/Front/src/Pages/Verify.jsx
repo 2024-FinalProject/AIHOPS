@@ -19,9 +19,15 @@ const Verify = () => {
     setIsSuccess(null);  // Reset before starting the registration attempt
 
     try {
-      const session = await startSession();
-      const cookie = session.data.cookie;
-
+      const existingToken = localStorage.getItem("authToken");
+      let cookie;
+      if(existingToken) {
+          cookie = existingToken;
+      }
+      else{
+          const session = await startSession();
+          cookie = session.data.cookie;
+      }
       const response = await verify(cookie, userName, password, code);
 
       // Check if registration is successful
