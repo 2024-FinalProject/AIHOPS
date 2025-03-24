@@ -50,10 +50,6 @@ const Register = () => {
         setIsSuccess(true);
         localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);
-        //login(cookie, userName);
-        // setTimeout(() => {
-        //   navigate("/");
-        // }, 1500);
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);
