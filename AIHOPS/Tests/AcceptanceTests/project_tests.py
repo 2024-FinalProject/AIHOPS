@@ -1,6 +1,12 @@
 import unittest
+from unittest.mock import patch
+
 from Domain.src.Server import Server
+from Domain.src.Users.MemberController import MemberController
 from Service.config import Base, engine
+from Tests.AcceptanceTests.Facade import Facade
+from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+
 
 # How to run the tests:
 # In a terminal, run:
@@ -9,14 +15,16 @@ from Service.config import Base, engine
 
 class ProjectTests(unittest.TestCase):
     # ------------- Base ------------------
+    @patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor)
 
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
         self.server = Server()
+        self.facade = Facade()
         self.cookie1 = self.server.enter().result.cookie
         self.cookie2 = self.server.enter().result.cookie
-        self.server.register(self.cookie1, "Alice", "")
-        self.server.register(self.cookie2, "Bob", "")
+        self.facade.register_and_verify(self.server, self.cookie1, "Alice", "")
+        self.facade.register_and_verify(self.server, self.cookie2, "Bob", "")
     
     def tearDown(self) -> None:
         # TODO:

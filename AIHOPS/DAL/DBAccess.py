@@ -78,6 +78,25 @@ class DBAccess:
             finally:
                 session.close()  # Close the session
 
+    def update_by_query(self, table, query_obj, update_data):
+        with self.lock:
+            session = Session()  # Create a new session
+            try:
+                obj = session.query(table).filter_by(**query_obj).first()
+                if obj is None:
+                    return ResponseFailMsg("No matching record found to update.")
+
+                for key, value in update_data.items():
+                    setattr(obj, key, value)  # Update object attributes
+
+                session.commit()  # Commit the changes
+                return ResponseSuccessMsg("Successfully updated the database.")
+            except SQLAlchemyError as e:
+                session.rollback()  # Rollback in case of an error
+                return ResponseFailMsg(f"Rolled back, failed to update the database: {str(e)}")
+            finally:
+                session.close()  # Close the session
+
     def delete(self, obj):
         with self.lock:  # Ensure thread safety if applicable
             session = Session()  # Create a new session

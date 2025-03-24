@@ -1,17 +1,26 @@
 import os
 import unittest
+from unittest.mock import patch
+
 from Domain.src.Server import Server
 from Service.config import Base, engine
+from Tests.AcceptanceTests.Facade import Facade
+from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+
 
 class DBProjectTests(unittest.TestCase):
+
+
 
     @classmethod
     def setUpClass(cls):
         print(os.getcwd())
 
+
     def setUp(self) -> None:
         Base.metadata.create_all(engine)
         self.server = None
+        self.facade = Facade()
 
     def tearDown(self) -> None:
         self.server.clear_db()
@@ -30,13 +39,13 @@ class DBProjectTests(unittest.TestCase):
 
 
     def register_alice_bob(self):
-        self.server.register(self.cookie, *self.AliceCred)
-        self.server.register(self.cookie, *self.BobCred)
+        self.facade.register_and_verify(self.server, self.cookie, *self.AliceCred)
+        self.facade.register_and_verify(self.server, self.cookie, *self.BobCred)
 
     def register_all(self):
-        self.server.register(self.cookie, *self.AliceCred)
-        self.server.register(self.cookie, *self.BobCred)
-        self.server.register(self.cookie, *self.EveCred)
+        self.facade.register_and_verify(self.server, self.cookie, *self.AliceCred)
+        self.facade.register_and_verify(self.server, self.cookie, *self.BobCred)
+        self.facade.register_and_verify(self.server, self.cookie, *self.EveCred)
 
     def create_project(self, cookie, user, project_name, project_desc):
         res = self.server.create_project(cookie, project_name, project_desc)

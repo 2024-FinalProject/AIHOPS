@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS.FactorsPool import FactorsPool, DEFAULT_FACTORS
@@ -11,6 +12,10 @@ from sqlalchemy import event
 
 import random
 
+from Tests.AcceptanceTests.Facade import Facade
+from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+
+
 # How to run the tests:
 # In a terminal, run:
 #   cd AIHOPS
@@ -18,15 +23,17 @@ import random
 
 class ProjectTests(unittest.TestCase):
     # ------------- Base ------------------
+    @patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor)
 
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
         FP.insert_defaults()
         self.server = Server()
+        self.facade = Facade()
         self.cookie1 = self.server.enter().result.cookie
         self.cookie2 = self.server.enter().result.cookie
-        self.server.register(self.cookie1, "Alice", "")
-        self.server.register(self.cookie2, "Bob", "")
+        self.facade.register_and_verify(self.server, self.cookie1, "Alice", "")
+        self.facade.register_and_verify(self.server, self.cookie2, "Bob", "")
 
     def tearDown(self) -> None:
         self.server.clear_db()
@@ -320,7 +327,7 @@ class ProjectTests(unittest.TestCase):
         
         # enter with a new member
         invaild_cookie = self.server.enter().result.cookie
-        self.server.register(invaild_cookie, "Charlie", "")
+        self.facade.register_and_verify(self.server, invaild_cookie, "Charlie", "")
         self.login(invaild_cookie, ["Charlie", ""])
 
         # get the vote with invalid member

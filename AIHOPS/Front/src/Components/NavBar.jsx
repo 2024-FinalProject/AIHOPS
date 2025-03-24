@@ -111,29 +111,39 @@ const NavBar = () => {
                 </li>
               </>
             ) : (
-              <>
-                <li className="nav-item">
-                  <Link
-                    to="/login"
-                    className={`nav-link nav-button ${
-                      location.pathname === "/login" ? "active" : ""
-                    }`}
-                    onClick={handleLogin}
-                  >
-                    Login
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link
-                    to="/register"
-                    className={`nav-link nav-button ${
-                      location.pathname === "/register" ? "active" : ""
-                    }`}
-                  >
-                    Register
-                  </Link>
-                </li>
-              </>
+                <>
+                  <li className="nav-item">
+                    <Link
+                        to="/login"
+                        className={`nav-link nav-button ${
+                            location.pathname === "/login" ? "active" : ""
+                        }`}
+                        onClick={handleLogin}
+                    >
+                      Login
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link
+                        to="/register"
+                        className={`nav-link nav-button ${
+                            location.pathname === "/register" ? "active" : ""
+                        }`}
+                    >
+                      Register
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link
+                        to="/verify"
+                        className={`nav-link nav-button ${
+                            location.pathname === "/verify" ? "active" : ""
+                        }`}
+                    >
+                      Verify
+                    </Link>
+                  </li>
+                </>
             )}
           </ul>
         </div>
