@@ -38,7 +38,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   const textColor = theme === 'light' ? '#333' : '#fff';
 
   useEffect(() => {
-    if(projectId)
+    if(projectId != null)
       getSeverityFactors();
   }, [projectId]);
 
