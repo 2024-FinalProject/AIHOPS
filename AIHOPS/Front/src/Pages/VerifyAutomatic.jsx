@@ -47,16 +47,16 @@ const VerifyAutomatic = () => {
 
       // Check if registration is successful
       if (response.data.success) {
-        setMsg(response.data.message);
+        setMsg("verified successfully");
         setIsSuccess(true);
-        //navigate("/login");
+        navigate("/login");
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);
       }
 
     } catch (error) {
-      setMsg("Failed to validate");
+      setMsg("Failed to verify");
       setIsSuccess(false);
     }
   };
@@ -66,7 +66,6 @@ const VerifyAutomatic = () => {
       <div>
         <h1>verification page</h1>
         <h1>{msg}</h1>
-        {/*<h1>{token}</h1>*/}
       </div>
   );
 }
