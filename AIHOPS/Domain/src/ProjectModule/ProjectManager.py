@@ -228,7 +228,7 @@ class ProjectManager():
         return project.get_to_invite()
 
     def get_project_severity_factors(self, pid, actor):
-        project = self._find_project(pid)
+        project = self._verify_owner(pid, actor)
         return project.get_severity_factors()
 
     # TODO: remove
