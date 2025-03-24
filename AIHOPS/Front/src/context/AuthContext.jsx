@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('userName');
-    // navigate("/");
+    navigate("/");
   };
 
   const toggleTheme = () => {
