@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Bar, Cell } from 'recharts';
 import './DGraph.css';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
-import { getProjectSeverityFactors, setSeverityFactors, updateProjectFactor } from "../api/ProjectApi";
+import { getProjectSeverityFactors, getMemberVoteOnProject } from "../api/ProjectApi";
 
 const DGraph = ({ onVoteComplete, projectId }) => {
   const [severityLevels, setSeverityLevels] = useState( [
@@ -22,6 +22,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   const [error, setError] = useState(null);
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(true);
+  const [hasVoted, setHasVoted] = useState(false);
 
   const [percentages, setPercentages] = useState(Array(5).fill(0));
   const [weightedValues, setWeightedValues] = useState([]);
@@ -39,8 +40,22 @@ const DGraph = ({ onVoteComplete, projectId }) => {
 
   useEffect(() => {
     if(projectId != null)
-      getSeverityFactors();
+      loadData();
   }, [projectId]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      await getSeverityFactors();
+      await fetchPreviousVotes();
+    } catch (error) {
+      console.error("Error loading severity factors:", error);
+      setMsg("An error occurred. Please try again later.");
+      setIsSuccess(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const newWeightedValues = severityLevels.map((level, index) => ({
@@ -54,6 +69,41 @@ const DGraph = ({ onVoteComplete, projectId }) => {
     }));
     setWeightedValues(newWeightedValues);
   }, [percentages, severityLevels]);
+
+  const fetchPreviousVotes = async () => {
+    const authToken = localStorage.getItem('authToken');
+    if(!authToken) {
+      console.error("No authentication token found. Please log in again.");
+      return;
+    }
+    try {
+      console.log("Fetching previous votes for project:", projectId);
+      const response = await getMemberVoteOnProject(authToken, projectId);
+
+      if(response.data.success) {
+        console.log("Previous votes found:", response.data.votes);
+        const votes = response.data.votes;
+        const severityVotes = votes.severity_votes || [];
+        if(votes && severityVotes.length > 0 && Array.isArray(severityVotes)) {
+          console.log("Setting previous votes:", severityVotes);
+          setPercentages(severityVotes);
+          setHasVoted(true);
+        } else {
+          console.log("No previous votes found.");
+          setPercentages([20, 20, 20, 20, 20]);
+          setHasVoted(false);
+        }
+      } else {
+        console.error("Failed to fetch previous votes:", response.data.message);
+        setMsg("An error occurred. Please try again later.");
+        setIsSuccess(false);
+      }
+    } catch(error) {
+      console.error("Error fetching previous votes:", error);
+      setMsg("An error occurred. Please try again later.");
+      setIsSuccess(false);
+    }
+  };
 
   const getSeverityFactors = async () => {
     const authToken = localStorage.getItem('authToken');
@@ -232,10 +282,6 @@ const DGraph = ({ onVoteComplete, projectId }) => {
     }
   };
 
-  const handleRefresh = async () => {
-    getSeverityFactors();  
-  };
-
   const handleResetPercentages = () => {
     setPercentages([20, 20, 20, 20, 20]);
   };
@@ -300,19 +346,6 @@ const DGraph = ({ onVoteComplete, projectId }) => {
             Error loading severity factors
           </div>
           <div style={{ marginBottom: '20px' }}>{error}</div>
-          <button 
-            onClick={handleRefresh}
-            style={{
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              padding: '8px 16px',
-              borderRadius: '4px',
-              border: 'none',
-              cursor: 'pointer'
-            }}
-          >
-            Retry
-          </button>
         </div>
       </CardContent>
     </Card>
@@ -471,10 +504,6 @@ const DGraph = ({ onVoteComplete, projectId }) => {
           <button className="reset-button" onClick={handleResetPercentages} style={{backgroundColor: '#6b7280', color: 'white', padding: '8px 16px',  borderRadius: '4px', border: 'none', cursor: 'pointer'}}>   
             <b>Reset</b>
           </button>
-          <button className="refresh-button" onClick={handleRefresh} style={{backgroundColor: '#6b7280', color: 'white', padding: '8px 16px', borderRadius: '4px', border: 'none', cursor: 'pointer'}}>
-            <b>Refresh Data</b>
-          </button>
-
         <button
           className="submit-button"
           disabled={Math.abs(totalPercentage - 100) > 0.1}
