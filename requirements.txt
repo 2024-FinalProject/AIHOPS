@@ -4,3 +4,4 @@ Flask-Cors==5.0.0
 npm install recharts
 npm install react-chartjs-2
 yagmail==0.15.293
+npm install xlsx
