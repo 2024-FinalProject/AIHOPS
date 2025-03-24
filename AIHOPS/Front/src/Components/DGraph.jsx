@@ -25,7 +25,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   const [hasVoted, setHasVoted] = useState(false);
 
   const [percentages, setPercentages] = useState(Array(5).fill(0));
-  const [weightedValues, setWeightedValues] = useState([]);
+  const [chartData, setChartData] = useState([]);
   const [selectedDot, setSelectedDot] = useState(null);
   const chartRef = useRef(null);
   const dragStateRef = useRef({
@@ -46,7 +46,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   const loadData = async () => {
     setLoading(true);
     try {
-      await getSeverityFactors();
+      //await getSeverityFactors();
       await fetchPreviousVotes();
     } catch (error) {
       console.error("Error loading severity factors:", error);
@@ -58,16 +58,15 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   };
 
   useEffect(() => {
-    const newWeightedValues = severityLevels.map((level, index) => ({
+    const newChartData = severityLevels.map((level, index) => ({
       name: `Level ${level.level}`,
       percentage: percentages[index],
-      weightedValue: (percentages[index] / 100) * level.value,
       color: level.color,
       level: level.name,
       description: level.description,
       levelIndex: index
     }));
-    setWeightedValues(newWeightedValues);
+    setChartData(newChartData);
   }, [percentages, severityLevels]);
 
   const fetchPreviousVotes = async () => {
@@ -105,90 +104,6 @@ const DGraph = ({ onVoteComplete, projectId }) => {
     }
   };
 
-  const getSeverityFactors = async () => {
-    const authToken = localStorage.getItem('authToken');
-    if(!authToken) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      setLoading(false);
-      return;
-    }
-    try{
-      console.log("Calling getProjectSeverityFactors with:", authToken, projectId);
-      let response = await getProjectSeverityFactors(authToken, projectId);
-      console.log("Response from getProjectSeverityFactors:", response);
-      if(response.data.success) {
-        if(Array.isArray(response.data.severityFactors) && response.data.severityFactors.length > 0) {
-          console.log("Severity factors found:", response.data.severityFactors);
-          const defaultLevels = [
-            {
-              level: 1,
-              name: "No to Negligible Damage",
-              value: 0.5,
-              color: "#4ade80",
-              description: "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement."
-            },
-            {
-              level: 2,
-              name: "Minor Damage",
-              value: 1,
-              color: "#fbbf24",
-              description: "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources."
-            },
-            {
-              level: 3,
-              name: "Manageable Damage",
-              value: 25,
-              color: "#fb923c",
-              description: "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations."
-            },
-            {
-              level: 4,
-              name: "Severe Damage",
-              value: 100,
-              color: "#f87171",
-              description: "Impacts are substantial, disrupting core activities significantly."
-            },
-            {
-              level: 5,
-              name: "Catastrophic Damage",
-              value: 400,
-              color: "#ef4444",
-              description: "Impacts result in extensive disruption, likely overwhelming available resources."
-            }
-          ]
-        console.log("Severity factors from response:", response.data.severityFactors);
-        response.data.severityFactors.forEach((factor, index) => {
-          if(index >= defaultLevels.length) return;
-          defaultLevels[index].value = factor;
-        });
-        console.log("Updated severity factors:", defaultLevels);
-        setSeverityLevels(defaultLevels);
-
-        if(percentages.every(p => p === 0)) {
-          setPercentages([20, 20, 20, 20, 20]);
-        }
-      } else {
-        console.error("Invalid severity factors data:", response.data.severityFactors);
-        setError("The API returned invalid severity factors data.");
-      }
-    } else {
-      console.error("Failed to fetch severity factors:", response.data.message);
-      setError(response.data.message || "An error occurred. Please try again later.");
-      setMsg("An error occurred. Please try again later.");
-      setIsSuccess(false);
-    }
-    }
-    catch(error) {  
-      console.error("Error fetching severity factors:", error);
-      setMsg("An error occurred. Please try again later.");
-      setIsSuccess(false);
-      alert(error);
-    }
-    finally{
-      setLoading(false);
-    }
-  };
 
   // Set up drag handlers
   useEffect(() => {
@@ -292,7 +207,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   const CustomTooltip = () => {
     if (!selectedDot || dragStateRef.current.isDragging) return null;
     
-    const data = weightedValues[selectedDot.index];
+    const data = chartData[selectedDot.index];
     
     return (
       <div
@@ -314,8 +229,6 @@ const DGraph = ({ onVoteComplete, projectId }) => {
         <h4 className="tooltip-title" style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>{data.level}</h4>
         <div className="tooltip-content">
           <div><u>Percentage</u>: {data.percentage.toFixed(1)}%</div>
-          <div><u>Weight Factor</u>: {severityLevels[data.levelIndex].value}</div>
-          <div><u>Weighted Value</u>: {data.weightedValue.toFixed(2)}</div>
         </div>
         <div className="tooltip-description" style={{ marginTop: '4px', fontSize: '10px' }}>{data.description}</div>
       </div>
@@ -376,7 +289,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
           <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap' }}>
             {severityLevels.map((level, index) => (
               <div key={index} style={{ padding: '5px 10px', margin: '5px', backgroundColor: level.color, borderRadius: '4px',  fontSize: '12px', fontWeight: 'bold'}}>
-                Level {level.level}: {level.value}
+                Level {level.level}
               </div>
             ))}
           </div>
@@ -389,7 +302,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
           <CustomTooltip />
           <ResponsiveContainer width="100%" height={370} style={{ padding: 0, margin: 0 }}>
             <ComposedChart
-              data={weightedValues}
+              data={chartData}
               margin={{ top: 0, right: 20, left: 20, bottom: 10 }}
               onMouseMove={() => {}}
             >
@@ -442,17 +355,6 @@ const DGraph = ({ onVoteComplete, projectId }) => {
                 padding={{ top: 3 }}
               />
               <Legend />
-              <Bar
-                yAxisId="right"
-                dataKey="weightedValue"
-                fill="#82ca9d"
-                name="Weighted Value"
-                isAnimationActive={false}
-              >
-                {weightedValues.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={severityLevels[index].color} />
-                ))}
-              </Bar>
               <Line
                 yAxisId="left"
                 type="monotone"
