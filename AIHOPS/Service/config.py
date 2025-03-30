@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 # init server
 app = Flask(__name__)
 # wrap our app with CORS
-CORS(app)
+CORS(app, origins=["http://aihops.cs.bgu.ac.il"])
 
 
 # ----------- later for db -----------

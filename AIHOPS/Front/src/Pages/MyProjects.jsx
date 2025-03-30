@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import VotingTypeSelector from "../components/VotingTypeSelector";
+import VotingTypeSelector from "../Components/VotingTypeSelector";
 import DGraph from "../Components/DGraph";
 import { getProjectsMember, submitFactorVote, getMemberVoteOnProject, submitDScoreVotes, checkProjectVotingStatus} from "../api/ProjectApi";
 
 
-import ProjectList from "../components/ProjectList";
+import ProjectList from "../Components/ProjectList";
 import FactorVotingModal from "../Components/FactorVotingModal";
 import "./MyProjects.css";
 

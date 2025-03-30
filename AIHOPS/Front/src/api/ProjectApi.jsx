@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = "http://localhost:5555";
+const API_URL = "http://132.73.84.59";
 
 export const getProjects = async (cookie) => {
     return await axios.get(`${API_URL}/projects`, {

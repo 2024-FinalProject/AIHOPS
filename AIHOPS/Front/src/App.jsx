@@ -12,7 +12,7 @@ import AccessibilityMenu from './Components/AccessibilityMenu';
 import WelcomePage from "./Pages/WelcomePage";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
-import Notification from "./Pages/PendingRequests";
+import Notification from "./pages/PendingRequests"
 import ProjectsManagement_old from "./Pages/ProjectsManagement_old";
 import ProjectsManagement from "./Pages/ProjectsManagement";
 import MyProjects from "./Pages/MyProjects";
