@@ -46,7 +46,9 @@ const Register = () => {
       
       // Check if registration is successful
       if (response.data.success) {
-        setMsg(response.data.message);
+        const frontMsg = "A verification email has been sent to you.\nIf you cant see it check the spam inbox :)";
+        // setMsg(response.data.message);
+        setMsg(frontMsg);
         setIsSuccess(true);
         localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);

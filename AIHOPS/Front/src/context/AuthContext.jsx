@@ -8,6 +8,11 @@ const validateAuthToken = async (token) => {
   return true;
 };
 
+const validateAuthLoggedIn = async (loggedIn) => {
+  if (!loggedIn) return false;
+  return true;
+};
+
 export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(localStorage.getItem('authToken') || null);
   const [userName, setUserName] = useState(localStorage.getItem('userName') || null);
@@ -32,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('userName');
+    localStorage.removeItem('isLoggedIn');
     navigate("/");
   };
 
@@ -55,7 +61,8 @@ export const AuthProvider = ({ children }) => {
     const validateToken = async () => {
       setIsValidatingToken(true);
       const token = localStorage.getItem('authToken');
-      if (!token || !(await validateAuthToken(token))) {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      if (!isLoggedIn || !(await validateAuthLoggedIn(isLoggedIn)) || !token || !(await validateAuthToken(token))) {
         setAuthToken(null);
         setUserName(null);
         setIsAuthenticated(false);
