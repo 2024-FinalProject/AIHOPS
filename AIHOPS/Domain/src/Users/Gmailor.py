@@ -25,9 +25,11 @@ class Gmailor:
                     self.codes_users.insert(code, [email, time])
 
                     yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
-                    yag.send(email, "AIHOPS verification email", f"Hello from AIHOPS!\nverification code: < {code} >\nOr click here: http://aihops.cs.bgu.ac.il/verifyautomatic?token={code}")
+                    yag.send(email, "AIHOPS verification email",
+                             f"Hello from AIHOPS!\nverification code: < {code} >\nOr click here: http://localhost:5173/verifyautomatic?token={code}")
 
-                    return ResponseSuccessMsg(f"an email with verification code has been sent to {email}, you have 5 minutes to validate your account")
+                    return ResponseSuccessMsg(
+                        f"an email with verification code has been sent to {email}, you have 5 minutes to validate your account")
 
     def verify(self, email, code):
         # need to use lock for the scenario that i will read the correct email but then when i read the time it has been changed by someone else => and thus is valid

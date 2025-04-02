@@ -11,12 +11,12 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 
-CORS(app, origins="http://aihops.cs.bgu.ac.il")
+CORS(app)
 
 
 # --------  init session and user management ---------------
 
-server = Server()
+# server = Server()
 
 @app.route("/enter", methods=["GET"])
 def start_session():
