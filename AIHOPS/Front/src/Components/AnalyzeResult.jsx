@@ -18,14 +18,6 @@ const AnalyzeResult = ({
     const [projectSeverityFactors, setProjectSeverityFactors] = useState({});
     const [projectFactorsVotes, setProjectFactorsVotes] = useState([]);
 
-    const fetchAllData = async () => {
-        await fetch_project_score();
-        await fetch_project_progress();
-        await fetch_project_factors();
-        await fetch_project_factors_votes();
-        await fetch_project_severity_factors();
-    };
-
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
         
@@ -35,7 +27,12 @@ const AnalyzeResult = ({
         return;
         }
 
-        fetchAllData();
+        fetch_project_score();
+        fetch_project_progress();
+        fetch_project_factors();
+        fetch_project_factors_votes();
+        fetch_project_severity_factors();
+        console.log(projectsScore);
     }, []);
 
     const fetch_project_progress = async () => {
@@ -262,29 +259,28 @@ const AnalyzeResult = ({
                 return null;
             }
         };
+
+        const getPopupTitle = () => {
+            switch (analyzePopupType) {
+                case 'showCurrentScore':
+                    return 'Current Project Score';
+                case 'showAssessorsInfo':
+                    return 'Assessors Information';
+                case 'showContentFactorsScore':
+                    return 'Content Factors Score';
+                case 'showSeverityFactorsScore':
+                    return 'd-Score';
+                case 'exportResults':
+                    return 'Export Results';
+                default:
+                    return 'Project Analysis';
+            }
+        };
     
         return(
             <div className="analyzePopup-content">
                 <div className="analyzePopup-header">
-                {/* Refresh Button */}
-                <button 
-                    onClick={fetchAllData} 
-                    style={{
-                        position: "fixed",    // Position the button at a fixed position
-                        top: "80px",          
-                        right: "85px",        
-                        padding: "8px 12px",
-                        fontSize: "15px",
-                        backgroundColor: "#007bff",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "5px",
-                        cursor: "pointer",
-                        fontFamily: "Verdana, sans-serif",
-                    }}
-                >
-                    🔄 Refresh
-                </button>
+                    <div className="analyzePopup-title">{getPopupTitle()}</div>
                 </div>
                 {getPopupContent()}
             </div>
