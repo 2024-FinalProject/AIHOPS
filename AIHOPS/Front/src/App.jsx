@@ -31,7 +31,7 @@ const AppContent = () => {
       .then((response) => {
         if (response.data.isAuthenticated) {
           const sessionCookie = response.data.sessionCookie;
-          login();
+          // login();
         }
       })
       .catch((error) => {

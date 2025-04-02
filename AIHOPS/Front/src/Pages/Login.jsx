@@ -53,6 +53,7 @@ const Login = () => {
 
         localStorage.setItem("userName", userName);
         login(cookie, userName);
+        localStorage.setItem("isLoggedIn", "true");
         console.log("Redirecting to /");
         navigate("/");
       } else {
