@@ -9,10 +9,14 @@ from sqlalchemy import event
 from flask_cors import CORS
 
 app = Flask(__name__)
-# CORS(app, resources={r"/*": {"origins": ["http://127.0.0.1:5173", "http://localhost:5173"]}})
-CORS(app)
+
+
+CORS(app, origins="http://aihops.cs.bgu.ac.il")
+
 
 # --------  init session and user management ---------------
+
+server = Server()
 
 @app.route("/enter", methods=["GET"])
 def start_session():
@@ -396,6 +400,9 @@ def get_project_factors_votes():
     res = server.get_project_factors_votes(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "votes": res.result if res.success else None})
 
+@app.route("/")
+def hello():
+    return jsonify({"msg": "hello"})
 
 # run the backed server
 if __name__ == "__main__":
