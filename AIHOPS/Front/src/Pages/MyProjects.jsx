@@ -236,7 +236,8 @@ const MyProjects = () => {
     setSubmittedVotes({});
     setCurrentFactorIndex(0);
     setCurrentVotingType(null);
-
+    
+    await fetchProjects(); // Refresh the project list
     await checkProjectVotingStatus(projectId);
   };
 
