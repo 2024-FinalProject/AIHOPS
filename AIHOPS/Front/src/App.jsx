@@ -55,7 +55,7 @@ const AppContent = () => {
         <Route path = "/settings" element = {<Settings />} />
         <Route path = "/about" element = {<About />} />
       </Routes>
-      <AccessibilityMenu />
+      {/* <AccessibilityMenu /> */}
     </>
   );
 };

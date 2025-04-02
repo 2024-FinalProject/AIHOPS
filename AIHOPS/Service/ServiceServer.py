@@ -9,7 +9,10 @@ from sqlalchemy import event
 from flask_cors import CORS
 
 app = Flask(__name__)
+
+
 CORS(app, origins="http://aihops.cs.bgu.ac.il")
+
 
 # --------  init session and user management ---------------
 
