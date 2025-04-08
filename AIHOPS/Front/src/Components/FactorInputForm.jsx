@@ -36,13 +36,13 @@ const FactorInputForm = ({
       <div className="factor-form-container">
         <Card className="factor-card">
           <div className="factor-header">
-            <u>Add New Content Factor</u>:
+            <u>Add New Assessmnet Dimension</u>:
           </div>
           
           <CardContent className="p-2">
             <div className="factor-grid">
               <div className="factor-input-group factor-name-group">
-                <label className="factor-input-label"><b><u>Factor Name</u>:</b></label>
+                <label className="factor-input-label"><b><u>Assessment Dimension Name</u>:</b></label>
                 <input
                   type="text"
                   value={newFactorName}
@@ -53,7 +53,7 @@ const FactorInputForm = ({
               </div>
               
               <div className="factor-input-group">
-                <label className="factor-input-label"><b><u>Factor Description</u>:</b></label>
+                <label className="factor-input-label"><b><u>Assessment Dimension Description</u>:</b></label>
                 <input
                   type="text"
                   value={newFactorDescription}
@@ -121,7 +121,7 @@ const FactorInputForm = ({
                 onClick={handleSubmit}
                 className="factor-button factor-submit-button"
               >
-                Add Factor
+                Add Assessment Dimension
               </button>
             </div>
           </CardContent>

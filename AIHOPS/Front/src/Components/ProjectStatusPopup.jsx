@@ -62,7 +62,7 @@ const ProjectStatusPopup = ({
             className="action-btn edit-btn"
             onClick={() => handleEditContentFactors(selectedProject.id, selectedProject.name)}
           >
-            Edit Content Factors
+            Edit & Confirm Assessment Dimensions
           </button>
         </div>
         <div>
@@ -70,7 +70,7 @@ const ProjectStatusPopup = ({
             className="action-btn edit-btn"
             onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
           >
-            Edit d-Score
+            Edit & Confirm Severity Factors
           </button>
         </div>
         <div>

@@ -351,7 +351,7 @@ const MyProjects = () => {
               <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
               <div style={{fontFamily: 'Verdana, sans-serif' }}>
                 <h2 className="text-2xl font-bold mb-4 text-center default-text" style={{margin: '0 auto', textAlign: 'center', fontFamily: 'Verdana, sans-serif' }}>
-                  <u>D-Score Voting for {currentProject.name}</u>:
+                  <u>Severity Factors Voting for {currentProject.name}</u>:
                 </h2>
                 <DGraph 
                 onVoteComplete={handleDScoreVoteComplete}

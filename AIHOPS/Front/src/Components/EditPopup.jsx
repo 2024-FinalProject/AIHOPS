@@ -530,11 +530,11 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             <div className="factor-form-container">
                 <div className="factor-card">
                     <div className="factor-header">
-                        Edit Content Factor: {editingFactor.name}
+                        Edit Assessment Dimension: {editingFactor.name}
                     </div>
                     <div className="factor-grid">
                         <div className="factor-input-group factor-name-group">
-                            <label className="factor-input-label"><b><u>Factor Name</u>:</b></label>
+                            <label className="factor-input-label"><b><u>Assessment Dimension Name</u>:</b></label>
                             <input
                                 type="text"
                                 className="factor-input"
@@ -543,7 +543,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             />
                         </div>
                         <div className="factor-input-group">
-                            <label className="factor-input-label"><b><u>Description</u>:</b></label>
+                            <label className="factor-input-label"><b><u>Assessment Dimension Description</u>:</b></label>
                             <textarea
                                 className="factor-input"
                                 value={editedFactorDescription}
@@ -602,7 +602,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 className="factor-button factor-submit-button"
                                 onClick={handleUpdateEditedFactor}
                             >
-                                Update Factor
+                                Update Assessment Dimension
                             </button>
                         </div>
                     </div>
@@ -668,25 +668,25 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 className={`action-btn edit-btn ${analyzePopupType === 'showCurrentScore' ? 'active' : ''}`}
                                 onClick={() => { setAnalyzePopupType('showCurrentScore') }}
                             >
-                                Show Current Score
+                                Current Score
                             </button>
                             <button
                                 className={`action-btn edit-btn ${analyzePopupType === 'showAssessorsInfo' ? 'active' : ''}`}
                                 onClick={() => { setAnalyzePopupType('showAssessorsInfo') }}
                             >
-                                Show Assessors Info
+                                Assessors Info
                             </button>
                             <button
                                 className={`action-btn edit-btn ${analyzePopupType === 'showContentFactorsScore' ? 'active' : ''}`}
                                 onClick={() => { setAnalyzePopupType('showContentFactorsScore') }}
                             >
-                                Show Content Factors Score
+                                Assessment Dimension Score
                             </button>
                             <button
                                 className={`action-btn edit-btn ${analyzePopupType === 'showSeverityFactorsScore' ? 'active' : ''}`}
                                 onClick={() => { setAnalyzePopupType('showSeverityFactorsScore') }}
                             >
-                                Show d-Score
+                                Severity Factors Score
                             </button>
                             <button
                                 className={`action-btn edit-btn ${analyzePopupType === 'exportResults' ? 'active' : ''}`}
@@ -740,7 +740,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         {showExistingContentFactors && (
                             <div>
                                 <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '30px'}}>
-                                    <b><u className="default-text">Project Factors</u>:</b>
+                                    <b><u className="default-text">Assessment Dimensions</u>:</b>
                                 </div>
                                 {selectedProject.factors.length > 0 ? (
                                     <>
@@ -830,7 +830,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                         background: "#2e8b57",
                                                     }}
                                                 >
-                                                    Confirm Content Factors
+                                                    Confirm Assessment Dimensions
                                                 </button>
                                             </div>
                                             <button
@@ -865,7 +865,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         {showPoolContentFactors && (
                             <div>
                                 <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '30px'}}>
-                                    <b><u> Factors Pool</u>:</b>
+                                    <b><u> Assessment Dimensions Pool</u>:</b>
                                 </div>
                                 {factorsPool.length > 0 ? (
                                     <>
@@ -988,7 +988,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     cursor: 'pointer',
                                                 }}
                                             >
-                                                Add Selected Factors
+                                                Add Selected Assessment Dimensions
                                             </button>
                                             <button
                                                 className="action-btn edit-btn"
@@ -1015,7 +1015,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         </div>}
                                     </>
                                 ) : (
-                                    <div className="default-div" style={{textAlign: 'center', marginTop:'20px'}}>No factors available in the factors pool.</div>
+                                    <div className="default-div" style={{textAlign: 'center', marginTop:'20px'}}>No Assessment Dimensions available in the pool.</div>
                                 )}
                             </div>
                         )}
@@ -1023,7 +1023,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                         {addNewFactorShow && (
                             <FactorInputForm 
                                 onSubmit={handleAddFactor}
-                                onCancel={() => setAddNewFactorShow(false)}
+                                onCancel={() => {setShowPoolContentFactors(false), setShowExistingContentFactors(true), setAddNewFactorShow(false)}}
                                 scaleDescriptions={scaleDescriptions}
                                 setScaleDescriptions={setScaleDescriptions}
                                 scaleExplanations={scaleExplanations}
@@ -1065,7 +1065,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                     onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
                                     onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
                                 >
-                                    Show Existing Content Factors
+                                    Projects Assessment Dimensions
                                 </button>
                             )}
                             {!showPoolContentFactors && !addNewFactorShow && (
@@ -1090,7 +1090,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                     onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
                                     onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
                                 >
-                                    Show Factors Pool
+                                    Assessment Dimensions Pool
                                 </button>
                             )}
 
@@ -1117,7 +1117,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                     onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
                                     onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
                                 >
-                                    Add New Content Factor
+                                    Add New Assessment Dimension
                                 </button>
                             )}
                         </div>
@@ -1126,7 +1126,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             case 'editSeverityFactors':
                 return (
                     <div>
-                        <h2 className = "default-text" style={{ textAlign: 'center' }}><u>Edit d-score</u>:</h2>
+                        <h2 className = "default-text" style={{ textAlign: 'center' }}><u>Severity Factors</u>:</h2>
                         <table className="severity-table">
                             <thead>
                                 <tr>

@@ -411,7 +411,7 @@ const DGraph = ({ onVoteComplete, projectId }) => {
           disabled={Math.abs(totalPercentage - 100) > 0.1}
           onClick={handleSubmit}
         >
-          <b>Submit D-Score Votes</b>
+          <b>Submit Severity Factors Votes</b>
         </button>
         </div>
       </CardContent>

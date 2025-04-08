@@ -15,18 +15,21 @@ const ExportDataButton = ({
     // Create a new workbook
     const workbook = XLSX.utils.book_new();
     
-    // Generate sheets for each type of data
+    // Project Score sheet
     if (Object.keys(projectsScore).length > 0) {
-      // Project Score sheet
       const scoreData = generateCurrentScoreData(projectsScore);
       const scoreSheet = XLSX.utils.aoa_to_sheet(scoreData);
       XLSX.utils.book_append_sheet(workbook, scoreSheet, "Project Score");
       
-      // Content Factors sheet
+      // Assessment Dimensions sheet
       if (projectsScore.factors && Object.keys(projectsScore.factors).length > 0) {
-        const factorsData = generateContentFactorsData(projectsScore, projectFactors, projectFactorsVotes);
+        const factorsData = generateContentFactorsData(
+          projectsScore,
+          projectFactors,
+          projectFactorsVotes
+        );
         const factorsSheet = XLSX.utils.aoa_to_sheet(factorsData);
-        XLSX.utils.book_append_sheet(workbook, factorsSheet, "Content Factors");
+        XLSX.utils.book_append_sheet(workbook, factorsSheet, "Assessment Dimensions");
       }
       
       // Severity Factors sheet
@@ -36,7 +39,7 @@ const ExportDataButton = ({
         XLSX.utils.book_append_sheet(workbook, severitySheet, "Severity Factors");
       }
     }
-    
+
     // Assessors Info sheet
     if (Object.keys(projectsProgress).length > 0) {
       const assessorsData = generateAssessorsInfoData(projectsProgress);
@@ -48,7 +51,7 @@ const ExportDataButton = ({
     const filename = `project_${projectId}_analysis_data.xlsx`;
     XLSX.writeFile(workbook, filename);
   };
-  
+
   const generateCurrentScoreData = (projectsScore) => {
     const data = [
       ["Project Score Summary"],
@@ -56,12 +59,11 @@ const ExportDataButton = ({
       ["Total Score", projectsScore.score || "N/A"],
       ["Nominator", projectsScore.nominator || "N/A"],
       ["Denominator", projectsScore.denominator || "N/A"],
-      ["d-Score", projectsScore.d_score ? projectsScore.d_score.toFixed(3) : "N/A"]
+      ["Severity Score", projectsScore.d_score ? projectsScore.d_score.toFixed(3) : "N/A"]
     ];
-    
     return data;
   };
-  
+
   const generateAssessorsInfoData = (projectsProgress) => {
     const data = [
       ["Assessors Information"],
@@ -70,45 +72,44 @@ const ExportDataButton = ({
       ["Registered Assessors", (projectsProgress.member_count - 1) || 0],
       ["Active Assessors", projectsProgress.voted_amount || 0]
     ];
-    
     return data;
   };
-  
+
   const generateContentFactorsData = (projectsScore, projectFactors, projectFactorsVotes) => {
-    // Calculate overall average
-    const totalSum = Object.values(projectsScore.factors).reduce((sum, factor) => sum + factor.avg, 0);
+    // Calculate overall average of dimension avgs
+    const totalSum = Object.values(projectsScore.factors)
+      .reduce((sum, f) => sum + f.avg, 0);
     const numFactors = Object.keys(projectsScore.factors).length;
-    const averageScore = numFactors > 0 ? (totalSum / numFactors).toFixed(3) : 0;
-    
+    const overallAvg = numFactors > 0 ? (totalSum / numFactors).toFixed(3) : "0.000";
+
     const data = [
-      ["Content Factors Analysis"],
+      ["Assessment Dimensions Analysis"],
       [],
-      ["Overall Content Factors Score", averageScore],
+      ["Overall Assessment Dimensions Score", overallAvg],
       [],
-      ["Factor ID", "Factor Name", "Average Score", "Number of Votes"]
+      ["Assessment Dimension ID", "Assessment Dimension Name", "Average Score", "Number of Votes"]
     ];
-    
-    // Add each factor as a row
-    Object.entries(projectsScore.factors).forEach(([factorId, factor]) => {
-      const factorName = projectFactors[factorId] ? projectFactors[factorId] : `Factor ${-factorId}`;
-      
-      // Make sure projectFactorsVotes is an array before using filter
-      let votes = 0;
-      if (Array.isArray(projectFactorsVotes)) {
-        votes = projectFactorsVotes.filter(vote => vote && vote.factor_id === parseInt(factorId)).length;
-      }
-      
+
+    Object.entries(projectsScore.factors).forEach(([factorIdStr, factorObj]) => {
+      const factorId = Number(factorIdStr);
+      const factorName = projectFactors[factorIdStr] || `Factor ${factorIdStr}`;
+      const avg = factorObj.avg.toFixed(3);
+
+      // Number of votes from projectFactorsVotes map
+      const votesArray = projectFactorsVotes && projectFactorsVotes[factorIdStr];
+      const votes = Array.isArray(votesArray) ? votesArray.length : 0;
+
       data.push([
-        -factorId,
+        factorId,
         factorName,
-        factor.avg.toFixed(3),
+        avg,
         votes
       ]);
     });
-    
+
     return data;
   };
-  
+
   const generateSeverityFactorsData = (projectsScore, projectSeverityFactors) => {
     const severityLevels = [
       "No to Negligible Damage",
@@ -117,20 +118,19 @@ const ExportDataButton = ({
       "Severe Damage",
       "Catastrophic Damage"
     ];
-    
+
     const data = [
       ["Severity Factors Analysis"],
       [],
-      ["Current d-Score", projectsScore.d_score ? projectsScore.d_score.toFixed(3) : "N/A"],
+      ["Current Severity Score", projectsScore.d_score ? projectsScore.d_score.toFixed(3) : "N/A"],
       [],
       ["Level", "Description", "Average Score", "Weight Factor", "Weighted Score"]
     ];
-    
-    // Add each severity level as a row
+
     projectsScore.severity_damage.avg.forEach((avgValue, index) => {
       const weightFactor = projectSeverityFactors[index];
       const weightedScore = (avgValue * weightFactor).toFixed(3);
-      
+
       data.push([
         `Level ${index + 1}`,
         severityLevels[index],
@@ -139,21 +139,19 @@ const ExportDataButton = ({
         weightedScore
       ]);
     });
-    
-    // Add total weighted score
-    const totalWeightedScore = projectsScore.severity_damage.avg.reduce(
-      (sum, avg, index) => sum + (avg * projectSeverityFactors[index]), 
-      0
-    ).toFixed(3);
-    
+
+    const totalWeightedScore = projectsScore.severity_damage.avg
+      .reduce((sum, avgVal, idx) => sum + (avgVal * projectSeverityFactors[idx]), 0)
+      .toFixed(3);
+
     data.push([]);
     data.push(["Total Weighted Score", totalWeightedScore]);
-    
+
     return data;
   };
 
   return (
-    <button 
+    <button
       onClick={exportToExcel}
       className="action-btn edit-btn"
       style={{
@@ -172,11 +170,10 @@ const ExportDataButton = ({
         boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
         transition: 'all 0.3s ease',
         margin: '0 auto',
-        width: 'auto',
         maxWidth: '250px'
       }}
-      onMouseOver={(e) => e.currentTarget.style.backgroundColor = theme === 'light' ? '#2563eb' : '#1d4ed8'}
-      onMouseOut={(e) => e.currentTarget.style.backgroundColor = theme === 'light' ? '#3b82f6' : '#2563eb'}
+      onMouseOver={e => e.currentTarget.style.backgroundColor = theme === 'light' ? '#2563eb' : '#1d4ed8'}
+      onMouseOut={e => e.currentTarget.style.backgroundColor = theme === 'light' ? '#3b82f6' : '#2563eb'}
     >
       <svg 
         xmlns="http://www.w3.org/2000/svg" 
