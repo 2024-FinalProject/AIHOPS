@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./NavBar.css";
 import { FaUser } from "react-icons/fa"; // <-- For user icon
 import aihops_article from "../assets/AIHOPS.pdf";
 import AccessibilityMenu from "./AccessibilityMenu";
+import {
+  getPendingRequest,
+} from "../api/ProjectApi";
+
+import { IoMdNotificationsOutline } from "react-icons/io"; // Notification bell icon
 
 const NavBar = () => {
   // Pull out userName from the AuthContext
@@ -12,6 +17,30 @@ const NavBar = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const [newMessages, setNewMessages] = useState(false); // State to track new messages
+
+  useEffect(() => {
+    fetchPendingRequest();
+  }, [location.pathname]);
+
+  const fetchPendingRequest = async () => {
+    const cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      console.error("authToken not found in localStorage");
+      return;
+    }
+    try {
+      const response = await getPendingRequest(cookie);
+      if (response.data.success) {
+        setNewMessages(response.data.requests.length > 0); // Check if there are new messages
+      } else {
+        setNewMessages(false); // No new messages if the request fails
+      }
+    } catch (error) {
+      console.error("Error fetching pending requests:", error);
+    }
+  };
+
 
   const handleLogout = () => {
     logout();
@@ -93,15 +122,18 @@ const NavBar = () => {
                 </li>
 
                 <li className="nav-item">
-                  <Link
-                    to="/notification"
-                    className={`nav-link nav-button ${
-                      location.pathname === "/notification" ? "active" : ""
-                    }`}
-                    state={{ triggerFetch: true }}
-                  >
-                    Notifications
-                  </Link>
+                <Link
+                  to="/notification"
+                  className={`nav-link nav-button ${
+                    location.pathname === "/notification" ? "active" : ""
+                  }`}
+                  state={{ triggerFetch: true }}
+                  style={{ position: "relative", display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <IoMdNotificationsOutline size={20} />
+                  Notifications
+                  {newMessages && <span className="new-message-dot" />}
+                </Link>
                 </li>
 
                 <li className="nav-item">
