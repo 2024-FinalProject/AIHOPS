@@ -38,6 +38,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [editedScaleDescriptions, setEditedScaleDescriptions] = useState(Array(5).fill(""));
     const [editedScaleExplanations, setEditedScaleExplanations] = useState(Array(5).fill(""));
     const [fromExistingFactorsPage, setFromExistingFactorsPage] = useState(true);
+    const [addedMember, setAddedMember] = useState(false);
     
     // Number of pages for the Project Factors
     const totalPagesFactors = Math.ceil(selectedProject.factors.length / itemsPerPage);
@@ -302,6 +303,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 // Clear the input fields after adding
                 setNewMemberName('');
                 setIsSuccess(true);
+                setAddedMember(true);
             } else {
                 setMsg(response.data.message);
                 alert(response.data.message);
@@ -1231,9 +1233,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             ))}
                             </ul>
                         )}
-                        {!selectedProject.isActive && <div className="severity-factors-warning">
-                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> Members to be invited, will be invited only once the project has been published.</p>
-                        </div>}
+
                         {!selectedProject.isActive && (projectsPendingInvites == null || !(projectsPendingInvites.length > 0)) && (<p className = "default-text"> There are currently no invited members </p>)}
                         
 
@@ -1277,6 +1277,9 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             Add Member
                             </button>
                         </div>
+                        {!selectedProject.isActive && addedMember && <div className="severity-factors-warning">
+                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> Members to be invited, will be invited only once the project has been published.</p>
+                        </div>}
                     </div>
             );
             default:
