@@ -133,7 +133,7 @@ const NavBar = () => {
                       Register
                     </Link>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <Link
                         to="/verify"
                         className={`nav-link nav-button ${
@@ -142,7 +142,7 @@ const NavBar = () => {
                     >
                       Verify
                     </Link>
-                  </li>
+                  </li> */}
                 </>
             )}
           </ul>

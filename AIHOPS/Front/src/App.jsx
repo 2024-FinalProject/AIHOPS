@@ -45,7 +45,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/verify" element={<Verify />} />
+        {/* <Route path="/verify" element={<Verify />} /> */}
         <Route path="/verifyautomatic" element={<VerifyAutomatic />} />
         <Route path="/login" element={<Login />} />
         <Route path="/notification" element={<Notification />} />
