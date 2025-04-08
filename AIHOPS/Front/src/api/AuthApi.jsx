@@ -1,5 +1,6 @@
 import axios from 'axios';
-const API_URL = "http://132.73.84.59";
+// const API_URL = "http://132.73.84.59";
+const API_URL = "https://aihops.cs.bgu.ac.il/api";
 
 export const verify = async (cookie, userName, passwd, code) => {
     return await axios.post(`${API_URL}/verify`, { cookie, userName, passwd, code });
