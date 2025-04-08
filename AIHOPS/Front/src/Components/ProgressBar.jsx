@@ -67,16 +67,16 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
       <div className="progress-steps">
         <div className="design-section">
           <div className={`progress-step ${isStepActive('name') ? 'active' : ''}`}>
-            Name{'\n'}Project
+            Edit{'\n'}Project{'\n'}Name
           </div>
           <div className={`progress-step ${isStepActive('description') ? 'active' : ''}`}>
-            Add{'\n'}Project{'\n'}Description
+            Edit{'\n'}Project{'\n'}Description
           </div>
           <div className={`progress-step ${isStepActive('content') ? 'active' : ''}`}>
-            Confirm{'\n'}Content{'\n'}Factors
+            Confirm{'\n'}Assessment{'\n'}Dimensions
           </div>
           <div className={`progress-step ${isStepActive('severity') ? 'active' : ''}`}>
-            Confirm{'\n'}d Score
+            Confirm{'\n'}Severity{'\n'}Factors
           </div>
           <div className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}>
             Invite{'\n'}Assessors

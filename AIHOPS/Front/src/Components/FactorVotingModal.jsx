@@ -29,9 +29,9 @@ const FactorVotingModal = ({
           ×
         </button>
 
-        <h2 className="default-text text-2xl font-bold mb-4 text-center" style={{textAlign: 'center', marginTop:'-10px'}}>
+        {/* <h2 className="default-text text-2xl font-bold mb-4 text-center" style={{textAlign: 'center', marginTop:'-10px'}}>
           <u>Vote on {project.name}</u>:
-        </h2>
+        </h2> */}
 
         <div className="vote-container">
           {currentFactor && (

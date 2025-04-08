@@ -157,7 +157,7 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
             x: {
                 title: {
                     display: true,
-                    text: "Content Factors",
+                    text: "Assessment Dimensions",
                     font: {
                         size: 14,
                         weight: "bold",
