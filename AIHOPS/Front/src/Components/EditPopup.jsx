@@ -1278,7 +1278,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             </button>
                         </div>
                         {!selectedProject.isActive && addedMember && <div className="severity-factors-warning">
-                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> Members to be invited, will be invited only once the project has been published.</p>
+                            <p style={{ textAlign: 'center', fontSize: '17px'}}><b>Note:</b> Members will be invited only after the project's publication.</p>
                         </div>}
                     </div>
             );
