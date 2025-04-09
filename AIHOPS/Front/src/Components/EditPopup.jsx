@@ -25,7 +25,6 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [factorUpdates, setFactorUpdates] = useState({});
     const [factorsPool, setFactorsPool] = useState([]);
     const [selectedFactors, setSelectedFactors] = useState([]);
-    const [selectedFactorId, setSelectedFactorId] = useState(null);
     const [showExistingContentFactors, setShowExistingContentFactors] = useState(true);
     const [showPoolContentFactors, setShowPoolContentFactors] = useState(false);
     const [factorStartIndex, setFactorStartIndex] = useState(0); // Counter for selectedProject.factors
