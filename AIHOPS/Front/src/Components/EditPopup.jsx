@@ -25,11 +25,12 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [factorUpdates, setFactorUpdates] = useState({});
     const [factorsPool, setFactorsPool] = useState([]);
     const [selectedFactors, setSelectedFactors] = useState([]);
+    const [selectedFactorId, setSelectedFactorId] = useState(null);
     const [showExistingContentFactors, setShowExistingContentFactors] = useState(true);
     const [showPoolContentFactors, setShowPoolContentFactors] = useState(false);
     const [factorStartIndex, setFactorStartIndex] = useState(0); // Counter for selectedProject.factors
     const [poolStartIndex, setPoolStartIndex] = useState(0); // Counter for factorsPool
-    const itemsPerPage = 2; // Number of items to display at a time
+    const itemsPerPage = 8; // Number of items to display at a time
     const [analyzePopupType, setAnalyzePopupType] = useState("");
     const [addNewFactorShow, setAddNewFactorShow] = useState(false);
     const [editingFactor, setEditingFactor] = useState(null);
@@ -353,6 +354,10 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
 
         const factorIds = selectedFactors.map((factor) => factor.id);
+        if (factorIds.length === 0) {
+            alert("Please select at least one factor to add.");
+            return;
+        }
         const response = await setProjectFactors(cookie, selectedProject.id, factorIds);
 
         if (response.data.success) {
@@ -364,6 +369,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             await fetch_factors_pool();
             adjustPaginationAfterDeletion('pool', factorsPool.length - selectedFactors.length);
             setSelectedFactors([]);
+            selectedProject.factors_inited = false;
         } else {
             setMsg(response.data.message);
             alert(response.data.message);
@@ -644,6 +650,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
                 await fetch_selected_project(selectedProject);
                 await fetch_factors_pool();
+                selectedProject.factors_inited = false;
                 adjustPaginationAfterDeletion('factors', selectedProject.factors.length);
             } else {
                 alert(res.data.message);
@@ -739,8 +746,65 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     <div className = "default-div">
                         {showExistingContentFactors && (
                             <div>
-                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '30px'}}>
+                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '5px'}}>
+                                        {!showPoolContentFactors && !addNewFactorShow && (
+                                            <button
+                                            className="action-btn edit-btn"
+                                            onClick={() => {
+                                                setShowPoolContentFactors(true);
+                                                setShowExistingContentFactors(false);
+                                            }}
+                                            style={{
+                                                padding: '10px 20px',
+                                                fontSize: '14px',
+                                                backgroundColor: '#2196F3',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '20px',
+                                                boxShadow: '0 3px 8px rgba(0, 0, 0, 0.1)',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s ease',
+                                                outline: 'none',
+                                                marginLeft: '-200px',
+                                                marginRight: '200px',
+                                            }}
+                                            onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                            onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
+                                        >
+                                            Dimensions Pool
+                                        </button>
+                                    )}
+                                    
                                     <b><u className="default-text">Assessment Dimensions</u>:</b>
+
+                                    {!addNewFactorShow && !showPoolContentFactors && (
+                                        <button
+                                        className="action-btn edit-btn"
+                                        onClick={() => {
+                                            setShowPoolContentFactors(false);
+                                            setShowExistingContentFactors(false);
+                                            setAddNewFactorShow(true);
+                                        }}
+                                        style={{
+                                            padding: '10px 20px',
+                                            fontSize: '14px',
+                                            backgroundColor: '#4CAF50',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '20px',
+                                            boxShadow: '0 3px 8px rgba(0, 0, 0, 0.1)',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s ease',
+                                            outline: 'none',
+                                            marginRight: '-200px',
+                                            marginLeft: '200px',
+                                        }}
+                                        onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                        onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
+                                    >
+                                        Add New Dimension
+                                    </button>
+                                    )}
                                 </div>
                                 {selectedProject.factors.length > 0 ? (
                                     <>
@@ -752,46 +816,49 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     className="factor-item"
                                                     style={{
                                                         display: 'flex',
-                                                        flexDirection: 'column',
-                                                        marginBottom: '20px',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        marginBottom: '3px',
                                                         backgroundColor: '#f9f9f9',
-                                                        borderRadius: '8px',
-                                                        padding: '15px',
-                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                        borderRadius: '6px',
+                                                        padding: '8px 12px',
+                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                                     }}
                                                 >
-                                                    <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-                                                        <strong><u>{factor.name}</u></strong>
-                                                        <div style={{ marginTop: '10px' }}>{factor.description}</div>
+                                                    <div style={{ flex: 1, marginRight: '8px' }}>
+                                                        <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{factor.name}</div>
+                                                        <div style={{ fontSize: '0.85rem', color: '#666' }}>{factor.description}</div>
                                                     </div>
-                                                    <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+                                                    <div style={{ display: 'flex', gap: '6px' }}>
                                                         <button
                                                             className="action-btn"
                                                             onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(true)}}
                                                             style={{
-                                                                padding: '8px 15px',
+                                                                padding: '4px 8px',
                                                                 backgroundColor: '#20b2aa',
                                                                 color: 'white',
                                                                 border: 'none',
-                                                                borderRadius: '4px',
+                                                                borderRadius: '3px',
                                                                 cursor: 'pointer',
+                                                                fontSize: '0.85rem'
                                                             }}
                                                         >
-                                                            View/Edit
+                                                            Edit
                                                         </button>
                                                         <button
                                                             className="action-btn delete-btn"
                                                             onClick={() => handleDeleteFactor(factor.name, factor.id)}
                                                             style={{
-                                                                padding: '8px 15px',
+                                                                padding: '4px 8px',
                                                                 backgroundColor: '#ff4444',
                                                                 color: 'white',
                                                                 border: 'none',
-                                                                borderRadius: '4px',
+                                                                borderRadius: '3px',
                                                                 cursor: 'pointer',
+                                                                fontSize: '0.85rem'
                                                             }}
                                                         >
-                                                            Delete From Project
+                                                            Delete
                                                         </button>
                                                     </div>
                                                 </div>
@@ -827,11 +894,26 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                         handleConfirmFactors(selectedProject.id, selectedProject.name)
                                                     }
                                                     style={{
-                                                        background: "#2e8b57",
+                                                        padding: '8px 18px',
+                                                        fontSize: '14px',
+                                                        backgroundColor: '#4CAF50',
+                                                        color: 'white',
+                                                        border: 'none',
+                                                        borderRadius: '20px',
+                                                        cursor: 'pointer',
+                                                        boxShadow: '0 3px 8px rgba(0, 0, 0, 0.1)',
+                                                        transition: 'all 0.2s ease',
+                                                        position: 'relative', // Positioning for the badge
                                                     }}
+                                                    onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                                    onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
                                                 >
-                                                    Confirm Assessment Dimensions
+                                                    ✅ Confirm Assessment Dimensions
+                                                    {!selectedProject.factors_inited && (
+                                                        <span className="reminder-badge">Unconfirmed</span>
+                                                    )}
                                                 </button>
+
                                             </div>
                                             <button
                                                 className="action-btn edit-btn"
@@ -863,8 +945,43 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             </div>
                         )}
                         {showPoolContentFactors && (
-                            <div>
-                                <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '30px'}}>
+                                        <div>
+                                            <div style={{alignItems: 'center', display: 'flex', justifyContent: 'center', fontSize: '25px', marginBottom: '5px'}}>
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                }}
+                                            >
+                                        {!showExistingContentFactors && !addNewFactorShow && (
+                                            <button
+                                                className="action-btn edit-btn"
+                                                onClick={() => {
+                                                    setShowExistingContentFactors(true);
+                                                    setShowPoolContentFactors(false);
+                                                    setAddNewFactorShow(false);
+                                                }}
+                                                style={{
+                                                    padding: '10px 20px',
+                                                    fontSize: '14px',
+                                                    backgroundColor: '#3F51B5',
+                                                    color: 'white',
+                                                    border: 'none',
+                                                    borderRadius: '20px',
+                                                    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.1)',
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s ease',
+                                                    outline: 'none',
+                                                    marginRight: '120px',
+                                                    marginLeft: '-380px',
+                                                }}
+                                                onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                                onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
+                                            >
+                                                Projects Dimensions
+                                            </button>
+                                        )}
+                                    </div>
                                     <b><u> Assessment Dimensions Pool</u>:</b>
                                 </div>
                                 {factorsPool.length > 0 ? (
@@ -872,88 +989,65 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         {factorsPool
                                             .slice(poolStartIndex, poolStartIndex + itemsPerPage)
                                             .map((factor) => (
-                                                // For Factors Pool with checkbox in top left corner
                                                 <div
                                                     key={factor.id}
                                                     className="factor-item"
                                                     style={{
                                                         display: 'flex',
-                                                        flexDirection: 'column',
-                                                        marginBottom: '20px',
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        marginBottom: '3px',
                                                         backgroundColor: '#f9f9f9',
-                                                        borderRadius: '8px',
-                                                        padding: '15px',
-                                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                                        position: 'relative'  // Added for absolute positioning of checkbox
+                                                        borderRadius: '6px',
+                                                        padding: '8px 12px',
+                                                        boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                                     }}
                                                 >
-                                                    {/* Checkbox positioned in the top left corner */}
-                                                    <div style={{ 
-                                                        position: 'absolute', 
-                                                        top: '12px', 
-                                                        left: '12px'
-                                                    }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                                                         <input
                                                             type="checkbox"
                                                             id={`factor-${factor.id}`}
                                                             onChange={() => handleCheckboxChange(factor)}
                                                             checked={selectedFactors.some((selected) => selected.id === factor.id)}
-                                                            style={{ transform: 'scale(1.3)' }}
+                                                            style={{ marginRight: '8px' }}
                                                         />
+                                                        <div>
+                                                            <label htmlFor={`factor-${factor.id}`} style={{ fontWeight: 'bold', marginBottom: '2px', display: 'block' }}>
+                                                                {factor.name}
+                                                            </label>
+                                                            <div style={{ fontSize: '0.85rem', color: '#666' }}>{factor.description}</div>
+                                                        </div>
                                                     </div>
-                                                    
-                                                    {/* Name - centered but with space on left for checkbox */}
-                                                    <div style={{ 
-                                                        textAlign: 'center', 
-                                                        marginBottom: '10px',
-                                                    }}>
-                                                        <label htmlFor={`factor-${factor.id}`}>
-                                                            <strong><u>{factor.name}</u></strong>
-                                                        </label>
-                                                    </div>
-                                                    
-                                                    {/* Description - centered */}
-                                                    <div style={{ 
-                                                        textAlign: 'center', 
-                                                        marginBottom: '15px', 
-                                                        padding: '0 10px' 
-                                                    }}>
-                                                        {factor.description}
-                                                    </div>
-                                                    
-                                                    {/* Buttons - centered at bottom */}
-                                                    <div style={{ 
-                                                        display: 'flex', 
-                                                        justifyContent: 'center', 
-                                                        gap: '10px' 
-                                                    }}>
+                                                    <div style={{ display: 'flex', gap: '6px' }}>
                                                         <button
                                                             className="action-btn"
                                                             onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(false)}}
                                                             style={{
-                                                                padding: '8px 15px',
+                                                                padding: '4px 8px',
                                                                 backgroundColor: '#20b2aa',
                                                                 color: 'white',
                                                                 border: 'none',
-                                                                borderRadius: '4px',
+                                                                borderRadius: '3px',
                                                                 cursor: 'pointer',
+                                                                fontSize: '0.85rem'
                                                             }}
                                                         >
-                                                            View/Edit
+                                                            Edit
                                                         </button>
                                                         <button
                                                             className="action-btn delete-btn"
                                                             onClick={() => handleDeleteFactorFromPool(factor.name, factor.id)}
                                                             style={{
-                                                                padding: '8px 15px',
+                                                                padding: '4px 8px',
                                                                 backgroundColor: '#ff4444',
                                                                 color: 'white',
                                                                 border: 'none',
-                                                                borderRadius: '4px',
+                                                                borderRadius: '3px',
                                                                 cursor: 'pointer',
+                                                                fontSize: '0.85rem'
                                                             }}
                                                         >
-                                                            Delete From Pool
+                                                            Delete
                                                         </button>
                                                     </div>
                                                 </div>
@@ -980,12 +1074,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 onClick={handleSubmit}
                                                 style={{
                                                     marginTop: '10px',
-                                                    padding: '10px 20px',
-                                                    backgroundColor: 'blue',
+                                                    padding: '8px 18px',
+                                                    fontSize: '14px',
+                                                    backgroundColor: '#4CAF50',
                                                     color: 'white',
                                                     border: 'none',
                                                     borderRadius: '5px',
                                                     cursor: 'pointer',
+                                                    transition: 'all 0.2s ease',
                                                 }}
                                             >
                                                 Add Selected Assessment Dimensions
@@ -1005,7 +1101,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                             </button>
                                         </div>
                                         {/* Page indicator for Factors Pool */}
-                                        {totalPagesPool > 1 && <div className="pagination-indicator">
+                                        {totalPagesPool > 1 && <div className="pagination-indicator" style = {{marginBottom: '-20px'}}>
                                             {Array.from({ length: totalPagesPool }).map((_, i) => (
                                                 <span
                                                 key={i}
@@ -1030,103 +1126,12 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 setScaleExplanations={setScaleExplanations}
                             />
                         )}
-
-                        <div
-                            style={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                gap: '15px',
-                                padding: '15px 0',
-                                marginTop: '5px',
-                                marginBottom: '-2px',
-                            }}
-                        >
-                            {!showExistingContentFactors && !addNewFactorShow && (
-                                <button
-                                    className="action-btn edit-btn"
-                                    onClick={() => {
-                                        setShowExistingContentFactors(true);
-                                        setShowPoolContentFactors(false);
-                                        setAddNewFactorShow(false);
-                                    }}
-                                    style={{
-                                        padding: '20px 30px',
-                                        fontSize: '16px',
-                                        background: 'linear-gradient(145deg, #5D9CEC, #4A89DC)',
-                                        color: 'white',
-                                        border: '1px solid #4A89DC',
-                                        borderRadius: '25px',
-                                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        outline: 'none',
-                                        marginLeft: '25px',
-                                    }}
-                                    onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
-                                    onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
-                                >
-                                    Projects Assessment Dimensions
-                                </button>
-                            )}
-                            {!showPoolContentFactors && !addNewFactorShow && (
-                                <button
-                                    className="action-btn edit-btn"
-                                    onClick={() => {
-                                        setShowPoolContentFactors(true);
-                                        setShowExistingContentFactors(false);
-                                    }}
-                                    style={{
-                                        padding: '20px 30px',
-                                        fontSize: '16px',
-                                        background: 'linear-gradient(145deg, #FFB6C1, #FF6F91)',
-                                        color: 'white',
-                                        border: '1px solid #FF6F91',
-                                        borderRadius: '25px',
-                                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        outline: 'none',
-                                    }}
-                                    onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
-                                    onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
-                                >
-                                    Assessment Dimensions Pool
-                                </button>
-                            )}
-
-                            {!addNewFactorShow && !showPoolContentFactors && (
-                                <button
-                                    className="action-btn edit-btn"
-                                    onClick={() => {
-                                        setShowPoolContentFactors(false);
-                                        setShowExistingContentFactors(false);
-                                        setAddNewFactorShow(true);
-                                    }}
-                                    style={{
-                                        padding: '20px 30px',
-                                        fontSize: '16px',
-                                        background: 'linear-gradient(145deg,rgb(186, 255, 182),rgb(111, 255, 142))',
-                                        color: 'white',
-                                        border: '1px solidrgb(111, 255, 183)',
-                                        borderRadius: '25px',
-                                        boxShadow: '0 6px 15px rgba(0, 0, 0, 0.1)',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
-                                        outline: 'none',
-                                    }}
-                                    onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
-                                    onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
-                                >
-                                    Add New Assessment Dimension
-                                </button>
-                            )}
-                        </div>
                     </div>
                 ); 
             case 'editSeverityFactors':
                 return (
                     <div>
-                        <h2 className = "default-text" style={{ textAlign: 'center' }}><u>Severity Factors</u>:</h2>
+                        <h2 className = "default-text" style={{ textAlign: 'center', marginTop: '-20px' }}><u>Severity Factors</u>:</h2>
                         <table className="severity-table">
                             <thead>
                                 <tr>
@@ -1178,10 +1183,20 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 className="action-btn confirm-btn"
                                 onClick={() => handleConfirmSeverityFactors(selectedProject.id, selectedProject.name)}
                                 style={{
-                                    background: "#2e8b57",
+                                    padding: '8px 18px',
+                                    fontSize: '14px',
+                                    backgroundColor: '#4CAF50',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '20px',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.1)',
+                                    transition: 'all 0.2s ease',
                                 }}
+                                onMouseOver={(e) => (e.target.style.transform = 'scale(1.05)')}
+                                onMouseOut={(e) => (e.target.style.transform = 'scale(1)')}
                             >
-                                Confirm Severity Factors
+                                ✅ Confirm Severity Factors
                             </button>
                         </div>
                     </div>

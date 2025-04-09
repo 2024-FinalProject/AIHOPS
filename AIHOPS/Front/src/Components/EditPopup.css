@@ -273,4 +273,22 @@ input::placeholder {
   .pagination-dot.active {
     background-color: #0095ff;  /* fill color */
   }
+
+  .reminder-badge {
+    position: absolute;
+    top: -6px; /* Adjust for fine-tuning */
+    right: -55px; /* Adjust for fine-tuning */
+    background-color: #f7b42c; /* Bright color for visibility */
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 12px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+    transform: translate(50%, -50%); /* Positions the badge relative to top-right */
+}
+
+
+
+
   
