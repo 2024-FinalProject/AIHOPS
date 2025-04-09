@@ -130,13 +130,31 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to logout: {e}")
         
-    def update_password(self, cookie, old_passwd, new_passwd):
+    # def update_password(self, cookie, old_passwd, new_passwd):
+    #     try:
+    #         res = self.get_session_member(cookie)
+    #         if not res.success:
+    #             return res
+    #         session = res.result
+    #         return self.user_controller.update_password(session.user_name, old_passwd, new_passwd)
+    #     except Exception as e:
+    #         return ResponseFailMsg(f"Failed to update password: {e}")
+
+    def start_password_recovery(self, cookie, email):
         try:
-            res = self.get_session_member(cookie)
+            res = self.get_session(cookie)
             if not res.success:
                 return res
-            session = res.result
-            return self.user_controller.update_password(session.user_name, old_passwd, new_passwd)
+            return self.user_controller.start_password_recovery(email)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to recover password: {e}")
+
+    def update_password(self, cookie, email, passwd, code):
+        try:
+            res = self.get_session(cookie)
+            if not res.success:
+                return res
+            return self.user_controller.recover_password(email, passwd, code)
         except Exception as e:
             return ResponseFailMsg(f"Failed to update password: {e}")
     

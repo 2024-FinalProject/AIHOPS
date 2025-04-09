@@ -25,6 +25,14 @@ export const startSession = async () => {
     return await axios.get(`${API_URL}/enter`);
 };
 
-export const updatePassword = async (cookie, oldPasswd, newPasswd) => {
-    return await axios.post(`${API_URL}/update-password`, { cookie, oldPasswd, newPasswd });
-}
+// export const updatePassword = async (cookie, oldPasswd, newPasswd) => {
+//     return await axios.post(`${API_URL}/update-password`, { cookie, oldPasswd, newPasswd });
+// }
+
+export const startPasswordRecovery = async (cookie, email) => {
+    return await axios.post(`${API_URL}/start_password_recovery`, { cookie, email });
+};
+
+export const updatePassword = async (cookie, email, password, code) => {
+    return await axios.post(`${API_URL}/update_password`, { cookie, email, password, code });
+};

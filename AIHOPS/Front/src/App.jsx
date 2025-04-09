@@ -20,6 +20,7 @@ import Settings from "./Pages/Settings";
 import About from './Pages/About';
 import Verify from "./Pages/Verify.jsx";
 import VerifyAutomatic from "./Pages/VerifyAutomatic.jsx";
+import PasswordRecovery from "./Pages/PasswordRevovery.jsx";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -54,6 +55,7 @@ const AppContent = () => {
         <Route path="/myprojects" element={<MyProjects />} />
         <Route path = "/settings" element = {<Settings />} />
         <Route path = "/about" element = {<About />} />
+        <Route path = "/PasswordRecovery" element = {<PasswordRecovery />} />
       </Routes>
       {/* <AccessibilityMenu /> */}
     </>
