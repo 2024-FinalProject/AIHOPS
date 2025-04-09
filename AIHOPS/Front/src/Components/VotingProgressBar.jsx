@@ -1,36 +1,37 @@
 import React from 'react';
-import './ProgressBar.css'; // Reuse existing styles
+import './VotingProgressBar.css';
 
 const VotingProgressBar = ({ votedCount, totalCount }) => {
-  // Calculate percentage
-  const percentage = totalCount > 0 ? Math.round((votedCount / totalCount) * 100) : 0;
-  
+  // Calculate progress percentage
+  const progressPercentage = totalCount > 0 ? (votedCount / totalCount) * 100 : 0;
+
+  // Customize the text based on progress
+  let statusText = '';
+  if (progressPercentage === 0) {
+    statusText = 'Start voting on factors below';
+  } else if (progressPercentage < 50) {
+    statusText = `You've voted on ${votedCount} of ${totalCount} factors`;
+  } else if (progressPercentage < 100) {
+    statusText = `Almost there! ${totalCount - votedCount} more to go`;
+  } else {
+    statusText = 'All factors rated! Ready to submit';
+  }
+
   return (
-    <div className="progress-container">
-      <div className="vote-progress-text" style={{ textAlign: 'center', margin: '0.5rem 0' }}>
-        <b>
-          <u>Voted on</u>: {votedCount}/{totalCount} Factors
-        </b>
+    <div className="voting-progress-container">
+      <div className="voting-progress-text">
+        {statusText}
+        <span className="voting-progress-percentage">
+          {Math.round(progressPercentage)}%
+        </span>
       </div>
-      
-      <div className="progress-step assessor-progress">
-        <div className="progress-step-container">
-          <div 
-            className="progress-step-background"
-            style={{
-              width: `${percentage}%`,
-              transition: 'width 0.5s ease-in-out'
-            }}
-          />
-          <div className="progress-step-content">
-            <span>
-              {`${percentage}% (${votedCount}/${totalCount})`}
-            </span>
-          </div>
-        </div>
+      <div className="voting-progress-bar">
+        <div 
+          className="voting-progress-fill"
+          style={{ width: `${progressPercentage}%` }}
+        />
       </div>
     </div>
   );
 };
-
 export default VotingProgressBar;
