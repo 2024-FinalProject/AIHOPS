@@ -276,7 +276,7 @@ input::placeholder {
 
   .reminder-badge {
     position:inherit;
-    top: -30px; /* Adjust for fine-tuning */
+    top: -37px; /* Adjust for fine-tuning */
     right: -100px; /* Adjust for fine-tuning */
     background-color: #f7b42c; /* Bright color for visibility */
     color: white;

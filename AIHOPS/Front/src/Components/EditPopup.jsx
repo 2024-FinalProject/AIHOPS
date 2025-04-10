@@ -909,7 +909,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                 >
                                                     ✅ Confirm Assessment Dimensions
                                                     {!selectedProject.factors_inited && (
-                                                        <span className="reminder-badge">Unconfirmed</span>
+                                                        <span className="reminder-badge">Unset</span>
                                                     )}
                                                 </button>
 
@@ -1198,7 +1198,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                             >
                                 ✅ Confirm Severity Factors
                                 {!selectedProject.severity_factors_inited && (
-                                    <span className="reminder-badge">Unconfirmed</span>
+                                    <span className="reminder-badge">Unset</span>
                                 )}
                             </button>
                         </div>
