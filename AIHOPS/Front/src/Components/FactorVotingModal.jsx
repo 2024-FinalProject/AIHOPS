@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./FactorVotingModal.css";
-import ImprovedConfirmationPopup from "./ConfirmationPopup";
+import ConfirmationPopup from "./ConfirmationPopup";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 const FactorVotingModal = ({
@@ -309,12 +309,13 @@ const FactorVotingModal = ({
                     const isSelected = currentValue === value;
                     
                     return (
-                      <tr key={value} className={isSelected ? "selected-row" : ""}>
+                      <tr 
+                        key={value} 
+                        className={`vote-row ${isSelected ? "selected-row" : ""}`}
+                        onClick={() => handleFactorVoteChange(selectedFactor.id, value)}
+                      >
                         <td className="vote-cell">
-                          <div 
-                            className={getOptionClasses(value, isSelected)}
-                            onClick={() => handleFactorVoteChange(selectedFactor.id, value)}
-                          >
+                          <div className={getOptionClasses(value, isSelected)}>
                             {value}
                           </div>
                         </td>
@@ -373,7 +374,7 @@ const FactorVotingModal = ({
         
         {/* Confirmation Popup */}
         {showConfirmation && (
-          <ImprovedConfirmationPopup
+          <ConfirmationPopup
             title={lastVotedFactor ? "Vote Recorded!" : "Submitting Votes"}
             message={lastVotedFactor 
               ? `You rated "${lastVotedFactor.name}" as ${getValueLabel(factorVotes[lastVotedFactor.id])} (${factorVotes[lastVotedFactor.id]}).`

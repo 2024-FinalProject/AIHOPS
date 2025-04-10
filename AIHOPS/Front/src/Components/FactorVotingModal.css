@@ -483,6 +483,24 @@
   background-color: #f9fafb;
 }
 
+/* Make entire row clickable */
+.factor-table .vote-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.factor-table .vote-row:hover {
+  background-color: #f9fafb;
+}
+
+.factor-table .vote-row.selected-row {
+  background-color: #f0f9ff;
+}
+
+.factor-table .vote-row.selected-row:hover {
+  background-color: #e0f2fe;
+}
+
 /* Option in table styling */
 .factor-table .factor-option {
   width: 36px;
@@ -493,7 +511,6 @@
   justify-content: center;
   font-weight: 700;
   border-radius: 6px;
-  cursor: pointer;
   transition: all 0.2s ease;
 }
 
