@@ -2,59 +2,61 @@ import './ProgressBar.css';
 import { getProjectProgress } from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 
-const ProgressBar = ({ project, handleAnalyzeResult }) => {
-    const [projectsProgress, setProjectsProgress] = useState({});
+const ProgressBar = ({
+  project,
+  handleAnalyzeResult,
+  handleEditProjectsName,
+  handleEditProjectsDescription,
+  handleEditContentFactors,
+  handleEditSeveirtyFactors,
+  handleManageAssessors
+}) => {
+  const [projectsProgress, setProjectsProgress] = useState({});
 
-    useEffect(() => {
-        const cookie = localStorage.getItem("authToken");
-        
-        if (!cookie) {
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
-        }
+  useEffect(() => {
+    const cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      return;
+    }
+    fetch_project_progress();
+  }, [project]);
 
-        fetch_project_progress();
-    }, []);
-
-    const fetch_project_progress = async () => {
-        let cookie = localStorage.getItem("authToken");
-        
-        if (!cookie) {
-            setMsg("No authentication token found. Please log in again.");
-            setIsSuccess(false);
-            return;
-        }
-        try{
-            let res = await getProjectProgress(cookie, project.id);
-            if (res.data.success) {
-                setProjectsProgress(res.data.progress);
-            }
-            else {
-                alert("Error fetching project progress");
-            }
-        } catch (error) {
-            alert("Error fetching project progress");
-        }
-    };
+  const fetch_project_progress = async () => {
+    const cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      return;
+    }
+    try {
+      const res = await getProjectProgress(cookie, project.id);
+      if (res.data.success) {
+        setProjectsProgress(res.data.progress);
+      } else {
+        alert("Error fetching project progress");
+      }
+    } catch (error) {
+      alert("Error fetching project progress");
+    }
+  };
 
   const isStepActive = (stepName) => {
     switch (stepName) {
       case 'name':
-        return Boolean(projectsProgress.name != null);
+        return projectsProgress.name != null;
       case 'description':
-        return Boolean(projectsProgress.desc != null);
+        return projectsProgress.desc != null;
       case 'content':
-        return Boolean(projectsProgress.factors_inited);
+        return projectsProgress.factors_inited;
       case 'severity':
-        return Boolean(projectsProgress.severity_factors_inited);
+        return projectsProgress.severity_factors_inited;
       case 'invite':
-        return Boolean(projectsProgress.invited_members || projectsProgress.pending_amount > 0
-                      || projectsProgress.member_count > 1);
+        return projectsProgress.invited_members || projectsProgress.pending_amount > 0 || projectsProgress.member_count > 1;
       default:
         return false;
     }
   };
+
+  const disableEditActions = project.isActive || project.isArchived;
+  const disableManageAssessors = project.isArchived;
 
   return (
     <div className="progress-container">
@@ -63,30 +65,50 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
         <div className="section-title data" style={{ fontWeight: 'bold', color: 'black' }}>Data Collection</div>
         <div className="section-title result" style={{ fontWeight: 'bold', color: 'black' }}>Result Analysis</div>
       </div>
-      
+
       <div className="progress-steps">
         <div className="design-section">
-          <div className={`progress-step ${isStepActive('name') ? 'active' : ''}`}>
+          <button
+            className={`progress-step ${isStepActive('name') ? 'active' : ''}`}
+            disabled={disableEditActions}
+            onClick={() => handleEditProjectsName(project.id, project.name)}
+          >
             Edit{'\n'}Project{'\n'}Name
-          </div>
-          <div className={`progress-step ${isStepActive('description') ? 'active' : ''}`}>
+          </button>
+          <button
+            className={`progress-step ${isStepActive('description') ? 'active' : ''}`}
+            disabled={disableEditActions}
+            onClick={() => handleEditProjectsDescription(project.id, project.name)}
+          >
             Edit{'\n'}Project{'\n'}Description
-          </div>
-          <div className={`progress-step ${isStepActive('content') ? 'active' : ''}`}>
+          </button>
+          <button
+            className={`progress-step ${isStepActive('content') ? 'active' : ''}`}
+            disabled={disableEditActions}
+            onClick={() => handleEditContentFactors(project.id, project.name)}
+          >
             Confirm{'\n'}Assessment{'\n'}Dimensions
-          </div>
-          <div className={`progress-step ${isStepActive('severity') ? 'active' : ''}`}>
+          </button>
+          <button
+            className={`progress-step ${isStepActive('severity') ? 'active' : ''}`}
+            disabled={disableEditActions}
+            onClick={() => handleEditSeveirtyFactors(project.id, project.name)}
+          >
             Confirm{'\n'}Severity{'\n'}Factors
-          </div>
-          <div className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}>
+          </button>
+          <button
+            className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}
+            disabled={disableManageAssessors}
+            onClick={() => handleManageAssessors(project.id, project.name)}
+          >
             Invite{'\n'}Assessors
-          </div>
+          </button>
         </div>
-        
+
         <div className="data-section">
           <div className="progress-step assessor-progress">
-            <div className={"progress-step-container"}>
-              <div 
+            <div className="progress-step-container">
+              <div
                 className="progress-step-background"
                 style={{
                   width: (() => {
@@ -102,9 +124,7 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
                 <span>
                   {(() => {
                     const totalMembers = projectsProgress.pending_amount + projectsProgress.member_count - 1;
-                    if (totalMembers === 0) {
-                      return `0% (0/0)`;
-                    }
+                    if (totalMembers === 0) return `0% (0/0)`;
                     const percentage = Math.round(((projectsProgress.member_count - 1) / totalMembers) * 100);
                     if (projectsProgress.member_count - 1 === 0) {
                       return `0% (0/${projectsProgress.pending_amount})`;
@@ -117,7 +137,7 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
           </div>
           <div className="progress-step assessor-progress">
             <div className="progress-step-container">
-              <div 
+              <div
                 className="progress-step-background"
                 style={{
                   width: (() => {
@@ -134,9 +154,7 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
                   {(() => {
                     const totalMembers = projectsProgress.member_count || 0;
                     const votedAmount = projectsProgress.voted_amount || 0;
-                    if (totalMembers === 0) {
-                      return `0% (0/0)`;
-                    }
+                    if (totalMembers === 0) return `0% (0/0)`;
                     const percentage = Math.round((votedAmount / totalMembers) * 100);
                     return `${percentage}% (${votedAmount}/${totalMembers})`;
                   })()}
@@ -145,13 +163,13 @@ const ProgressBar = ({ project, handleAnalyzeResult }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="result-section">
           <button
-              className="analyze-btn action-btn"
-              onClick={() => {handleAnalyzeResult()}}
+            className="analyze-btn action-btn"
+            onClick={handleAnalyzeResult}
           >
-              Analyze{'\n'}Result
+            Analyze{'\n'}Result
           </button>
         </div>
       </div>

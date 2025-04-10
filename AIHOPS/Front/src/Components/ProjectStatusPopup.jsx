@@ -1,8 +1,7 @@
-import { confirmProjectFactors, confirmSeverityFactors} from "../api/ProjectApi";
-import React, { useState, useEffect } from "react";
+import { confirmProjectFactors, confirmSeverityFactors } from "../api/ProjectApi";
+import React, { useEffect } from "react";
 import "./ProjectStatusPopup.css";
-import ProgressBar from '../Components/ProgressBar'; //Component for secondary popups
-
+import ProgressBar from '../Components/ProgressBar';
 
 const ProjectStatusPopup = ({
   fetch_selected_project,
@@ -18,17 +17,13 @@ const ProjectStatusPopup = ({
   handlePublish
 }) => {
 
-    useEffect(() => {
-        const cookie = localStorage.getItem("authToken");
-        
-        if (!cookie) {
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
-        }
-
-        fetch_selected_project(selectedProject);
-    }, []);
+  useEffect(() => {
+    const cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      return;
+    }
+    fetch_selected_project(selectedProject);
+  }, [fetch_selected_project, selectedProject]);
 
   return (
     <div className="popup-overlay">
@@ -36,50 +31,19 @@ const ProjectStatusPopup = ({
         <span className="close-popup" onClick={closePopup}>
           &times;
         </span>
-        <h3><u>Project's Status</u>:</h3>
+        <h3>
+          <u>Project's Status</u>:
+        </h3>
         <div className="project-edit-container">
-        <ProgressBar project={selectedProject} handleAnalyzeResult = {handleAnalyzeResult} />
-        </div>
-        <h3><u>Project's Actions</u>:</h3>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditProjectsName(selectedProject.id, selectedProject.name)}
-          >
-            Edit Project's Name
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditProjectsDescription(selectedProject.id, selectedProject.name)}
-          >
-            Edit Project's Description
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditContentFactors(selectedProject.id, selectedProject.name)}
-          >
-            Edit & Confirm Assessment Dimensions
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
-          >
-            Edit & Confirm Severity Factors
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleManageAssessors(selectedProject.id, selectedProject.name)}
-          >
-            Manage Assessors
-          </button>
+          <ProgressBar
+            project={selectedProject}
+            handleAnalyzeResult={handleAnalyzeResult}
+            handleEditProjectsName={handleEditProjectsName}
+            handleEditProjectsDescription={handleEditProjectsDescription}
+            handleEditContentFactors={handleEditContentFactors}
+            handleEditSeveirtyFactors={handleEditSeveirtyFactors}
+            handleManageAssessors={handleManageAssessors}
+          />
         </div>
         <div>
           {selectedProject.isActive && (
@@ -90,8 +54,9 @@ const ProjectStatusPopup = ({
               Archive
             </button>
           )}
-          {!selectedProject.isActive &&  (
-            <button disabled = {selectedProject.isArchived}
+          {!selectedProject.isActive && (
+            <button
+              disabled={selectedProject.isArchived}
               className="action-btn edit-btn"
               onClick={() => handlePublish(selectedProject.id, selectedProject.name)}
             >
