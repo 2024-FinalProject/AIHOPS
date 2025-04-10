@@ -1,6 +1,6 @@
+import React, { useState, useEffect } from "react";
 import './ProgressBar.css';
 import { getProjectProgress } from "../api/ProjectApi";
-import React, { useState, useEffect } from "react";
 
 const ProgressBar = ({
   project,
@@ -9,7 +9,9 @@ const ProgressBar = ({
   handleEditProjectsDescription,
   handleEditContentFactors,
   handleEditSeveirtyFactors,
-  handleManageAssessors
+  handleManageAssessors,
+  handlePublish,
+  handleArchive
 }) => {
   const [projectsProgress, setProjectsProgress] = useState({});
 
@@ -58,119 +60,156 @@ const ProgressBar = ({
   const disableEditActions = project.isActive || project.isArchived;
   const disableManageAssessors = project.isArchived;
 
+  // Calculate percentages for progress bars
+  const calculateAssessorsConfirmedData = () => {
+    const totalMembers = (projectsProgress.pending_amount || 0) + (projectsProgress.member_count || 0) - 1;
+    if (totalMembers <= 0) return { percentage: 0, text: '0% (0/0)' };
+    const confirmed = projectsProgress.member_count - 1 || 0;
+    const percentage = Math.round((confirmed / totalMembers) * 100);
+    return { 
+      percentage, 
+      text: `${percentage}% (${confirmed}/${totalMembers})` 
+    };
+  };
+
+  const calculateSurveyCompletedData = () => {
+    const totalMembers = projectsProgress.member_count || 0;
+    const votedAmount = projectsProgress.voted_amount || 0;
+    if (totalMembers <= 0) return { percentage: 0, text: '0% (0/0)' };
+    const percentage = Math.round((votedAmount / totalMembers) * 100);
+    return { 
+      percentage, 
+      text: `${percentage}% (${votedAmount}/${totalMembers})` 
+    };
+  };
+
+  const assessorsData = calculateAssessorsConfirmedData();
+  const surveyData = calculateSurveyCompletedData();
+
   return (
-    <div className="progress-container">
-      <div className="sections-header">
-        <div className="section-title design" style={{ fontWeight: 'bold', color: 'black' }}>Design Project</div>
-        <div className="section-title data" style={{ fontWeight: 'bold', color: 'black' }}>Data Collection</div>
-        <div className="section-title result" style={{ fontWeight: 'bold', color: 'black' }}>Result Analysis</div>
-      </div>
-
-      <div className="progress-steps">
-        <div className="design-section">
-          <button
-            className={`progress-step ${isStepActive('name') ? 'active' : ''}`}
-            disabled={disableEditActions}
-            onClick={() => handleEditProjectsName(project.id, project.name)}
-          >
-            Edit{'\n'}Project{'\n'}Name
-          </button>
-          <button
-            className={`progress-step ${isStepActive('description') ? 'active' : ''}`}
-            disabled={disableEditActions}
-            onClick={() => handleEditProjectsDescription(project.id, project.name)}
-          >
-            Edit{'\n'}Project{'\n'}Description
-          </button>
-          <button
-            className={`progress-step ${isStepActive('content') ? 'active' : ''}`}
-            disabled={disableEditActions}
-            onClick={() => handleEditContentFactors(project.id, project.name)}
-          >
-            Confirm{'\n'}Assessment{'\n'}Dimensions
-          </button>
-          <button
-            className={`progress-step ${isStepActive('severity') ? 'active' : ''}`}
-            disabled={disableEditActions}
-            onClick={() => handleEditSeveirtyFactors(project.id, project.name)}
-          >
-            Confirm{'\n'}Severity{'\n'}Factors
-          </button>
-          <button
-            className={`progress-step ${isStepActive('invite') ? 'active' : ''}`}
-            disabled={disableManageAssessors}
-            onClick={() => handleManageAssessors(project.id, project.name)}
-          >
-            Invite{'\n'}Assessors
-          </button>
+    <div className="progress-container-enhanced">
+      <div className="progress-card">
+        {/* Design Project Section */}
+        <div className="section design-section">
+          <h3 className="section-title">Design Project</h3>
+          
+          <div className="design-buttons">
+            <button
+              className={`design-btn ${isStepActive('name') ? 'active' : ''}`}
+              disabled={disableEditActions}
+              onClick={() => handleEditProjectsName(project.id, project.name)}
+            >
+              <span className="btn-icon">✏️</span>
+              <span className="btn-text">Edit Project Name</span>
+            </button>
+            
+            <button
+              className={`design-btn ${isStepActive('description') ? 'active' : ''}`}
+              disabled={disableEditActions}
+              onClick={() => handleEditProjectsDescription(project.id, project.name)}
+            >
+              <span className="btn-icon">📝</span>
+              <span className="btn-text">Edit Project Description</span>
+            </button>
+            
+            <button
+              className={`design-btn ${isStepActive('content') ? 'active' : ''}`}
+              disabled={disableEditActions}
+              onClick={() => handleEditContentFactors(project.id, project.name)}
+            >
+              <span className="btn-icon">📊</span>
+              <span className="btn-text">Confirm Assessment Dimensions</span>
+            </button>
+            
+            <button
+              className={`design-btn ${isStepActive('severity') ? 'active' : ''}`}
+              disabled={disableEditActions}
+              onClick={() => handleEditSeveirtyFactors(project.id, project.name)}
+            >
+              <span className="btn-icon">⚠️</span>
+              <span className="btn-text">Confirm Severity Factors</span>
+            </button>
+            
+            <button
+              className={`design-btn ${isStepActive('invite') ? 'active' : ''}`}
+              disabled={disableManageAssessors}
+              onClick={() => handleManageAssessors(project.id, project.name)}
+            >
+              <span className="btn-icon">👥</span>
+              <span className="btn-text">Invite Assessors</span>
+            </button>
+          </div>
         </div>
 
-        <div className="data-section">
-          <div className="progress-step assessor-progress">
-            <div className="progress-step-container">
-              <div
-                className="progress-step-background"
-                style={{
-                  width: (() => {
-                    const totalMembers = projectsProgress.pending_amount + projectsProgress.member_count - 1;
-                    if (totalMembers === 0) return '0%';
-                    const percentage = ((projectsProgress.member_count - 1) / totalMembers) * 100;
-                    return `${percentage}%`;
-                  })()
-                }}
-              />
-              <div className="progress-step-content">
-                Assessors{'\n'}Confirmed
-                <span>
-                  {(() => {
-                    const totalMembers = projectsProgress.pending_amount + projectsProgress.member_count - 1;
-                    if (totalMembers === 0) return `0% (0/0)`;
-                    const percentage = Math.round(((projectsProgress.member_count - 1) / totalMembers) * 100);
-                    if (projectsProgress.member_count - 1 === 0) {
-                      return `0% (0/${projectsProgress.pending_amount})`;
-                    }
-                    return `${percentage}% (${projectsProgress.member_count - 1}/${totalMembers})`;
-                  })()}
-                </span>
+        {/* Publish Section */}
+        {!project.isActive && (
+          <div className="section publish-section">
+            <button
+              className="publish-btn"
+              disabled={project.isArchived}
+              onClick={() => handlePublish(project.id, project.name)}
+            >
+              Publish Project
+            </button>
+          </div>
+        )}
+
+        {/* Data Collection Section */}
+        <div className="section data-section">
+          <h3 className="section-title">Data Collection</h3>
+          
+          <div className="data-grid">
+            <div className="data-card">
+              <div className="data-header">
+                <div className="data-title">Assessors Confirmed</div>
+                <div className="data-value">{assessorsData.text}</div>
+              </div>
+              <div className="progress-bar-container">
+                <div 
+                  className="progress-bar" 
+                  style={{ width: `${assessorsData.percentage}%` }}
+                ></div>
               </div>
             </div>
-          </div>
-          <div className="progress-step assessor-progress">
-            <div className="progress-step-container">
-              <div
-                className="progress-step-background"
-                style={{
-                  width: (() => {
-                    const totalMembers = projectsProgress.member_count || 0;
-                    const votedAmount = projectsProgress.voted_amount || 0;
-                    if (totalMembers === 0) return '0%';
-                    return `${(votedAmount / totalMembers) * 100}%`;
-                  })()
-                }}
-              />
-              <div className="progress-step-content">
-                Survey{'\n'}Completed
-                <span>
-                  {(() => {
-                    const totalMembers = projectsProgress.member_count || 0;
-                    const votedAmount = projectsProgress.voted_amount || 0;
-                    if (totalMembers === 0) return `0% (0/0)`;
-                    const percentage = Math.round((votedAmount / totalMembers) * 100);
-                    return `${percentage}% (${votedAmount}/${totalMembers})`;
-                  })()}
-                </span>
+            
+            <div className="data-card">
+              <div className="data-header">
+                <div className="data-title">Survey Completed</div>
+                <div className="data-value">{surveyData.text}</div>
+              </div>
+              <div className="progress-bar-container">
+                <div 
+                  className="progress-bar" 
+                  style={{ width: `${surveyData.percentage}%` }}
+                ></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="result-section">
-          <button
-            className="analyze-btn action-btn"
-            onClick={handleAnalyzeResult}
-          >
-            Analyze{'\n'}Result
-          </button>
+        {/* Result Analysis Section */}
+        <div className="section result-section">
+          <h3 className="section-title">Result Analysis</h3>
+          
+          <div className="result-actions">
+            <button
+              className="analyze-btn"
+              onClick={handleAnalyzeResult}
+            >
+              <span className="btn-icon">📈</span>
+              <span className="btn-text">Analyze Result</span>
+            </button>
+            
+            {project.isActive && (
+              <button
+                className="archive-btn"
+                onClick={() => handleArchive(project.id, project.name)}
+              >
+                <span className="btn-icon">📦</span>
+                <span className="btn-text">Archive Project</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

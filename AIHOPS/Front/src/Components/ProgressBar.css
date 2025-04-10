@@ -1,188 +1,290 @@
-.progress-container {
+/* Enhanced Progress Bar Styles - Compact & More Stylish Version */
+.progress-container-enhanced {
   width: 100%;
-  padding: 0 10px;
-  box-sizing: border-box;
-}
-
-.sections-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-}
-
-.section-title {
-  text-align: center;
-  font-size: 15px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
   color: #333;
-  padding: 5px 0;
-  border: 1px solid var(--border-color) !important;
 }
 
-.section-title.design {
-  background-color: #b3dcb7;
-  margin-right: 5px;
-  width: 587px;
+.progress-card {
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(230, 230, 230, 0.8);
 }
 
-.section-title.data {
-  background-color: #debee3;
-  margin: 0 0px;
-  width: 442px;
+/* Section Styling - More Compact */
+.section {
+  padding: 16px 20px;
+  position: relative;
 }
 
-.section-title.result {
-  background-color: #ebc5cb;
-  margin-left: 5px;
-  width: 146px;
+.section:not(:last-child) {
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.progress-steps {
-  display: flex;
-  gap: 4px;
+/* Updated Section Headers - Not Clickable, More Stylish & Compact */
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 14px 0;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 6px;
+  cursor: default;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
   width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #4CAF50, #8bc34a);
+  border-radius: 2px;
 }
-  
-.progress-step {
+
+/* Design Section Buttons - More Compact */
+.design-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.design-btn {
   flex: 1;
-  min-height: 32px;
-  padding: 8px 6px;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  text-align: center;
+  min-width: 160px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #f5f7fa;
+  color: #4a5568;
   font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1.2;
-  word-break: break-word;
-  border: 1px solid var(--border-color) !important;
-  cursor: pointer;
-  transition: background-color 0.2s, transform 0.2s;
+  gap: 6px;
 }
 
-.progress-step:enabled:hover {
-  background-color: #61ecc2;
-  transform: scale(1.02);
+.design-btn:hover:not(:disabled) {
+  background: #59a2eb;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.06);
 }
 
-.progress-step:disabled {
+.design-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.design-btn.active {
+  background: linear-gradient(135deg, #4CAF50, #8bc34a);
+  color: white;
+  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.2);
+}
+
+.design-btn:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-.progress-step.active {
-  background-color: #4CAF50;
-  color: rgb(0, 0, 0);
+.btn-icon {
+  font-size: 14px;
 }
 
-.progress-step-container {
-  position: relative;
-  flex: 1;
-  min-height: 30px;
-}
-  
-.progress-step-background {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 120%;
-  width: 100%;
-  background-color: #4CAF50;
-  transition: width 0.3s ease;
-  border-radius: 4px;
-  z-index: 1;
-}
-  
-.progress-step-content {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  padding: 4px 6px;
-  background-color: transparent;
-  border-radius: 4px;
-  text-align: center;
-  font-size: 13px;
+/* Publish Button - More Compact */
+.publish-section {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  line-height: 1.2;
-  word-break: break-word;
-  z-index: 2;
-  box-sizing: border-box;
-  color: black;
-}
-  
-.progress-step.assessor-progress {
-  padding: 0;
-  overflow: hidden;
-  background-color: #e0e0e0;
-  height: 30px;
+  justify-content: center;
+  padding: 10px 20px;
 }
 
-.design-section {
-  flex: 4;
-  display: flex;
-  gap: 4px;
+.publish-btn {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(41, 128, 185, 0.2);
 }
 
-.data-section {
-  flex: 3;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-  
-.result-section {
-  flex: 1;
-  display: flex;
-  gap: 4px;
-  width: 145px;
+.publish-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(41, 128, 185, 0.25);
 }
 
-.section-headers {
-  display: flex;
-  width: 100%;
+.publish-btn:active:not(:disabled) {
+  transform: translateY(0);
 }
 
-.design-header {
-  flex: 4;
+.publish-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Data Collection Section - More Compact & Stylish */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.data-card {
+  background: #f9fafc;
+  border-radius: 8px;
+  padding: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(230, 230, 230, 0.6);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.data-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 .data-header {
-  flex: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
-.result-header {
-  flex: 1;
+.data-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.data-value {
+  font-size: 13px;
+  color: #718096;
+  font-weight: 500;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4CAF50, #8bc34a);
+  border-radius: 4px;
+  transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add shine effect to progress bar */
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    rgba(255,255,255,0) 0%, 
+    rgba(255,255,255,0.3) 50%, 
+    rgba(255,255,255,0) 100%);
+  animation: shine 2s infinite;
+}
+
+@keyframes shine {
+  0% { left: -100%; }
+  100% { left: 200%; }
+}
+
+/* Result Section - More Compact */
+.result-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.analyze-btn, .archive-btn {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 160px;
+  justify-content: center;
 }
 
 .analyze-btn {
-  width: 100%;
-  background-color: #75b7b7;
-  padding: 8px 6px;
-  margin: 0;
-  font-size: 13px;
-  min-height: 60px;
-  line-height: 1.2;
-  box-sizing: border-box;
-  font-family: Verdana, sans-serif !important;
-  border: none;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  word-break: break-word;
-  flex: 1;
-  color: black !important;
-  cursor: pointer;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  color: white;
+  box-shadow: 0 3px 8px rgba(243, 156, 18, 0.2);
 }
 
-.analyze-btn:hover {
-  background-color: #50c1c1;
+.analyze-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.25);
 }
 
+.archive-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  box-shadow: 0 3px 8px rgba(231, 76, 60, 0.2);
+}
 
-.assessor-progress {
-  cursor: default;
-  pointer-events: none;
+.archive-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25);
+}
+
+.analyze-btn:disabled, .archive-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .section {
+    padding: 14px 16px;
+  }
+  
+  .design-buttons {
+    flex-direction: column;
+  }
+  
+  .design-btn {
+    width: 100%;
+  }
+  
+  .data-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .result-actions {
+    flex-direction: column;
+  }
+  
+  .analyze-btn, .archive-btn {
+    width: 100%;
+  }
 }

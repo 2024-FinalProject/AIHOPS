@@ -31,9 +31,6 @@ const ProjectStatusPopup = ({
         <span className="close-popup" onClick={closePopup}>
           &times;
         </span>
-        <h3>
-          <u>Project's Status</u>:
-        </h3>
         <div className="project-edit-container">
           <ProgressBar
             project={selectedProject}
@@ -43,26 +40,9 @@ const ProjectStatusPopup = ({
             handleEditContentFactors={handleEditContentFactors}
             handleEditSeveirtyFactors={handleEditSeveirtyFactors}
             handleManageAssessors={handleManageAssessors}
+            handlePublish={handlePublish}
+            handleArchive={handleArchive}
           />
-        </div>
-        <div>
-          {selectedProject.isActive && (
-            <button
-              className="action-btn edit-btn"
-              onClick={() => handleArchive(selectedProject.id, selectedProject.name)}
-            >
-              Archive
-            </button>
-          )}
-          {!selectedProject.isActive && (
-            <button
-              disabled={selectedProject.isArchived}
-              className="action-btn edit-btn"
-              onClick={() => handlePublish(selectedProject.id, selectedProject.name)}
-            >
-              Publish
-            </button>
-          )}
         </div>
       </div>
     </div>
