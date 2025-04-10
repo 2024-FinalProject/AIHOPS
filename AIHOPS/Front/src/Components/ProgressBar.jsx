@@ -51,7 +51,10 @@ const ProgressBar = ({
       case 'severity':
         return projectsProgress.severity_factors_inited;
       case 'invite':
-        return projectsProgress.invited_members || projectsProgress.pending_amount > 0 || projectsProgress.member_count > 1;
+        return project.isArchived || 
+                projectsProgress.invited_members || 
+                projectsProgress.pending_amount > 0 || 
+                projectsProgress.member_count > 1;
       default:
         return false;
     }
@@ -94,70 +97,90 @@ const ProgressBar = ({
           <h3 className="section-title">Design Project</h3>
           
           <div className="design-buttons">
-            <button
-              className={`design-btn ${isStepActive('name') ? 'active' : ''}`}
-              disabled={disableEditActions}
-              onClick={() => handleEditProjectsName(project.id, project.name)}
-            >
-              <span className="btn-icon">✏️</span>
-              <span className="btn-text">Edit Project Name</span>
-            </button>
+            <div className="button-wrapper">
+              <button
+                className={`design-btn ${isStepActive('name') ? 'active' : ''}`}
+                disabled={disableEditActions}
+                onClick={() => handleEditProjectsName(project.id, project.name)}
+              >
+                <span className="btn-icon">✏️</span>
+                <span className="btn-text">Edit <br /> Project <br /> Name</span>
+              </button>
+            </div>
             
-            <button
-              className={`design-btn ${isStepActive('description') ? 'active' : ''}`}
-              disabled={disableEditActions}
-              onClick={() => handleEditProjectsDescription(project.id, project.name)}
-            >
-              <span className="btn-icon">📝</span>
-              <span className="btn-text">Edit Project Description</span>
-            </button>
+            <div className="button-wrapper">
+              <button
+                className={`design-btn ${isStepActive('description') ? 'active' : ''}`}
+                disabled={disableEditActions}
+                onClick={() => handleEditProjectsDescription(project.id, project.name)}
+              >
+                <span className="btn-icon">📝</span>
+                <span className="btn-text">Edit <br /> Project <br /> Description</span>
+              </button>
+            </div>
             
-            <button
-              className={`design-btn ${isStepActive('content') ? 'active' : ''}`}
-              disabled={disableEditActions}
-              onClick={() => handleEditContentFactors(project.id, project.name)}
-            >
-              <span className="btn-icon">📊</span>
-              <span className="btn-text">
-                Edit & Confirm Assessment Dimensions
-                {!project.factors_inited && (
-                    <span className="reminder-badge">Unconfirmed</span>
-                )}
-              </span>
-            </button>
-            
-            <button
-              className={`design-btn ${isStepActive('severity') ? 'active' : ''}`}
-              disabled={disableEditActions}
-              onClick={() => handleEditSeveirtyFactors(project.id, project.name)}
-            >
-              <span className="btn-icon">⚠️</span>
-              <span className="btn-text">
-                Edit & Confirm Severity Factors
-                {!project.severity_factors_inited && (
-                    <span className="reminder-badge">Unconfirmed</span>
-                )}
+            <div className="button-wrapper">
+              <button
+                className={`design-btn ${isStepActive('content') ? 'active' : ''}`}
+                disabled={disableEditActions}
+                onClick={() => handleEditContentFactors(project.id, project.name)}
+              >
+                <span className="btn-icon">🗂️</span>
+                <span className="btn-text">
+                  Edit & Confirm
+                  <br />
+                  Assessment
+                  <br />
+                  Dimensions
                 </span>
-            </button>
+              </button>
+              {!project.factors_inited && (
+                <span className="reminder-badge">Unset</span>
+              )}
+            </div>
             
-            <button
-              className={`design-btn ${isStepActive('invite') ? 'active' : ''}`}
-              disabled={disableManageAssessors}
-              onClick={() => handleManageAssessors(project.id, project.name)}
-            >
-              <span className="btn-icon">👥</span>
-              <span className="btn-text">
-                Manage Assessors
-                {(!(projectsProgress.invited_members || projectsProgress.pending_amount > 0 || projectsProgress.member_count > 1) && !project.isArchived) && (
-                    <span className="reminder-badge">Unconfirmed</span>
-                )}
-              </span>
-            </button>
+            <div className="button-wrapper">
+              <button
+                className={`design-btn ${isStepActive('severity') ? 'active' : ''}`}
+                disabled={disableEditActions}
+                onClick={() => handleEditSeveirtyFactors(project.id, project.name)}
+              >
+                <span className="btn-icon">📏</span>
+                <span className="btn-text">
+                  Edit & Confirm
+                  <br />
+                  Severity
+                  <br />
+                  Factors
+                </span>
+              </button>
+              {!project.severity_factors_inited && (
+                <span className="reminder-badge">Unset</span>
+              )}
+            </div>
+            
+            <div className="button-wrapper">
+              <button
+                className={`design-btn ${isStepActive('invite') ? 'active' : ''}`}
+                disabled={disableManageAssessors}
+                onClick={() => handleManageAssessors(project.id, project.name)}
+              >
+                <span className="btn-icon">👥</span>
+                <span className="btn-text">
+                  Manage
+                  <br />
+                  Assessors
+                </span>
+              </button>
+              {(!(projectsProgress.invited_members || projectsProgress.pending_amount > 0 || projectsProgress.member_count > 1) && !project.isArchived) && (
+                <span className="reminder-badge">Unset</span>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Publish Section */}
-        {!project.isActive && (
+        {!project.isActive && !project.isArchived && (
           <div className="section publish-section">
             <button
               className="publish-btn"
@@ -211,7 +234,7 @@ const ProgressBar = ({
               className="analyze-btn"
               onClick={handleAnalyzeResult}
             >
-              <span className="btn-icon">📈</span>
+              <span className="btn-icon">📊</span>
               <span className="btn-text">Analyze Result</span>
             </button>
             
