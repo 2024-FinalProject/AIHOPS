@@ -118,7 +118,12 @@ const ProgressBar = ({
               onClick={() => handleEditContentFactors(project.id, project.name)}
             >
               <span className="btn-icon">📊</span>
-              <span className="btn-text">Confirm Assessment Dimensions</span>
+              <span className="btn-text">
+                Edit & Confirm Assessment Dimensions
+                {!project.factors_inited && (
+                    <span className="reminder-badge">Unconfirmed</span>
+                )}
+              </span>
             </button>
             
             <button
@@ -127,7 +132,12 @@ const ProgressBar = ({
               onClick={() => handleEditSeveirtyFactors(project.id, project.name)}
             >
               <span className="btn-icon">⚠️</span>
-              <span className="btn-text">Confirm Severity Factors</span>
+              <span className="btn-text">
+                Edit & Confirm Severity Factors
+                {!project.severity_factors_inited && (
+                    <span className="reminder-badge">Unconfirmed</span>
+                )}
+                </span>
             </button>
             
             <button
@@ -136,7 +146,12 @@ const ProgressBar = ({
               onClick={() => handleManageAssessors(project.id, project.name)}
             >
               <span className="btn-icon">👥</span>
-              <span className="btn-text">Invite Assessors</span>
+              <span className="btn-text">
+                Manage Assessors
+                {(!(projectsProgress.invited_members || projectsProgress.pending_amount > 0 || projectsProgress.member_count > 1) && !project.isArchived) && (
+                    <span className="reminder-badge">Unconfirmed</span>
+                )}
+              </span>
             </button>
           </div>
         </div>
