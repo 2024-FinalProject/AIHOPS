@@ -356,22 +356,15 @@
   min-width: 5px;
 }
 
-/* Add the scroll container and indicator styles */
-.factor-tabs-scroll-container {
-  flex: 1;
-  overflow: hidden;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
+/* Progress text inside scroll indicator container */
 .scroll-indicator-container {
   width: 100%;
-  height: 8px;
-  margin-top: 2px;
+  padding-top: 4px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 4px;
 }
 
 .scroll-indicator-track {
@@ -390,6 +383,13 @@
   top: 0;
   min-width: 30px;
   transition: left 0.1s ease;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 12px;
+  color: #4b5563;
+  margin-top: 2px;
 }
 
 /* Make factor content more compact */
@@ -519,24 +519,27 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Navigation buttons */
+/* Navigation buttons with submit button in center */
 .navigation-buttons {
   display: flex;
   justify-content: space-between;
-  margin-top: 12px;
+  align-items: center;
+  margin-top: 16px;
+  gap: 10px;
 }
 
 .nav-button {
   display: flex;
   align-items: center;
   gap: 4px;
-  padding: 6px 12px;
+  padding: 8px 12px;
   border-radius: 6px;
   border: none;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 13px;
+  flex: 0 0 auto;
 }
 
 .prev-button {
@@ -564,53 +567,38 @@
   color: #9ca3af;
 }
 
-/* Submit section with progress bar at the bottom */
-.submit-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.progress-text {
-  font-size: 13px;
-  color: #4b5563;
-  margin-bottom: 6px;
-}
-
-.progress-bar-container {
-  height: 6px;
-  background-color: #e5e7eb;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 12px;
-  width: 100%;
-  max-width: 450px;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #3b82f6, #6366f1);
-  border-radius: 3px;
-  transition: width 0.3s ease;
-  min-width: 5px;
-  box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
-}
-
-.submit-button {
-  padding: 8px 24px;
+/* Submit factor button changed to Vote for this Factor */
+.vote-factor-button {
   background-color: #3b82f6;
   color: white;
   border: none;
   border-radius: 6px;
+  padding: 8px 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 250px;
+  text-align: center;
+}
+
+.vote-factor-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
   box-shadow: 0 3px 5px rgba(59, 130, 246, 0.25);
-  margin-top: 8px;
+}
+
+.vote-factor-button:active {
+  transform: translateY(0);
+}
+
+.factor-tabs-scroll-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .submit-button:hover:not(.disabled) {
@@ -672,4 +660,115 @@
   .submit-button {
     width: 100%;
   }
+}
+
+/* Container for vote option and its label */
+.vote-option-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Style for the vote label under the number */
+.vote-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: center;
+  white-space: nowrap;
+  max-width: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Adjust the vote cell to accommodate the label */
+.factor-table .vote-cell {
+  width: 70px;
+  padding: 10px 6px;
+  vertical-align: top;
+}
+
+/* Submit button disabled state */
+.vote-factor-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Adjust the popup message styling for multi-line text */
+.confirmation-message {
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* Table headers */
+.factor-table th {
+  background-color: #f3f4f6;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vote-header {
+  text-align: left !important;
+  width: 60px;
+}
+
+/* Table rows */
+.factor-table-row {
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.factor-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.factor-table-row.selected-row {
+  background-color: #f0f9ff;
+}
+
+/* Option cells */
+.vote-cell {
+  width: 60px;
+  text-align: center;
+  vertical-align: middle;
+  padding: 12px 8px;
+}
+
+.description-cell, 
+.explanation-cell {
+  padding: 12px;
+  vertical-align: top;
+}
+
+/* Vote option styling */
+.vote-option-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.vote-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Alternating row colors for better readability */
+.factor-table-row:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.factor-table-row:nth-child(even).selected-row,
+.factor-table-row:nth-child(odd).selected-row {
+  background-color: #f0f9ff;
 }
