@@ -115,7 +115,27 @@ class MemberController:
                 return res
             self.members.insert(email, updated_member)
         return ResponseSuccessMsg(f'password updated for {email}')
-        
 
-    
+    def _verify_valid_member(self, email):
+        member = self.members.get(email)
+        if member is None:
+            raise Exception(f'invalid user: {email}')
+
+    def start_password_recovery(self, email):
+        self._verify_valid_member(email)
+        self.gmailor.start_password_recovery(email)
+        return ResponseSuccessMsg(f'started password recovery for {email}, you have 5 minutes to make a new password')
+
+    def recover_password(self, email, passwd, code):
+        self._verify_valid_member(email)
+        self.gmailor.recover_password(email, code)
+        member = self.members.get(email)
+        old_passwd = member.encrypted_passwd
+        member.update_password(passwd)
+        res = self.db_access.update_by_query(DBMember, {"email": email}, {"encrypted_passwd": member.encrypted_passwd})
+        if not res.success:
+            member.encrypted_passwd = old_passwd
+            return ResponseFailMsg(f'password recovery failed for {email}')
+        return ResponseSuccessMsg(f'password recovery for {email} has been successful')
+
 

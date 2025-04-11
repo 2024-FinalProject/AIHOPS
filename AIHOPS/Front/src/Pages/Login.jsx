@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { startSession, loginUser } from "../api/AuthApi";
+import {startSession, loginUser, startPasswordRecovery} from "../api/AuthApi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
@@ -65,36 +65,77 @@ const Login = () => {
     }
   };
 
+  const handleRecover = async (e) => {
+    e.preventDefault();
+    setMsg("");
+
+    console.log("recovering");
+
+    try {
+      const existingToken = localStorage.getItem("authToken");
+      let cookie;
+      if (existingToken) {
+        // Use the existing token if available
+        cookie = existingToken;
+        console.log("Using existing token for login");
+      } else {
+        // Only start a new session if no token exists
+        const session = await startSession();
+        cookie = session.data.cookie;
+        console.log("New session created, cookie received:", cookie);
+      }
+
+      const response = await startPasswordRecovery(cookie, userName);
+      setMsg(response.data.message);
+
+    } catch (error) {
+      console.error("Recovery error:", error);
+      setMsg("Recovery failed");
+    }
+
+  }
+
   return (
-    <section>
-      <div className="auth-container">
-        <p>
-          Don't have an account? <a href="/Register">Sign up</a>
-        </p>
-        <form onSubmit={handleLogin}>
-          <input
-            type="text"
-            onChange={(e) => setUserName(e.target.value)}
-            value={userName}
-            placeholder="Enter username"
-            required
-          />
+      <section>
+        <div className="auth-container">
+          <p>
+            Don't have an account? <a href="/Register">Sign up</a>
+          </p>
+          <form onSubmit={handleLogin}>
+            <input
+                type="text"
+                onChange={(e) => setUserName(e.target.value)}
+                value={userName}
+                placeholder="Enter username"
+                required
+            />
 
-          <input
-            type="password"
-            onChange={(e) => setPassword(e.target.value)}
-            value={password}
-            placeholder="Enter password"
-            required
-          />
+            <input
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                placeholder="Enter password"
+                required
+            />
 
-          <button type="submit" className="login-submit-btn">
-            Login
-          </button>
-          {msg && <div className="error-message">{msg}</div>}
-        </form>
-      </div>
-    </section>
+            <button type="submit" className="login-submit-btn">
+              Login
+            </button>
+            {msg && <div className="error-message">{msg}</div>}
+          </form>
+          <div className="forgot-password">
+            <button
+                type="button"
+                className="text-button"
+                onClick={handleRecover}
+            >
+              <p>Forgot your password? Recover here</p>
+            </button>
+          </div>
+
+        </div>
+
+      </section>
   );
 };
 
