@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./FactorVotingModal.css";
-import ImprovedConfirmationPopup from "./ConfirmationPopup";
+import ConfirmationPopup from "./ConfirmationPopup";
 import { ChevronLeft, ChevronRight, Check } from "lucide-react";
 
 const FactorVotingModal = ({
@@ -96,60 +96,34 @@ const FactorVotingModal = ({
     }
   }, []);
 
-  // Handle factor tabs navigation
-  const handleTabsNavigation = (direction) => {
-    const currentIndex = project.factors.findIndex(f => f.id === selectedFactorId);
-    const newIndex = direction === 'next' 
-      ? Math.min(currentIndex + 1, project.factors.length - 1)
-      : Math.max(currentIndex - 1, 0);
-    
-    setSelectedFactorId(project.factors[newIndex].id);
-  };
-
-  // Handle vote changes with less frequent popups
+  // Handle vote changes without showing popup
   const handleFactorVoteChange = (factorId, value) => {
-    const isNewVote = factorVotes[factorId] === undefined;
-    
     setFactorVotes((prevVotes) => ({
       ...prevVotes,
       [factorId]: value,
     }));
-    
-    // Only show popup for new votes
-    if (isNewVote) {
-      // Find the factor name for the confirmation message
-      const votedFactor = project.factors.find(f => f.id === factorId);
-      setLastVotedFactor(votedFactor);
-      
-      // Show confirmation popup
-      setShowConfirmation(true);
-      
-      // Auto navigate to next factor if there is a next factor
-      if (canGoNext) {
-        // Wait a brief moment for visual feedback before moving
-        setTimeout(() => {
-          goToNextFactor();
-        }, 500);
-      }
-    }
   };
 
-  // Count how many factors have been voted on
-  const countVotedFactors = () => {
-    return Object.keys(factorVotes).length;
-  };
-
-  // Handle submit with final confirmation
+  // Handle submit with confirmation
   const handleSubmit = () => {
-    // Show a final confirmation popup
-    setLastVotedFactor(null);
+    // Get the currently selected factor for the confirmation message
+    const currentFactor = project.factors.find(f => f.id === selectedFactorId);
+    const voteValue = factorVotes[selectedFactorId];
+    
+    // Set the last voted factor to show in the confirmation
+    setLastVotedFactor({
+      name: currentFactor.name,
+      value: voteValue
+    });
+    
+    // Show confirmation popup
     setShowConfirmation(true);
     
     // Submit after a short delay
     setTimeout(() => {
       onSubmitVotes(factorVotes);
       onClose();
-    }, 1500);
+    }, 2000);
   };
   
   // Close the confirmation popup
@@ -161,6 +135,7 @@ const FactorVotingModal = ({
   const votedFactorKeys = Object.keys(factorVotes);
   const votedFactors = votedFactorKeys.length;
   const totalFactors = project?.factors?.length || 0;
+  const remainingFactors = totalFactors - votedFactors;
   const progressPercentage = totalFactors > 0 ? (votedFactors / totalFactors) * 100 : 0;
 
   // Get the currently selected factor
@@ -215,7 +190,7 @@ const FactorVotingModal = ({
           Vote on factors for {project.name}
         </h2>
 
-        {/* Modern Tab Navigation with Enhanced Visible Scrollbar */}
+        {/* Tab Navigation */}
         <div className="factor-tabs-wrapper">
           <button 
             className={`tabs-nav-button ${canScrollLeft ? 'active' : 'disabled'}`}
@@ -252,20 +227,6 @@ const FactorVotingModal = ({
                 );
               })}
             </div>
-            {/* Visual scroll indicator that visually shows there's scrollable content */}
-            <div className="scroll-indicator-container">
-              <div className="scroll-indicator-track">
-                <div 
-                  className="scroll-indicator-thumb"
-                  style={{
-                    width: tabsContainerRef.current ? 
-                      `${(tabsContainerRef.current.clientWidth / tabsContainerRef.current.scrollWidth) * 100}%` : '30%',
-                    left: tabsContainerRef.current ? 
-                      `${(tabsContainerRef.current.scrollLeft / tabsContainerRef.current.scrollWidth) * 100}%` : '0%'
-                  }}
-                />
-              </div>
-            </div>
           </div>
           
           <button 
@@ -277,15 +238,18 @@ const FactorVotingModal = ({
           </button>
         </div>
         
-        {/* Progress indicator */}
+        {/* Progress indicator with text */}
         <div className="progress-bar-container">
           <div 
             className="progress-bar-fill"
             style={{ width: `${progressPercentage}%` }}
           />
         </div>
+        <div className="progress-text">
+          Voted on {votedFactors} of {totalFactors} factors ({Math.round(progressPercentage)}%)
+        </div>
 
-        {/* Selected factor content in a compact layout */}
+        {/* Selected factor content */}
         {selectedFactor && (
           <div className="factor-content">
             <div className="factor-header">
@@ -293,12 +257,12 @@ const FactorVotingModal = ({
               <p className="factor-description">{selectedFactor.description}</p>
             </div>
 
-            {/* Voting options with descriptions and explanations */}
+            {/* Table headers */}
             <div className="factor-table-container">
               <table className="factor-table">
                 <thead>
                   <tr>
-                    <th>Vote</th>
+                    <th className="vote-header">Vote</th>
                     <th>Description</th>
                     <th>Explanation</th>
                   </tr>
@@ -309,22 +273,24 @@ const FactorVotingModal = ({
                     const isSelected = currentValue === value;
                     
                     return (
-                      <tr key={value} className={isSelected ? "selected-row" : ""}>
+                      <tr 
+                        key={value} 
+                        className={`factor-table-row ${isSelected ? "selected-row" : ""}`}
+                        onClick={() => handleFactorVoteChange(selectedFactor.id, value)}
+                      >
                         <td className="vote-cell">
-                          <div 
-                            className={getOptionClasses(value, isSelected)}
-                            onClick={() => handleFactorVoteChange(selectedFactor.id, value)}
-                          >
-                            {value}
+                          <div className="vote-option-container">
+                            <div className={getOptionClasses(value, isSelected)}>
+                              {value}
+                            </div>
+                            <div className="vote-label">{getValueLabel(value)}</div>
                           </div>
                         </td>
                         <td className="description-cell">
-                          <strong>{getValueLabel(value)}</strong>
-                          {selectedFactor.scales_desc?.[value] ? 
-                            <span>: {selectedFactor.scales_desc[value]}</span> : ''}
+                          {selectedFactor.scales_desc?.[value] || ''}
                         </td>
                         <td className="explanation-cell">
-                          {selectedFactor.scales_explanation?.[value]}
+                          {selectedFactor.scales_explanation?.[value] || ''}
                         </td>
                       </tr>
                     );
@@ -345,6 +311,14 @@ const FactorVotingModal = ({
               </button>
               
               <button 
+                className="vote-factor-button"
+                onClick={handleSubmit}
+                disabled={factorVotes[selectedFactorId] === undefined}
+              >
+                Submit Vote
+              </button>
+              
+              <button 
                 className={`nav-button next-button ${!canGoNext ? 'disabled' : ''}`}
                 onClick={goToNextFactor} 
                 disabled={!canGoNext}
@@ -355,36 +329,22 @@ const FactorVotingModal = ({
             </div>
           </div>
         )}
-
-        {/* Progress and Submit */}
-        <div className="submit-container">
-          <div className="progress-text">
-            Voted on {votedFactors} of {totalFactors} factors ({Math.round(progressPercentage)}%)
-          </div>
-          
-          <button
-            className={`submit-button ${votedFactors === 0 ? 'disabled' : ''}`}
-            onClick={handleSubmit}
-            disabled={votedFactors === 0}
-          >
-            Submit All Votes
-          </button>
-        </div>
         
         {/* Confirmation Popup */}
-        {showConfirmation && (
-          <ImprovedConfirmationPopup
-            title={lastVotedFactor ? "Vote Recorded!" : "Submitting Votes"}
-            message={lastVotedFactor 
-              ? `You rated "${lastVotedFactor.name}" as ${getValueLabel(factorVotes[lastVotedFactor.id])} (${factorVotes[lastVotedFactor.id]}).`
-              : `Submitting votes for ${votedFactors} factors. Thank you for your contribution!`
+        {showConfirmation && lastVotedFactor && (
+          <ConfirmationPopup
+            title="Vote Submitted!"
+            message={
+              `You rated "${lastVotedFactor.name}" as ${getValueLabel(lastVotedFactor.value)} (${lastVotedFactor.value}).
+              ${remainingFactors > 0 ? `You have ${remainingFactors} more factor${remainingFactors !== 1 ? 's' : ''} to vote on.` : 'You have completed voting on all factors!'}`
             }
             onClose={closeConfirmation}
-            autoCloseTime={lastVotedFactor ? 2000 : 1500}
+            autoCloseTime={2000}
           />
         )}
       </div>
     </div>
   );
 };
+
 export default FactorVotingModal;
