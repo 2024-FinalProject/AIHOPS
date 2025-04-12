@@ -41,9 +41,5 @@ class Member:
     def to_json(self):
         return {"name": self.email}
     
-    def update_password(self, email, old_passwd, new_passwd):
-        if self.email != email:
-            return Response(False, 'incorrect credentials', None, False)
-        if self.encrypted_passwd != hashlib.sha256(old_passwd.encode('utf8')).hexdigest():
-            return Response(False, 'incorrect credentials', None, False)
-        return Response(True, f'password for {email} has been updated', None, False)
+    def update_password(self, passwd):
+        self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()

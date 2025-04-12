@@ -8,7 +8,7 @@ from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValu
 from Domain.src.Loggs.Response import ResponseSuccessObj, ResponseSuccessMsg, ResponseFailMsg, Response
 from Domain.src.ProjectModule.Project import Project
 
-
+from Domain.src.Users.Gmailor import Gmailor
 
 
 class ProjectManager():
@@ -20,6 +20,7 @@ class ProjectManager():
         self.project_id_maker = IdMaker()
         self.factor_pool = FactorsPool(self.db_access)
         self.load_from_db()
+        self.gmailor = Gmailor()
 
     def _verify_unique_project(self, actor, name, desc):
         """raises error if there is active project with same name and description"""
@@ -161,6 +162,8 @@ class ProjectManager():
             try:
                 if project.is_published():
                     self.pending_requests.insert(member, project.pid)
+                    # send invite email
+                    self.gmailor.send_email_invitation(member, project.owner, project.name)
                 else:
                     project.add_member_to_invite(member)
             except Exception as e:
@@ -179,6 +182,7 @@ class ProjectManager():
         """ adds list of users to a project"""
         project = self._verify_owner(pid, actor)
         for member in user_names:
+            self._verify_not_duplicate_member(project, member)
             self._add_member_after_verifying_owner(project, member)
         return ResponseSuccessMsg(f"members: {user_names} pending requests added for project {pid}: {project.name}")
 

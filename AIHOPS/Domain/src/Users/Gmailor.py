@@ -13,7 +13,10 @@ class Gmailor:
 
     def __init__(self):
         self.codes_users = ThreadSafeDict()
+        self.password_recovery = ThreadSafeDict()
         self.lock = RLock()
+        self.local = 'http://localhost:5173/'
+        self.public = 'https://aihops.cs.bgu.ac.il/'
 
     def register(self, email, length=6):
         with self.lock:
@@ -26,7 +29,7 @@ class Gmailor:
 
                     yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
                     yag.send(email, "AIHOPS verification email",
-                             f"Hello from AIHOPS!\nPlease click here to verify your account: http://localhost:5173/verifyautomatic?token={code}\nOnce you've verified it, you can login to your account.\n\nBest regards,\nAIHOPS Team")
+                             f"Hello from AIHOPS!\nPlease click here to verify your account: {self.local}verifyautomatic?token={code}\nOnce you've verified it, you can login to your account.\n\nBest regards,\nAIHOPS Team")
 
                     return ResponseSuccessMsg(
                         f"an email with verification code has been sent to {email}, you have 5 minutes to validate your account")
@@ -67,7 +70,42 @@ class Gmailor:
                 return False
         return False
 
+    def send_email_invitation(self, email, inviting_member, project_name):
+        yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
+        yag.send(email, "AIHOPS Project Invitation",
+                 f"Hello from AIHOPS!\n"
+                 f"{inviting_member[0:inviting_member.find('@')]} have invited you to participate in a new Project: {project_name}\n"
+                 f"To join the project create an account at: {self.local}register\n"
+                 f"If you already have an account at AIHOPS: {self.local}login\n"
+                 f".\n\nBest regards,\nAIHOPS Team")
 
 
+    def start_password_recovery(self, email, length=6):
+        if self.password_recovery.get(email) is not None:
+            time = self.password_recovery.get(email)[1]
+            if datetime.now() - time <= self.TIME_DELTA:
+                raise Exception("your recovery time has not expired, check your email")
 
+        characters = string.ascii_letters + string.digits  # A-Z, a-z, 0-9
+        code = ''.join(secrets.choice(characters) for _ in range(length))
+
+        self.password_recovery.insert(email, (code, datetime.now()))
+
+        yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
+        yag.send(email, "AIHOPS Password Recovery",
+                 f"Hello from AIHOPS!\n"
+                 f"To recover you password, please click here:\n{self.local}passwordrecovery?token={code}\n"
+                 f".\n\nBest regards,\nAIHOPS Team")
+
+    def recover_password(self, email, code):
+        info = self.password_recovery.get(email)
+        if info is None:
+            raise Exception("invalid code -> try again")
+        saved_code = info[0]
+        time = info[1]
+        if code != saved_code:
+            raise Exception("invalid code")
+        if datetime.now() - time > self.TIME_DELTA:
+            raise Exception("code has expired")
+        self.password_recovery.pop(email)
 
