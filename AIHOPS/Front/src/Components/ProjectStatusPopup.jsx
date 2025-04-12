@@ -23,7 +23,7 @@ const ProjectStatusPopup = ({
       return;
     }
     fetch_selected_project(selectedProject);
-  }, [fetch_selected_project, selectedProject]);
+  }, []);
 
   return (
     <div className="popup-overlay">
