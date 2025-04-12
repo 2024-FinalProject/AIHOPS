@@ -455,7 +455,13 @@
 .factor-table td {
   padding: 8px 12px;
   border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #f0f0f0;
   vertical-align: middle;
+  text-align: left;  /* Ensure text is aligned to the left */
+}
+
+.factor-table tr:last-child td {
+  border-bottom: none;
 }
 
 .factor-table tr:last-child td {
@@ -463,16 +469,19 @@
 }
 
 .factor-table .vote-cell {
-  width: 60px;
-  text-align: center;
+  width: 80px;  /* Reduced from original 50px */
+  padding: 12px 10px; /* Increased horizontal padding */
+  text-align: center; /* Center align the vote option */
+  vertical-align: middle;
 }
 
 .factor-table .description-cell {
-  width: 30%;
+  width: 25%;
 }
 
 .factor-table .explanation-cell {
   color: #4b5563;
+  width: 55%;
 }
 
 .factor-table tr.selected-row {
@@ -512,6 +521,7 @@
   font-weight: 700;
   border-radius: 6px;
   transition: all 0.2s ease;
+  align-self: flex-start !important;
 }
 
 .factor-table .factor-option:hover:not(.selected) {
@@ -662,30 +672,29 @@
   }
 }
 
-/* Container for vote option and its label */
 .vote-option-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  align-items: center; /* Center the option and label */
+  gap: 6px;
+  margin: 0 auto; /* Center in cell */
 }
 
-/* Style for the vote label under the number */
 .vote-label {
   font-size: 11px;
   font-weight: 500;
   color: #4b5563;
+  word-break: break-word;
   text-align: center;
-  white-space: nowrap;
-  max-width: 60px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: nowrap; /* Prevent wrapping for short labels */
+  max-width: 100%;
 }
 
 /* Adjust the vote cell to accommodate the label */
 .factor-table .vote-cell {
-  width: 70px;
-  padding: 10px 6px;
+  width: 20px;
+  padding: 12px 6px;
+  text-align: left;
   vertical-align: top;
 }
 
@@ -714,9 +723,10 @@
 }
 
 .vote-header {
-  text-align: left !important;
+  text-align: center !important;
   width: 60px;
 }
+
 
 /* Table rows */
 .factor-table-row {
@@ -735,8 +745,8 @@
 
 /* Option cells */
 .vote-cell {
-  width: 60px;
-  text-align: center;
+  width: 50px;
+  text-align: left;
   vertical-align: middle;
   padding: 12px 8px;
 }
@@ -750,7 +760,7 @@
 /* Vote option styling */
 .vote-option-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: flex-start;
   align-items: center;
   gap: 4px;
 }
@@ -760,7 +770,8 @@
   font-weight: 500;
   color: #4b5563;
   text-align: center;
-  white-space: nowrap;
+  white-space: normal;         /* allow wrapping */
+  max-width: 70px;             /* optional: increase size */
 }
 
 /* Alternating row colors for better readability */
@@ -773,3 +784,42 @@
   background-color: #f0f9ff;
 }
 
+/* ─── Fully reset button appearance ─── */
+.nav-button,
+.tabs-nav-button {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none !important;
+  border: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Restore actual colors ─── */
+.prev-button {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
+}
+.prev-button:active {
+  background-color: #e5e7eb !important;
+}
+
+.next-button {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+.next-button:active {
+  background-color: #bfdbfe !important;
+}
+
+.tabs-nav-button {
+  background-color: #e1effe !important;
+  color: #3b82f6 !important;
+}
+.tabs-nav-button:active {
+  background-color: #bfdbfe !important;
+}

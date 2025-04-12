@@ -1,168 +1,78 @@
+// src/Components/FactorVotingModal.jsx
 import React, { useState, useEffect, useRef } from "react";
 import "./FactorVotingModal.css";
 import ConfirmationPopup from "./ConfirmationPopup";
-import { ChevronLeft, ChevronRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const FactorVotingModal = ({
   project,
-  onClose,
-  onSubmitVotes,
-  initialFactorVotes = {},
+  currentFactorIndex,
+  factorVotes,           // from MyProjects state
+  submittedVotes,        // from MyProjects state
+  onClose,               // closes the modal
+  onFactorVoteChange,    // (factorId, value) => void
+  onNextFactor,          // () => void
+  onPrevFactor,          // () => void
+  onSelectFactor,
+  countVotedFactors,     // () => number
+  handleFactorSubmit     // async () => boolean
 }) => {
-  // State to track votes for all factors
-  const [factorVotes, setFactorVotes] = useState(initialFactorVotes);
-  // State to track the currently selected factor
-  const [selectedFactorId, setSelectedFactorId] = useState(null);
-  // State for confirmation popup
+  // confirmation popup state
   const [showConfirmation, setShowConfirmation] = useState(false);
-  // Track the factor that was just voted on
   const [lastVotedFactor, setLastVotedFactor] = useState(null);
-  // Track horizontal scroll position
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  // Reference to the tabs container
+
+  // scrolling refs & state
   const tabsContainerRef = useRef(null);
-  // Reference to the selected tab
   const selectedTabRef = useRef(null);
+  const [canScrollLeft,  setCanScrollLeft]  = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Set the first factor as selected if none is selected and we have factors
+  // Helpers for scroll‐buttons
+  const checkScrollPosition = () => {
+    const c = tabsContainerRef.current;
+    if (!c) return;
+    setCanScrollLeft (c.scrollLeft > 0);
+    setCanScrollRight(c.scrollLeft < c.scrollWidth - c.clientWidth - 5);
+  };
+  const handleScroll = (dir) => {
+    const c = tabsContainerRef.current;
+    if (!c) return;
+    c.scrollBy({ left: dir === 'left' ? -200 : 200, behavior: 'smooth' });
+    setTimeout(checkScrollPosition, 300);
+  };
   useEffect(() => {
-    if (!selectedFactorId && project?.factors?.length > 0) {
-      setSelectedFactorId(project.factors[0].id);
-    }
-  }, [project, selectedFactorId]);
+    const c = tabsContainerRef.current;
+    if (!c) return;
+    c.addEventListener('scroll', checkScrollPosition);
+    checkScrollPosition();
+    return () => c.removeEventListener('scroll', checkScrollPosition);
+  }, []);
 
-  // Scroll selected tab into view when it changes
+  // whenever you move factors or new votes come in, scroll the selected tab into view
   useEffect(() => {
     if (selectedTabRef.current && tabsContainerRef.current) {
       selectedTabRef.current.scrollIntoView({
         behavior: "smooth",
-        block: "nearest",
-        inline: "center"
+        inline: "center",
+        block: "nearest"
       });
-      
-      // Check scroll position after scrolling
       checkScrollPosition();
     }
-  }, [selectedFactorId]);
+  }, [currentFactorIndex, submittedVotes]);
 
-  // Check if we can scroll left or right
-  const checkScrollPosition = () => {
-    if (tabsContainerRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = tabsContainerRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5);
-    }
-  };
+  // derive some handy bits
+  const totalFactors    = project.factors.length;
+  const votedFactors    = countVotedFactors();
+  const remaining       = totalFactors - votedFactors;
+  const progressPercent = totalFactors > 0 ? (votedFactors/totalFactors)*100 : 0;
 
-  // Handle horizontal scroll
-  const handleScroll = (direction) => {
-    if (tabsContainerRef.current) {
-      const scrollAmount = direction === 'left' ? -200 : 200;
-      tabsContainerRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-      });
-      
-      // Check scroll position after scrolling
-      setTimeout(checkScrollPosition, 300);
-    }
-  };
-
-  // Update scroll indicator position
-  const updateScrollIndicator = () => {
-    if (tabsContainerRef.current) {
-      // This forces a re-render to update the scroll indicator position
-      setCanScrollLeft(tabsContainerRef.current.scrollLeft > 0);
-    }
-  };
-
-  // Listen for scroll events
-  useEffect(() => {
-    const tabsContainer = tabsContainerRef.current;
-    if (tabsContainer) {
-      const handleScroll = () => {
-        checkScrollPosition();
-        updateScrollIndicator();
-      };
-      
-      tabsContainer.addEventListener('scroll', handleScroll);
-      // Initial check
-      checkScrollPosition();
-      
-      return () => {
-        tabsContainer.removeEventListener('scroll', handleScroll);
-      };
-    }
-  }, []);
-
-  // Handle vote changes without showing popup
-  const handleFactorVoteChange = (factorId, value) => {
-    setFactorVotes((prevVotes) => ({
-      ...prevVotes,
-      [factorId]: value,
-    }));
-  };
-
-  // Handle submit with confirmation
-  const handleSubmit = () => {
-    // Get the currently selected factor for the confirmation message
-    const currentFactor = project.factors.find(f => f.id === selectedFactorId);
-    const voteValue = factorVotes[selectedFactorId];
-    
-    // Set the last voted factor to show in the confirmation
-    setLastVotedFactor({
-      name: currentFactor.name,
-      value: voteValue
-    });
-    
-    // Show confirmation popup
-    setShowConfirmation(true);
-    
-    // Submit after a short delay
-    setTimeout(() => {
-      onSubmitVotes(factorVotes);
-      onClose();
-    }, 2000);
-  };
-  
-  // Close the confirmation popup
-  const closeConfirmation = () => {
-    setShowConfirmation(false);
-  };
-
-  // Calculate progress percentage
-  const votedFactorKeys = Object.keys(factorVotes);
-  const votedFactors = votedFactorKeys.length;
-  const totalFactors = project?.factors?.length || 0;
-  const remainingFactors = totalFactors - votedFactors;
-  const progressPercentage = totalFactors > 0 ? (votedFactors / totalFactors) * 100 : 0;
-
-  // Get the currently selected factor
-  const selectedFactor = project?.factors?.find((f) => f.id === selectedFactorId);
-  
-  // Determine if we can go next/previous
-  const currentFactorIndex = project?.factors?.findIndex(f => f.id === selectedFactorId);
-  const canGoNext = currentFactorIndex < (project?.factors?.length - 1);
   const canGoPrev = currentFactorIndex > 0;
-  
-  // Function to move to the next factor
-  const goToNextFactor = () => {
-    if (canGoNext) {
-      setSelectedFactorId(project.factors[currentFactorIndex + 1].id);
-    }
-  };
+  const canGoNext = currentFactorIndex < totalFactors - 1;
 
-  // Function to move to the previous factor
-  const goToPrevFactor = () => {
-    if (canGoPrev) {
-      setSelectedFactorId(project.factors[currentFactorIndex - 1].id);
-    }
-  };
+  const selectedFactor = project.factors[currentFactorIndex];
 
-  // Get a label based on the score value
-  const getValueLabel = (value) => {
-    switch(value) {
+  const getValueLabel = (v) => {
+    switch(v) {
       case 0: return "Not at all";
       case 1: return "Slightly";
       case 2: return "Moderately";
@@ -171,56 +81,65 @@ const FactorVotingModal = ({
       default: return "";
     }
   };
-
-  // Get class names for option based on value
   const getOptionClasses = (value, isSelected) => {
-    const baseClasses = "factor-option";
-    const valueClasses = `factor-option-${value}`;
-    const selectedClass = isSelected ? "selected" : "";
-    
-    return `${baseClasses} ${valueClasses} ${selectedClass}`;
+    return [
+      "factor-option",
+      `factor-option-${value}`,
+      isSelected ? "selected" : ""
+    ].join(" ");
+  };
+
+  // Submit button handler
+  const onSubmitClick = async () => {
+    const value = factorVotes[selectedFactor.id];
+    if (value === undefined) {
+      alert("Please select a value before submitting your vote.");
+      return;
+    }
+    const ok = await handleFactorSubmit();
+    if (ok) {
+      setLastVotedFactor({ name: selectedFactor.name, value });
+      setShowConfirmation(true);
+      // auto‐dismiss popup
+      setTimeout(() => setShowConfirmation(false), 2000);
+    }
   };
 
   return (
     <div className="modal-overlay">
       <div className="modal-content">
         <button className="close-modal" onClick={onClose}>×</button>
+        <h2 className="modal-title">Vote on factors for {project.name}</h2>
 
-        <h2 className="modal-title">
-          Vote on factors for {project.name}
-        </h2>
-
-        {/* Tab Navigation */}
+        {/* ─── TABS ─────────────────────────────────────────── */}
         <div className="factor-tabs-wrapper">
-          <button 
+          <button
             className={`tabs-nav-button ${canScrollLeft ? 'active' : 'disabled'}`}
             onClick={() => handleScroll('left')}
             disabled={!canScrollLeft}
-          >
-            <ChevronLeft size={20} />
-          </button>
-          
+          ><ChevronLeft size={20}/></button>
+
           <div className="factor-tabs-scroll-container">
-            <div 
+            <div
               ref={tabsContainerRef}
               className="factor-tabs-container"
             >
-              {project.factors.map((factor) => {
-                const hasVote = factorVotes[factor.id] !== undefined;
-                const isSelected = selectedFactorId === factor.id;
-                const voteValue = factorVotes[factor.id];
+              {project.factors.map((f, idx) => {
+                const hasVote  = submittedVotes[f.id] !== undefined;
+                const voteVal  = submittedVotes[f.id];
+                const isActive = idx === currentFactorIndex;
 
                 return (
                   <div
-                    key={factor.id}
-                    ref={isSelected ? selectedTabRef : null}
-                    className={`factor-tab ${isSelected ? "selected" : ""}`}
-                    onClick={() => setSelectedFactorId(factor.id)}
+                    key={f.id}
+                    ref={isActive ? selectedTabRef : null}
+                    className={`factor-tab ${isActive ? "selected" : ""}`}
+                    onClick={() => idx !== currentFactorIndex && onSelectFactor(idx)}
                   >
-                    <span>{factor.name}</span>
+                    <span>{f.name}</span>
                     {hasVote && (
-                      <span className={`vote-indicator vote-indicator-${voteValue}`}>
-                        {voteValue}
+                      <span className={`vote-indicator vote-indicator-${voteVal}`}>
+                        {voteVal}
                       </span>
                     )}
                   </div>
@@ -228,28 +147,26 @@ const FactorVotingModal = ({
               })}
             </div>
           </div>
-          
-          <button 
+
+          <button
             className={`tabs-nav-button ${canScrollRight ? 'active' : 'disabled'}`}
             onClick={() => handleScroll('right')}
             disabled={!canScrollRight}
-          >
-            <ChevronRight size={20} />
-          </button>
+          ><ChevronRight size={20}/></button>
         </div>
-        
-        {/* Progress indicator with text */}
+
+        {/* ─── PROGRESS ─────────────────────────────────────── */}
         <div className="progress-bar-container">
-          <div 
+          <div
             className="progress-bar-fill"
-            style={{ width: `${progressPercentage}%` }}
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
         <div className="progress-text">
-          Voted on {votedFactors} of {totalFactors} factors ({Math.round(progressPercentage)}%)
+          Voted on {votedFactors} of {totalFactors} factors ({Math.round(progressPercent)}%)
         </div>
 
-        {/* Selected factor content */}
+        {/* ─── SELECTED FACTOR ───────────────────────────────── */}
         {selectedFactor && (
           <div className="factor-content">
             <div className="factor-header">
@@ -257,40 +174,35 @@ const FactorVotingModal = ({
               <p className="factor-description">{selectedFactor.description}</p>
             </div>
 
-            {/* Table headers */}
             <div className="factor-table-container">
               <table className="factor-table">
                 <thead>
                   <tr>
-                    <th className="vote-header">Vote</th>
+                    <th style= {{textAlign: "center"}}>Vote</th>
                     <th>Description</th>
                     <th>Explanation</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {[0, 1, 2, 3, 4].map((value) => {
-                    const currentValue = factorVotes[selectedFactor.id];
-                    const isSelected = currentValue === value;
-                    
+                  {[0,1,2,3,4].map((v) => {
+                    const isSel = factorVotes[selectedFactor.id] === v;
                     return (
-                      <tr 
-                        key={value} 
-                        className={`factor-table-row ${isSelected ? "selected-row" : ""}`}
-                        onClick={() => handleFactorVoteChange(selectedFactor.id, value)}
+                      <tr
+                        key={v}
+                        className={`factor-table-row ${isSel ? "selected-row" : ""}`}
+                        onClick={() => onFactorVoteChange(selectedFactor.id, v)}
                       >
-                        <td className="vote-cell">
+                        <td className="vote-cell" style={{maxwidth:"10px"}}>
                           <div className="vote-option-container">
-                            <div className={getOptionClasses(value, isSelected)}>
-                              {value}
-                            </div>
-                            <div className="vote-label">{getValueLabel(value)}</div>
+                            <div className={getOptionClasses(v, isSel)}>{v}</div>
+                            <div className="vote-label">{getValueLabel(v)}</div>
                           </div>
                         </td>
                         <td className="description-cell">
-                          {selectedFactor.scales_desc?.[value] || ''}
+                          {selectedFactor.scales_desc?.[v] || ''}
                         </td>
                         <td className="explanation-cell">
-                          {selectedFactor.scales_explanation?.[value] || ''}
+                          {selectedFactor.scales_explanation?.[v] || ''}
                         </td>
                       </tr>
                     );
@@ -299,46 +211,46 @@ const FactorVotingModal = ({
               </table>
             </div>
 
-            {/* Navigation buttons */}
+            {/* ─── NAV BUTTONS ───────────────────────────────── */}
             <div className="navigation-buttons">
-              <button 
+              <button
                 className={`nav-button prev-button ${!canGoPrev ? 'disabled' : ''}`}
-                onClick={goToPrevFactor}
+                onClick={onPrevFactor}
                 disabled={!canGoPrev}
               >
-                <ChevronLeft size={16} />
-                <span>Previous</span>
+                <ChevronLeft size={16}/> Previous
               </button>
-              
-              <button 
+
+              <button
                 className="vote-factor-button"
-                onClick={handleSubmit}
-                disabled={factorVotes[selectedFactorId] === undefined}
+                onClick={onSubmitClick}
+                disabled={factorVotes[selectedFactor.id] === undefined}
               >
                 Submit Vote
               </button>
-              
-              <button 
+
+              <button
                 className={`nav-button next-button ${!canGoNext ? 'disabled' : ''}`}
-                onClick={goToNextFactor} 
+                onClick={onNextFactor}
                 disabled={!canGoNext}
               >
-                <span>Next</span>
-                <ChevronRight size={16} />
+                Next <ChevronRight size={16}/>
               </button>
             </div>
           </div>
         )}
-        
-        {/* Confirmation Popup */}
+
+        {/* ─── CONFIRMATION ────────────────────────────────── */}
         {showConfirmation && lastVotedFactor && (
           <ConfirmationPopup
             title="Vote Submitted!"
             message={
-              `You rated "${lastVotedFactor.name}" as ${getValueLabel(lastVotedFactor.value)} (${lastVotedFactor.value}).
-              ${remainingFactors > 0 ? `You have ${remainingFactors} more factor${remainingFactors !== 1 ? 's' : ''} to vote on.` : 'You have completed voting on all factors!'}`
+              `You rated "${lastVotedFactor.name}" as ${getValueLabel(lastVotedFactor.value)} (${lastVotedFactor.value}). ` +
+              (remaining > 0
+                ? `You have ${remaining} more factor${remaining !== 1 ? 's' : ''} to vote on.`
+                : 'You have completed voting on all factors!')
             }
-            onClose={closeConfirmation}
+            onClose={() => setShowConfirmation(false)}
             autoCloseTime={2000}
           />
         )}

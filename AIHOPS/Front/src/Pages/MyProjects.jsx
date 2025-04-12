@@ -189,15 +189,11 @@ const MyProjects = () => {
     }
   };
 
-  const handleNextFactor = async () => {
-    const submitSuccess = await handleFactorSubmit();
-
-    if (submitSuccess) {
-      if (currentFactorIndex < currentProject.factors.length - 1) {
-        setCurrentFactorIndex(currentFactorIndex + 1);
-      } else {
-        await handleCloseVoting(currentProject.id);
-      }
+  const handleNextFactor = () => {
+    if (currentFactorIndex < currentProject.factors.length - 1) {
+      setCurrentFactorIndex(currentFactorIndex + 1);
+    } else {
+      handleCloseVoting(currentProject.id);
     }
   };
 
@@ -216,8 +212,10 @@ const MyProjects = () => {
       }
       const response = await getMemberVoteOnProject(cookie, projectId);
       if (response.data.success) {
-        const factorVotes = response.data.votes.factor_votes || {};
-        setFactorVotes(factorVotes);
+        const apiFactorVotes = response.data.votes.factor_votes || {};
+        // load both into local vote‐state AND "submitted" state
+        setFactorVotes(apiFactorVotes);
+        setSubmittedVotes(apiFactorVotes);
       } else {
         alert(response.data.message || "Failed to fetch votes for project");
       }
@@ -356,6 +354,8 @@ const MyProjects = () => {
             onNextFactor={handleNextFactor}
             onPrevFactor={handlePrevFactor}
             countVotedFactors={countVotedFactors}
+            onSelectFactor={(idx) => setCurrentFactorIndex(idx)}
+            handleFactorSubmit={handleFactorSubmit}
           />
         )}
         
