@@ -454,7 +454,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 setAddNewFactorShow(false);
                 setShowExistingContentFactors(true);
                 selectedProject.factors_inited = false;
-                await fetch_selected_project();
+                await fetch_selected_project(selectedProject);
                 await fetch_factors_pool();
             } else {
                 setMsg(response.data.message);
