@@ -304,7 +304,7 @@ const MyProjects = () => {
       </div>
     ) : (
       <>
-        <h1 className="page-heading" style={{marginBottom:'-5px'}}><u>Voting on projects</u></h1>
+        <h1 className="page-heading" style={{marginBottom:'-100px'}}><u>Voting on projects</u></h1>
         
         {/* Sort toggle button - only show if there are projects */}
         {filteredProjects.length > 0 && (
