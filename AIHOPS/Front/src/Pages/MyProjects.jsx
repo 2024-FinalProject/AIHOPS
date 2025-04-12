@@ -11,6 +11,8 @@ import "./MyProjects.css";
 const MyProjects = () => {
   // State Management
   const [projects, setProjects] = useState([]);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [isNewestFirst, setIsNewestFirst] = useState(true); // default sort order - newest first
   const [currentProject, setCurrentProject] = useState(null);
   const [factorVotes, setFactorVotes] = useState({});
   const [submittedVotes, setSubmittedVotes] = useState({});
@@ -37,25 +39,60 @@ const MyProjects = () => {
     return status && status.votingStatus === 1 && status.severitiesStatus === 1;
   };
 
+  // Handle sort order change
+  const toggleSort = () => {
+    setIsNewestFirst((prevState) => !prevState);
+    sortProjects(!isNewestFirst);
+  };
+
+  // Sort projects based on the selected order
+  const sortProjects = (newestFirst) => {
+    if (!projects || projects.length === 0) {
+      console.log("No projects to sort");
+      setFilteredProjects([]);
+      return;
+    }
+    
+    console.log(`Sorting ${projects.length} projects by ${newestFirst ? "newest" : "oldest"}`);
+    let sortedProjects = [...projects];
+    
+    if (newestFirst) {
+      // Sort by ID in descending order (higher ID = newer)
+      sortedProjects.sort((a, b) => b.id - a.id);
+    } else {
+      // Sort by ID in ascending order (lower ID = older)
+      sortedProjects.sort((a, b) => a.id - b.id);
+    }
+    
+    console.log("Sorted projects:", sortedProjects);
+    setFilteredProjects(sortedProjects);
+  };
+
   // Project Fetching and Initialization
   const fetchProjects = async () => {
     try {
+      setLoading(true); // Make sure loading is true when fetching
       const cookie = localStorage.getItem("authToken");
       if (!cookie) {
-        alert("Authentication token not found");
+        console.error("Authentication token not found");
+        setLoading(false);
         return;
       }
 
       const response = await getProjectsMember(cookie);
       if (response.data.success) {
-        setProjects(response.data.projects);
-        await initializeProjectVotingStatuses(response.data.projects, cookie);
+        const fetchedProjects = response.data.projects || [];
+        console.log("Fetched projects:", fetchedProjects); // Debug logging
+        setProjects(fetchedProjects);
+        
+        // Sort projects by default order (newest first)
+        sortProjects(isNewestFirst);
+        await initializeProjectVotingStatuses(fetchedProjects, cookie);
       } else {
-        alert(response.data.message || "Failed to fetch projects");
+        console.error("Failed to fetch projects:", response.data.message);
       }
     } catch (error) {
-      alert("Failed to fetch projects");
-      console.error(error);
+      console.error("API error when fetching projects:", error);
     }
     finally {
       setLoading(false); // Stop loading after the request completes
@@ -105,13 +142,6 @@ const MyProjects = () => {
     setShowVotePopup(true);
     updateFactorsVotes(project.id);
   };
-
-  /*const handleStartVoting = () => {
-    setIsVoteStarted(true);
-    setShowVotePopup(false);
-    setCurrentFactorIndex(0);
-    setSubmittedVotes({}); 
-  };*/
 
   const handleFactorVoteChange = (factorId, value) => {
     setFactorVotes((prev) => ({ ...prev, [factorId]: value }));
@@ -177,16 +207,6 @@ const MyProjects = () => {
     }
   };
 
-  /*const handleCloseVoting = async (projectId) => {
-    setShowVotePopup(false);
-    setCurrentProject(null);
-    setIsVoteStarted(false);
-    setSubmittedVotes({});
-    setCurrentFactorIndex(0);
-
-    await checkProjectVotingStatus(projectId);
-  };*/
-
   const updateFactorsVotes = async (projectId) => {
     try {
       const cookie = localStorage.getItem("authToken");
@@ -206,12 +226,6 @@ const MyProjects = () => {
       console.error(error);
     }
   };
-  /*const handleStartVoting = () => {
-    setIsVoteStarted(true);
-    setShowVotePopup(false);
-    setCurrentFactorIndex(0);
-    setSubmittedVotes({}); // Reset submitted votes when starting new voting session
-  };*/
 
   const handleStartVoting = (type) => {
     setCurrentVotingType(type);
@@ -224,7 +238,6 @@ const MyProjects = () => {
       setShowDScoreVote(true);
     }
     setShowVotePopup(false);
-    //setSubmittedVotes({});
   };
 
   const handleCloseVoting = async (projectId) => {
@@ -256,42 +269,27 @@ const MyProjects = () => {
         }));
         setShowDScoreVote(false);
         await handleCloseVoting(currentProject.id);
-        //alert("D-score votes submitted successfully");
       }
       else{
         alert(`Failed to submit D-score votes: ${response.data.message}`);
       }
-      //setSeverityLevel(true);
     }
     catch (error) {
       alert("Failed to submit D-score votes");
     }
   };
 
-  // Lifecycle Hook
+  // Lifecycle Hooks
   useEffect(() => {
     fetchProjects();
   }, []);
-
-  /*const handleSubmitAllVotes = async () => {
-    try {
-      if (!currentProject) return;
-      const cookie = localStorage.getItem("authToken");
-      
-      // Check if both votes are complete
-      const status = projectVotingStatus[currentProject.id];
-      if (!isBothStatusesComplete(currentProject)) {
-        alert("Please complete both factor and D-score voting first");
-        return;
-      }
   
-      // Add final submission logic here
-      setShowVotePopup(false);
-      await fetchProjects(); // Refresh status
-    } catch (error) {
-      alert("Failed to submit all votes");
+  // This effect ensures filteredProjects is updated whenever projects change
+  useEffect(() => {
+    if (projects && projects.length > 0) {
+      sortProjects(isNewestFirst);
     }
-  };*/
+  }, [projects]);
 
   return (
     <div className="my-projects-container">
@@ -301,10 +299,20 @@ const MyProjects = () => {
       </div>
     ) : (
       <>
-        <h1 className="page-heading" style ={{marginBottom:'-70px'}}><u>Voting on projects</u></h1>
+        <h1 className="page-heading" style={{marginBottom:'-5px'}}><u>Voting on projects</u></h1>
+        
+        {/* Sort toggle button - only show if there are projects */}
+        {filteredProjects.length > 0 && (
+          <div className="sort-container">
+            <button className="sort-button" onClick={toggleSort}>
+              ⇅
+            </button>
+            {isNewestFirst ? "Newest First" : "Oldest First"}
+          </div>
+        )}
 
         <ProjectList 
-          projects={projects}
+          projects={filteredProjects}
           projectVotingStatus={projectVotingStatus}
           isBothStatusesComplete={isBothStatusesComplete}
           onVoteClick={handleVoteClick}
@@ -324,11 +332,11 @@ const MyProjects = () => {
           </div>
         )}
 
-        {(projects == null || projects.length === 0) && (
-          <div className="default-text" style={{marginTop: '-30px', textAlign: 'center'}}>
+        {(!loading && (filteredProjects == null || filteredProjects.length === 0)) && (
+          <div className="default-text" style={{marginTop: '40px', textAlign: 'center'}}>
             <div className="default-text" style={{fontSize:'17px'}}><i>There are currently no projects to vote on</i>...</div>
           </div>
-        ) }
+        )}
 
         {currentProject && isVoteStarted && (
           <FactorVotingModal
