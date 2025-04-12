@@ -452,6 +452,10 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 setScaleDescriptions(Array(5).fill(""));
                 setScaleExplanations(Array(5).fill(""));
                 setAddNewFactorShow(false);
+                setShowExistingContentFactors(true);
+                selectedProject.factors_inited = false;
+                await fetch_selected_project();
+                await fetch_factors_pool();
             } else {
                 setMsg(response.data.message);
                 alert(response.data.message);
