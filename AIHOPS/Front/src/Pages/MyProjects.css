@@ -22,6 +22,33 @@ body {
   font-family: Verdana, sans-serif !important;
 }
 
+/* Filter Container */
+.sort-container {
+  position: absolute;
+  right: 80px; /* Align to the far right */
+  top: 120px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: Verdana, sans-serif !important;
+  color: var(--text-color, #333);
+}
+
+/* Sort Button Styling */
+.sort-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--text-color, #333);
+  transition: color 0.3s;
+  font-family: Verdana, sans-serif !important;
+}
+
+.sort-button:hover {
+  color: #0078d7; /* Highlight on hover */
+}
+
 /* Projects List */
 .projects-list {
   display: grid;
