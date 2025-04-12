@@ -77,7 +77,7 @@ class Gmailor:
                  f"{inviting_member[0:inviting_member.find('@')]} have invited you to participate in a new Project: {project_name}\n"
                  f"To join the project create an account at: {self.local}register\n"
                  f"If you already have an account at AIHOPS: {self.local}login\n"
-                 f"\nAll The Best\nAIHOPS Team")
+                 f".\n\nBest regards,\nAIHOPS Team")
 
 
     def start_password_recovery(self, email, length=6):
@@ -94,7 +94,8 @@ class Gmailor:
         yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
         yag.send(email, "AIHOPS Password Recovery",
                  f"Hello from AIHOPS!\n"
-                 f"To recover you password click here\n{self.local}passwordrecovery?token={code}\n")
+                 f"To recover you password, please click here:\n{self.local}passwordrecovery?token={code}\n"
+                 f".\n\nBest regards,\nAIHOPS Team")
 
     def recover_password(self, email, code):
         info = self.password_recovery.get(email)

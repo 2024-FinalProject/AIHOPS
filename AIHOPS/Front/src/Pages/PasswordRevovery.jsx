@@ -90,7 +90,7 @@ const PasswordRecovery = () => {
             <input
                 type="text"
                 id="formUsername"
-                placeholder="Enter username"
+                placeholder="Enter email"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 required

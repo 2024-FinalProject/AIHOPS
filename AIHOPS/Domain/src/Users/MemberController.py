@@ -124,7 +124,7 @@ class MemberController:
     def start_password_recovery(self, email):
         self._verify_valid_member(email)
         self.gmailor.start_password_recovery(email)
-        return ResponseSuccessMsg(f'started password recovery for {email}, you have 5 minutes to make a new password')
+        return ResponseSuccessMsg(f'Started password recovery for {email}, you have 5 minutes to make a new password - please check your email')
 
     def recover_password(self, email, passwd, code):
         self._verify_valid_member(email)

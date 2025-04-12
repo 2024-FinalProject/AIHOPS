@@ -10,6 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
+  const [isSuccess, setIsSuccess] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -56,12 +57,15 @@ const Login = () => {
         localStorage.setItem("isLoggedIn", "true");
         console.log("Redirecting to /");
         navigate("/");
+        setIsSuccess(true);
       } else {
         setMsg(response.data.message);
+        setIsSuccess(false);
       }
     } catch (error) {
       console.error("Login error:", error);
       setMsg("Login failed: Invalid credentials");
+      setIsSuccess(false);
     }
   };
 
@@ -86,11 +90,19 @@ const Login = () => {
       }
 
       const response = await startPasswordRecovery(cookie, userName);
-      setMsg(response.data.message);
+      if(response.data.success) {
+        setIsSuccess(true);
+        setMsg(response.data.message);
+      }
+      else{
+        setMsg(response.data.message);
+        setIsSuccess(false);
+      }
 
     } catch (error) {
       console.error("Recovery error:", error);
       setMsg("Recovery failed");
+      setIsSuccess(false);
     }
 
   }
@@ -106,7 +118,7 @@ const Login = () => {
                 type="text"
                 onChange={(e) => setUserName(e.target.value)}
                 value={userName}
-                placeholder="Enter username"
+                placeholder="Enter email"
                 required
             />
 
@@ -115,26 +127,21 @@ const Login = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
                 placeholder="Enter password"
-                required
+                // required
             />
 
             <button type="submit" className="login-submit-btn">
               Login
             </button>
-            {msg && <div className="error-message">{msg}</div>}
+            {msg && <div className={`login-alert ${isSuccess === true ? "success" : isSuccess === false ? "danger" : ""}`}>{msg}</div>}
           </form>
           <div className="forgot-password">
-            <button
-                type="button"
-                className="text-button"
-                onClick={handleRecover}
-            >
-              <p>Forgot your password? Recover here</p>
-            </button>
+            <p>
+              Forgot your password? Enter your email above and
+              <a href="#" onClick={handleRecover} className="recover-link">click here</a>.
+            </p>
           </div>
-
         </div>
-
       </section>
   );
 };
