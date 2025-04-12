@@ -1,131 +1,658 @@
-.factor-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 15px;
+/* Styles for option values in table */
+.factor-option-0 {
+  background-color: #fee2e2;
+  border: 2px solid #ef4444;
+  color: #991b1b;
 }
 
-.factor-table th,
-.factor-table td {
+.factor-option-0.selected {
+  background-color: #fecaca;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px #fca5a5;
+}
+
+.factor-option-1 {
+  background-color: #ffedd5;
+  border: 2px solid #f97316;
+  color: #c2410c;
+}
+
+.factor-option-1.selected {
+  background-color: #fed7aa;
+  border-color: #ea580c;
+  box-shadow: 0 0 0 2px #fdba74;
+}
+
+.factor-option-2 {
+  background-color: #d1fae5;
+  border: 2px solid #10b981;
+  color: #065f46;
+}
+
+.factor-option-2.selected {
+  background-color: #a7f3d0;
+  border-color: #059669;
+  box-shadow: 0 0 0 2px #6ee7b7;
+}
+
+.factor-option-3 {
+  background-color: #dbeafe;
+  border: 2px solid #3b82f6;
+  color: #1e40af;
+}
+
+.factor-option-3.selected {
+  background-color: #bfdbfe;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #93c5fd;
+}
+
+.factor-option-4 {
+  background-color: #e0e7ff;
+  border: 2px solid #6366f1;
+  color: #3730a3;
+}
+
+.factor-option-4.selected {
+  background-color: #c7d2fe;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px #a5b4fc;
+}/* Improved Factor Voting Modal Styles */
+
+/* Modal overlay and content */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #f0f7ff; /* Lighter blue background */
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh; /* Limit height to 90% of viewport height */
+  padding: 20px;
+  position: relative;
+  overflow-y: auto; /* Enable vertical scrolling */
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+}
+
+/* Custom scrollbar for the modal content */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 8px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: #2563eb;
+}
+
+.close-modal {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.close-modal:hover {
+  background-color: #f0f0f0;
+  color: #333;
+  transform: scale(1.1);
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 14px;
+  color: #1a365d;
+}
+
+/* Tabs styling */
+.factor-tabs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.tabs-nav-button {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background-color: #e1effe;
+  color: #3b82f6;
+  cursor: pointer;
+  margin: 0 8px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.tabs-nav-button.active:hover {
+  background-color: #bfdbfe;
+  transform: scale(1.1);
+}
+
+.tabs-nav-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+.factor-tabs-container {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px 4px;
+  padding-bottom: 16px; /* Add extra padding to make room for the scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+  position: relative;
+}
+
+/* Make the scrollbar container visible */
+.factor-tabs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px; /* Extra space below to prevent overflow issues */
+  border-bottom: 1px solid #e5e7eb; /* Add a bottom border to make it obvious there's a scrollable area */
+  padding-bottom: 6px;
+}
+
+/* Custom scrollbar for Webkit browsers (Chrome, Safari, newer Edge) */
+.factor-tabs-container::-webkit-scrollbar {
+  height: 10px; /* Increased height for better visibility */
+  width: 10px;
+}
+
+.factor-tabs-container::-webkit-scrollbar-track {
+  background: #e5e7eb; /* Light gray track */
+  border-radius: 10px;
+}
+
+.factor-tabs-container::-webkit-scrollbar-thumb {
+  background-color: #3b82f6; /* Bright blue thumb */
+  border-radius: 10px;
+  border: 2px solid #e5e7eb; /* Creates a nice border effect */
+}
+
+/* Add hover state for scrollbar thumb */
+.factor-tabs-container::-webkit-scrollbar-thumb:hover {
+  background-color: #2563eb; /* Darker blue on hover */
+}
+
+.factor-tab {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: white;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.factor-tab:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-2px);
+}
+
+.factor-tab.selected {
+  background-color: #dbeafe;
+  color: #1e40af;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.2);
+}
+
+.vote-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.vote-indicator-0 {
+  background-color: #ef4444;
+}
+
+.vote-indicator-1 {
+  background-color: #f97316;
+}
+
+.vote-indicator-2 {
+  background-color: #10b981;
+}
+
+.vote-indicator-3 {
+  background-color: #3b82f6;
+}
+
+.vote-indicator-4 {
+  background-color: #6366f1;
+}
+
+/* Factor tabs wrapper */
+.factor-tabs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.tabs-nav-button {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background-color: #e1effe;
+  color: #3b82f6;
+  cursor: pointer;
+  margin: 0 6px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.factor-tabs-container {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 6px 4px;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+  position: relative;
+}
+
+.factor-tab {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background-color: white;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+}
+
+/* Progress bar */
+.progress-bar-container {
+  height: 6px;
+  background-color: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #3b82f6;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  min-width: 5px;
+}
+
+/* Add the scroll container and indicator styles */
+.factor-tabs-scroll-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-indicator-container {
+  width: 100%;
+  height: 8px;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scroll-indicator-track {
+  width: 100%;
+  height: 4px;
+  background-color: #e5e7eb;
+  border-radius: 2px;
+  position: relative;
+}
+
+.scroll-indicator-thumb {
+  position: absolute;
+  height: 100%;
+  background-color: #3b82f6;
+  border-radius: 2px;
+  top: 0;
+  min-width: 30px;
+  transition: left 0.1s ease;
+}
+
+/* Make factor content more compact */
+.factor-content {
+  background-color: white;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.factor-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.factor-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+  background-color: #2563eb;
   padding: 8px;
-  text-align: left;
-  border: 1px solid var(--border-color) !important; /* Adds column separation */
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.factor-description {
+  color: white;
+  background-color: #3b82f6;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Factor table styling - more compact */
+.factor-table-container {
+  margin-bottom: 16px;
+  overflow-x: auto;
+}
+
+.factor-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
 }
 
 .factor-table th {
-  background-color: #92b7e1;
-  font-weight: bold;
+  background-color: #f3f4f6;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.factor-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.factor-table tr:last-child td {
+  border-bottom: none;
+}
+
+.factor-table .vote-cell {
+  width: 60px;
   text-align: center;
-  width: 70px;
 }
 
-/* Adjusted column widths */
-.factor-table th:first-child,
-.factor-table td:first-child {
-  width: 10%;
+.factor-table .description-cell {
+  width: 30%;
 }
 
-.factor-table th:nth-child(2),
-.factor-table td:nth-child(2) {
-  width: 35%;
+.factor-table .explanation-cell {
+  color: #4b5563;
 }
 
-.factor-table th:nth-child(3),
-.factor-table td:nth-child(3) {
-  width: 55%;
+.factor-table tr.selected-row {
+  background-color: #f0f9ff;
 }
 
-.factor-table .score-cell {
-  text-align: center;
-  font-weight: bold;
+.factor-table tr:hover:not(.selected-row) {
+  background-color: #f9fafb;
 }
 
-.factor-table tbody tr:nth-child(even) {
-  background-color: #b3b3b3;
+/* Option in table styling */
+.factor-table .factor-option {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.factor-table tbody tr:hover {
-  background-color: #77caf173;
+.factor-table .factor-option:hover:not(.selected) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-  
-  /* Progress Bar Styling */
-  .vote-progress-container {
-    margin-top: 20px;
-    text-align: center;
-  }
-  
-  .progress-bar {
-    width: 100%;
-    height: 20px;
-    background-color: #ddd;
-    border-radius: 5px;
-    overflow: hidden;
-  }
-  
-  .progress-bar-fill {
-    height: 100%;
-    background-color: #4caf50;
-    text-align: center;
-    transition: width 0.4s ease;
-  }
-  
-  .vote-progress-text {
-    margin-top:-30px;
-    font-size: 16px;
-    margin-bottom:10px;
-  }
-  
-  /* Navigation Buttons */
-  .factor-navigation {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .prev-factor-btn,
-  .next-factor-btn {
-    padding: 8px 16px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-  }
-  
-  .prev-factor-btn:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
 
+/* Navigation buttons */
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
+.prev-button {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.prev-button:hover:not(.disabled) {
+  background-color: #e5e7eb;
+}
+
+.next-button {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.next-button:hover:not(.disabled) {
+  background-color: #bfdbfe;
+}
+
+.nav-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+/* Submit section with progress bar at the bottom */
+.submit-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 6px;
+}
+
+.progress-bar-container {
+  height: 6px;
+  background-color: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  width: 100%;
+  max-width: 450px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  min-width: 5px;
+  box-shadow: 0 0 5px rgba(59, 130, 246, 0.3);
+}
+
+.submit-button {
+  padding: 8px 24px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 5px rgba(59, 130, 246, 0.25);
+  margin-top: 8px;
+}
+
+.submit-button:hover:not(.disabled) {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+}
+
+.submit-button:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.submit-button.disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 16px;
+    width: 95%;
+  }
+  
+  .voting-options-grid {
+    gap: 6px;
+  }
+  
   .factor-option {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--background-color) !important;
-    border: 1px solid #ddd;
-    margin: 0 auto;
-    cursor: pointer;
-    font-weight: bold;
-  }
-
-  .factor-option:hover {
-    background-color: #e0e0e0;
+    padding: 8px 4px;
   }
   
-  .factor-option.selected {
-    background-color: #3b82f6 !important;
-    color: white;
-    border-color: #2563eb;
+  .option-value {
+    font-size: 20px;
   }
-
-  /* Highlight the selected row */
-.selected-row {
-  background-color: rgb(60, 187, 223) !important;
-}
-
-.default-text{
-  color: var(--text-color) !important;
+  
+  .option-label {
+    font-size: 10px;
+  }
+  
+  .nav-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+  
+  .submit-button {
+    width: 100%;
+  }
 }
