@@ -6,6 +6,7 @@ import {
   rejectProjByUser,
 } from "../api/ProjectApi";
 import "./PendingRequestList.css";
+import { useNavigate } from "react-router-dom";
 
 const PendingRequestList = () => {
   const location = useLocation();
@@ -14,6 +15,8 @@ const PendingRequestList = () => {
   const [requestList, setRequestList] = useState([]);
   const [selectedElement, setSelectedElement] = useState("");
   const [isNewFirst, setIsNewFirst] = useState(false);
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
 
   const requestListTest = [
     { title: "Request 1", description: "Description 1", id: 1 },
@@ -140,6 +143,14 @@ const PendingRequestList = () => {
       fetchPendingRequest();
     }
   }, [location.state]); // Listen for location.state changes
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+        console.log("Redirecting to /");
+        navigate("/");
+    }
+  }
+  , [isLoggedIn, navigate]);
 
   return (
     <div className="pending-request-list-page">

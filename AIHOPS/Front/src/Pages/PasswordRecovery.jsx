@@ -16,6 +16,7 @@ const PasswordRecovery = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
 
   useEffect(() => {
     // Update existingToken if it changes in localStorage
@@ -31,7 +32,14 @@ const PasswordRecovery = () => {
       if (_code && _code !== code)
         setCode(_code)
       // setToken(searchParams.get("token")) // Get token from URL
-  }, [searchParams]);
+  }, [searchParams, isLoggedIn]);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      console.log("Redirecting to /");
+      navigate("/");
+    }
+  }, [isLoggedIn, navigate]);
 
 
   const handleUpdate = async (e) => {

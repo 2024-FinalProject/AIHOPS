@@ -13,6 +13,7 @@ const Register = () => {
   const [existingToken, setExistingToken] = useState(localStorage.getItem("authToken"));
   const { login } = useAuth();
   const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
 
   useEffect(() => {
     // Update existingToken if it changes in localStorage
@@ -20,7 +21,11 @@ const Register = () => {
     if (token !== existingToken) {
       setExistingToken(token);
     }
-  }, [existingToken]);
+    if(isLoggedIn){
+      console.log("Redirecting to /");
+      navigate("/");
+    }
+  }, [existingToken, isLoggedIn, navigate]);
 
   const handleRegister = async (e) => {
     e.preventDefault();

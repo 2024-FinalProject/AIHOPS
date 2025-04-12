@@ -1,10 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Settings.css'; // Import the CSS
 import { updatePassword } from "../api/AuthApi";
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from "react-router-dom";
+import { use } from 'react';
 
 const SettingsPage = () => {
   const { theme, toggleTheme } = useAuth();
+  const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      console.log("Redirecting to /");
+      navigate("/");
+    }
+  }, [isLoggedIn, navigate]);
+
   const [openSections, setOpenSections] = useState({
     security: false,
     changePassword: false,

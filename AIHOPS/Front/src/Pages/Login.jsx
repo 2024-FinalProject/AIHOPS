@@ -11,6 +11,7 @@ const Login = () => {
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -19,7 +20,11 @@ const Login = () => {
       console.log("Redirecting to /");
       navigate("/");
     }
-  }, [isAuthenticated, isValidatingToken, navigate]);
+    if(isLoggedIn){
+      console.log("Redirecting to /");
+      navigate("/");
+    }
+  }, [isAuthenticated, isValidatingToken, navigate, isLoggedIn]);
 
   const handleLogin = async (e) => {
     e.preventDefault();

@@ -62,8 +62,17 @@ const ProjectsManagement = () => {
     };
 
     useEffect(() => {
-        fetchProjects();
+        const isLoggedIn = localStorage.getItem('isLoggedIn');
+        if (!isLoggedIn) {
+            console.log("Redirecting to /");
+            navigate("/");
+        }
+        else{
+          // Fetch projects when the component mounts
+          fetchProjects();
+        }
     }, []);
+
 
     const fetch_selected_project = async (project) => {
         let cookie = localStorage.getItem("authToken");
