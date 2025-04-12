@@ -100,7 +100,7 @@ class Gmailor:
     def recover_password(self, email, code):
         info = self.password_recovery.get(email)
         if info is None:
-            raise Exception("invalid code -> try again")
+            raise Exception("Please use password recovery, located in the log-in page.")
         saved_code = info[0]
         time = info[1]
         if code != saved_code:

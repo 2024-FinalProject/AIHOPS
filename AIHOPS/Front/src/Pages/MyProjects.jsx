@@ -2,11 +2,10 @@ import React, { useState, useEffect } from "react";
 import VotingTypeSelector from "../Components/VotingTypeSelector";
 import DGraph from "../Components/DGraph";
 import { getProjectsMember, submitFactorVote, getMemberVoteOnProject, submitDScoreVotes, checkProjectVotingStatus} from "../api/ProjectApi";
-
-
 import ProjectList from "../Components/ProjectList";
 import FactorVotingModal from "../Components/FactorVotingModal";
 import "./MyProjects.css";
+import { useNavigate } from "react-router-dom";
 
 const MyProjects = () => {
   // State Management
@@ -24,6 +23,7 @@ const MyProjects = () => {
   const [showDScoreVote, setShowDScoreVote] = useState(false);
   const [currentVotingType, setCurrentVotingType] = useState(null); // 'factors' or 'dscore'
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   // Utility Functions
   const calculateProgress = (votedCount, totalCount) => {
@@ -281,7 +281,14 @@ const MyProjects = () => {
 
   // Lifecycle Hooks
   useEffect(() => {
-    fetchProjects();
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    if (!isLoggedIn) {
+        console.log("Redirecting to /");
+        navigate("/");
+    }
+    else{
+      fetchProjects();
+    }
   }, []);
   
   // This effect ensures filteredProjects is updated whenever projects change

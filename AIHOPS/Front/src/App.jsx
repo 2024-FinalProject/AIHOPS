@@ -20,7 +20,7 @@ import Settings from "./Pages/Settings";
 import About from './Pages/About';
 import Verify from "./Pages/Verify.jsx";
 import VerifyAutomatic from "./Pages/VerifyAutomatic.jsx";
-import PasswordRecovery from "./Pages/PasswordRevovery.jsx";
+import PasswordRecovery from "./Pages/PasswordRecovery.jsx";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
