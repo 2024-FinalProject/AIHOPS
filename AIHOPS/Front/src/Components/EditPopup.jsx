@@ -8,6 +8,7 @@ import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMem
 import "./EditPopup.css";
 import AnalyzeResult from './AnalyzeResult';
 import FactorInputForm from './FactorInputForm';
+import {register} from "../api/AuthApi.jsx";
 
 
 const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg,
@@ -48,6 +49,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const totalPagesPool = Math.ceil(factorsPool.length / itemsPerPage);
     const currentPagePool = poolStartIndex / itemsPerPage;
 
+    const [reloadTrigger, setReloadTrigger] = useState(0);
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -61,7 +63,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         fetch_pending_invites(cookie, selectedProject.id);
         fetch_pending_requests(cookie, selectedProject.id);
         fetch_factors_pool();
-    }, []);
+    }, [reloadTrigger]);
 
     const fetch_pending_invites = async (cookie, projectId) => {
         try {
@@ -522,7 +524,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
     const handleUpdateEditedFactor = async () => {
         if (window.confirm(`Are you sure you want to update the factor "${editedFactorName}"?`)) {
-            let cookie = localStorage.getItem("authToken");
+        let cookie = localStorage.getItem("authToken");
             if (!cookie) {
                 setMsg("No authentication token found. Please log in again.");
                 setIsSuccess(false);
@@ -530,9 +532,31 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             }
 
             // TODO: Implement the actual API call here
-            alert("Not implemented yet!");
+            // alert("Not implemented yet!");
+            try {
+                const response = await updateProjectFactor(cookie, editingFactor.id, selectedProject.id, editedFactorName, editedFactorDescription, editedScaleDescriptions, editedScaleExplanations, false);
+
+                if (response.data.success) {
+                    setMsg(response.data.message);
+                    setIsSuccess(true);
+                    setReloadTrigger(prev => prev + 1);
+                    setEditingFactor(false);
+                    setShowExistingContentFactors(true);
+                    await fetch_selected_project(selectedProject);
+
+                } else {
+                    setMsg(response.data.message);
+                    setIsSuccess(false);
+                }
+            } catch (error) {
+              console.error("Failed to update: ", error);
+              setMsg("Failed to update");
+              setIsSuccess(false);
+            }
         }
     };
+
+
 
     const getEditFactorContent = () => {
         return (
