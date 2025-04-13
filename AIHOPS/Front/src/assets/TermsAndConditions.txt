@@ -1,0 +1,98 @@
+			# Terms and Conditions for AIHOPS Calculator
+
+## 1. Introduction
+
+These Terms and Conditions ("Terms") govern your access to and use of the Adoption of Innovation by Healthcare Organizations Prerequisites Scale (AIHOPS) Calculator website and services ("Service"). By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of these Terms, you may not access the Service.
+
+## 2. Definitions
+
+- "AIHOPS" refers to the Adoption of Innovation by Healthcare Organizations Prerequisites Scale.
+- "Calculator" refers to the online tool that implements the AIHOPS methodology.
+- "We," "us," and "our" refer to the operator of this Service.
+- "You" and "your" refer to any individual or entity using our Service.
+
+## 3. Disclaimer of Liability
+
+**3.1.** The AIHOPS Calculator is provided as a decision support tool only. The Calculator provides estimates based on the information you input and does not guarantee any specific outcome or result.
+
+**3.2.** We expressly disclaim all liability for any decisions, actions, or outcomes that result from or are connected to your use of the Calculator.
+
+**3.3.** You acknowledge that the assessment of innovation adoption prerequisites in healthcare organizations involves complex considerations that may not be fully captured by the Calculator, regardless of the accuracy of the information you provide.
+
+**3.4.** The Calculator is not a substitute for professional judgment, thorough assessment, or due diligence. You are solely responsible for verifying and validating any results obtained through use of the Calculator.
+
+## 4. No Warranty
+
+**4.1.** The Service is provided on an "AS IS" and "AS AVAILABLE" basis without warranties of any kind, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, non-infringement, or course of performance.
+
+**4.2.** We do not warrant that the Service will function uninterrupted, secure, or available at any particular time or location, or that any errors or defects will be corrected.
+
+**4.3.** We do not warrant the accuracy, reliability, completeness, or usefulness of any information obtained through the Calculator.
+
+## 5. Ethical Use Requirements
+
+**5.1.** You agree to use the AIHOPS Calculator for legitimate healthcare innovation assessment purposes only.
+
+**5.2.** You agree not to use the Calculator for any purpose that is unlawful, harmful, or unethical, or that could damage, disable, or impair the operation of the Service.
+
+**5.3.** You acknowledge that you are solely responsible for ensuring that your use of the Calculator and any decisions based on its results comply with applicable laws, regulations, and ethical standards in your jurisdiction and professional context.
+
+## 6. Intellectual Property Rights
+
+**6.1.** The AIHOPS methodology, Calculator, website design, content, and all related materials are protected by copyright, trademark, and other intellectual property laws.
+
+**6.2.** You may use the Calculator and download or print results for your personal or internal organizational use only. You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, store, or transmit any of the material on our Service, except as incidental to normal web browsing or as expressly permitted in writing.
+
+**6.3.** No right, title, or interest in or to the Service or any content on the Service is transferred to you, and all rights not expressly granted are reserved.
+
+## 7. Data and Privacy
+
+**7.1.** We collect and process only the information necessary to provide the Service. This may include information you provide when using the Calculator.
+
+**7.2.** We implement reasonable security measures to protect any information collected, but cannot guarantee absolute security.
+
+**7.3.** We do not sell, rent, or lease user data to third parties.
+
+## 8. Limitation of Use
+
+**8.1.** You agree not to use the Service in any way that could damage or overburden the Service.
+
+**8.2.** You agree not to attempt to gain unauthorized access to any portion of the Service or any related systems or networks.
+
+**8.3.** We reserve the right to limit or terminate your access to the Service at our sole discretion, without notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties, or for any other reason.
+
+## 9. Indemnification
+
+**9.1.** You agree to defend, indemnify, and hold harmless us, our affiliates, licensors, and service providers, and our and their respective officers, directors, employees, contractors, agents, licensors, suppliers, successors, and assigns from and against any claims, liabilities, damages, judgments, awards, losses, costs, expenses, or fees (including reasonable attorneys' fees) arising out of or relating to your violation of these Terms or your use of the Service.
+
+## 10. Governing Law and Jurisdiction
+
+**10.1.** These Terms shall be governed by and construed in accordance with the laws of [Jurisdiction], without regard to its conflict of law provisions.
+
+**10.2.** Any legal action or proceeding arising out of or relating to these Terms or your use of the Service shall be brought exclusively in the courts located in [Jurisdiction], and you consent to the personal jurisdiction of such courts.
+
+## 11. Modifications to Terms
+
+**11.1.** We reserve the right to modify or replace these Terms at any time at our sole discretion.
+
+**11.2.** If a revision is material, we will make reasonable efforts to provide notice prior to any new terms taking effect. What constitutes a material change will be determined at our sole discretion.
+
+**11.3.** By continuing to access or use our Service after any revisions become effective, you agree to be bound by the revised terms. If you do not agree to the new terms, you are no longer authorized to use the Service.
+
+## 12. Severability
+
+**12.1.** If any provision of these Terms is held to be unenforceable or invalid, such provision will be changed and interpreted to accomplish the objectives of such provision to the greatest extent possible under applicable law, and the remaining provisions will continue in full force and effect.
+
+## 13. Entire Agreement
+
+**13.1.** These Terms constitute the entire agreement between you and us regarding your use of the Service and supersede all prior and contemporaneous written or oral agreements between you and us.
+
+**13.2.** Any rights not expressly granted herein are reserved.
+
+## 14. Contact Information
+
+**14.1.** Questions or comments about the Service or these Terms may be directed to: contact.aihops@gmail.com
+
+*Last updated: April 2025*
+
+*By using the AIHOPS Calculator, you acknowledge that you have read these Terms and Conditions and agree to be bound by them.*
