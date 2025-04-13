@@ -2,7 +2,7 @@
     "python.testing.unittestArgs": [
         "-v",
         "-s",
-        "./AIHOPS",
+        "AIHOPS/AIHOPS",
         "-p",
         "*test*.py"
     ],
