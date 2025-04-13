@@ -28,9 +28,9 @@ class VoteManager:
             return ResponseFailMsg(res.msg)
         return ResponseSuccessMsg(f"factor {factor.fid} added to project {self.pid}")
 
-    def update_factor(self, factor):
-        with self.lock:
-            self.factors.insert(factor.fid, factor)
+    # def update_factor(self, factor):
+    #     with self.lock:
+    #         self.factors.insert(factor.fid, factor)
 
 
     def remove_factor(self, fid):

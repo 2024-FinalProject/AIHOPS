@@ -147,15 +147,15 @@ class FactorsPool:
                     return factor
         raise KeyError(f"factor {fid} not found")
 
-    #TODO: need to update the scales as well
-    def update_factor(self, actor, fid, factor_name, factor_desc):
-        if fid < 0:
-            return ResponseFailMsg(f"can't update default factor")
-        factor = self._find_factor(actor, fid)
-        res = factor.update(factor_name, factor_desc, self.db_access)
-        if res.success:
-            return ResponseSuccessObj(res.msg, factor)
-        return res
+    # #TODO: need to update the scales as well
+    # def update_factor(self, actor, fid, factor_name, factor_desc):
+    #     if fid < 0:
+    #         return ResponseFailMsg(f"can't update default factor")
+    #     factor = self._find_factor(actor, fid)
+    #     res = factor.update(factor_name, factor_desc, self.db_access)
+    #     if res.success:
+    #         return ResponseSuccessObj(res.msg, factor)
+    #     return res
 
 
     def add_factor(self, actor, factor_name, factor_desc, scales_desc, scales_explanation):
