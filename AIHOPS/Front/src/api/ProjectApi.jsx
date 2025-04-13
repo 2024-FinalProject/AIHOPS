@@ -73,13 +73,17 @@ export const deleteProjectFactor = async (cookie, project_id, factor_id) => {
     });
 };
 
-//TODO: Change this!
-export const updateProjectFactor = async (cookie, factor_id, factor_name, factor_desc) => {
+//TODO: new
+export const updateProjectFactor = async (cookie, factor_id, pid, factor_name, factor_desc, scales_desc, scales_explenation, apply_to_all_inDesign) => {
     return await axios.post(`${API_URL}/project/update-factor`, {
         cookie: cookie,
         fid: factor_id,
-        new_name: factor_name,
-        new_desc: factor_desc
+        pid: pid,
+        name: factor_name,
+        desc: factor_desc,
+        scales_desc: scales_desc,
+        scales_explenation: scales_explenation,
+        apply_to_all_inDesign: apply_to_all_inDesign
     });
 };
 

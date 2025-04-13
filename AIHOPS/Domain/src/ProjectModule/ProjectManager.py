@@ -1,3 +1,5 @@
+from threading import RLock
+
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectMembers import DBProjectMembers
@@ -21,6 +23,9 @@ class ProjectManager():
         self.factor_pool = FactorsPool(self.db_access)
         self.load_from_db()
         self.gmailor = Gmailor()
+        self.project_lock = RLock()
+
+
 
     def _verify_unique_project(self, actor, name, desc):
         """raises error if there is active project with same name and description"""
@@ -54,7 +59,8 @@ class ProjectManager():
         project = Project(pid, name, description, owner, self.db_access)
         # add to lists
         self.projects.insert(pid, project)
-        self.owners.insert(owner, project)
+        with self.project_lock:
+            self.owners.insert(owner, project)
         msg = f"actor: {owner} sccessfully created project: {pid, name, description}"
         # default_factors:
         if is_default_factors:
@@ -395,15 +401,72 @@ class ProjectManager():
                 ps.append(project)
         return ps
 
-    def update_factor(self, actor, fid, name, desc):
-        res = self.factor_pool.update_factor(actor, fid, name, desc)
-        if not res.success:
-            return res
-        factor = res.result
-        projects = self._get_projects_containing_factor(actor, fid)
-        for project in projects:
-            project.update_factor(factor)
-        return res
+    def get_owners_projects_with_factor_per_status(self, actor, fid):
+        with self.project_lock:
+            ownersProjects = self.owners.get(actor)
+            inDesign = set()
+            Active = set()
+            Archived = set()
+            for project in ownersProjects:
+                if project.has_factor(fid):
+                    if project.archived:
+                        Archived.add(project.pid)
+                    elif project.published:
+                        Active.add(project.pid)
+                    else:
+                        inDesign.add(project.pid)
+        return inDesign, Active, Archived
+
+
+    def update_factor(self, actor, fid, pid, name, desc, scales_desc, scales_explenation, apply_to_all_inDesign):
+        """if there is an active or an archived project with the factor actr is trying to update => must change name/ or desc and a new factor will be created
+            also true id there is a project in design and apply_to_all_inDesgin = False
+            if no projects except this one exists or there are only projects in design containing this actor then
+            delete current factor and create a new one instead"""
+        # verify actor is owner of pid
+        project = self._verify_owner(pid, actor)
+        # load inDesign \ pid, Active, Archived projects of actor with fid in them
+        inDesign, Active, Archived = self.get_owners_projects_with_factor_per_status(actor, fid)
+        inDesign.remove(project.pid)
+        # if there is a project in Archived or Published => create new factor, remove current from project
+        if fid < 0 or (len(Active) > 0 or len(Archived) > 0) or (len(inDesign) > 0 and not apply_to_all_inDesign):
+            res = self.add_project_factor(pid, actor, name, desc, scales_desc, scales_explenation)
+            if not res.success:
+                return ResponseFailMsg("you have an active or an archived project with current factor, "
+                                           "in order to update in current project must update factors name or description")
+            self.delete_factor(pid, actor, fid)
+        #   else: delete current factor and make a new one
+        else:
+            self.delete_factor(pid, actor, fid)
+            self.delete_factor_from_pool(actor, fid)
+            res = self.add_project_factor(pid, actor, name, desc, scales_desc, scales_explenation)
+            if not res.success:
+                return res
+        if apply_to_all_inDesign:
+            # find factor id
+            factors = self.get_project_factors(pid, actor).result
+            new_fid = -1
+            for factor in factors:
+                if factor["name"] == name and factor["description"] == desc:
+                    new_fid = factor["id"]
+                    break
+
+            for p in inDesign:
+                self.delete_factor(p, actor, fid)
+                self.add_factors(p, actor, [new_fid])
+
+        return ResponseSuccessMsg(f"factor {fid} has been updated")
+
+
+    # def update_factor(self, actor, fid, name, desc):
+    #     res = self.factor_pool.update_factor(actor, fid, name, desc)
+    #     if not res.success:
+    #         return res
+    #     factor = res.result
+    #     projects = self._get_projects_containing_factor(actor, fid)
+    #     for project in projects:
+    #         project.update_factor(factor)
+    #     return res
 
 
     def get_projects_factor_pool(self, actor, pid):
