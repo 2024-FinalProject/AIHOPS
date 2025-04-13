@@ -428,31 +428,39 @@ class ProjectManager():
         # load inDesign \ pid, Active, Archived projects of actor with fid in them
         inDesign, Active, Archived = self.get_owners_projects_with_factor_per_status(actor, fid)
         inDesign.remove(project.pid)
-        # if there is a project in Archived or Published => create new factor, remove current from project
-        if fid < 0 or (len(Active) > 0 or len(Archived) > 0) or (len(inDesign) > 0 and not apply_to_all_inDesign):
-            res = self.add_project_factor(pid, actor, name, desc, scales_desc, scales_explenation)
-            if not res.success:
-                return ResponseFailMsg("you have an active or an archived project with current factor, "
-                                           "in order to update in current project must update factors name or description")
+
+        try:
             self.delete_factor(pid, actor, fid)
-        #   else: delete current factor and make a new one
-        else:
-            self.delete_factor(pid, actor, fid)
-            self.delete_factor_from_pool(actor, fid)
-            res = self.add_project_factor(pid, actor, name, desc, scales_desc, scales_explenation)
-            if not res.success:
-                return res
+        except:
+            pass
+
+        if (len(Active) == 0 and len(Archived) == 0) and (apply_to_all_inDesign or len(inDesign) == 0):
+            # delete factor from all projects in design
+            for p in inDesign:
+                self.delete_factor(p, actor, fid)
+
+
+        res = self.add_project_factor(pid, actor, name, desc, scales_desc, scales_explenation)
+        if not res.success:
+            self.add_factors(pid, actor, [fid])
+            for p in inDesign:
+                self.add_factors(p, actor, [fid])
+            return ResponseFailMsg("you have an active or an archived project with current factor, "
+                                   "in order to update in current project must update factors name or description")
+
         if apply_to_all_inDesign:
-            # find factor id
-            factors = self.get_project_factors(pid, actor).result
-            new_fid = -1
+            # find factor from pool
+            factors = self.factor_pool.get_factors(actor)
             for factor in factors:
                 if factor["name"] == name and factor["description"] == desc:
                     new_fid = factor["id"]
                     break
 
             for p in inDesign:
-                self.delete_factor(p, actor, fid)
+                try:
+                    self.delete_factor(p, actor, fid)
+                except:
+                    pass
                 self.add_factors(p, actor, [new_fid])
 
         return ResponseSuccessMsg(f"factor {fid} has been updated")

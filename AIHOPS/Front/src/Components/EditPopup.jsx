@@ -540,11 +540,14 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     setMsg(response.data.message);
                     setIsSuccess(true);
                     setReloadTrigger(prev => prev + 1);
+                    await fetchProjects();
+                    await fetch_selected_project(selectedProject);
+                    selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+                    fetch_factors_pool();
                     setEditingFactor(false);
                     setShowExistingContentFactors(true);
-                    await fetch_selected_project(selectedProject);
-
                 } else {
+                    alert(response.data.message);
                     setMsg(response.data.message);
                     setIsSuccess(false);
                 }
@@ -1059,7 +1062,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                                 fontSize: '0.85rem'
                                                             }}
                                                         >
-                                                            Edit
+                                                            Edit & Add
                                                         </button>
                                                         <button
                                                             className="action-btn delete-btn"
