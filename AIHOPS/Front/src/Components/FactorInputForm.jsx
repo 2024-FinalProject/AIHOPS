@@ -26,11 +26,13 @@ const FactorInputForm = ({
         }
 
         if (scaleDescriptions.some(desc => !desc)) {
-            setAlertMessage("Please fill in all scale descriptions.");
+            setAlertMessage("Please fill in all scale descriptions. Descriptions are required for all score levels.");
             setAlertType("warning");
             setShowAlert(true);
             return;
         }
+        
+        // Note: We don't validate explanations since they are optional
 
         onSubmit({
             name: newFactorName,
@@ -56,18 +58,18 @@ const FactorInputForm = ({
                   value={newFactorName}
                   onChange={(e) => setNewFactorName(e.target.value)}
                   className="factor-input"
-                  placeholder="Enter factor name"
+                  placeholder="Enter factor name (Required)"
                 />
               </div>
 
               <div className="factor-input-group">
                 <label className="factor-input-label"><b><u>Assessment Dimension Description</u>:</b></label>
-                <input
-                  type="text"
+                <textarea
                   value={newFactorDescription}
                   onChange={(e) => setNewFactorDescription(e.target.value)}
                   className="factor-input"
-                  placeholder="Enter factor description"
+                  placeholder="Enter factor description (Required)"
+                  rows="3"
                 />
               </div>
             </div>
@@ -76,8 +78,8 @@ const FactorInputForm = ({
                 <thead className="factor-table-header">
                     <tr>
                     <th>Score</th>
-                    <th>Description</th>
-                    <th>Explanation</th>
+                    <th>Description (Required)</th>
+                    <th>Explanation (Optional)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,7 +97,7 @@ const FactorInputForm = ({
                             setScaleDescriptions(newDescs);
                             }}
                             className="factor-table-input"
-                            placeholder="Enter description"
+                            placeholder="Enter description (Required)"
                             rows="2"
                         />
                         </td>
@@ -108,7 +110,7 @@ const FactorInputForm = ({
                             setScaleExplanations(newExps);
                             }}
                             className="factor-table-input"
-                            placeholder="Enter explanation"
+                            placeholder="Enter explanation (Optional)"
                             rows="2"
                         />
                         </td>
