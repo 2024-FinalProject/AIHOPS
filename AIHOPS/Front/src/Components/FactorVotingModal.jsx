@@ -72,6 +72,11 @@ const FactorVotingModal = ({
 
   const selectedFactor = project.factors[currentFactorIndex];
 
+  // Check if the current factor has at least one explanation filled
+  const hasExplanations = selectedFactor && 
+    selectedFactor.scales_explanation && 
+    Object.values(selectedFactor.scales_explanation).some(explanation => explanation && explanation.trim() !== '');
+
   const getValueLabel = (v) => {
     switch (v) {
       case 0:
@@ -199,7 +204,9 @@ const FactorVotingModal = ({
                   <tr>
                     <th style={{ textAlign: "center" }}>Vote</th>
                     <th>Description</th>
-                    <th>Explanation</th>
+                    {hasExplanations && (
+                      <th>Explanation</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -224,9 +231,11 @@ const FactorVotingModal = ({
                         <td className="description-cell">
                           {selectedFactor.scales_desc?.[v] || ""}
                         </td>
-                        <td className="explanation-cell">
-                          {selectedFactor.scales_explanation?.[v] || ""}
-                        </td>
+                        {hasExplanations && (
+                          <td className="explanation-cell">
+                            {selectedFactor.scales_explanation?.[v] || ""}
+                          </td>
+                        )}
                       </tr>
                     );
                   })}

@@ -49,7 +49,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 1.5rem;
 }
 
 /* Labels for the voting scale */
@@ -191,16 +191,10 @@
   color: #6b7280;
 }
 
-/* Modal styling improvements */
-.vote-container {
-  padding: 1rem;
-  background-color: #f9fafb;
-  border-radius: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.factor-header {
-  margin-bottom: 1.5rem;
+/* Factor table container */
+.factor-table-container {
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
 }
 
 /* Table styling improvements */
@@ -208,7 +202,6 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 1rem 0;
   border-radius: 0.5rem;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -234,7 +227,16 @@
 }
 
 .factor-table .vote-cell {
-  width: 70px;
+  width: 80px;
+  text-align: center;
+}
+
+.factor-table .description-cell {
+  width: 40%;
+}
+
+.factor-table .explanation-cell {
+  width: 40%;
 }
 
 .factor-table tr.selected-row {
@@ -243,6 +245,34 @@
 
 .factor-table tr:hover:not(.selected-row) {
   background-color: #f9fafb;
+}
+
+/* Factor table rows */
+.factor-table-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.factor-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.factor-table-row.selected-row {
+  background-color: #f0f9ff;
+}
+
+/* Vote option container in table */
+.vote-option-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.vote-label {
+  font-size: 0.7rem;
+  color: #6b7280;
+  white-space: nowrap;
 }
 
 /* Mobile adjustments */
@@ -261,5 +291,13 @@
   .factor-table td {
     padding: 0.5rem;
     font-size: 0.9rem;
+  }
+  
+  .factor-table .vote-cell {
+    width: 60px;
+  }
+  
+  .vote-label {
+    font-size: 0.65rem;
   }
 }
