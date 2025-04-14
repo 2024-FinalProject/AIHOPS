@@ -21,14 +21,16 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const termsRef = useRef(null);
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
     if (!termsAccepted) {
-      setShowTermsConditions(true);
-      setMsg("Please read and accept the terms and conditions.");
+      setMsg("Please read and accept the terms and conditions, then alick on register again.");
       setIsSuccess(false);
+      await delay(3000); //3 sec
+      setShowTermsConditions(true);
       return;
     }
 
