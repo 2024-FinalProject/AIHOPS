@@ -72,12 +72,17 @@ class ProjectManager():
     def add_project_factor(self, pid, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
         """ adds of factor to a project"""
         # check valid project, and owned by owner
-        if(factor_name == "" or factor_desc == ""):
-            return ResponseFailMsg("factor name and description cannot be empty")
         project = self._verify_owner(pid, actor)
-        factor = self.factor_pool.add_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
+        factor = self._create_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
         project.add_factor(factor)
         return ResponseSuccessMsg(f"actor: {actor} added factor {factor.name} to project {project.name}")
+
+    def _create_factor(self, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
+        """ creates a new factor for actors factor pool """
+        if(factor_name == "" or factor_desc == ""):
+            return ResponseFailMsg("factor name and description cannot be empty")
+        factor = self.factor_pool.add_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
+        return factor
 
     def add_factors(self, pid, actor, factor_ids):
         project = self._verify_owner(pid, actor)
@@ -423,39 +428,44 @@ class ProjectManager():
             also true id there is a project in design and apply_to_all_inDesgin = False
             if no projects except this one exists or there are only projects in design containing this actor then
             delete current factor and create a new one instead"""
-        # verify actor is owner of pid
-        project = self._verify_owner(pid, actor)
         # load inDesign \ pid, Active, Archived projects of actor with fid in them
+        print(f"project manage, update_factor: pid: {pid}")
         inDesign, Active, Archived = self.get_owners_projects_with_factor_per_status(actor, fid)
-        inDesign.remove(project.pid)
-        # if there is a project in Archived or Published => create new factor, remove current from project
-        if fid < 0 or (len(Active) > 0 or len(Archived) > 0) or (len(inDesign) > 0 and not apply_to_all_inDesign):
-            res = self.add_project_factor(pid, actor, name, desc, scales_desc, scales_explenation)
-            if not res.success:
-                return ResponseFailMsg("you have an active or an archived project with current factor, "
-                                           "in order to update in current project must update factors name or description")
+        project = None
+        deleted = False
+        if pid >= 0:
+            project = self._verify_owner(pid, actor)
+            inDesign.discard(pid)
             self.delete_factor(pid, actor, fid)
-        #   else: delete current factor and make a new one
-        else:
-            self.delete_factor(pid, actor, fid)
-            self.delete_factor_from_pool(actor, fid)
-            res = self.add_project_factor(pid, actor, name, desc, scales_desc, scales_explenation)
-            if not res.success:
-                return res
-        if apply_to_all_inDesign:
-            # find factor id
-            factors = self.get_project_factors(pid, actor).result
-            new_fid = -1
-            for factor in factors:
-                if factor["name"] == name and factor["description"] == desc:
-                    new_fid = factor["id"]
-                    break
+        try:
+            if (fid >= 0) and (len(Active) == 0 and len(Archived) == 0) and (len(inDesign) == 0 or apply_to_all_inDesign):
+                for p in inDesign:
+                    self.delete_factor(p, actor, fid)
+                old_factor = self.factor_pool._find_factor(actor, fid)
+                self.delete_factor_from_pool(actor, fid)
+                deleted = True
 
-            for p in inDesign:
-                self.delete_factor(p, actor, fid)
-                self.add_factors(p, actor, [new_fid])
+            factor = self._create_factor(actor, name, desc, scales_desc, scales_explenation)
 
-        return ResponseSuccessMsg(f"factor {fid} has been updated")
+            if project is not None:
+                project.add_factor(factor)
+            if apply_to_all_inDesign:
+                for p in inDesign:
+                    self.projects.get(p).add_factor(factor)
+        except Exception as e:
+            if deleted:
+                restored_factor = self.factor_pool.add_factor(actor, old_factor.name, old_factor.description, old_factor.scales_desc, old_factor.scales_explanation)
+                fid = restored_factor.fid
+            if pid >= 0:
+                self.add_factors(pid, actor, [fid])
+                if apply_to_all_inDesign:
+                    for p in inDesign:
+                        self.add_factors(p, actor, [fid])
+
+            return ResponseFailMsg(f"updating factor {fid} failed: {e}")
+
+        return ResponseSuccessMsg(f"factor {fid} updated successfully")
+
 
 
     # def update_factor(self, actor, fid, name, desc):

@@ -33,7 +33,7 @@ class VoteManager:
         if res.success:
             self.factors.pop(fid)
             return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
-        return ResponseFailMsg(res.message)
+        return ResponseFailMsg(res.msg)
 
     def set_factor_vote(self, actor, fid, score, persist=True):
         with self.lock:

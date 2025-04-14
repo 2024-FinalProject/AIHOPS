@@ -40,7 +40,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [editedScaleExplanations, setEditedScaleExplanations] = useState(Array(5).fill(""));
     const [fromExistingFactorsPage, setFromExistingFactorsPage] = useState(true);
     const [addedMember, setAddedMember] = useState(false);
-    
+    const [updateFactorFromPool, setUpdateFactorFromPool] = useState(false)
+
     // Number of pages for the Project Factors
     const totalPagesFactors = Math.ceil(selectedProject.factors.length / itemsPerPage);
     // Current page index (0-based) for the Project Factors
@@ -500,7 +501,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
-    const handleStartEditFactor = (factor) => {
+    const handleStartEditFactor = (factor, isFromPool) => {
+        setUpdateFactorFromPool(isFromPool)
         setEditingFactor(factor);
         setEditedFactorName(factor.name);
         setEditedFactorDescription(factor.description);
@@ -534,19 +536,27 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             // TODO: Implement the actual API call here
             // alert("Not implemented yet!");
             try {
-                const response = await updateProjectFactor(cookie, editingFactor.id, selectedProject.id, editedFactorName, editedFactorDescription, editedScaleDescriptions, editedScaleExplanations, false);
-
+                let projectId = selectedProject.id;
+                if (updateFactorFromPool) {
+                    projectId = -1;
+                }
+                const response = await updateProjectFactor(cookie, editingFactor.id, projectId, editedFactorName, editedFactorDescription, editedScaleDescriptions, editedScaleExplanations, false);
+                console.log(typeof response.data);
                 if (response.data.success) {
                     setMsg(response.data.message);
                     setIsSuccess(true);
                     setReloadTrigger(prev => prev + 1);
+                    await fetchProjects();
+                    await fetch_selected_project(selectedProject);
+                    selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+                    fetch_factors_pool();
                     setEditingFactor(false);
                     setShowExistingContentFactors(true);
-                    await fetch_selected_project(selectedProject);
 
                 } else {
-                    setMsg(response.data.message);
-                    setIsSuccess(false);
+                    // setMsg(response.data.message);
+                    // setIsSuccess(false);
+                    alert(response.data.message)
                 }
             } catch (error) {
               console.error("Failed to update: ", error);
@@ -859,7 +869,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     <div style={{ display: 'flex', gap: '6px' }}>
                                                         <button
                                                             className="action-btn"
-                                                            onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(true)}}
+                                                            onClick={() => {handleStartEditFactor(factor, false), setFromExistingFactorsPage(true)}}
                                                             style={{
                                                                 padding: '4px 8px',
                                                                 backgroundColor: '#20b2aa',
@@ -1048,7 +1058,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     <div style={{ display: 'flex', gap: '6px' }}>
                                                         <button
                                                             className="action-btn"
-                                                            onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(false)}}
+                                                            onClick={() => {handleStartEditFactor(factor, true), setFromExistingFactorsPage(false)}}
                                                             style={{
                                                                 padding: '4px 8px',
                                                                 backgroundColor: '#20b2aa',
