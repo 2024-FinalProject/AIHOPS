@@ -546,23 +546,24 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                     setMsg(response.data.message);
                     setIsSuccess(true);
                     setReloadTrigger(prev => prev + 1);
-                    await fetchProjects();
-                    await fetch_selected_project(selectedProject);
-                    selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
-                    fetch_factors_pool();
-                    setEditingFactor(false);
-                    setShowExistingContentFactors(true);
-
                 } else {
                     // setMsg(response.data.message);
                     // setIsSuccess(false);
                     alert(response.data.message)
                 }
             } catch (error) {
-              console.error("Failed to update: ", error);
-              setMsg("Failed to update");
-              setIsSuccess(false);
+                console.error("Failed to update: ", error);
+                setMsg("Failed to update");
+                setIsSuccess(false);
+
             }
+
+            await fetchProjects();
+            await fetch_selected_project(selectedProject);
+            selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+            fetch_factors_pool();
+            setEditingFactor(false);
+            setShowExistingContentFactors(true);
         }
     };
 
