@@ -27,7 +27,7 @@ const Register = () => {
     e.preventDefault();
 
     if (!termsAccepted) {
-      setMsg("Please read and accept the terms and conditions, then alick on register again.");
+      setMsg("Please read and accept the terms and conditions, then click on register again.");
       setIsSuccess(false);
       await delay(3000); //3 sec
       setShowTermsConditions(true);
