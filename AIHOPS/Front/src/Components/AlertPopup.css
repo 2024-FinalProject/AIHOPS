@@ -84,3 +84,22 @@
     from { transform: translateY(20px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
   }
+
+
+  .confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .confirmation-button.confirm {
+    background-color: #4BB543;
+    color: white;
+  }
+  
+  .confirmation-button.cancel {
+    background-color: #FF4D4D;
+    color: white;
+  }
+  
