@@ -51,6 +51,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const currentPagePool = poolStartIndex / itemsPerPage;
 
     const [reloadTrigger, setReloadTrigger] = useState(0);
+    const [UpdateAllProjectsInDesign, setUpdateAllProjectsInDesign] = useState(false);
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -540,7 +541,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                 if (updateFactorFromPool) {
                     projectId = -1;
                 }
-                const response = await updateProjectFactor(cookie, editingFactor.id, projectId, editedFactorName, editedFactorDescription, editedScaleDescriptions, editedScaleExplanations, false);
+                const response = await updateProjectFactor(cookie, editingFactor.id, projectId, editedFactorName, editedFactorDescription, editedScaleDescriptions, editedScaleExplanations, UpdateAllProjectsInDesign);
                 console.log(typeof response.data);
                 if (response.data.success) {
                     setMsg(response.data.message);
@@ -563,7 +564,13 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
             fetch_factors_pool();
             setEditingFactor(false);
-            setShowExistingContentFactors(true);
+            
+            if(fromExistingFactorsPage){
+                setShowExistingContentFactors(true);
+            }
+            else{
+                setShowPoolContentFactors(true);
+            }
         }
     };
 
@@ -635,7 +642,18 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 ))}
                             </tbody>
                         </table>
-                        <div className="factor-button-group">
+                        <div className="checkbox-container">
+                            <input
+                                type="checkbox"
+                                id="UpdateAllProjectsInDesign"
+                                className="styled-checkbox"
+                                onChange={(e) => setUpdateAllProjectsInDesign(e.target.checked)}
+                            />
+                            <label htmlFor="UpdateAllProjectsInDesign" className="checkbox-label">
+                                Update all projects in design?
+                            </label>
+                        </div>
+                        <div className="factor-button-group" style = {{marginRight: '50px'}}>
                             <button 
                                 className="factor-button factor-cancel-button"
                                 onClick={handleCancelEdit}
@@ -646,7 +664,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 className="factor-button factor-submit-button"
                                 onClick={handleUpdateEditedFactor}
                             >
-                                Update Assessment Dimension
+                                Update
                             </button>
                         </div>
                     </div>
