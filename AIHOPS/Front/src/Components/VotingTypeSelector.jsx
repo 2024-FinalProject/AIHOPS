@@ -21,14 +21,19 @@ const VotingTypeSelector = ({
           onClick={() => onSelectVotingType('factors')}
         >
           Assessment Dimensions Vote
-          {isFactorsVoted && <span className="check-mark">✓</span>}
+          <span className={`vote-icon ${isFactorsVoted ? 'voted' : 'not-voted'}`}>
+            {isFactorsVoted ? '☑' : '☐'}
+          </span>
         </button>
+
         <button 
           className={`voting-type-btn ${isDScoreVoted ? 'completed' : ''}`}
           onClick={() => onSelectVotingType('dscore')} 
         >
           Severity Factors Vote
-          {isDScoreVoted && <span className="check-mark">✓</span>}
+          <span className={`vote-icon ${isDScoreVoted ? 'voted' : 'not-voted'}`}>
+            {isDScoreVoted ? '☑' : '⬜'}
+          </span>
         </button>
       </CardContent>
     </Card>
