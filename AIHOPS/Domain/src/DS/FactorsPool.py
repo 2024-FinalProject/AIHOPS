@@ -131,7 +131,7 @@ class FactorsPool:
         return DEFAULT_FACTORS_IDS
 
     def _check_id_dup_factor(self, actor, factor_name, factor_description):
-        factors_of_member = self.members.get(actor)
+        factors_of_member = self.members.get(actor) + DEFAULT_FACTORS
         for factor in factors_of_member:
             if factor.name == factor_name and factor.description == factor_description:
                 raise NameError(f"factor name {factor_name} already exists")

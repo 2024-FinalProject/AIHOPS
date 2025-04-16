@@ -75,7 +75,7 @@ class ProjectManager():
         project = self._verify_owner(pid, actor)
         factor = self._create_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
         project.add_factor(factor)
-        return ResponseSuccessMsg(f"actor: {actor} added factor {factor.name} to project {project.name}")
+        return ResponseSuccessObj(f"actor: {actor} added factor {factor.name} to project {project.name}", factor)
 
     def _create_factor(self, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
         """ creates a new factor for actors factor pool """
@@ -464,7 +464,7 @@ class ProjectManager():
 
             return ResponseFailMsg(f"updating factor {fid} failed: {e}")
 
-        return ResponseSuccessMsg(f"factor {fid} updated successfully")
+        return ResponseSuccessObj(f"factor {fid} updated successfully", factor)
 
 
 
