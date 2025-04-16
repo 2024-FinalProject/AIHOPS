@@ -75,7 +75,7 @@
 }
 
 .modal-content {
-  background-color: #f0f7ff; /* Lighter blue background */
+  background-color: var(--voting-on-factor-page-background) !important;
   border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   width: 90%;
@@ -388,14 +388,15 @@
 
 .progress-text {
   text-align: center;
-  font-size: 12px;
-  color: #4b5563;
-  margin-top: 2px;
+  font-size: 13px;
+  font-weight: bolder;
+  color: black;
+  margin-top: -5px;
 }
 
 /* Make factor content more compact */
 .factor-content {
-  background-color: white;
+  background-color: var(--voting-on-factor-page-background2);
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 12px;
