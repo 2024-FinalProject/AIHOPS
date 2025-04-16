@@ -794,3 +794,126 @@ class ProjectTests(unittest.TestCase):
         res = self.server.remove_member(self.cookie1, project_id, "Bob")
         self.assertFalse(res.success, res.msg)
         self.server.logout(self.cookie1)
+
+
+    def _create_default_project_in_design(self, name="Project1", desc="Description1"):
+        pid_res = self.server.create_project(self.cookie1, name, desc, True)
+        pid = pid_res.result
+        self.server.confirm_project_factors(self.cookie1, pid)
+        self.server.confirm_project_severity_factors(self.cookie1, pid)
+        self.server.add_member(self.cookie1, pid, "Bob")
+        return pid
+
+    def _check_original_factor_removed_and_new_added(self, pid, fid, new_factor_name):
+        factors = self.server.get_project_factors(self.cookie1, pid).result
+        removed = True
+        added = False
+        for factor in factors:
+            if factor["id"] == fid:
+                removed = False
+            if factor["name"] == new_factor_name:
+                added = True
+        return removed, added
+
+    # only 1 in design
+    def test_update_default_factor_only_cur_in_design(self):
+        # signUp and login, create a project with a new factor
+        self.server.login(self.cookie1, "Alice", "")
+        pid = self._create_default_project_in_design()
+        f = self.server.get_project_factors(self.cookie1, pid).result
+        f = f[3]
+        res = self.server.update_factor(self.cookie1, f["id"], pid, "new factor", f["description"],
+                                  f["scales_desc"], f["scales_explanation"], False)
+        removed, added = self._check_original_factor_removed_and_new_added(pid, f["id"], "new factor")
+        self.assertTrue(removed, f"factor {f['id']} has not been removed")
+        self.assertTrue(added, f"new factor has not been added")
+
+    def test_update_default_factor_2_in_design(self):
+        # signUp and login, create a project with a new factor
+        self.server.login(self.cookie1, "Alice", "")
+        pid = self._create_default_project_in_design()
+        pid2 = self._create_default_project_in_design("Project2", "desc2")
+        f = self.server.get_project_factors(self.cookie1, pid).result
+        f = f[3]
+        res = self.server.update_factor(self.cookie1, f["id"], pid, "new factor", f["description"],
+                                  f["scales_desc"], f["scales_explanation"], False)
+        removed, added = self._check_original_factor_removed_and_new_added(pid2, f["id"], "new factor")
+        self.assertFalse(removed, f"factor {f['id']} has not been removed")
+        self.assertFalse(added, f"new factor has not been added")
+
+
+    def test_update_default_factor_2_in_design_apply(self):
+        # signUp and login, create a project with a new factor
+        self.server.login(self.cookie1, "Alice", "")
+        pid = self._create_default_project_in_design()
+        pid2 = self._create_default_project_in_design("Project2", "desc2")
+        f = self.server.get_project_factors(self.cookie1, pid).result
+        f = f[3]
+        res = self.server.update_factor(self.cookie1, f["id"], pid, "new factor", f["description"],
+                                  f["scales_desc"], f["scales_explanation"], True)
+        removed, added = self._check_original_factor_removed_and_new_added(pid2, f["id"], "new factor")
+        self.assertTrue(removed, f"factor {f['id']} has not been removed")
+        self.assertTrue(added, f"new factor has not been added")
+
+    def _find_factor_id(self, cookie, pid, name, desc):
+        factors = self.server.get_project_factors(cookie, pid).result
+        for f in factors:
+            if f['name'] == name and f['description'] == desc:
+                return f['id']
+
+    def test_update_default_factor_2_in_design_apply_and_1_published(self):
+        # signUp and login, create a project with a new factor
+        self.server.login(self.cookie1, "Alice", "")
+        pid = self._create_default_project_in_design()
+        res = self.server.add_project_factor(self.cookie1, pid, "new factor", "new desc", ["1", "1", "1", "1", "1"], ["1", "1", "1", "1", "1"])
+        fid = self._find_factor_id(self.cookie1, pid, "new factor", "new desc")
+
+        pid2 = self._create_default_project_in_design("Project2", "desc2")
+        self.server.set_project_factors(self.cookie1, pid2, [fid])
+        pid3 = self._create_default_project_in_design("Project3", "desc3")
+        self.server.set_project_factors(self.cookie1, pid3, [fid])
+
+        self.server.confirm_project_factors(self.cookie1, pid2)
+        self.server.confirm_project_factors(self.cookie1, pid3)
+
+        self.server.confirm_project_factors(self.cookie1, pid2)
+        self.server.confirm_project_factors(self.cookie1, pid3)
+
+        self.server.publish_project(self.cookie1, pid3)
+
+        res = self.server.update_factor(self.cookie1, fid, pid, "updated", "updated",
+                                  ["1", "1", "1", "1", "1"], ["1", "1", "1", "1", "1"], True)
+        removed, added = self._check_original_factor_removed_and_new_added(pid, fid, "updated")
+        self.assertTrue(removed, f"factor {fid} has not been removed")
+        self.assertTrue(added, f"new factor has not been added")
+
+        res = self.server.update_factor(self.cookie1, fid, pid, "updated", "updated",
+                                        ["1", "1", "1", "1", "1"], ["1", "1", "1", "1", "1"], True)
+        removed, added = self._check_original_factor_removed_and_new_added(pid3, fid, "updated")
+        self.assertFalse(removed, f"factor {fid} has not been removed")
+        self.assertFalse(added, f"new factor has not been added")
+
+    def test_update_default_factor_2_in_design_apply_and_1_archived_fail_not_unique(self):
+        # signUp and login, create a project with a new factor
+        self.server.login(self.cookie1, "Alice", "")
+        pid = self._create_default_project_in_design()
+        res = self.server.add_project_factor(self.cookie1, pid, "new factor", "new desc", ["1", "1", "1", "1", "1"], ["1", "1", "1", "1", "1"])
+        fid = self._find_factor_id(self.cookie1, pid, "new factor", "new desc")
+
+        pid2 = self._create_default_project_in_design("Project2", "desc2")
+        self.server.set_project_factors(self.cookie1, pid2, [fid])
+        pid3 = self._create_default_project_in_design("Project3", "desc3")
+        self.server.set_project_factors(self.cookie1, pid3, [fid])
+
+        self.server.confirm_project_factors(self.cookie1, pid2)
+        self.server.confirm_project_factors(self.cookie1, pid3)
+
+        self.server.confirm_project_factors(self.cookie1, pid2)
+        self.server.confirm_project_factors(self.cookie1, pid3)
+
+        self.server.publish_project(self.cookie1, pid3)
+        self.server.archive_project(self.cookie1, pid3)
+
+        res = self.server.update_factor(self.cookie1, fid, pid, "new factor", "new desc",
+                                  ["1", "1", "1", "1", "1"], ["1", "1", "1", "1", "1"], True)
+        self.assertFalse(res.success, f"factor {fid} has not been removed")

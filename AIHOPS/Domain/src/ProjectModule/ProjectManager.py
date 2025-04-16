@@ -1,3 +1,5 @@
+from threading import RLock
+
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectMembers import DBProjectMembers
@@ -21,6 +23,9 @@ class ProjectManager():
         self.factor_pool = FactorsPool(self.db_access)
         self.load_from_db()
         self.gmailor = Gmailor()
+        self.project_lock = RLock()
+
+
 
     def _verify_unique_project(self, actor, name, desc):
         """raises error if there is active project with same name and description"""
@@ -54,7 +59,8 @@ class ProjectManager():
         project = Project(pid, name, description, owner, self.db_access)
         # add to lists
         self.projects.insert(pid, project)
-        self.owners.insert(owner, project)
+        with self.project_lock:
+            self.owners.insert(owner, project)
         msg = f"actor: {owner} sccessfully created project: {pid, name, description}"
         # default_factors:
         if is_default_factors:
@@ -66,12 +72,17 @@ class ProjectManager():
     def add_project_factor(self, pid, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
         """ adds of factor to a project"""
         # check valid project, and owned by owner
+        project = self._verify_owner(pid, actor)
+        factor = self._create_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
+        project.add_factor(factor)
+        return ResponseSuccessObj(f"actor: {actor} added factor {factor.name} to project {project.name}", factor)
+
+    def _create_factor(self, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
+        """ creates a new factor for actors factor pool """
         if(factor_name == "" or factor_desc == ""):
             return ResponseFailMsg("factor name and description cannot be empty")
-        project = self._verify_owner(pid, actor)
         factor = self.factor_pool.add_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
-        project.add_factor(factor)
-        return ResponseSuccessMsg(f"actor: {actor} added factor {factor.name} to project {project.name}")
+        return factor
 
     def add_factors(self, pid, actor, factor_ids):
         project = self._verify_owner(pid, actor)
@@ -395,15 +406,77 @@ class ProjectManager():
                 ps.append(project)
         return ps
 
-    def update_factor(self, actor, fid, name, desc):
-        res = self.factor_pool.update_factor(actor, fid, name, desc)
-        if not res.success:
-            return res
-        factor = res.result
-        projects = self._get_projects_containing_factor(actor, fid)
-        for project in projects:
-            project.update_factor(factor)
-        return res
+    def get_owners_projects_with_factor_per_status(self, actor, fid):
+        with self.project_lock:
+            ownersProjects = self.owners.get(actor)
+            inDesign = set()
+            Active = set()
+            Archived = set()
+            for project in ownersProjects:
+                if project.has_factor(fid):
+                    if project.archived:
+                        Archived.add(project.pid)
+                    elif project.published:
+                        Active.add(project.pid)
+                    else:
+                        inDesign.add(project.pid)
+        return inDesign, Active, Archived
+
+
+    def update_factor(self, actor, fid, pid, name, desc, scales_desc, scales_explenation, apply_to_all_inDesign):
+        """if there is an active or an archived project with the factor actr is trying to update => must change name/ or desc and a new factor will be created
+            also true id there is a project in design and apply_to_all_inDesgin = False
+            if no projects except this one exists or there are only projects in design containing this actor then
+            delete current factor and create a new one instead"""
+        # load inDesign \ pid, Active, Archived projects of actor with fid in them
+        print(f"project manage, update_factor: pid: {pid}")
+        inDesign, Active, Archived = self.get_owners_projects_with_factor_per_status(actor, fid)
+        project = None
+        deleted = False
+        if pid >= 0:
+            project = self._verify_owner(pid, actor)
+            inDesign.discard(pid)
+            self.delete_factor(pid, actor, fid)
+        try:
+            if (fid >= 0) and (len(Active) == 0 and len(Archived) == 0) and (len(inDesign) == 0 or apply_to_all_inDesign):
+                for p in inDesign:
+                    self.delete_factor(p, actor, fid)
+                old_factor = self.factor_pool._find_factor(actor, fid)
+                self.delete_factor_from_pool(actor, fid)
+                deleted = True
+
+            factor = self._create_factor(actor, name, desc, scales_desc, scales_explenation)
+
+            if project is not None:
+                project.add_factor(factor)
+            if apply_to_all_inDesign:
+                for p in inDesign:
+                    self.projects.get(p).add_factor(factor)
+        except Exception as e:
+            if deleted:
+                restored_factor = self.factor_pool.add_factor(actor, old_factor.name, old_factor.description, old_factor.scales_desc, old_factor.scales_explanation)
+                fid = restored_factor.fid
+            if pid >= 0:
+                self.add_factors(pid, actor, [fid])
+                if apply_to_all_inDesign:
+                    for p in inDesign:
+                        self.add_factors(p, actor, [fid])
+
+            return ResponseFailMsg(f"updating factor {fid} failed: {e}")
+
+        return ResponseSuccessObj(f"factor {fid} updated successfully", factor)
+
+
+
+    # def update_factor(self, actor, fid, name, desc):
+    #     res = self.factor_pool.update_factor(actor, fid, name, desc)
+    #     if not res.success:
+    #         return res
+    #     factor = res.result
+    #     projects = self._get_projects_containing_factor(actor, fid)
+    #     for project in projects:
+    #         project.update_factor(factor)
+    #     return res
 
 
     def get_projects_factor_pool(self, actor, pid):

@@ -60,7 +60,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully added to the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
-                return ResponseFailMsg(f"Rolled back, failed to add to the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to add to the database")
             finally:
                 if closeSession:
                     session.close()  # Close the session
@@ -74,7 +74,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully updated the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
-                return ResponseFailMsg(f"Rolled back, failed to update the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to update the database")
             finally:
                 session.close()  # Close the session
 
@@ -93,7 +93,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully updated the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback in case of an error
-                return ResponseFailMsg(f"Rolled back, failed to update the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to update the database")
             finally:
                 session.close()  # Close the session
 
@@ -106,7 +106,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully deleted the object from the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session in case of an error
-                return ResponseFailMsg(f"Rolled back, failed to delete the object: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to delete the object")
             finally:
                 session.close()  # Ensure the session is closed
 
@@ -131,7 +131,7 @@ class DBAccess:
                     return ResponseFailMsg("Object not found.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
-                return ResponseFailMsg(f"Rolled back, failed to delete from the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to delete from the database")
             finally:
                 session.close()  # Close the session
 
@@ -140,7 +140,7 @@ class DBAccess:
         try:
             return session.query(Obj).filter_by(**query_obj).all()
         except SQLAlchemyError as e:
-            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+            return ResponseFailMsg(f"Failed to load data from the database")
         finally:
             session.close()  # Close the session
 
@@ -157,7 +157,7 @@ class DBAccess:
 
             return query.all()
         except SQLAlchemyError as e:
-            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+            return ResponseFailMsg(f"Failed to load data from the database")
         finally:
             session.close()  # Close the session
 
@@ -168,6 +168,6 @@ class DBAccess:
             highest_id = session.query(func.max(DBFactors.id)).scalar()
             return highest_id
         except SQLAlchemyError as e:
-            return ResponseFailMsg(f"Failed to retrieve the highest Factor ID: {str(e)}")
+            return ResponseFailMsg(f"Failed to retrieve the highest Factor ID")
         finally:
             session.close()  # Close the session

@@ -28,17 +28,12 @@ class VoteManager:
             return ResponseFailMsg(res.msg)
         return ResponseSuccessMsg(f"factor {factor.fid} added to project {self.pid}")
 
-    def update_factor(self, factor):
-        with self.lock:
-            self.factors.insert(factor.fid, factor)
-
-
     def remove_factor(self, fid):
         res = self.db_access.delete_obj_by_query(DBProjectFactors, {"project_id": self.pid, "factor_id": fid})
         if res.success:
             self.factors.pop(fid)
             return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
-        return ResponseFailMsg(res.message)
+        return ResponseFailMsg(res.msg)
 
     def set_factor_vote(self, actor, fid, score, persist=True):
         with self.lock:
