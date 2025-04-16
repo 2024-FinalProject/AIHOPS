@@ -32,7 +32,7 @@ const VotingTypeSelector = ({
         >
           Severity Factors Vote
           <span className={`vote-icon ${isDScoreVoted ? 'voted' : 'not-voted'}`}>
-            {isDScoreVoted ? '☑' : '⬜'}
+            {isDScoreVoted ? '☑' : '☐'}
           </span>
         </button>
       </CardContent>
