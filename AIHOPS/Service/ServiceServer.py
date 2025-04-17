@@ -374,9 +374,10 @@ def get_pending_requests_for_project():
 @app.route("/project/score", methods=["GET"])
 # expecting query params: cookie, pid
 def get_score():
-    cookie = request.args.get("cookie", type=int)
-    pid = request.args.get("pid", type=int)
-    res = server.get_score(cookie, pid)
+    # cookie = request.args.get("cookie", type=int)
+    # pid = request.args.get("pid", type=int)
+    data = request.json
+    res = server.get_score(data["cookie"], data["pid"], data["weights"])
     return jsonify({"message": res.msg, "success": res.success, "score": res.result if res.success else None})
 
 

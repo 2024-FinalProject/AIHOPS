@@ -221,7 +221,7 @@ class Project:
         self.to_invite_when_published.clear()
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
-    def get_score(self, pending_amount):
+    def get_score(self, pending_amount, weights):
         voted_amount = self.vote_manager.get_partially_voted_amount()
         if voted_amount == 0:
             return ResponseFailMsg(f"voted amount is 0")
