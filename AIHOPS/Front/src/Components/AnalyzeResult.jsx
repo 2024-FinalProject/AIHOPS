@@ -32,7 +32,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     }
   };
 
-  const fetch_project_score = async (weightsObj = null) => {
+  const fetch_project_score = async () => {
     let cookie = localStorage.getItem("authToken");
     if (!cookie) {
       setMsg("No authentication token found. Please log in again.");
@@ -40,12 +40,9 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       return;
     }
     try {
-      let args = [cookie, projectId];
-      if (weightsObj) {
-        const list = projectFactors.map(f => weightsObj[f.id] ?? 1.0);
-        args.push(list);
-      }
-      let res = await getProjectsScore(...args);
+      //Turn wighets into a list of weights values:
+      let weightedList = Object.values(weights).map((weight) => parseFloat(weight));
+      let res = await getProjectsScore(cookie, projectId, weightedList);
       if (res.data.success) setProjectsScore(res.data.score);
     } catch (error) {
       alert(error);
@@ -63,9 +60,11 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       let res = await getProjectFactors(cookie, projectId);
       if (res.data.success) {
         setProjectFactors(res.data.factors);
-        const defaultWeights = {};
-        res.data.factors.forEach(f => { defaultWeights[f.id] = 1.0; });
-        setWeights(defaultWeights);
+        if(Object.keys(weights).length === 0) {
+            const defaultWeights = {};
+            res.data.factors.forEach(f => { defaultWeights[f.id] = 1.0; });
+            setWeights(defaultWeights);
+        }
       }
     } catch (error) {
       alert(error);
@@ -207,8 +206,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                       type="number"
                       min="0"
                       step="0.1"
-                      value={weights[f.id] ?? ''}
-                      placeholder="1"
+                      value={weights[f.id]}
                       onChange={e => handleWeightChange(f.id, e.target.value)}
                       style={{
                         width: '45px',

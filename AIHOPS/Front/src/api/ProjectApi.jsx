@@ -314,9 +314,16 @@ export const submitDScoreVotes = async (cookie, projectId, votes) => {
     }
   };
 
-export const getProjectsScore = async (cookie, pid) => {
+export const getProjectsScore = async (cookie, pid, weights) => {
+    console.log("weights", weights);
     return await axios.get(`${API_URL}/project/score`, {
-        params: { cookie, pid }
+        cookie: cookie,
+        pid: pid,
+        wieghts: weights
     });
-}
+};
+
+
+
+
 
