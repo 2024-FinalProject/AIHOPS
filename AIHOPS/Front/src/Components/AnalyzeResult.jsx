@@ -35,13 +35,20 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   const fetch_project_score = async () => {
-    console.log("fetching score");
     let cookie = localStorage.getItem("authToken");
     if (!cookie) {
       setMsg("No authentication token found. Please log in again.");
       setIsSuccess(false);
       return;
     }
+
+    //check all weights not zero
+    const hasPositiveWeight = Object.values(weights).some(val => parseFloat(val) > 0);
+    if (!hasPositiveWeight) {
+      alert("must have at least 1 non zero weight");
+      return;
+    }
+
     try {
       //Turn wighets into a list of weights values:
       let res = await getProjectsScore(cookie, projectId, weights);
@@ -228,7 +235,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                     <input
                       type="number"
                       min="0"
-                      step="0.1"
+                      step="1"
                       value={weights[f.id]}
                       onChange={e => handleWeightChange(f.id, e.target.value)}
                       style={{
@@ -280,7 +287,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
                 backgroundColor: 'var(--card-background)',
                 flex: '1',
-                margin: '0 8px'
+                margin: '0 8px',
+                marginBottom: '-20%'
               }}>
                 <p className="default-text" style={{ fontWeight: '600', fontSize: '16px' }}>
                   {projectsProgress.pending_amount + projectsProgress.member_count - 1}
@@ -333,7 +341,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               borderRadius: '8px',
               maxWidth: '700px',
               margin: '0 auto 15px',
-              marginBottom: '-20px'
+              marginBottom: '-5px'
             }}>
               {Object.keys(projectsScore).length > 0 ? (ProjectScore()) : ("Assessment Dimensions Score not available")}
             </div>
@@ -379,7 +387,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               padding: '20px', 
               borderRadius: '8px',
               maxWidth: '700px',
-              margin: '0 auto'
+              margin: '0 auto',
+              marginBottom: '-0.5%'
             }}>
               {Object.keys(projectsScore).length > 0 ? (
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '15px' }}>
