@@ -69,12 +69,6 @@ class Project:
         self._set_factors_inited_false()
         self.vote_manager.add_factor(factor)
 
-    """if factor have been updated (name or desc) after ddb load, factor pool and project dont have the same object,
-        so this function will replace the factor object in the project only if necessary"""
-    def update_factor(self, factor):
-        self._verify_in_design()
-        self.vote_manager.update_factor(factor)
-
     def remove_factor(self, fid):
         self._verify_in_design()
         self._set_factors_inited_false()

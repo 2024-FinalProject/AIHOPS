@@ -8,6 +8,7 @@ import { update_project_name_and_desc, setSeverityFactors, addMembers, removeMem
 import "./EditPopup.css";
 import AnalyzeResult from './AnalyzeResult';
 import FactorInputForm from './FactorInputForm';
+import {register} from "../api/AuthApi.jsx";
 
 
 const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg,
@@ -39,7 +40,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const [editedScaleExplanations, setEditedScaleExplanations] = useState(Array(5).fill(""));
     const [fromExistingFactorsPage, setFromExistingFactorsPage] = useState(true);
     const [addedMember, setAddedMember] = useState(false);
-    
+    const [updateFactorFromPool, setUpdateFactorFromPool] = useState(false)
+
     // Number of pages for the Project Factors
     const totalPagesFactors = Math.ceil(selectedProject.factors.length / itemsPerPage);
     // Current page index (0-based) for the Project Factors
@@ -48,6 +50,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
     const totalPagesPool = Math.ceil(factorsPool.length / itemsPerPage);
     const currentPagePool = poolStartIndex / itemsPerPage;
 
+    const [reloadTrigger, setReloadTrigger] = useState(0);
+    const [UpdateAllProjectsInDesign, setUpdateAllProjectsInDesign] = useState(false);
 
     useEffect(() => {
         const cookie = localStorage.getItem("authToken");
@@ -61,7 +65,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         fetch_pending_invites(cookie, selectedProject.id);
         fetch_pending_requests(cookie, selectedProject.id);
         fetch_factors_pool();
-    }, []);
+    }, [reloadTrigger]);
 
     const fetch_pending_invites = async (cookie, projectId) => {
         try {
@@ -498,7 +502,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         }
     };
 
-    const handleStartEditFactor = (factor) => {
+    const handleStartEditFactor = (factor, isFromPool) => {
+        setUpdateFactorFromPool(isFromPool)
         setEditingFactor(factor);
         setEditedFactorName(factor.name);
         setEditedFactorDescription(factor.description);
@@ -522,7 +527,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
 
     const handleUpdateEditedFactor = async () => {
         if (window.confirm(`Are you sure you want to update the factor "${editedFactorName}"?`)) {
-            let cookie = localStorage.getItem("authToken");
+        let cookie = localStorage.getItem("authToken");
             if (!cookie) {
                 setMsg("No authentication token found. Please log in again.");
                 setIsSuccess(false);
@@ -530,9 +535,46 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
             }
 
             // TODO: Implement the actual API call here
-            alert("Not implemented yet!");
+            // alert("Not implemented yet!");
+            try {
+                let projectId = selectedProject.id;
+                if (updateFactorFromPool) {
+                    projectId = -1;
+                }
+                const response = await updateProjectFactor(cookie, editingFactor.id, projectId, editedFactorName, editedFactorDescription, editedScaleDescriptions, editedScaleExplanations, UpdateAllProjectsInDesign);
+                console.log(typeof response.data);
+                if (response.data.success) {
+                    setMsg(response.data.message);
+                    setIsSuccess(true);
+                    setReloadTrigger(prev => prev + 1);
+                } else {
+                    // setMsg(response.data.message);
+                    // setIsSuccess(false);
+                    alert(response.data.message)
+                }
+            } catch (error) {
+                console.error("Failed to update: ", error);
+                setMsg("Failed to update");
+                setIsSuccess(false);
+
+            }
+
+            await fetchProjects();
+            await fetch_selected_project(selectedProject);
+            selectedProject.factors = (await getProjectFactors(cookie, selectedProject.id)).data.factors;
+            fetch_factors_pool();
+            setEditingFactor(false);
+            
+            if(fromExistingFactorsPage){
+                setShowExistingContentFactors(true);
+            }
+            else{
+                setShowPoolContentFactors(true);
+            }
         }
     };
+
+
 
     const getEditFactorContent = () => {
         return (
@@ -600,7 +642,18 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 ))}
                             </tbody>
                         </table>
-                        <div className="factor-button-group">
+                        <div className="checkbox-container">
+                            <input
+                                type="checkbox"
+                                id="UpdateAllProjectsInDesign"
+                                className="styled-checkbox"
+                                onChange={(e) => setUpdateAllProjectsInDesign(e.target.checked)}
+                            />
+                            <label htmlFor="UpdateAllProjectsInDesign" className="checkbox-label">
+                                Update all projects in design?
+                            </label>
+                        </div>
+                        <div className="factor-button-group" style = {{marginRight: '50px'}}>
                             <button 
                                 className="factor-button factor-cancel-button"
                                 onClick={handleCancelEdit}
@@ -611,7 +664,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                 className="factor-button factor-submit-button"
                                 onClick={handleUpdateEditedFactor}
                             >
-                                Update Assessment Dimension
+                                Update
                             </button>
                         </div>
                     </div>
@@ -835,7 +888,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     <div style={{ display: 'flex', gap: '6px' }}>
                                                         <button
                                                             className="action-btn"
-                                                            onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(true)}}
+                                                            onClick={() => {handleStartEditFactor(factor, false), setFromExistingFactorsPage(true)}}
                                                             style={{
                                                                 padding: '4px 8px',
                                                                 backgroundColor: '#20b2aa',
@@ -1024,7 +1077,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                                     <div style={{ display: 'flex', gap: '6px' }}>
                                                         <button
                                                             className="action-btn"
-                                                            onClick={() => {handleStartEditFactor(factor), setFromExistingFactorsPage(false)}}
+                                                            onClick={() => {handleStartEditFactor(factor, true), setFromExistingFactorsPage(false)}}
                                                             style={{
                                                                 padding: '4px 8px',
                                                                 backgroundColor: '#20b2aa',

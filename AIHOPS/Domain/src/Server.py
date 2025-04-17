@@ -214,14 +214,16 @@ class Server:
             return ResponseFailMsg(f"Failed to remove factor {fid} from users {actor} pool:\n {e}")
 
     # TODO: newnewnew- need to change it
-    def update_factor(self, cookie, fid, new_name, new_desc):
+    def update_factor(self, cookie, fid, pid, name, desc, scales_desc, scales_explenation, apply_to_all_inDesign):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res.result
             actor = session.user_name
-            return self.project_manager.update_factor(actor, fid, new_name, new_desc)
+            ress = self.project_manager.update_factor(actor, fid, pid, name, desc, scales_desc, scales_explenation, apply_to_all_inDesign)
+            print(f"from service.py: {ress.msg}")
+            return ress
         except Exception as e:
             return ResponseFailMsg(f"Failed to update factor {fid} :\n {e}")
 

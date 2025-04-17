@@ -111,7 +111,10 @@ def set_project_factors():
 # expecting json with {cookie, fid, new_name, new_desc}
 def update_project_factor():
     data = request.json
-    res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["new_name"], data["new_desc"])
+    res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["pid"], data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"], bool(data["apply_to_all_inDesign"]))
+    # res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["new_name"], data["new_desc"])
+    print(res.msg)
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/delete-factor", methods=["POST"])
