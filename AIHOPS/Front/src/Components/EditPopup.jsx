@@ -998,7 +998,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         </div>}
                                     </>
                                 ) : (
-                                    <p>No factors available in the project.</p>
+                                    <p className="warning" style={{textAlign: "center", marginTop: "15%", marginLeft: "-3%"}}>No factors available in the project.</p>
                                 )}
                             </div>
                         )}
