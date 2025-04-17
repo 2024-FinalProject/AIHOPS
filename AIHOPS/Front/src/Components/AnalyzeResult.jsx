@@ -162,9 +162,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               marginBottom: '15px',
               fontWeight: '600'
             }}>
-              Current Project Score
+              <u>Current Project Score</u>:
             </h2>
-            
             {/* Display the formula and score */}
             <div className="score-display" style={{ 
               margin: '0 auto 15px', 
@@ -191,7 +190,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 marginBottom: '10px',
                 color: 'var(--text-color)'
               }}>
-                Apply weight to the assessment dimensions
+                <u>Apply weight to the assessment dimensions</u>:
               </h3>
               
               <div className="weight-inputs" style={{
@@ -259,9 +258,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         );
       case 'showAssessorsInfo':
         return (
-          <div style={{ lineHeight: '1.6', margin: '10px', textAlign: 'center', marginTop: '20px' }}>
-            <h2 className="default-text" style={{ fontSize: '22px', color: 'var(--text-color)', marginBottom: '15px', fontWeight: '600' }}>Assessors Info</h2>
-            
+          <div style={{ lineHeight: '1.6', margin: '10px', textAlign: 'center', marginTop: '80px' }}>           
             <div style={{ 
               display: 'flex',
               justifyContent: 'space-around',
@@ -320,21 +317,20 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         );
       case 'showContentFactorsScore':
         return (
-          <div style={{ textAlign: 'center', marginTop: '15px' }}>
-            <h2 className="default-text" style={{ fontSize: '22px', color: 'var(--text-color)', marginBottom: '15px', fontWeight: '600' }}>Assessment Dimensions Score</h2>
-            
+          <div style={{ textAlign: 'center', marginTop: '15px'}}>
             <div className="default-text" style={{ 
               backgroundColor: 'var(--card-background)',
               padding: '12px', 
               borderRadius: '8px',
               maxWidth: '700px',
-              margin: '0 auto 15px'
+              margin: '0 auto 15px',
+              marginBottom: '-20px'
             }}>
               {Object.keys(projectsScore).length > 0 ? (ProjectScore()) : ("Assessment Dimensions Score not available")}
             </div>
             
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+              <div style={{ maxWidth: '900px', margin: '0 auto'}}>
                 <Histogram factors={projectsScore.factors} factorslist={projectFactors} factorVotes={projectFactorsVotes} />
               </div>
             )}
@@ -342,15 +338,14 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         );
       case 'showSeverityFactorsScore':
         return (
-          <div style={{ textAlign: 'center', marginTop: '15px' }}>
-            <h2 className="default-text" style={{ fontSize: '22px', color: 'var(--text-color)', marginBottom: '15px', fontWeight: '600' }}>Severity Factors Score</h2>
-            
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <div style={{ 
               backgroundColor: 'var(--card-background)',
               padding: '12px', 
               borderRadius: '8px',
               maxWidth: '700px',
-              margin: '0 auto 15px'
+              margin: '0 auto 15px',
+              marginBottom: '-10px'
             }}>
               <p className="default-text" style={{ fontSize: '15px', marginBottom: '8px' }}>
                 <b>Current Severity Factors Score:</b> {Object.keys(projectsScore).length > 0 ? (projectsScore.d_score ? parseFloat(projectsScore.d_score.toFixed(3)) : "No available Severity Factors Score") : "No available Severity Factors Score"}
@@ -369,9 +364,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         );
       case 'exportResults':
         return (
-          <div style={{ textAlign: 'center', marginTop: '30px' }}>
-            <h2 className="default-text" style={{ fontSize: '22px', color: 'var(--text-color)', marginBottom: '20px', fontWeight: '600' }}>Export Results</h2>
-            
+          <div style={{ textAlign: 'center', marginTop: '80px' }}>    
             <div className="default-text" style={{ 
               backgroundColor: 'var(--card-background)',
               padding: '20px', 
