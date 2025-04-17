@@ -286,6 +286,7 @@ input::placeholder {
     border-radius: 12px;
     box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
     transform: translate(50%, -50%); /* Positions the badge relative to top-right */
+
 }
 
 /* Checkbox container */
@@ -323,7 +324,6 @@ input::placeholder {
     cursor: pointer;
 }
 
-
 .warning {
     background-color: #fff3cd;
     border: 1px solid #ffeeba;
@@ -335,6 +335,3 @@ input::placeholder {
     width: 105%;
   }
 
-
-
-  

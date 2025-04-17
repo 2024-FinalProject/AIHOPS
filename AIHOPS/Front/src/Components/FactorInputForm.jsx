@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from "../Components/ui/card";
+import AlertPopup from './AlertPopup';
 import './FactorInputForm.css';
 
 const FactorInputForm = ({ 
@@ -12,18 +13,27 @@ const FactorInputForm = ({
 }) => {
     const [newFactorName, setNewFactorName] = useState("");
     const [newFactorDescription, setNewFactorDescription] = useState("");
-  
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
+    const [alertType, setAlertType] = useState("warning");
+
     const handleSubmit = () => {
         if (!newFactorName || !newFactorDescription) {
-            alert("Please enter a factor name and description.");
+            setAlertMessage("Please enter a factor name and description.");
+            setAlertType("warning");
+            setShowAlert(true);
+            return;
+        }
+
+        if (scaleDescriptions.some(desc => !desc)) {
+            setAlertMessage("Please fill in all scale descriptions. Descriptions are required for all score levels.");
+            setAlertType("warning");
+            setShowAlert(true);
             return;
         }
         
-        if (scaleDescriptions.some(desc => !desc) || scaleExplanations.some(exp => !exp)) {
-            alert("Please fill in all scale descriptions and explanations.");
-            return;
-        }
-        
+        // Note: We don't validate explanations since they are optional
+
         onSubmit({
             name: newFactorName,
             description: newFactorDescription,
@@ -31,14 +41,14 @@ const FactorInputForm = ({
             scaleExplanations: scaleExplanations.slice().reverse(),
         });
     };      
-    
+
     return (
       <div className="factor-form-container">
         <Card className="factor-card">
           <div className="factor-header">
-            <u>Add New Assessmnet Dimension</u>:
+            <u>Add New Assessment Dimension</u>:
           </div>
-          
+
           <CardContent className="p-2">
             <div className="factor-grid">
               <div className="factor-input-group factor-name-group">
@@ -48,18 +58,18 @@ const FactorInputForm = ({
                   value={newFactorName}
                   onChange={(e) => setNewFactorName(e.target.value)}
                   className="factor-input"
-                  placeholder="Enter factor name"
+                  placeholder="Enter factor name (Required)"
                 />
               </div>
-              
+
               <div className="factor-input-group">
                 <label className="factor-input-label"><b><u>Assessment Dimension Description</u>:</b></label>
-                <input
-                  type="text"
+                <textarea
                   value={newFactorDescription}
                   onChange={(e) => setNewFactorDescription(e.target.value)}
                   className="factor-input"
-                  placeholder="Enter factor description"
+                  placeholder="Enter factor description (Required)"
+                  rows="3"
                 />
               </div>
             </div>
@@ -68,8 +78,8 @@ const FactorInputForm = ({
                 <thead className="factor-table-header">
                     <tr>
                     <th>Score</th>
-                    <th>Description</th>
-                    <th>Explanation</th>
+                    <th>Description (Required)</th>
+                    <th>Explanation (Optional)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -87,7 +97,7 @@ const FactorInputForm = ({
                             setScaleDescriptions(newDescs);
                             }}
                             className="factor-table-input"
-                            placeholder="Enter description"
+                            placeholder="Enter description (Required)"
                             rows="2"
                         />
                         </td>
@@ -100,7 +110,7 @@ const FactorInputForm = ({
                             setScaleExplanations(newExps);
                             }}
                             className="factor-table-input"
-                            placeholder="Enter explanation"
+                            placeholder="Enter explanation (Optional)"
                             rows="2"
                         />
                         </td>
@@ -126,6 +136,16 @@ const FactorInputForm = ({
             </div>
           </CardContent>
         </Card>
+
+        {showAlert && (
+          <AlertPopup
+            message={alertMessage}
+            type={alertType}
+            title="Input Validation"
+            onClose={() => setShowAlert(false)}
+            autoCloseTime={3000}
+          />
+        )}
       </div>
     );
 };
