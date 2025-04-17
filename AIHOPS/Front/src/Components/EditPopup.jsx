@@ -65,6 +65,8 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
         fetch_pending_invites(cookie, selectedProject.id);
         fetch_pending_requests(cookie, selectedProject.id);
         fetch_factors_pool();
+
+        setAnalyzePopupType("showAssessorsInfo");
     }, [reloadTrigger]);
 
     const fetch_pending_invites = async (cookie, projectId) => {
@@ -996,7 +998,7 @@ const EditPopup = ({ fetchProjects, fetch_selected_project, setIsSuccess, setMsg
                                         </div>}
                                     </>
                                 ) : (
-                                    <p>No factors available in the project.</p>
+                                    <p className="warning" style={{textAlign: "center", marginTop: "15%", marginLeft: "-3%"}}>No factors available in the project.</p>
                                 )}
                             </div>
                         )}

@@ -324,3 +324,14 @@ input::placeholder {
     cursor: pointer;
 }
 
+.warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 14px;
+    width: 105%;
+  }
+
