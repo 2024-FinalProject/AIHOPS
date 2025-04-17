@@ -14,8 +14,10 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [projectSeverityFactors, setProjectSeverityFactors] = useState({});
   const [projectFactorsVotes, setProjectFactorsVotes] = useState([]);
   const [weights, setWeights] = useState({});
+
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(true);
+
 
   const fetch_project_progress = async () => {
     let cookie = localStorage.getItem("authToken");
@@ -33,6 +35,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   const fetch_project_score = async () => {
+    console.log("fetching score");
     let cookie = localStorage.getItem("authToken");
     if (!cookie) {
       setMsg("No authentication token found. Please log in again.");
@@ -41,8 +44,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     }
     try {
       //Turn wighets into a list of weights values:
-      let weightedList = Object.values(weights).map((weight) => parseFloat(weight));
-      let res = await getProjectsScore(cookie, projectId, weightedList);
+      let res = await getProjectsScore(cookie, projectId, weights);
       if (res.data.success) setProjectsScore(res.data.score);
     } catch (error) {
       alert(error);
@@ -60,11 +62,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       let res = await getProjectFactors(cookie, projectId);
       if (res.data.success) {
         setProjectFactors(res.data.factors);
-        if(Object.keys(weights).length === 0) {
-            const defaultWeights = {};
-            res.data.factors.forEach(f => { defaultWeights[f.id] = 1.0; });
-            setWeights(defaultWeights);
-        }
       }
     } catch (error) {
       alert(error);
@@ -106,7 +103,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     await fetch_project_progress();
     await fetch_project_factors_votes();
     await fetch_project_severity_factors();
-    await fetch_project_score();
+    // await fetch_project_score();
   };
 
   useEffect(() => {
@@ -116,13 +113,31 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       setIsSuccess(false);
       return;
     }
-    fetchAllData();
+    fetchAllData()
   }, []);
+
+  useEffect(() => {
+    console.log("weights use Effect len: ", projectFactors.length);
+    if (projectFactors.length > 0) {
+      const initialWeights = {};
+      projectFactors.forEach(factor => {
+        initialWeights[factor.id] = 1;
+      });
+      setWeights(initialWeights);
+      console.log("set weights: ", initialWeights);
+    }
+  }, [projectFactors]);
 
   const handleWeightChange = (id, value) => {
     const val = parseFloat(value);
     if (isNaN(val) || val < 0) return;
-    setWeights(prev => ({ ...prev, [id]: val }));
+
+    setWeights(prev => ({
+      ...prev,
+      [id]: val
+    }));
+
+    console.log("changed weight for", id, "to", val);
   };
 
   const ProjectScore = () => {
@@ -224,7 +239,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               </div>
               
               <button
-                onClick={() => fetch_project_score(weights)}
+                onClick={() => fetch_project_score()}
                 style={{
                   padding: '6px 20px',
                   fontSize: '14px',
@@ -238,7 +253,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 }}
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#218838'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#28a745'}
-              >Apply</button>
+              >Calculate</button>
             </div>
           </div>
         );

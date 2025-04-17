@@ -315,12 +315,12 @@ export const submitDScoreVotes = async (cookie, projectId, votes) => {
   };
 
 export const getProjectsScore = async (cookie, pid, weights) => {
-    console.log("weights", weights);
-    return await axios.get(`${API_URL}/project/score`, {
-        cookie: cookie,
-        pid: pid,
-        wieghts: weights
-    });
+  console.log("weights", weights);
+  return await axios.post(`${API_URL}/project/score`, {
+    cookie: cookie,
+    pid: pid,
+    weights: weights
+  });
 };
 
 
