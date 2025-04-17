@@ -131,7 +131,11 @@ class VoteManager:
                 factors_res[fid]["score"] += score
         return factors_res
 
-    def _factors_score_data(self):
+    def _factors_score_data(self, weights):
+        if len(self.factors_votes.items()) != len(weights):
+            raise Exception("invalid amount of weights")
+
+
         factors_res = self._sum_score_by_factor()
 
         # Calculate averages for each factor
@@ -148,7 +152,9 @@ class VoteManager:
             if 0 in vote_dict.values():
                 Sa = 0  # If any factor is scored 0, the assessor's total score is 0
             else:
-                Sa = sum(list(vote_dict.values())) / len(vote_dict.values())
+                votes = list(vote_dict.values())
+                weighted_votes = [a * b for a, b in zip(votes, weights)]
+                Sa = sum(weighted_votes) / sum(weights)
             N += Sa
 
         m = len(self.factors_votes.keys())
@@ -168,7 +174,7 @@ class VoteManager:
         d = d_ass / len(self.severity_votes.getKeys())
         return d, damage_avg
 
-    def get_score(self, severity_factors):
+    def get_score(self, severity_factors, weights):
         for i in range(5):
             severity_factors[i] /= 100
         factors_res, N, D = self._factors_score_data()

@@ -420,14 +420,14 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get pending emails for project: {e}")
   
-    def get_score(self, cookie, pid):
+    def get_score(self, cookie, pid, weights):
         try:
             res = self.get_session_member(cookie)
             if not res.success:
                 return res
             session = res.result
             user_name = session.user_name
-            res = self.project_manager.get_score(user_name, pid)
+            res = self.project_manager.get_score(user_name, pid, weights)
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to get score: {e}")
