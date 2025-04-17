@@ -98,6 +98,14 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     }
   };
 
+  const handleRefresh = async () => {
+    await fetch_project_factors();
+    await fetch_project_progress();
+    await fetch_project_factors_votes();
+    await fetch_project_severity_factors();
+    await fetch_project_score();
+  };
+
   const fetchAllData = async () => {
     await fetch_project_factors();
     await fetch_project_progress();
@@ -125,6 +133,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       });
       setWeights(initialWeights);
       console.log("set weights: ", initialWeights);
+      fetch_project_score();
     }
   }, [projectFactors]);
 
@@ -406,7 +415,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     <div className="analyzePopup-content">
       <div className="analyzePopup-header">
         <button
-          onClick={fetchAllData}
+          onClick={handleRefresh}
           style={{
             position: "fixed",
             top: "80px",
