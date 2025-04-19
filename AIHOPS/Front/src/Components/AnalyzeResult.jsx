@@ -14,6 +14,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [projectSeverityFactors, setProjectSeverityFactors] = useState({});
   const [projectFactorsVotes, setProjectFactorsVotes] = useState([]);
   const [weights, setWeights] = useState({});
+  const [weightsInited, setWeightsInited] = useState(false);
 
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(true);
@@ -34,7 +35,9 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     }
   };
 
-  const fetch_project_score = async () => {
+  const fetch_project_score = async ( weightsToUse ) => {
+    console.log("trying to fetch score witth weights: ", weights);
+
     let cookie = localStorage.getItem("authToken");
     if (!cookie) {
       setMsg("No authentication token found. Please log in again.");
@@ -43,7 +46,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     }
 
     //check all weights not zero
-    const hasPositiveWeight = Object.values(weights).some(val => parseFloat(val) > 0);
+    const hasPositiveWeight = Object.values(weightsToUse).some(val => parseFloat(val) > 0);
     if (!hasPositiveWeight) {
       alert("must have at least 1 non zero weight");
       return;
@@ -51,7 +54,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
     try {
       //Turn wighets into a list of weights values:
-      let res = await getProjectsScore(cookie, projectId, weights);
+      let res = await getProjectsScore(cookie, projectId, weightsToUse);
       if (res.data.success) setProjectsScore(res.data.score);
     } catch (error) {
       alert(error);
@@ -110,7 +113,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     await fetch_project_progress();
     await fetch_project_factors_votes();
     await fetch_project_severity_factors();
-    await fetch_project_score();
+    await fetch_project_score(weights);
   };
 
   const fetchAllData = async () => {
@@ -118,7 +121,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     await fetch_project_progress();
     await fetch_project_factors_votes();
     await fetch_project_severity_factors();
-    // await fetch_project_score();
   };
 
   useEffect(() => {
@@ -132,15 +134,15 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   }, []);
 
   useEffect(() => {
-    console.log("weights use Effect len: ", projectFactors.length);
-    if (projectFactors.length > 0) {
+    if (!weightsInited && projectFactors.length > 0) {
+      setWeightsInited(true);
+      console.log("weights use Effect len: ", projectFactors.length);
       const initialWeights = {};
       projectFactors.forEach(factor => {
         initialWeights[factor.id] = 1;
       });
       setWeights(initialWeights);
-      console.log("set weights: ", initialWeights);
-      fetch_project_score();
+      fetch_project_score(initialWeights);
     }
   }, [projectFactors]);
 
@@ -254,7 +256,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               </div>
               
               <button
-                onClick={() => fetch_project_score()}
+                onClick={() => fetch_project_score(weights)}
                 style={{
                   padding: '6px 20px',
                   fontSize: '14px',
