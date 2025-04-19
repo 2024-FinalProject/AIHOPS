@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from "react";
 import VotingTypeSelector from "../Components/VotingTypeSelector";
 import DGraph from "../Components/DGraph";
-import { getProjectsMember, submitFactorVote, getMemberVoteOnProject, submitDScoreVotes, checkProjectVotingStatus} from "../api/ProjectApi";
+import {
+  getProjectsMember,
+  submitFactorVote,
+  getMemberVoteOnProject,
+  submitDScoreVotes,
+  checkProjectVotingStatus,
+} from "../api/ProjectApi";
 import ProjectList from "../Components/ProjectList";
 import FactorVotingModal from "../Components/FactorVotingModal";
 import "./MyProjects.css";
@@ -52,10 +58,14 @@ const MyProjects = () => {
       setFilteredProjects([]);
       return;
     }
-    
-    console.log(`Sorting ${projects.length} projects by ${newestFirst ? "newest" : "oldest"}`);
+
+    console.log(
+      `Sorting ${projects.length} projects by ${
+        newestFirst ? "newest" : "oldest"
+      }`
+    );
     let sortedProjects = [...projects];
-    
+
     if (newestFirst) {
       // Sort by ID in descending order (higher ID = newer)
       sortedProjects.sort((a, b) => b.id - a.id);
@@ -63,7 +73,7 @@ const MyProjects = () => {
       // Sort by ID in ascending order (lower ID = older)
       sortedProjects.sort((a, b) => a.id - b.id);
     }
-    
+
     console.log("Sorted projects:", sortedProjects);
     setFilteredProjects(sortedProjects);
   };
@@ -84,7 +94,7 @@ const MyProjects = () => {
         const fetchedProjects = response.data.projects || [];
         console.log("Fetched projects:", fetchedProjects); // Debug logging
         setProjects(fetchedProjects);
-        
+
         // Sort projects by default order (newest first)
         sortProjects(isNewestFirst);
         await initializeProjectVotingStatuses(fetchedProjects, cookie);
@@ -93,8 +103,7 @@ const MyProjects = () => {
       }
     } catch (error) {
       console.error("API error when fetching projects:", error);
-    }
-    finally {
+    } finally {
       setLoading(false); // Stop loading after the request completes
     }
   };
@@ -124,7 +133,10 @@ const MyProjects = () => {
             };
           }
         } catch (error) {
-          console.error(`Error fetching votes for project ${project.id}:`, error);
+          console.error(
+            `Error fetching votes for project ${project.id}:`,
+            error
+          );
           initialStatus[project.id] = {
             votingStatus: 0,
             severitiesStatus: 0,
@@ -147,23 +159,22 @@ const MyProjects = () => {
     setFactorVotes((prev) => ({ ...prev, [factorId]: value }));
   };
 
-  const handleFactorSubmit = async () => {
+  const handleFactorSubmit = async (factorId, score) => {
     try {
       const cookie = localStorage.getItem("authToken");
       if (!cookie) return false;
 
-      const currentFactorId = currentProject.factors[currentFactorIndex].id;
       const response = await submitFactorVote(
         cookie,
         currentProject.id,
-        currentFactorId,
-        factorVotes[currentFactorId]
+        factorId,
+        score
       );
 
       if (response.data.success) {
         setSubmittedVotes((prev) => ({
           ...prev,
-          [currentFactorId]: factorVotes[currentFactorId],
+          [factorId]: score,
         }));
 
         const votedCount = Object.keys(submittedVotes).length + 1;
@@ -227,11 +238,11 @@ const MyProjects = () => {
 
   const handleStartVoting = (type) => {
     setCurrentVotingType(type);
-    if (type === 'factors') {
+    if (type === "factors") {
       setIsVoteStarted(true);
       setShowDScoreVote(false);
       setCurrentFactorIndex(0);
-    } else if (type === 'dscore') {
+    } else if (type === "dscore") {
       setIsVoteStarted(false);
       setShowDScoreVote(true);
     }
@@ -243,52 +254,53 @@ const MyProjects = () => {
     setShowDScoreVote(false);
     setCurrentProject(null);
     setIsVoteStarted(false);
-    
+
     setSubmittedVotes({});
     setCurrentFactorIndex(0);
     setCurrentVotingType(null);
-    
+
     await fetchProjects(); // Refresh the project list
     await checkProjectVotingStatus(projectId);
   };
 
   // Function to handle D-score vote completion
   const handleDScoreVoteComplete = async (percentages) => {
-    try{
+    try {
       const cookie = localStorage.getItem("authToken");
-      const response = await submitDScoreVotes(cookie, currentProject.id, percentages);
+      const response = await submitDScoreVotes(
+        cookie,
+        currentProject.id,
+        percentages
+      );
       if (response.data.success) {
-        setProjectVotingStatus(prev => ({
+        setProjectVotingStatus((prev) => ({
           ...prev,
           [currentProject.id]: {
             ...prev[currentProject.id],
-            severitiesStatus: 1
-          }
+            severitiesStatus: 1,
+          },
         }));
         setShowDScoreVote(false);
         await handleCloseVoting(currentProject.id);
-      }
-      else{
+      } else {
         alert(`Failed to submit D-score votes: ${response.data.message}`);
       }
-    }
-    catch (error) {
+    } catch (error) {
       alert("Failed to submit D-score votes");
     }
   };
 
   // Lifecycle Hooks
   useEffect(() => {
-    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (!isLoggedIn) {
-        console.log("Redirecting to /");
-        navigate("/");
-    }
-    else{
+      console.log("Redirecting to /");
+      navigate("/");
+    } else {
       fetchProjects();
     }
   }, []);
-  
+
   // This effect ensures filteredProjects is updated whenever projects change
   useEffect(() => {
     if (projects && projects.length > 0) {
@@ -299,84 +311,109 @@ const MyProjects = () => {
   return (
     <div className="my-projects-container">
       {loading ? (
-      <div className="loading-container">
-        <div className="loading-text">Loading...</div>
-      </div>
-    ) : (
-      <>
-        <h1 className="page-heading" style={{marginBottom:'-100px'}}><u>Voting on projects</u></h1>
-        
-        {/* Sort toggle button - only show if there are projects */}
-        {filteredProjects.length > 0 && (
-          <div className="sort-container">
-            <button className="sort-button" onClick={toggleSort}>
-              ⇅
-            </button>
-            {isNewestFirst ? "Newest First" : "Oldest First"}
-          </div>
-        )}
+        <div className="loading-container">
+          <div className="loading-text">Loading...</div>
+        </div>
+      ) : (
+        <>
+          <h1 className="page-heading" style={{ marginBottom: "-100px" }}>
+            <u>Voting on projects</u>
+          </h1>
 
-        <ProjectList 
-          projects={filteredProjects}
-          projectVotingStatus={projectVotingStatus}
-          isBothStatusesComplete={isBothStatusesComplete}
-          onVoteClick={handleVoteClick}
-        />
-
-        {showVotePopup && (
-          <div className="popup-overlay">
-            <div className="popup-content">
-              <VotingTypeSelector 
-                projectName={currentProject.name}
-                onSelectVotingType={handleStartVoting}
-                isFactorsVoted={projectVotingStatus[currentProject?.id]?.votingStatus === 1}
-                isDScoreVoted={projectVotingStatus[currentProject?.id]?.severitiesStatus === 1}
-                onClose={() => handleCloseVoting(currentProject.id)}
-              />
+          {/* Sort toggle button - only show if there are projects */}
+          {filteredProjects.length > 0 && (
+            <div className="sort-container">
+              <button className="sort-button" onClick={toggleSort}>
+                ⇅
+              </button>
+              {isNewestFirst ? "Newest First" : "Oldest First"}
             </div>
-          </div>
-        )}
+          )}
 
-        {(!loading && (filteredProjects == null || filteredProjects.length === 0)) && (
-          <div className="default-text" style={{marginTop: '40px', textAlign: 'center'}}>
-            <div className="default-text" style={{fontSize:'17px'}}><i>There are currently no projects to vote on</i>...</div>
-          </div>
-        )}
-
-        {currentProject && isVoteStarted && (
-          <FactorVotingModal
-            project={currentProject}
-            currentFactorIndex={currentFactorIndex}
-            factorVotes={factorVotes}
-            submittedVotes={submittedVotes}
-            onClose={() => handleCloseVoting(currentProject.id)}
-            onFactorVoteChange={handleFactorVoteChange}
-            onNextFactor={handleNextFactor}
-            onPrevFactor={handlePrevFactor}
-            countVotedFactors={countVotedFactors}
-            onSelectFactor={(idx) => setCurrentFactorIndex(idx)}
-            handleFactorSubmit={handleFactorSubmit}
+          <ProjectList
+            projects={filteredProjects}
+            projectVotingStatus={projectVotingStatus}
+            isBothStatusesComplete={isBothStatusesComplete}
+            onVoteClick={handleVoteClick}
           />
-        )}
-        
-        {/* D-score voting popup */}
-        {showDScoreVote && (
-          <div className="popup-overlay">
-            <div className="popup-content wide">
-              <button className="close-popup" onClick={() => handleCloseVoting(currentProject.id)}>×</button>
-              <div style={{fontFamily: 'Verdana, sans-serif' }}>
-                <h2 className="text-2xl font-bold mb-4 text-center default-text" style={{margin: '0 auto', textAlign: 'center', fontFamily: 'Verdana, sans-serif' }}>
-                  <u>Severity Factors Voting for {currentProject.name}</u>:
-                </h2>
-                <DGraph 
-                onVoteComplete={handleDScoreVoteComplete}
-                projectId={currentProject.id}
+
+          {showVotePopup && (
+            <div className="popup-overlay">
+              <div className="popup-content">
+                <VotingTypeSelector
+                  projectName={currentProject.name}
+                  onSelectVotingType={handleStartVoting}
+                  isFactorsVoted={
+                    projectVotingStatus[currentProject?.id]?.votingStatus === 1
+                  }
+                  isDScoreVoted={
+                    projectVotingStatus[currentProject?.id]
+                      ?.severitiesStatus === 1
+                  }
+                  onClose={() => handleCloseVoting(currentProject.id)}
                 />
               </div>
             </div>
-          </div>
-        )}
-      </>
+          )}
+
+          {!loading &&
+            (filteredProjects == null || filteredProjects.length === 0) && (
+              <div
+                className="default-text"
+                style={{ marginTop: "40px", textAlign: "center" }}
+              >
+                <div className="default-text" style={{ fontSize: "17px" }}>
+                  <i>There are currently no projects to vote on</i>...
+                </div>
+              </div>
+            )}
+
+          {currentProject && isVoteStarted && (
+            <FactorVotingModal
+              project={currentProject}
+              currentFactorIndex={currentFactorIndex}
+              factorVotes={factorVotes}
+              submittedVotes={submittedVotes}
+              onClose={() => handleCloseVoting(currentProject.id)}
+              onFactorVoteChange={handleFactorVoteChange}
+              onNextFactor={handleNextFactor}
+              onPrevFactor={handlePrevFactor}
+              countVotedFactors={countVotedFactors}
+              onSelectFactor={(idx) => setCurrentFactorIndex(idx)}
+              handleFactorSubmit={handleFactorSubmit}
+            />
+          )}
+
+          {/* D-score voting popup */}
+          {showDScoreVote && (
+            <div className="popup-overlay">
+              <div className="popup-content wide">
+                <button
+                  className="close-popup"
+                  onClick={() => handleCloseVoting(currentProject.id)}
+                >
+                  ×
+                </button>
+                <div style={{ fontFamily: "Verdana, sans-serif" }}>
+                  <h2
+                    className="text-2xl font-bold mb-4 text-center default-text"
+                    style={{
+                      margin: "0 auto",
+                      textAlign: "center",
+                      fontFamily: "Verdana, sans-serif",
+                    }}
+                  >
+                    <u>Severity Factors Voting for {currentProject.name}</u>:
+                  </h2>
+                  <DGraph
+                    onVoteComplete={handleDScoreVoteComplete}
+                    projectId={currentProject.id}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
