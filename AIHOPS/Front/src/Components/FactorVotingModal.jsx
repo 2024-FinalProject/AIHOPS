@@ -19,7 +19,7 @@ const FactorVotingModal = ({
 }) => {
   // confirmation popup state
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [lastVotedFactor, setLastVotedFactor] = useState(null);
+  const [allFactorsCompleted, setAllFactorsCompleted] = useState(false);
 
   // scrolling refs & state
   const tabsContainerRef = useRef(null);
@@ -73,9 +73,12 @@ const FactorVotingModal = ({
   const selectedFactor = project.factors[currentFactorIndex];
 
   // Check if the current factor has at least one explanation filled
-  const hasExplanations = selectedFactor && 
-    selectedFactor.scales_explanation && 
-    Object.values(selectedFactor.scales_explanation).some(explanation => explanation && explanation.trim() !== '');
+  const hasExplanations =
+    selectedFactor &&
+    selectedFactor.scales_explanation &&
+    Object.values(selectedFactor.scales_explanation).some(
+      (explanation) => explanation && explanation.trim() !== ""
+    );
 
   const getValueLabel = (v) => {
     switch (v) {
@@ -101,19 +104,29 @@ const FactorVotingModal = ({
     ].join(" ");
   };
 
-  // Submit button handler
-  const onSubmitClick = async () => {
-    const value = factorVotes[selectedFactor.id];
-    if (value === undefined) {
-      alert("Please select a value before submitting your vote.");
-      return;
-    }
+  // Handle vote submission when clicking a row
+  const handleRowClick = async (value) => {
+    // First update the factor vote value
+    onFactorVoteChange(selectedFactor.id, value);
+
+    // Then submit the vote immediately
     const ok = await handleFactorSubmit();
+
     if (ok) {
-      setLastVotedFactor({ name: selectedFactor.name, value });
-      setShowConfirmation(true);
-      // auto‐dismiss popup
-      setTimeout(() => setShowConfirmation(false), 2000);
+      // Check if all factors are now voted on
+      const newVotedCount = countVotedFactors();
+
+      if (newVotedCount === totalFactors) {
+        setAllFactorsCompleted(true);
+        setShowConfirmation(true);
+        // auto‐dismiss popup
+        setTimeout(() => setShowConfirmation(false), 3000);
+      }
+
+      // Optionally auto-navigate to next factor if not the last one
+      if (canGoNext) {
+        onNextFactor();
+      }
     }
   };
 
@@ -204,9 +217,7 @@ const FactorVotingModal = ({
                   <tr>
                     <th style={{ textAlign: "center" }}>Vote</th>
                     <th>Description</th>
-                    {hasExplanations && (
-                      <th>Explanation</th>
-                    )}
+                    {hasExplanations && <th>Explanation</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -218,14 +229,14 @@ const FactorVotingModal = ({
                         className={`factor-table-row ${
                           isSel ? "selected-row" : ""
                         }`}
-                        onClick={() => onFactorVoteChange(selectedFactor.id, v)}
+                        onClick={() => handleRowClick(v)}
                       >
                         <td className="vote-cell" style={{ maxwidth: "10px" }}>
                           <div className="vote-option-container">
                             <div className={getOptionClasses(v, isSel)}>
                               {v}
                             </div>
-                            <div className="vote-label">{getValueLabel(v)}</div>
+                            {/* <div className="vote-label">{getValueLabel(v)}</div> */}
                           </div>
                         </td>
                         <td className="description-cell">
@@ -244,7 +255,7 @@ const FactorVotingModal = ({
             </div>
 
             {/* ─── NAV BUTTONS ───────────────────────────────── */}
-            <div className="navigation-buttons">
+            {/* <div className="navigation-buttons">
               <button
                 className={`nav-button prev-button ${
                   !canGoPrev ? "disabled" : ""
@@ -256,14 +267,6 @@ const FactorVotingModal = ({
               </button>
 
               <button
-                className="vote-factor-button"
-                onClick={onSubmitClick}
-                disabled={factorVotes[selectedFactor.id] === undefined}
-              >
-                Submit Vote
-              </button>
-
-              <button
                 className={`nav-button next-button ${
                   !canGoNext ? "disabled" : ""
                 }`}
@@ -272,26 +275,17 @@ const FactorVotingModal = ({
               >
                 Next <ChevronRight size={16} />
               </button>
-            </div>
+            </div> */}
           </div>
         )}
 
         {/* ─── CONFIRMATION ────────────────────────────────── */}
-        {showConfirmation && lastVotedFactor && (
+        {showConfirmation && allFactorsCompleted && (
           <AlertPopup
-            title="Vote Submitted!"
-            message={
-              `You rated "${lastVotedFactor.name}" as ${getValueLabel(
-                lastVotedFactor.value
-              )} (${lastVotedFactor.value}). ` +
-              (remaining > 0
-                ? `You have ${remaining} more factor${
-                    remaining !== 1 ? "s" : ""
-                  } to vote on.`
-                : "You have completed voting on all factors!")
-            }
+            title="All Votes Completed!"
+            message="You've voted successfully on all of the dimensions! Feel free to update your vote on any of them."
             onClose={() => setShowConfirmation(false)}
-            autoCloseTime={2000}
+            autoCloseTime={3000}
           />
         )}
       </div>
