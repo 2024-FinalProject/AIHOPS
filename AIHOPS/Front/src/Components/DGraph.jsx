@@ -1,57 +1,93 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, Bar, Cell } from 'recharts';
-import './DGraph.css';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card';
-import { getProjectSeverityFactors, getMemberVoteOnProject } from "../api/ProjectApi";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  ComposedChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+import "./DGraph.css";
+import { Card, CardHeader, CardDescription, CardContent } from "./ui/card";
+import { getMemberVoteOnProject } from "../api/ProjectApi";
 
 const DGraph = ({ onVoteComplete, projectId }) => {
-  const [severityLevels, setSeverityLevels] = useState( [
-    { level: 1, name: "No to Negligible Damage", value: 0.5, color: "#4ade80", 
-      description: "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement." },
-    { level: 2, name: "Minor Damage", value: 1, color: "#fbbf24",
-      description: "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources." },
-    { level: 3, name: "Manageable Damage", value: 25, color: "#fb923c",
-      description: "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations." },
-    { level: 4, name: "Severe Damage", value: 100, color: "#f87171",
-      description: "Impacts are substantial, disrupting core activities significantly." },
-    { level: 5, name: "Catastrophic Damage", value: 400, color: "#ef4444",
-      description: "Impacts result in extensive disruption, likely overwhelming available resources." }
+  const [severityLevels] = useState([
+    {
+      level: 1,
+      name: "No to Negligible",
+      value: 0.5,
+      color: "#4ade80",
+      description:
+        "No noticeable effects on operations. Recovery is either unnecessary or instantaneous.",
+    },
+    {
+      level: 2,
+      name: "Minor",
+      value: 1,
+      color: "#fbbf24",
+      description:
+        "Small impacts causing slight disruptions that can be resolved with minimal effort.",
+    },
+    {
+      level: 3,
+      name: "Manageable",
+      value: 25,
+      color: "#fb923c",
+      description:
+        "Moderate impacts requiring resources and temporary adjustments to restore operations.",
+    },
+    {
+      level: 4,
+      name: "Severe",
+      value: 100,
+      color: "#f87171",
+      description:
+        "Substantial impacts disrupting core activities significantly.",
+    },
+    {
+      level: 5,
+      name: "Catastrophic",
+      value: 400,
+      color: "#ef4444",
+      description:
+        "Extensive disruption, likely overwhelming available resources.",
+    },
   ]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [msg, setMsg] = useState("");
-  const [isSuccess, setIsSuccess] = useState(true);
   const [hasVoted, setHasVoted] = useState(false);
-
   const [percentages, setPercentages] = useState(Array(5).fill(0));
   const [chartData, setChartData] = useState([]);
   const [selectedDot, setSelectedDot] = useState(null);
+  const [hoveredLevel, setHoveredLevel] = useState(null);
+
   const chartRef = useRef(null);
   const dragStateRef = useRef({
     isDragging: false,
     activeIndex: -1,
     startY: 0,
     startPercentage: 0,
-    chartHeight: 0
+    chartHeight: 0,
   });
-  const theme = localStorage.getItem('theme') || 'light';
-  const textColor = theme === 'light' ? '#333' : '#fff';
+
+  const theme = localStorage.getItem("theme") || "light";
+  const textColor = theme === "light" ? "#333" : "#fff";
 
   useEffect(() => {
-    if(projectId != null)
-      loadData();
+    if (projectId != null) loadData();
   }, [projectId]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      //await getSeverityFactors();
       await fetchPreviousVotes();
     } catch (error) {
       console.error("Error loading severity factors:", error);
-      setMsg("An error occurred. Please try again later.");
-      setIsSuccess(false);
+      setError("Failed to load data. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -64,93 +100,79 @@ const DGraph = ({ onVoteComplete, projectId }) => {
       color: level.color,
       level: level.name,
       description: level.description,
-      levelIndex: index
+      levelIndex: index,
     }));
     setChartData(newChartData);
   }, [percentages, severityLevels]);
 
   const fetchPreviousVotes = async () => {
-    const authToken = localStorage.getItem('authToken');
-    if(!authToken) {
-      console.error("No authentication token found. Please log in again.");
+    const authToken = localStorage.getItem("authToken");
+    if (!authToken) {
+      console.error("No authentication token found");
       return;
     }
-    try {
-      console.log("Fetching previous votes for project:", projectId);
-      const response = await getMemberVoteOnProject(authToken, projectId);
 
-      if(response.data.success) {
-        console.log("Previous votes found:", response.data.votes);
+    try {
+      const response = await getMemberVoteOnProject(authToken, projectId);
+      if (response.data.success) {
         const votes = response.data.votes;
         const severityVotes = votes.severity_votes || [];
-        if(votes && severityVotes.length > 0 && Array.isArray(severityVotes)) {
-          console.log("Setting previous votes:", severityVotes);
+
+        if (votes && severityVotes.length > 0 && Array.isArray(severityVotes)) {
           setPercentages(severityVotes);
           setHasVoted(true);
         } else {
-          console.log("No previous votes found.");
           setPercentages([20, 20, 20, 20, 20]);
           setHasVoted(false);
         }
       } else {
-        console.error("Failed to fetch previous votes:", response.data.message);
-        setMsg("An error occurred. Please try again later.");
-        setIsSuccess(false);
+        setError("Failed to fetch votes");
       }
-    } catch(error) {
-      console.error("Error fetching previous votes:", error);
-      setMsg("An error occurred. Please try again later.");
-      setIsSuccess(false);
+    } catch (error) {
+      console.error("Error fetching votes:", error);
+      setError("Failed to connect to server");
     }
   };
-
 
   // Set up drag handlers
   useEffect(() => {
     const handleMouseDown = (e) => {
-      // Check if this is a dot - look for circle elements
-      if (e.target.tagName === 'circle') {
-        const index = parseInt(e.target.getAttribute('data-index'));
+      if (e.target.tagName === "circle") {
+        const index = parseInt(e.target.getAttribute("data-index"));
         if (!isNaN(index)) {
           e.preventDefault();
-          
-          // Get chart container for scaling
           const container = chartRef.current;
           if (!container) return;
-          
+
           const containerRect = container.getBoundingClientRect();
-          const availableHeight = containerRect.height - 150; // Adjust for padding and margins
-          
-          // Update drag state
+          const availableHeight = containerRect.height - 150;
+
           dragStateRef.current = {
             isDragging: true,
             activeIndex: index,
             startY: e.clientY,
             startPercentage: percentages[index],
-            chartHeight: availableHeight
+            chartHeight: availableHeight,
           };
-          
-          document.body.classList.add('no-select');
+
+          document.body.classList.add("no-select");
         }
       }
     };
 
-
     const handleMouseMove = (e) => {
-      const { isDragging, activeIndex, startY, startPercentage, chartHeight } = dragStateRef.current;
-      
+      const { isDragging, activeIndex, startY, startPercentage, chartHeight } =
+        dragStateRef.current;
       if (!isDragging || activeIndex === -1 || chartHeight === 0) return;
-      
-      // Calculate the change as a percentage of the available drag area
-      // Multiply by a sensitivity factor (e.g., 2) to make drag more responsive
+
       const sensitivity = 0.8;
       const deltaY = startY - e.clientY;
       const percentageDelta = (deltaY / chartHeight) * 100 * sensitivity;
-      
-      const newPercentage = Math.min(100, Math.max(0, 
-        Math.round(startPercentage + percentageDelta)
-      ));
-      
+      const newPercentage = Math.min(
+        100,
+        Math.max(0, Math.round(startPercentage + percentageDelta))
+      );
+
       const newPercentages = [...percentages];
       newPercentages[activeIndex] = newPercentage;
       setPercentages(newPercentages);
@@ -160,21 +182,19 @@ const DGraph = ({ onVoteComplete, projectId }) => {
       if (dragStateRef.current.isDragging) {
         dragStateRef.current.isDragging = false;
         dragStateRef.current.activeIndex = -1;
-        document.body.classList.remove('no-select');
+        document.body.classList.remove("no-select");
       }
     };
 
-    // Add global listeners
-    document.addEventListener('mousedown', handleMouseDown);
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
 
-    // Cleanup
     return () => {
-      document.removeEventListener('mousedown', handleMouseDown);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.classList.remove('no-select');
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.classList.remove("no-select");
     };
   }, [percentages]);
 
@@ -187,13 +207,13 @@ const DGraph = ({ onVoteComplete, projectId }) => {
 
   const handleSubmit = async () => {
     if (Math.abs(totalPercentage - 100) > 0.1) {
-      alert('Percentages must sum to 100%');
+      alert("Percentages must sum to 100%");
       return;
     }
     try {
       await onVoteComplete(percentages);
     } catch (error) {
-      alert('Failed to submit votes');
+      alert("Failed to submit votes");
     }
   };
 
@@ -203,158 +223,179 @@ const DGraph = ({ onVoteComplete, projectId }) => {
 
   const totalPercentage = percentages.reduce((sum, p) => sum + p, 0);
 
-  // Custom tooltip handler
+  // Custom tooltip with improved positioning
   const CustomTooltip = () => {
-    if (!selectedDot || dragStateRef.current.isDragging) return null;
-    
-    const data = chartData[selectedDot.index];
-    
+    if (
+      (!selectedDot && hoveredLevel === null) ||
+      dragStateRef.current.isDragging
+    )
+      return null;
+
+    // Display the tooltip based on either the selected dot or hovered level
+    const levelIndex = selectedDot ? selectedDot.index : hoveredLevel;
+    const data = chartData[levelIndex];
+
+    // Calculate the x-position based on the chart width divided by the number of data points
+    const chartRect = chartRef.current.getBoundingClientRect();
+    const pointWidth = chartRect.width / chartData.length;
+
+    // Position the tooltip directly above the respective level point
+    const xPosition = chartRect.left + levelIndex * pointWidth + pointWidth / 2;
+    const yPosition = selectedDot ? selectedDot.y : chartRect.top + 120; // Position above the badge
+
+    // Center the tooltip above the point
+    const tooltipX = xPosition - 280; // Half of tooltip width (250px)
+    const tooltipY = yPosition - 190; // Position above with some space
+
     return (
       <div
         className="custom-tooltip"
         style={{
-          position: 'absolute',
-          left: `${selectedDot.x - 110}px`,
-          top: `${selectedDot.y + 40}px`,
-          width: '220px',
-          fontSize: '11px',
-          padding: '8px',
-          backgroundColor: 'white',
-          border: '1px solid #ccc',
-          borderRadius: '4px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-          zIndex: 1000,
+          position: "absolute",
+          left: `${tooltipX}px`,
+          top: `${tooltipY}px`,
         }}
       >
-        <h4 className="tooltip-title" style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>{data.level}</h4>
+        <h4 className="tooltip-title">{data.level}</h4>
         <div className="tooltip-content">
-          <div><u>Percentage</u>: {data.percentage.toFixed(1)}%</div>
+          <div>
+            <u>Percentage</u>: {data.percentage.toFixed(1)}%
+          </div>
         </div>
-        <div className="tooltip-description" style={{ marginTop: '4px', fontSize: '10px' }}>{data.description}</div>
+        <div className="tooltip-description">{data.description}</div>
       </div>
     );
   };
 
-  if(loading) {
+  if (loading) {
     return (
       <Card className="severity-card">
-        <CardContent style={{ textAlign: 'center', padding: '40px 0' }}>
-          <div className="loading-spinner">
-            <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>
-              Loading severity factors...
-            </div>
-            <div className="spinner"></div>
-          </div>
+        <CardContent className="loading-spinner">
+          <div className="loading-text">Loading severity factors...</div>
+          <div className="spinner"></div>
         </CardContent>
       </Card>
-    )
-  }
-
-  if(error) { 
-    return (
-      <Card className="severity-card">
-      <CardContent style={{ textAlign: 'center', padding: '40px 0' }}>
-        <div className="error-message" style={{ color: '#ef4444' }}>
-          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '15px' }}>
-            Error loading severity factors
-          </div>
-          <div style={{ marginBottom: '20px' }}>{error}</div>
-        </div>
-      </CardContent>
-    </Card>
     );
   }
 
-  if(!Array.isArray(severityLevels) || severityLevels.length === 0) {
+  if (error) {
     return (
-      <Card className="severity-card" style={{ margin: 0, padding: 0, fontFamily: 'Verdana, sans-serif' }}>
-        <CardHeader style={{ margin: 0, padding: '0 0 0 0', textAlign: 'center' }}>
-          <CardTitle style={{ color: textColor }}>No Severity Factors Found</CardTitle>
-          <CardDescription style={{ color: textColor }}>Please contact the project owner to set up severity factors.</CardDescription>
+      <Card className="severity-card">
+        <CardContent>
+          <div className="error-message">
+            <div className="error-title">Error loading severity factors</div>
+            <div className="error-details">{error}</div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!Array.isArray(severityLevels) || severityLevels.length === 0) {
+    return (
+      <Card className="severity-card">
+        <CardHeader className="text-center">
+          <CardDescription>No Severity Factors Found</CardDescription>
+          <CardDescription>
+            Please contact the project owner to set up severity factors.
+          </CardDescription>
         </CardHeader>
       </Card>
     );
   }
-  
+
   return (
-    <Card className="severity-card" style={{ margin: 0, padding: 0, fontFamily: 'Verdana, sans-serif' }}>
-      <CardHeader style={{ margin: 0, padding: '0 0 0 0', textAlign: 'center' }}>
-        <CardDescription style={{ color: textColor, marginBottom: 0, paddingBottom: 0 }}>
-          Allocate probability percentages across severity levels (total must be 100%)
+    <Card className="severity-card">
+      <CardHeader className="text-center severity-card-header">
+        <CardDescription
+          style={{
+            color: textColor,
+            fontSize: "1rem",
+            fontWeight: "500",
+            marginBottom: "-1.5rem",
+          }}
+        >
+          Allocate probability percentages across severity levels
+          <br />
+          <span style={{ fontSize: "0.9rem", opacity: 0.85 }}>
+            <b>(Total must be 100%)</b>
+          </span>
         </CardDescription>
       </CardHeader>
-      <CardContent style={{ padding: 0, marginTop: 20, maxHeight: '130vh' }}>
-        <div className='severity-levels-info' style={{ padding: '0 20px 15px 20px', textAlign:'center'}}>
-          <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>Current Severity Weight Factors:</p>
-          <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap' }}>
-            {severityLevels.map((level, index) => (
-              <div key={index} style={{ padding: '5px 10px', margin: '5px', backgroundColor: level.color, borderRadius: '4px',  fontSize: '12px', fontWeight: 'bold'}}>
-                Level {level.level}
-              </div>
-            ))}
-          </div>
-        </div>
-        <div
-          className="severity-graph"
-          style={{ padding: 0, margin: 0, position: 'relative' }}
-          ref={chartRef}
-        >
+      <CardContent className="compact-card-content">
+        <div className="severity-graph" ref={chartRef}>
           <CustomTooltip />
-          <ResponsiveContainer width="100%" height={370} style={{ padding: 0, margin: 0 }}>
+          <ResponsiveContainer width="100%" height={360}>
             <ComposedChart
               data={chartData}
-              margin={{ top: 0, right: 20, left: 20, bottom: 10 }}
-              onMouseMove={() => {}}
+              margin={{ top: 0, right: 40, left: 30, bottom: 15 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" stroke="#eaeaea" />
               <XAxis
                 dataKey="name"
                 interval={0}
-                tick={({ x, y, payload }) => (
-                  <g transform={`translate(${x},${y})`}>
-                    <text x={0} y={0} dy={16} textAnchor="middle" fill={textColor}>
-                      {`Level ${payload.value.split(' ')[1]}`}
-                    </text>
-                    <text x={0} y={20} dy={16} textAnchor="middle" fill={textColor} fontSize="12">
-                      {severityLevels[parseInt(payload.value.split(' ')[1]) - 1].name}
-                    </text>
-                    <foreignObject
-                      x="-30"
-                      y="50"
-                      width="70"
-                      height="30"
-                    >
-                      <div className="input-group-chart">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={percentages[parseInt(payload.value.split(' ')[1]) - 1]}
-                          onChange={(e) => handlePercentageChange(parseInt(payload.value.split(' ')[1]) - 1, e.target.value)}
-                        />
-                        <span>%</span>
-                      </div>
-                    </foreignObject>
-                  </g>
-                )}
-                height={100}
+                axisLine={false}
+                tickLine={false}
+                height={110}
+                padding={{ left: 30, right: 30 }}
+                tick={(props) => {
+                  const { x, y, index } = props;
+                  const level = severityLevels[index];
+
+                  return (
+                    <g transform={`translate(${x},${y})`}>
+                      {/* Colored level badge */}
+                      <foreignObject x="-40" y="5" width="80" height="45">
+                        <div
+                          className="x-axis-badge"
+                          style={{ backgroundColor: level.color }}
+                          onMouseEnter={() => setHoveredLevel(index)}
+                          onMouseLeave={() => setHoveredLevel(null)}
+                        >
+                          Level {level.level}
+                        </div>
+                      </foreignObject>
+
+                      {/* Percentage input */}
+                      <foreignObject x="-35" y="60" width="8%" height="32">
+                        <div className="input-group-chart">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={percentages[index]}
+                            onChange={(e) =>
+                              handlePercentageChange(index, e.target.value)
+                            }
+                            style={{ width: "100%" }}
+                          />
+                          <span>%</span>
+                        </div>
+                      </foreignObject>
+                    </g>
+                  );
+                }}
               />
               <YAxis
-                yAxisId="right"
-                orientation="right"
-                domain={[0, Math.max(...severityLevels.map((level) => level.value)) * 1.1 || 400]}
-                label={{ value: 'Weighted Value', angle: 90, position: 'insideRight', fill: textColor, dy: 40 }}
-                tick={{ fill: textColor }}
-              />
-              <YAxis
-                yAxisId="left"  
+                yAxisId="left"
                 orientation="left"
                 domain={[0, 100]}
-                label={{ value: 'Percentage (%)', angle: -90, position: 'insideLeft', fill: textColor, dy: 40 }}
+                label={{
+                  value: "Percentage %",
+                  angle: -90,
+                  position: "insideLeft",
+                  fill: textColor,
+                  dy: 40,
+                  fontSize: 12,
+                }}
+                style={{ fontFamily: "Verdana, sans-serif" }}
                 tick={{ fill: textColor }}
-                padding={{ top: 3 }}
+                tickCount={5}
               />
-              <Legend />
+              <Tooltip
+                content={() => null} // Using custom tooltip outside chart
+              />
+              <Legend wrapperStyle={{ bottom: -15 }} />
               <Line
                 yAxisId="left"
                 type="monotone"
@@ -365,19 +406,19 @@ const DGraph = ({ onVoteComplete, projectId }) => {
                 isAnimationActive={false}
                 dot={(props) => {
                   const { cx, cy, index } = props;
-                  const isDragging = dragStateRef.current.isDragging && dragStateRef.current.activeIndex === index;
+                  const isDragging =
+                    dragStateRef.current.isDragging &&
+                    dragStateRef.current.activeIndex === index;
                   return (
                     <circle
                       cx={cx}
                       cy={cy}
                       r={isDragging ? 8 : 6}
                       fill="#2563eb"
-                      stroke="#2563eb"
+                      stroke="#fff"
                       strokeWidth={isDragging ? 3 : 2}
-                      style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+                      style={{ cursor: isDragging ? "grabbing" : "grab" }}
                       data-index={index}
-                      onMouseEnter={() => !dragStateRef.current.isDragging && setSelectedDot({ x: cx, y: cy, index })}
-                      onMouseLeave={() => !dragStateRef.current.isDragging && setSelectedDot(null)}
                     />
                   );
                 }}
@@ -386,33 +427,38 @@ const DGraph = ({ onVoteComplete, projectId }) => {
             </ComposedChart>
           </ResponsiveContainer>
         </div>
+
         {Math.abs(totalPercentage - 100) > 0.1 && (
           <div className="percentage-alert">
-            <div className="alert-content" style={{ textAlign: 'center' }}>
-              <u>Current total</u>: <b>{totalPercentage}%</b> (Need 100%)
+            <div className="alert-content">
+              <span>
+                Current total: <b>{totalPercentage}%</b> (Need 100%)
+              </span>
             </div>
             <div className="alert-bar">
               <div
                 className="alert-progress"
                 style={{
                   width: `${Math.min(totalPercentage, 100)}%`,
-                  backgroundColor: totalPercentage > 100 ? '#ef4444' : '#3b82f6'
+                  backgroundColor:
+                    totalPercentage > 100 ? "#ef4444" : "#3b82f6",
                 }}
-              />  
+              />
             </div>
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20, padding: '10px 20px' }}>
-          <button className="reset-button" onClick={handleResetPercentages} style={{backgroundColor: '#6b7280', color: 'white', padding: '8px 16px',  borderRadius: '4px', border: 'none', cursor: 'pointer'}}>   
-            <b>Reset</b>
+
+        <div className="action-buttons">
+          <button className="reset-button" onClick={handleResetPercentages}>
+            Reset
           </button>
-        <button
-          className="submit-button"
-          disabled={Math.abs(totalPercentage - 100) > 0.1}
-          onClick={handleSubmit}
-        >
-          <b>Submit Severity Factors Votes</b>
-        </button>
+          <button
+            className="submit-button"
+            disabled={Math.abs(totalPercentage - 100) > 0.1}
+            onClick={handleSubmit}
+          >
+            Submit Votes
+          </button>
         </div>
       </CardContent>
     </Card>

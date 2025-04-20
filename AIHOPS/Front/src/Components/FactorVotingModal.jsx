@@ -136,7 +136,7 @@ const FactorVotingModal = ({
         <button className="close-modal" onClick={onClose}>
           ×
         </button>
-        <h2 className="modal-title">Vote on factors for {project.name}</h2>
+        <h2 className="modal-title">Vote on dimensions for {project.name}</h2>
 
         {/* Tabs */}
         <div className="factor-tabs-wrapper">
