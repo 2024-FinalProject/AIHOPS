@@ -64,6 +64,8 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   const [chartData, setChartData] = useState([]);
   const [selectedDot, setSelectedDot] = useState(null);
   const [hoveredLevel, setHoveredLevel] = useState(null);
+  // Add debounce timer ref to fix laggy hover behavior
+  const hoverTimerRef = useRef(null);
 
   const chartRef = useRef(null);
   const dragStateRef = useRef({
@@ -221,9 +223,43 @@ const DGraph = ({ onVoteComplete, projectId }) => {
     setPercentages([20, 20, 20, 20, 20]);
   };
 
+  // Add functions to handle hover with debouncing
+  const handleLevelMouseEnter = (index) => {
+    // Clear any existing timer
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+
+    // Set a short delay to prevent flickering
+    hoverTimerRef.current = setTimeout(() => {
+      setHoveredLevel(index);
+    }, 50);
+  };
+
+  const handleLevelMouseLeave = () => {
+    // Clear any existing timer
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+
+    // Add a small delay before hiding the tooltip
+    hoverTimerRef.current = setTimeout(() => {
+      setHoveredLevel(null);
+    }, 50);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+    };
+  }, []);
+
   const totalPercentage = percentages.reduce((sum, p) => sum + p, 0);
 
-  // Custom tooltip with improved positioning
+  // Improved custom tooltip with fixed positioning relative to chart container
   const CustomTooltip = () => {
     if (
       (!selectedDot && hoveredLevel === null) ||
@@ -235,34 +271,29 @@ const DGraph = ({ onVoteComplete, projectId }) => {
     const levelIndex = selectedDot ? selectedDot.index : hoveredLevel;
     const data = chartData[levelIndex];
 
-    // Calculate the x-position based on the chart width divided by the number of data points
-    const chartRect = chartRef.current.getBoundingClientRect();
-    const pointWidth = chartRect.width / chartData.length;
+    if (!data) return null;
 
-    // Position the tooltip directly above the respective level point
-    const xPosition = chartRect.left + levelIndex * pointWidth + pointWidth / 2;
-    const yPosition = selectedDot ? selectedDot.y : chartRect.top + 120; // Position above the badge
-
-    // Center the tooltip above the point
-    const tooltipX = xPosition - 280; // Half of tooltip width (250px)
-    const tooltipY = yPosition - 190; // Position above with some space
+    // Calculate position based on level index
+    // Each level takes up 1/5 of the chart width
+    const levelPosition = ((levelIndex + 0.5) / chartData.length) * 100;
 
     return (
       <div
-        className="custom-tooltip"
+        className="custom-tooltip-container"
         style={{
-          position: "absolute",
-          left: `${tooltipX}px`,
-          top: `${tooltipY}px`,
+          left: `${levelPosition + 2}%`,
+          top: "100px",
         }}
       >
-        <h4 className="tooltip-title">{data.level}</h4>
-        <div className="tooltip-content">
-          <div>
-            <u>Percentage</u>: {data.percentage.toFixed(1)}%
+        <div className="custom-tooltip">
+          <h4 className="tooltip-title">{data.level}</h4>
+          <div className="tooltip-content">
+            <div>
+              <u>Percentage</u>: {data.percentage.toFixed(1)}%
+            </div>
           </div>
+          <div className="tooltip-description">{data.description}</div>
         </div>
-        <div className="tooltip-description">{data.description}</div>
       </div>
     );
   };
@@ -349,8 +380,8 @@ const DGraph = ({ onVoteComplete, projectId }) => {
                         <div
                           className="x-axis-badge"
                           style={{ backgroundColor: level.color }}
-                          onMouseEnter={() => setHoveredLevel(index)}
-                          onMouseLeave={() => setHoveredLevel(null)}
+                          onMouseEnter={() => handleLevelMouseEnter(index)}
+                          onMouseLeave={() => handleLevelMouseLeave()}
                         >
                           Level {level.level}
                         </div>

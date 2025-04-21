@@ -96,25 +96,48 @@
   padding-right: 2px;
 }
 
-/* Enhanced tooltip styling with animation */
+/* Fixed tooltip container for positioning */
+.custom-tooltip-container {
+  position: absolute;
+  top: 10px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Enhanced and more compact tooltip styling with animation */
 .custom-tooltip {
   background-color: var(--card-background, #fff) !important;
   border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  width: 250px;
-  font-size: 0.9rem;
-  z-index: 1000;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  width: 180px;
+  font-size: 0.8rem;
   overflow: visible;
-  transition: all 0.3s ease;
-  animation: fadeInTooltip 0.25s ease-in-out;
+  transition: all 0.2s ease;
+  animation: fadeInTooltip 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.custom-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  margin-left: -8px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid var(--card-background, #fff);
+  pointer-events: none;
 }
 
 @keyframes fadeInTooltip {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.95);
+    transform: translateY(5px) scale(0.95);
   }
   to {
     opacity: 1;
@@ -123,30 +146,29 @@
 }
 
 .tooltip-title {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--text-color, #333) !important;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
   text-align: center;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .tooltip-content {
-  margin: 0.5rem 0;
-  padding: 0.3rem 0;
-  font-size: 0.9rem !important;
+  margin: 0.3rem 0;
+  padding: 0.2rem 0;
+  font-size: 0.8rem !important;
   text-align: center;
   color: var(--text-color, #555) !important;
 }
 
 .tooltip-description {
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  line-height: 1.4;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
   color: var(--text-color, #666) !important;
   text-align: center;
-  font-style: italic;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   padding-top: 6px;
 }
