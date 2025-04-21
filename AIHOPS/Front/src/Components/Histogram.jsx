@@ -100,7 +100,16 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
     : factorsArray;
 
   // Separate labels and data from ordered factors.
-  const labels = orderedFactors.map((factor) => factor.name.split(" "));
+  // Put this above your component:
+  function splitTwoLines(name) {
+    const words = name.trim().split(/\s+/);
+    if (words.length <= 2) return [name]; // short → one line
+    const mid = Math.ceil(words.length / 2);
+    return [words.slice(0, mid).join(" "), words.slice(mid).join(" ")];
+  }
+
+  // then, build your labels:
+  const labels = orderedFactors.map((f) => splitTwoLines(f.name));
   const tooltipNames = orderedFactors.map((factor) => factor.name);
   const data = orderedFactors.map((factor) => factor.avg);
 
@@ -174,9 +183,13 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
           color: textColor,
         },
         ticks: {
+          autoSkip: false,
+          maxRotation: 45, // rotate labels 45° (so they don’t overlap as badly)
+          minRotation: 45,
           font: { size: 12 },
           color: textColor,
         },
+        offset: true,
       },
       y: {
         title: {
@@ -202,14 +215,18 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
     <div style={{ display: "flex", justifyContent: "center" }}>
       <div
         style={{
-          width: "80%",
-          height: "345px",
-          marginTop: "20px",
-          marginBottom: "20px",
+          width: "90%",
+          maxWidth: "1000px",
+          height: "400px",
+          margin: "20px auto",
           backgroundColor: backgroundColor,
         }}
       >
-        <Bar data={chartData} options={options} plugins={[errorBarPlugin]} />
+        <Bar
+          data={chartData}
+          options={{ ...options, aspectRatio: 2 }}
+          plugins={[errorBarPlugin]}
+        />
       </div>
     </div>
   );
