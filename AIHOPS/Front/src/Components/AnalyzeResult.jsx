@@ -1,7 +1,13 @@
-import { getProjectProgress, getProjectsScore, getProjectFactors, getProjectSeverityFactors, getProjectFactorVotes } from "../api/ProjectApi";
+import {
+  getProjectProgress,
+  getProjectsScore,
+  getProjectFactors,
+  getProjectSeverityFactors,
+  getProjectFactorVotes,
+} from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 import "./ProjectStatusPopup.css";
-import './AnalyzeResult.css';
+import "./AnalyzeResult.css";
 import Histogram from "./Histogram";
 import SeverityHistogram from "./SeverityHistogram";
 import FormulaDisplay from "./FormulaDisplay";
@@ -19,7 +25,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(true);
 
-
   const fetch_project_progress = async () => {
     let cookie = localStorage.getItem("authToken");
     if (!cookie) {
@@ -35,7 +40,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     }
   };
 
-  const fetch_project_score = async ( weightsToUse ) => {
+  const fetch_project_score = async (weightsToUse) => {
     console.log("trying to fetch score witth weights: ", weights);
 
     let cookie = localStorage.getItem("authToken");
@@ -46,7 +51,9 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     }
 
     //check all weights not zero
-    const hasPositiveWeight = Object.values(weightsToUse).some(val => parseFloat(val) > 0);
+    const hasPositiveWeight = Object.values(weightsToUse).some(
+      (val) => parseFloat(val) > 0
+    );
     if (!hasPositiveWeight) {
       alert("must have at least 1 non zero weight");
       return;
@@ -130,7 +137,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       setIsSuccess(false);
       return;
     }
-    fetchAllData()
+    fetchAllData();
   }, []);
 
   useEffect(() => {
@@ -138,7 +145,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       setWeightsInited(true);
       console.log("weights use Effect len: ", projectFactors.length);
       const initialWeights = {};
-      projectFactors.forEach(factor => {
+      projectFactors.forEach((factor) => {
         initialWeights[factor.id] = 1;
       });
       setWeights(initialWeights);
@@ -150,20 +157,23 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     const val = parseFloat(value);
     if (isNaN(val) || val < 0) return;
 
-    setWeights(prev => ({
+    setWeights((prev) => ({
       ...prev,
-      [id]: val
+      [id]: val,
     }));
 
     console.log("changed weight for", id, "to", val);
   };
 
   const ProjectScore = () => {
-    const vals = Object.values(projectsScore.factors || {}).map(f => f.avg);
+    const vals = Object.values(projectsScore.factors || {}).map((f) => f.avg);
     const total = vals.reduce((s, v) => s + v, 0);
     const avg = vals.length ? (total / vals.length).toFixed(3) : 0;
     return (
-      <p className="default-text" style={{ fontSize: '16px', margin: '10px 0' }}>
+      <p
+        className="default-text"
+        style={{ fontSize: "16px", margin: "10px 0", marginBottom: "-3%" }}
+      >
         <b>Current Assessment Dimensions Score:</b> {avg}
       </p>
     );
@@ -171,25 +181,31 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
   const getPopupContent = () => {
     switch (analyzePopupType) {
-      case 'showCurrentScore':
+      case "showCurrentScore":
         return (
-          <div style={{ textAlign: 'center', margin: '10px 0' }}>
-            <h2 className="default-text" style={{ 
-              fontSize: '22px', 
-              color: 'var(--text-color)', 
-              marginBottom: '15px',
-              fontWeight: '600'
-            }}>
+          <div style={{ textAlign: "center", margin: "10px 0" }}>
+            <h2
+              className="default-text"
+              style={{
+                fontSize: "22px",
+                color: "var(--text-color)",
+                marginBottom: "15px",
+                fontWeight: "600",
+              }}
+            >
               <u>Current Project Score</u>:
             </h2>
             {/* Display the formula and score */}
-            <div className="score-display" style={{ 
-              margin: '0 auto 15px', 
-              padding: '8px', 
-              backgroundColor: 'var(--card-background)',
-              borderRadius: '8px',
-              maxWidth: '600px'
-            }}>
+            <div
+              className="score-display"
+              style={{
+                margin: "0 auto 15px",
+                padding: "8px",
+                backgroundColor: "var(--card-background)",
+                borderRadius: "8px",
+                maxWidth: "600px",
+              }}
+            >
               {Object.keys(projectsScore).length > 0 ? (
                 <FormulaDisplay
                   nominator={projectsScore.nominator}
@@ -201,200 +217,292 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 "No score available"
               )}
             </div>
-            
-            <div style={{ marginBottom: '10px' }}>
-              <h3 className="default-text" style={{ 
-                fontSize: '16px', 
-                marginBottom: '10px',
-                color: 'var(--text-color)'
-              }}>
+
+            <div style={{ marginBottom: "10px" }}>
+              <h3
+                className="default-text"
+                style={{
+                  fontSize: "16px",
+                  marginBottom: "10px",
+                  color: "var(--text-color)",
+                }}
+              >
                 <u>Apply weight to the assessment dimensions</u>:
               </h3>
-              
-              <div className="weight-inputs" style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '8px',
-                justifyContent: 'center',
-                marginBottom: '10px'
-              }}>
-                {projectFactors.map(f => (
-                  <div key={f.id} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '5px 10px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color)',
-                    backgroundColor: 'rgba(255,255,255,0.02)'
-                  }}>
-                    <span className="default-text" style={{ 
-                      fontWeight: '500',
-                      fontSize: '14px',
-                      textAlign: 'left',
-                      flex: '1'
-                    }}>{f.name}</span>
+
+              <div
+                className="weight-inputs"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "8px",
+                  justifyContent: "center",
+                  marginBottom: "10px",
+                }}
+              >
+                {projectFactors.map((f) => (
+                  <div
+                    key={f.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      padding: "5px 10px",
+                      borderRadius: "6px",
+                      border: "1px solid var(--border-color)",
+                      backgroundColor: "rgba(255,255,255,0.02)",
+                    }}
+                  >
+                    <span
+                      className="default-text"
+                      style={{
+                        fontWeight: "500",
+                        fontSize: "14px",
+                        textAlign: "left",
+                        flex: "1",
+                      }}
+                    >
+                      {f.name}
+                    </span>
                     <input
                       type="number"
                       min="0"
                       step="1"
                       value={weights[f.id]}
-                      onChange={e => handleWeightChange(f.id, e.target.value)}
+                      onChange={(e) => handleWeightChange(f.id, e.target.value)}
                       style={{
-                        width: '45px',
-                        height: '28px',
-                        textAlign: 'center',
-                        borderRadius: '4px',
-                        border: '1px solid var(--border-color)',
-                        fontSize: '14px',
-                        backgroundColor: 'transparent',
-                        color: 'var(--text-color)'
+                        width: "45px",
+                        height: "28px",
+                        textAlign: "center",
+                        borderRadius: "4px",
+                        border: "1px solid var(--border-color)",
+                        fontSize: "14px",
+                        backgroundColor: "transparent",
+                        color: "var(--text-color)",
                       }}
                     />
                   </div>
                 ))}
               </div>
-              
+
               <button
                 onClick={() => fetch_project_score(weights)}
                 style={{
-                  padding: '6px 20px',
-                  fontSize: '14px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  backgroundColor: '#28a745',
-                  color: '#fff',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s ease'
+                  padding: "6px 20px",
+                  fontSize: "14px",
+                  borderRadius: "6px",
+                  border: "none",
+                  cursor: "pointer",
+                  backgroundColor: "#28a745",
+                  color: "#fff",
+                  fontWeight: "500",
+                  transition: "background-color 0.2s ease",
                 }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#218838'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#28a745'}
-              >Calculate</button>
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#218838")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#28a745")
+                }
+              >
+                Calculate
+              </button>
             </div>
           </div>
         );
-      case 'showAssessorsInfo':
+      case "showAssessorsInfo":
         return (
-          <div style={{ lineHeight: '1.6', margin: '10px', textAlign: 'center', marginTop: '80px' }}>           
-            <div style={{ 
-              display: 'flex',
-              justifyContent: 'space-around',
-              maxWidth: '700px',
-              margin: '0 auto'
-            }}>
-              <div style={{ 
-                padding: '12px', 
-                borderRadius: '8px', 
-                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-                backgroundColor: 'var(--card-background)',
-                flex: '1',
-                margin: '0 8px',
-                marginBottom: '-20%'
-              }}>
-                <p className="default-text" style={{ fontWeight: '600', fontSize: '16px' }}>
-                  {projectsProgress.pending_amount + projectsProgress.member_count - 1}
+          <div
+            style={{
+              lineHeight: "1.6",
+              margin: "10px",
+              textAlign: "center",
+              marginTop: "80px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                maxWidth: "700px",
+                margin: "0 auto",
+              }}
+            >
+              <div
+                style={{
+                  padding: "12px",
+                  borderRadius: "8px",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  backgroundColor: "var(--card-background)",
+                  flex: "1",
+                  margin: "0 8px",
+                  marginBottom: "-20%",
+                }}
+              >
+                <p
+                  className="default-text"
+                  style={{ fontWeight: "600", fontSize: "16px" }}
+                >
+                  {projectsProgress.pending_amount +
+                    projectsProgress.member_count -
+                    1}
                 </p>
-                <p className="default-text" style={{ fontSize: '14px', color: 'var(--text-color)' }}>
+                <p
+                  className="default-text"
+                  style={{ fontSize: "14px", color: "var(--text-color)" }}
+                >
                   Invited Assessors
                 </p>
               </div>
-              
-              <div style={{ 
-                padding: '12px', 
-                borderRadius: '8px', 
-                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-                backgroundColor: 'var(--card-background)',
-                flex: '1',
-                margin: '0 8px' 
-              }}>
-                <p className="default-text" style={{ fontWeight: '600', fontSize: '16px' }}>
+
+              <div
+                style={{
+                  padding: "12px",
+                  borderRadius: "8px",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  backgroundColor: "var(--card-background)",
+                  flex: "1",
+                  margin: "0 8px",
+                }}
+              >
+                <p
+                  className="default-text"
+                  style={{ fontWeight: "600", fontSize: "16px" }}
+                >
                   {projectsProgress.member_count - 1}
                 </p>
-                <p className="default-text" style={{ fontSize: '14px', color: 'var(--text-color)' }}>
+                <p
+                  className="default-text"
+                  style={{ fontSize: "14px", color: "var(--text-color)" }}
+                >
                   Registered Assessors
                 </p>
               </div>
-              
-              <div style={{ 
-                padding: '12px', 
-                borderRadius: '8px', 
-                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-                backgroundColor: 'var(--card-background)',
-                flex: '1',
-                margin: '0 8px' 
-              }}>
-                <p className="default-text" style={{ fontWeight: '600', fontSize: '16px' }}>
+
+              <div
+                style={{
+                  padding: "12px",
+                  borderRadius: "8px",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  backgroundColor: "var(--card-background)",
+                  flex: "1",
+                  margin: "0 8px",
+                }}
+              >
+                <p
+                  className="default-text"
+                  style={{ fontWeight: "600", fontSize: "16px" }}
+                >
                   {projectsProgress.voted_amount}
                 </p>
-                <p className="default-text" style={{ fontSize: '14px', color: 'var(--text-color)' }}>
+                <p
+                  className="default-text"
+                  style={{ fontSize: "14px", color: "var(--text-color)" }}
+                >
                   Completed Assessments
                 </p>
               </div>
             </div>
           </div>
         );
-      case 'showContentFactorsScore':
+      case "showContentFactorsScore":
         return (
-          <div style={{ textAlign: 'center', marginTop: '15px'}}>
-            <div className="default-text" style={{ 
-              backgroundColor: 'var(--card-background)',
-              padding: '12px', 
-              borderRadius: '8px',
-              maxWidth: '700px',
-              margin: '0 auto 15px',
-              marginBottom: '-5px'
-            }}>
-              {Object.keys(projectsScore).length > 0 ? (ProjectScore()) : ("Assessment Dimensions Score not available")}
+          <div style={{ textAlign: "center", marginTop: "15px" }}>
+            <div
+              className="default-text"
+              style={{
+                backgroundColor: "var(--card-background)",
+                padding: "12px",
+                borderRadius: "8px",
+                maxWidth: "700px",
+                margin: "0 auto 15px",
+                marginBottom: "-5px",
+              }}
+            >
+              {Object.keys(projectsScore).length > 0
+                ? ProjectScore()
+                : "Assessment Dimensions Score not available"}
             </div>
-            
+
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: '900px', margin: '0 auto'}}>
-                <Histogram factors={projectsScore.factors} factorslist={projectFactors} factorVotes={projectFactorsVotes} />
+              <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+                <Histogram
+                  factors={projectsScore.factors}
+                  factorslist={projectFactors}
+                  factorVotes={projectFactorsVotes}
+                />
               </div>
             )}
           </div>
         );
-      case 'showSeverityFactorsScore':
+      case "showSeverityFactorsScore":
         return (
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
-            <div style={{ 
-              backgroundColor: 'var(--card-background)',
-              padding: '12px', 
-              borderRadius: '8px',
-              maxWidth: '700px',
-              margin: '0 auto 15px',
-              marginBottom: '-10px'
-            }}>
-              <p className="default-text" style={{ fontSize: '15px', marginBottom: '8px' }}>
-                <b>Current Severity Factors Score:</b> {Object.keys(projectsScore).length > 0 ? (projectsScore.d_score ? parseFloat(projectsScore.d_score.toFixed(3)) : "No available Severity Factors Score") : "No available Severity Factors Score"}
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <div
+              style={{
+                backgroundColor: "var(--card-background)",
+                padding: "12px",
+                borderRadius: "8px",
+                maxWidth: "700px",
+                margin: "0 auto 15px",
+                marginBottom: "-10px",
+              }}
+            >
+              <p
+                className="default-text"
+                style={{ fontSize: "15px", marginBottom: "8px" }}
+              >
+                <b>Current Severity Factors Score:</b>{" "}
+                {Object.keys(projectsScore).length > 0
+                  ? projectsScore.d_score
+                    ? parseFloat(projectsScore.d_score.toFixed(3))
+                    : "No available Severity Factors Score"
+                  : "No available Severity Factors Score"}
               </p>
-              <p className="default-text" style={{ fontSize: '15px' }}>
-                <b>Number of Severity Factors Score assessors:</b> {projectsProgress.voted_amount}
+              <p className="default-text" style={{ fontSize: "15px" }}>
+                <b>Number of Severity Factors Score assessors:</b>{" "}
+                {projectsProgress.voted_amount}
               </p>
             </div>
-            
+
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                <SeverityHistogram severityfactors={projectsScore.severity_damage} severityfactorsValues={projectSeverityFactors} />
+              <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+                <SeverityHistogram
+                  severityfactors={projectsScore.severity_damage}
+                  severityfactorsValues={projectSeverityFactors}
+                />
               </div>
             )}
           </div>
         );
-      case 'exportResults':
+      case "exportResults":
         return (
-          <div style={{ textAlign: 'center', marginTop: '80px' }}>    
-            <div className="default-text" style={{ 
-              backgroundColor: 'var(--card-background)',
-              padding: '20px', 
-              borderRadius: '8px',
-              maxWidth: '700px',
-              margin: '0 auto',
-              marginBottom: '-0.5%'
-            }}>
+          <div style={{ textAlign: "center", marginTop: "80px" }}>
+            <div
+              className="default-text"
+              style={{
+                backgroundColor: "var(--card-background)",
+                padding: "20px",
+                borderRadius: "8px",
+                maxWidth: "700px",
+                margin: "0 auto",
+                marginBottom: "-0.5%",
+              }}
+            >
               {Object.keys(projectsScore).length > 0 ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', gap: '15px' }}>
-                  <p style={{ fontSize: '15px' }}>Click the button below to export all project analysis data to Excel.</p>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    flexDirection: "column",
+                    gap: "15px",
+                  }}
+                >
+                  <p style={{ fontSize: "15px" }}>
+                    Click the button below to export all project analysis data
+                    to Excel.
+                  </p>
                   <ExportDataButton
                     projectsScore={projectsScore}
                     projectsProgress={projectsProgress}
@@ -435,10 +543,14 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             display: "flex",
             alignItems: "center",
             gap: "5px",
-            transition: "background-color 0.2s ease"
+            transition: "background-color 0.2s ease",
           }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#0069d9"}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#007bff"}
+          onMouseOver={(e) =>
+            (e.currentTarget.style.backgroundColor = "#0069d9")
+          }
+          onMouseOut={(e) =>
+            (e.currentTarget.style.backgroundColor = "#007bff")
+          }
         >
           <span style={{ fontSize: "14px" }}>🔄</span> Refresh
         </button>
