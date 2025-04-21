@@ -401,6 +401,7 @@ const MyProjects = () => {
                       margin: "0 auto",
                       textAlign: "center",
                       fontFamily: "Verdana, sans-serif",
+                      marginBottom: "-3%",
                     }}
                   >
                     <u>Severity Factors Voting for {currentProject.name}</u>:
