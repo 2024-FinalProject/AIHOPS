@@ -354,7 +354,11 @@ const DGraph = ({ onVoteComplete, projectId }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="compact-card-content">
-        <div className="severity-graph" ref={chartRef}>
+        <div
+          className="severity-graph"
+          ref={chartRef}
+          style={{ marginBottom: "-2.5%" }}
+        >
           <CustomTooltip />
           <ResponsiveContainer width="100%" height={360}>
             <ComposedChart
