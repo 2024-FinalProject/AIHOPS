@@ -1,5 +1,5 @@
 .severity-card {
-  font-family: "Inter", system-ui, sans-serif !important;
+  font-family: "Verdana", sans-serif !important;
   background: var(--card-background, #fff);
   border-radius: 20px;
   overflow: hidden;
