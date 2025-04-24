@@ -11,6 +11,7 @@ import CreateProjectPopup from "../Components/CreateProjectPopup";
 import ProjectStatusPopup from "../Components/ProjectStatusPopup";
 import AlertPopup from "../Components/AlertPopup";
 import EditPopup from "../Components/EditPopup"; //Component for secondary popups
+import PublishingModal from "../Components/PublishingModal"; // Import the new component
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
 
@@ -40,6 +41,12 @@ const ProjectsManagement = () => {
   const [publishData, setPublishData] = useState({
     projectID: null,
     projectName: "",
+  });
+
+  // State for publishing progress modal
+  const [publishingModalState, setPublishingModalState] = useState({
+    isOpen: false,
+    isComplete: false,
   });
 
   // State for project archiving
@@ -225,37 +232,61 @@ const ProjectsManagement = () => {
     }
   };
 
+  // Initial publish handler - shows confirmation popup
   const handlePublish = async (projectID, projectName) => {
     setPublishData({ projectID, projectName });
     setConfirmPublishPopUp(true);
   };
 
+  // Execute publishing after confirmation
   const handleConfirmPublish = async () => {
     setConfirmPublishPopUp(false);
     const { projectID, projectName } = publishData;
 
     await fetchProjects(); // Ensure the projects list is refreshed
     const project = findProjectByID(projectID);
+
     if (project.severity_factors_inited && project.factors_inited) {
+      // Show the publishing modal with loading state
+      setPublishingModalState({
+        isOpen: true,
+        isComplete: false,
+      });
+
       const cookie = localStorage.getItem("authToken");
       if (!cookie) {
+        setPublishingModalState({ isOpen: false, isComplete: false });
         setMsg("No authentication token found. Please log in again.");
         setIsSuccess(false);
         return;
       }
+
       try {
         const response = await publishProject(cookie, project.id);
         if (response.data.success) {
-          //alert(`Published project: "${project.name}".`);
+          // Update project state
+          await fetchProjects();
+          if (selectedProject) {
+            selectedProject.isActive = true;
+          }
+
+          // Show success state in modal
+          setPublishingModalState({
+            isOpen: true,
+            isComplete: true,
+          });
+
           setIsSuccess(true);
-          await fetchProjects(); // Refresh project list after publishing
-          selectedProject.isActive = true;
         } else {
+          // Hide modal and show error
+          setPublishingModalState({ isOpen: false, isComplete: false });
           setMsg(response.data.message);
           alert(response.data.message);
           setIsSuccess(true);
         }
       } catch (error) {
+        // Hide modal and show error
+        setPublishingModalState({ isOpen: false, isComplete: false });
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
         setMsg(`Error in publishing project: ${errorMessage}`);
@@ -264,6 +295,14 @@ const ProjectsManagement = () => {
     } else {
       alert("Please initialize factors and severity factors first.");
     }
+  };
+
+  // Close the publishing modal
+  const closePublishingModal = () => {
+    setPublishingModalState({
+      isOpen: false,
+      isComplete: false,
+    });
   };
 
   const handleCreateProject = async () => {
@@ -451,6 +490,7 @@ const ProjectsManagement = () => {
         />
       )}
 
+      {/* Project publish confirmation */}
       {confirmPublishPopUp && (
         <AlertPopup
           message={`Are you sure you want to publish the project "${publishData.projectName}"?`}
@@ -460,6 +500,8 @@ const ProjectsManagement = () => {
           onCancel={() => setConfirmPublishPopUp(false)}
         />
       )}
+
+      {/* Archive confirmation */}
       {showArchivePopup && (
         <AlertPopup
           message={`Are you sure you want to archive the project "${archiveData.projectName}"?`}
@@ -469,6 +511,13 @@ const ProjectsManagement = () => {
           onCancel={() => setShowArchivePopup(false)}
         />
       )}
+
+      {/* Publishing progress modal */}
+      <PublishingModal
+        isOpen={publishingModalState.isOpen}
+        isComplete={publishingModalState.isComplete}
+        onClose={closePublishingModal}
+      />
     </section>
   );
 };
