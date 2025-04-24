@@ -1598,7 +1598,7 @@ const EditPopup = ({
             {/* Members Section */}
             <p>
               <strong className="default-text">
-                <u>Members</u>:
+                <u>Assessors</u>:
               </strong>
             </p>
             {Object.keys(selectedProject.members).length > 0 ? (
@@ -1611,21 +1611,21 @@ const EditPopup = ({
                         className="remove-btn"
                         onClick={() => handleRemoveMember(memberItem)}
                       >
-                        Remove Member
+                        Remove Assessor
                       </button>
                     )}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p>No members added yet.</p>
+              <p>No assessors added yet.</p>
             )}
 
             {/* Remove invited members section: */}
             <p>
               {!selectedProject.isActive && (
                 <strong className="default-text">
-                  <u>Members to be invited</u>:
+                  <u>Assessors to be invited</u>:
                 </strong>
               )}
             </p>
@@ -1654,14 +1654,14 @@ const EditPopup = ({
                 !(projectsPendingInvites.length > 0)) && (
                 <p className="default-text">
                   {" "}
-                  There are currently no invited members{" "}
+                  There are currently no invited assessors{" "}
                 </p>
               )}
 
             <p>
               {selectedProject.isActive && (
                 <strong className="default-text">
-                  <u>Pending Members</u>:
+                  <u>Pending Assessors</u>:
                 </strong>
               )}
             </p>
@@ -1677,7 +1677,7 @@ const EditPopup = ({
                           className="remove-btn"
                           onClick={() => handleRemoveMember(pendingMember)}
                         >
-                          Remove Pending Member
+                          Remove Pending Assessor
                         </button>
                       }
                     </li>
@@ -1695,7 +1695,7 @@ const EditPopup = ({
 
             <p>
               <strong className="default-text">
-                <u>Add New Members</u>:
+                <u>Add New Assessors</u>:
               </strong>
             </p>
             {/* Add member section */}
@@ -1703,7 +1703,7 @@ const EditPopup = ({
               <input
                 type="text"
                 className="add-member-input"
-                placeholder="New member's name"
+                placeholder="New assessor's name"
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
                 style={{ flex: "1" }}
@@ -1712,14 +1712,14 @@ const EditPopup = ({
                 className="action-btn add-member-btn"
                 onClick={handleAddMember}
               >
-                Add Member
+                Add Assessor
               </button>
             </div>
             {!selectedProject.isActive && addedMember && (
               <div className="severity-factors-warning">
                 <p style={{ textAlign: "center", fontSize: "17px" }}>
-                  <b>Note:</b> Members will be invited only after the project's
-                  publication.
+                  <b>Note:</b> Assessors will be invited only after the
+                  project's publication.
                 </p>
               </div>
             )}
