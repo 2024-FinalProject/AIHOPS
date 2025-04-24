@@ -218,7 +218,7 @@ const EditPopup = ({
       if (response.data.success) {
         //alert("Severity factors confirmed successfully");
         selectedProject.severity_factors_inited = true;
-        fetch_selected_project(selectedProject);
+        await fetch_selected_project(selectedProject);
       } else {
         console.log("Error confirming project factors");
       }
@@ -243,9 +243,12 @@ const EditPopup = ({
       level++
     ) {
       if (severityUpdates[level] < 0) {
-        alert(
-          "Severity factors cannot be negative. Please enter a valid number for all levels."
+        setIsSuccess(true);
+        setAlertMessage(
+          "Severity factors cannot be negative.\nPlease enter a valid number for all levels."
         );
+        setAlertType("warning");
+        setShowAlert(true);
         return -1;
       }
       if (severityUpdates == null || severityUpdates[level] === undefined) {
@@ -256,13 +259,16 @@ const EditPopup = ({
     }
 
     for (let i = 1; i < tempSeverityFactors.length; i++) {
-      if (tempSeverityFactors[i - 1] > tempSeverityFactors[i]) {
-        alert(
+      if (tempSeverityFactors[i - 1] >= tempSeverityFactors[i]) {
+        setIsSuccess(true);
+        setAlertMessage(
           "Severity factors must be in increasing order.\nCurrently level " +
             i +
             " is greater than level " +
             (i + 1)
         );
+        setAlertType("warning");
+        setShowAlert(true);
         return -1;
       }
     }
@@ -1621,6 +1627,15 @@ const EditPopup = ({
                 )}
               </button>
             </div>
+            {showAlert && (
+              <AlertPopup
+                message={alertMessage}
+                type={alertType}
+                title="Input Validation"
+                onClose={() => setShowAlert(false)}
+                autoCloseTime={3000}
+              />
+            )}
           </div>
         );
 
