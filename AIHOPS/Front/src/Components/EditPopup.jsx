@@ -24,6 +24,7 @@ import AnalyzeResult from "./AnalyzeResult";
 import FactorInputForm from "./FactorInputForm";
 import { register } from "../api/AuthApi.jsx";
 import AlertPopup from "./AlertPopup";
+import EmailValidator from "email-validator";
 
 const EditPopup = ({
   fetchProjects,
@@ -166,9 +167,11 @@ const EditPopup = ({
       return;
     }
 
-    if (name == null && description == null) {
-      alert("Please enter a new value to update to.");
+    if (name == "" || description == "") {
       setIsSuccess(true);
+      setAlertMessage("Please enter a new value to update to.");
+      setAlertType("warning");
+      setShowAlert(true);
       return;
     }
 
@@ -336,14 +339,25 @@ const EditPopup = ({
 
   const handleAddMember = async () => {
     if (newMemberName === selectedProject.founder) {
-      alert(
-        `You cannot add the founder of the project, as they already exist.`
+      setAlertMessage(
+        "You cannot add the founder of the project, as they already exist."
       );
+      setAlertType("warning");
+      setShowAlert(true);
       return;
     }
 
     if (newMemberName === "") {
-      alert(`Please enter a valid member name.`);
+      setAlertMessage("Please enter a valid member name");
+      setAlertType("warning");
+      setShowAlert(true);
+      return;
+    }
+
+    if (!EmailValidator.validate(newMemberName)) {
+      setAlertMessage("Please enter a valid email address.");
+      setAlertType("warning");
+      setShowAlert(true);
       return;
     }
 
@@ -972,6 +986,15 @@ const EditPopup = ({
             <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
               Save
             </button>
+            {showAlert && (
+              <AlertPopup
+                message={alertMessage}
+                type={alertType}
+                title="Input Validation"
+                onClose={() => setShowAlert(false)}
+                autoCloseTime={3000}
+              />
+            )}
           </div>
         );
       case "editDescription":
@@ -988,6 +1011,15 @@ const EditPopup = ({
             <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
               Save
             </button>
+            {showAlert && (
+              <AlertPopup
+                message={alertMessage}
+                type={alertType}
+                title="Input Validation"
+                onClose={() => setShowAlert(false)}
+                autoCloseTime={3000}
+              />
+            )}
           </div>
         );
       case "editContentFactors":
@@ -1703,7 +1735,7 @@ const EditPopup = ({
               <input
                 type="text"
                 className="add-member-input"
-                placeholder="New assessor's name"
+                placeholder="New assessor's email"
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
                 style={{ flex: "1" }}
@@ -1722,6 +1754,16 @@ const EditPopup = ({
                   project's publication.
                 </p>
               </div>
+            )}
+
+            {showAlert && (
+              <AlertPopup
+                message={alertMessage}
+                type={alertType}
+                title="Input Validation"
+                onClose={() => setShowAlert(false)}
+                autoCloseTime={3000}
+              />
             )}
           </div>
         );
