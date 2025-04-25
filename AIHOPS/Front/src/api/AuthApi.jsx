@@ -54,3 +54,7 @@ export const updatePassword = async (cookie, email, password, code) => {
 export const googleLogin = async (cookie, tokenId) => {
   return await axios.post(`${API_URL}/google_login`, { cookie, tokenId });
 };
+
+export const checkEmailExists = async (cookie, tokenId) => {
+  return await axios.post(`${API_URL}/check_email_exists`, { cookie, tokenId });
+};

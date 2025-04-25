@@ -4,6 +4,7 @@ import {
   loginUser,
   startPasswordRecovery,
   googleLogin,
+  checkEmailExists,
 } from "../api/AuthApi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -174,15 +175,35 @@ const Login = () => {
   };
 
   // First step of Google login; show modal if no session flag yet
-  const handleGoogleSuccess = (credentialResponse) => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     const cred = credentialResponse.credential;
-    const hasSession =
-      sessionStorage.getItem("termsAcceptedSession") === "true";
-    if (hasSession) {
-      completeGoogleLogin(cred);
-    } else {
-      setPendingGoogleCredential(cred);
-      setShowTermsConditions(true);
+
+    try {
+      // First check if the user already exists
+      const existingToken = localStorage.getItem("authToken");
+      let cookie;
+      if (existingToken) {
+        cookie = existingToken;
+      } else {
+        const session = await startSession();
+        cookie = session.data.cookie;
+      }
+
+      // Call new endpoint to check if email exists
+      const checkEmailResponse = await checkEmailExists(cookie, cred);
+
+      if (checkEmailResponse.data.userExists) {
+        // User exists, proceed with Google login directly
+        completeGoogleLogin(cred);
+      } else {
+        // New user, show terms & conditions first
+        setPendingGoogleCredential(cred);
+        setShowTermsConditions(true);
+      }
+    } catch (error) {
+      console.error("Error checking email:", error);
+      setMsg("Login failed. Please try again.");
+      setIsSuccess(false);
     }
   };
 

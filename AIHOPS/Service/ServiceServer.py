@@ -77,6 +77,21 @@ def google_login():
     
     return jsonify(response_data)
 
+@app.route("/check_email_exists", methods=["POST"])
+def check_email_exists():
+    data = request.json
+    res = server.check_email_exists(int(data["cookie"]), data["tokenId"])
+    response_data = {
+        "message": res.msg, 
+        "success": res.success,
+        "userExists": res.result["userExists"] if res.success else False
+    }
+    
+    if res.success and "email" in res.result:
+        response_data["email"] = res.result["email"]
+    
+    return jsonify(response_data)
+
 # @app.route("/update-password", methods=["POST"])
 # # expecting json with {cookie, oldPasswd, newPasswd}
 # def update_password():

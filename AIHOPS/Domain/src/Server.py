@@ -180,6 +180,29 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to login with Google: {str(e)}")
         
+    def check_email_exists(self, cookie, token_id):
+        try:
+            # Verify the Google token
+            id_info = id_token.verify_oauth2_token(
+                token_id, google_requests.Request(), self.GOOGLE_CLIENT_ID
+            )
+            
+            if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                return ResponseFailMsg("Invalid token issuer")
+            
+            # Get user email from the token info
+            email = id_info['email']
+            
+            # Check if user exists
+            user_exists = self.user_controller.members.get(email) is not None
+            
+            return Response(True, "Email check completed", {"userExists": user_exists, "email": email}, False)
+        
+        except ValueError as e:
+            return ResponseFailMsg(f"Invalid Google token: {str(e)}")
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to check email: {str(e)}")
+        
     # def update_password(self, cookie, old_passwd, new_passwd):
     #     try:
     #         res = self.get_session_member(cookie)
