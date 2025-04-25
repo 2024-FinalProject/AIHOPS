@@ -10,8 +10,11 @@ from Domain.src.Session import Session
 from Domain.src.Users.MemberController import MemberController
 
 
-class Server:
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+import json
 
+class Server:
     def __init__(self):
         self.db_access = DBAccess()
         self.sessions = {}  # map cookies to sessions
@@ -19,6 +22,7 @@ class Server:
         self.user_deletion_lock = RLock()
         self.user_controller = MemberController(self, self.db_access)
         self.project_manager = ProjectManager(self.db_access)
+        self.GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
 
     def clear_db(self):
         self.db_access.clear_db()
@@ -129,6 +133,52 @@ class Server:
             return session.logout()
         except Exception as e:
             return ResponseFailMsg(f"Failed to logout: {e}")
+        
+    def google_login(self, cookie, token_id):
+        try:
+            # Verify the Google token
+            id_info = id_token.verify_oauth2_token(
+                token_id, google_requests.Request(), self.GOOGLE_CLIENT_ID
+            )
+            
+            if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                return ResponseFailMsg("Invalid token issuer")
+            
+            # Get user email from the token info
+            email = id_info['email']
+            
+            # Get the session
+            res = self.get_session(cookie)
+            if not res.success:
+                return res
+            
+            session = res.result
+            
+            # Check if user exists
+            member_exists = self.user_controller.members.get(email) is not None
+            
+            if not member_exists:
+                # User doesn't exist, create one with a random password
+                import secrets
+                random_password = secrets.token_hex(16)
+                register_res = self.user_controller.register_google_user(email, random_password)
+                
+                if not register_res.success:
+                    return register_res
+            
+            # Login the user with Google authentication
+            login_res = self.user_controller.login_with_google(email)
+            
+            if login_res.success:
+                session.login(email)
+                return Response(True, f"Successfully logged in with Google as {email}", {"email": email}, False)
+            
+            return login_res
+        
+        except ValueError as e:
+            return ResponseFailMsg(f"Invalid Google token: {str(e)}")
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to login with Google: {str(e)}")
         
     # def update_password(self, cookie, old_passwd, new_passwd):
     #     try:

@@ -4,7 +4,7 @@ from Domain.src.Loggs.Response import Response, ResponseSuccessObj
 
 
 class Member:
-    def __init__(self, email, passwd, uid, from_db=False, verified=False):
+    def __init__(self, email, passwd, uid, from_db=False, verified=False, is_google_user=False):
         self.id = uid
         self.email = email
         if from_db:
@@ -13,6 +13,7 @@ class Member:
             self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()
         self.logged_in = False
         self.verified = verified
+        self.is_google_user = is_google_user
 
     def verify(self):
         self.verified = True
@@ -20,7 +21,6 @@ class Member:
     def verify_passwd(self, passwd):
         if self.encrypted_passwd != hashlib.sha256(passwd.encode('utf8')).hexdigest():
             raise Exception('incorrect credentials')
-
 
     def login(self, email, passwd):
         if not self.verified:
@@ -30,6 +30,16 @@ class Member:
         self.verify_passwd(passwd)
         self.logged_in = True
         return Response(True, f'user: {email} is now logged in', self, False)
+    
+    def login_with_google(self, email):
+        """Login without password verification for Google-authenticated users"""
+        if not self.verified:
+            return Response(False, f'{email} is not verified', None, False)
+        if self.email != email:
+            return Response(False, 'incorrect credentials', None, False)
+        
+        self.logged_in = True
+        return Response(True, f'user: {email} is now logged in via Google', self, False)
 
     def logout(self):
         self.logged_in = False
@@ -39,7 +49,7 @@ class Member:
         return ResponseSuccessObj('user name', self.email)
 
     def to_json(self):
-        return {"name": self.email}
+        return {"name": self.email, "is_google_user": self.is_google_user}
     
     def update_password(self, passwd):
         self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()

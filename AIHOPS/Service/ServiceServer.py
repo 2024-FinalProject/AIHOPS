@@ -50,11 +50,14 @@ def verify_automatic():
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/login", methods=["POST"])
-# excpecting json with {cookie, user_name, passwd}
 def login():
     data = request.json
-    res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success})
+    res  = server.login(int(data["cookie"]), data["userName"], data["passwd"])
+    out  = {"message": res.msg, "success": res.success}
+    if res.success:
+        member = server.user_controller.members.get(data["userName"])
+        out["termsAccepted"] = bool(member.terms_accepted)
+    return jsonify(out)
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
@@ -62,6 +65,17 @@ def logout():
     data = request.json
     res = server.logout(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/google_login", methods=["POST"])
+def google_login():
+    data = request.json
+    res = server.google_login(int(data["cookie"]), data["tokenId"])
+    response_data = {"message": res.msg, "success": res.success}
+    
+    if res.success and hasattr(res, 'result') and isinstance(res.result, dict) and 'email' in res.result:
+        response_data["email"] = res.result["email"]
+    
+    return jsonify(response_data)
 
 # @app.route("/update-password", methods=["POST"])
 # # expecting json with {cookie, oldPasswd, newPasswd}
