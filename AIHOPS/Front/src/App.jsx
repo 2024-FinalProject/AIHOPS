@@ -2,25 +2,30 @@ import React, { useEffect } from "react";
 import axios from "axios";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import './theme.css';
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import "./theme.css";
 
 // Importing the components
 import NavBar from "./Components/NavBar";
-import AccessibilityMenu from './Components/AccessibilityMenu';
+import AccessibilityMenu from "./Components/AccessibilityMenu";
 
 // Importing the pages
 import WelcomePage from "./Pages/WelcomePage";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
-import Notification from "./pages/PendingRequests"
+import Notification from "./pages/PendingRequests";
 import ProjectsManagement_old from "./Pages/ProjectsManagement_old";
 import ProjectsManagement from "./Pages/ProjectsManagement";
 import MyProjects from "./Pages/MyProjects";
 import Settings from "./Pages/Settings";
-import About from './Pages/About';
+import About from "./Pages/About";
 import Verify from "./Pages/Verify.jsx";
 import VerifyAutomatic from "./Pages/VerifyAutomatic.jsx";
 import PasswordRecovery from "./Pages/PasswordRecovery.jsx";
+
+//Google OAuth client ID
+const GOOGLE_CLIENT_ID =
+  "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com";
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
@@ -51,11 +56,14 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/notification" element={<Notification />} />
         <Route path="/projectsmanagement" element={<ProjectsManagement />} />
-        <Route path="/projectsmanagement_old" element={<ProjectsManagement_old />} />
+        <Route
+          path="/projectsmanagement_old"
+          element={<ProjectsManagement_old />}
+        />
         <Route path="/myprojects" element={<MyProjects />} />
-        <Route path = "/settings" element = {<Settings />} />
-        <Route path = "/about" element = {<About />} />
-        <Route path = "/PasswordRecovery" element = {<PasswordRecovery />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/PasswordRecovery" element={<PasswordRecovery />} />
       </Routes>
       {/* <AccessibilityMenu /> */}
     </>
@@ -63,9 +71,11 @@ const AppContent = () => {
 };
 
 const App = () => (
-  <AuthProvider>
-    <AppContent />
-  </AuthProvider>
+  <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  </GoogleOAuthProvider>
 );
 
 export default App;

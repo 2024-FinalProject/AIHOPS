@@ -137,5 +137,61 @@ class MemberController:
             member.encrypted_passwd = old_passwd
             return ResponseFailMsg(f'password recovery failed for {email}')
         return ResponseSuccessMsg(f'password recovery for {email} has been successful')
+    
+    def register_google_user(self, email, passwd):
+        """Register a user that authenticated through Google"""
+        with self.register_lock:
+            member = self.members.get(email)
+            if member is not None and member.verified:
+                # User already exists and is verified
+                if not hasattr(member, 'is_google_user') or not member.is_google_user:
+                    member.is_google_user = True
+                    # Update database record to mark as Google user
+                    res = self.db_access.update_by_query(DBMember, {"email": email}, {"is_google_user": True})
+                    if not res.success:
+                        return res
+                return Response(True, f'User {email} already exists', member, False)
+
+            if member is not None:
+                # User exists but is not verified, delete and recreate
+                res = self.db_access.delete_obj_by_query(DBMember, {"email": email})
+                if not res.success:
+                    return res
+
+            uid = self.id_maker.next_id()
+            # Create a new member and set is_google_user to True
+            member = Member(email, passwd, uid, from_db=False, verified=True, is_google_user=True)
+            
+            # Insert to db with is_google_user flag set to True
+            res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd, is_verified=True, is_google_user=True))
+            if not res.success:
+                return res
+            
+            self.members.insert(email, member)
+            
+            return Response(True, f'Google user {email} has been registered', member, False)
+
+    def login_with_google(self, email):
+        """Login a user that authenticated through Google without password check"""
+        member = self.members.get(email)
+        if member is None:
+            return Response(False, f'User {email} not found', None, False)
+        
+        if not member.verified:
+            # Update verification status for the Google user
+            member.verify()
+            member.is_google_user = True
+            res = self.db_access.update_by_query(DBMember, {"email": email}, {"verified": True, "is_google_user": True})
+            if not res.success:
+                return res
+        elif not hasattr(member, 'is_google_user') or not member.is_google_user:
+            # Update existing user to mark as Google user
+            member.is_google_user = True
+            res = self.db_access.update_by_query(DBMember, {"email": email}, {"is_google_user": True})
+            if not res.success:
+                return res
+        
+        # Use the new login_with_google method that bypasses password verification
+        return member.login_with_google(email)
 
 

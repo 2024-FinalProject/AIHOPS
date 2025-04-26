@@ -63,6 +63,32 @@ def logout():
     res = server.logout(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/google_login", methods=["POST"])
+def google_login():
+    data = request.json
+    res = server.google_login(int(data["cookie"]), data["tokenId"])
+    response_data = {"message": res.msg, "success": res.success}
+    
+    if res.success and hasattr(res, 'result') and isinstance(res.result, dict) and 'email' in res.result:
+        response_data["email"] = res.result["email"]
+    
+    return jsonify(response_data)
+
+@app.route("/check_email_exists", methods=["POST"])
+def check_email_exists():
+    data = request.json
+    res = server.check_email_exists(int(data["cookie"]), data["tokenId"])
+    response_data = {
+        "message": res.msg, 
+        "success": res.success,
+        "userExists": res.result["userExists"] if res.success else False
+    }
+    
+    if res.success and "email" in res.result:
+        response_data["email"] = res.result["email"]
+    
+    return jsonify(response_data)
+
 # @app.route("/update-password", methods=["POST"])
 # # expecting json with {cookie, oldPasswd, newPasswd}
 # def update_password():
