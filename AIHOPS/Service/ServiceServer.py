@@ -50,14 +50,11 @@ def verify_automatic():
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/login", methods=["POST"])
+# excpecting json with {cookie, user_name, passwd}
 def login():
     data = request.json
-    res  = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    out  = {"message": res.msg, "success": res.success}
-    if res.success:
-        member = server.user_controller.members.get(data["userName"])
-        out["termsAccepted"] = bool(member.terms_accepted)
-    return jsonify(out)
+    res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
+    return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
