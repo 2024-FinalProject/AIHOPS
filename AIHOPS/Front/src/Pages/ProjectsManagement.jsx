@@ -56,6 +56,16 @@ const ProjectsManagement = () => {
     projectName: "",
   });
 
+  const [confirmDeletionPopUp, setConfirmDeletionPopUp] = useState(false);
+  const [DeleteData, setDeleteData] = useState({
+    projectID: null,
+    projectName: "",
+  });
+
+  // State for error in  project creation
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const navigate = useNavigate();
 
   const findProjectByID = (id) => {
@@ -179,13 +189,15 @@ const ProjectsManagement = () => {
   };
 
   const handleDelete = async (projectName) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete the project "${projectName}"?`
-      )
-    ) {
-      alert(`Deleted project: "${projectName}". Implement the backend call.`);
-    }
+    setDeleteData({ projectName });
+    setConfirmDeletionPopUp(true);
+  };
+
+  //  TODO: Implement the delete project functionality
+  const handleConfirmDelete = async (projectName) => {
+    alert(
+      "Work in progress. Please check back later. (need to implement delete project functionality)"
+    );
   };
 
   const handleArchive = async (projectID, projectName) => {
@@ -228,7 +240,8 @@ const ProjectsManagement = () => {
         setIsSuccess(false);
       }
     } else {
-      alert("Please initialize factors and severity factors first.");
+      setShowErrorPopup(true);
+      setErrorMessage(errorMessage);
     }
   };
 
@@ -280,8 +293,8 @@ const ProjectsManagement = () => {
         } else {
           // Hide modal and show error
           setPublishingModalState({ isOpen: false, isComplete: false });
-          setMsg(response.data.message);
-          alert(response.data.message);
+          setShowErrorPopup(true);
+          setErrorMessage(response.data.message);
           setIsSuccess(true);
         }
       } catch (error) {
@@ -289,11 +302,12 @@ const ProjectsManagement = () => {
         setPublishingModalState({ isOpen: false, isComplete: false });
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
-        setMsg(`Error in publishing project: ${errorMessage}`);
+        setErrorMessage(`Error in publishing project: ${errorMessage}`);
         setIsSuccess(false);
       }
     } else {
-      alert("Please initialize factors and severity factors first.");
+      setShowErrorPopup(true);
+      setErrorMessage(errorMessage);
     }
   };
 
@@ -315,7 +329,9 @@ const ProjectsManagement = () => {
     }
 
     if (newProject.name === "" || newProject.description === "") {
-      alert("Please enter a valid project name and description.");
+      // alert("Please enter a valid project name and description.");
+      setShowErrorPopup(true);
+      setErrorMessage("Please enter a valid project name and description.");
       return;
     }
 
@@ -335,8 +351,8 @@ const ProjectsManagement = () => {
         await fetchProjects();
         setShowCreatePopup(false);
       } else {
-        setMsg(response.data.message);
-        setIsSuccess(true);
+        setErrorMessage(response.data.message);
+        setShowErrorPopup(true);
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
@@ -511,6 +527,36 @@ const ProjectsManagement = () => {
           onCancel={() => setShowArchivePopup(false)}
         />
       )}
+
+      {/* Project deletion confirmation */}
+      {confirmDeletionPopUp && (
+        <AlertPopup
+          message={`Are you sure you want to delete the project "${DeleteData.projectName}"?`}
+          title="Delete Project"
+          type="info"
+          onConfirm={() => {
+            setConfirmDeletionPopUp(false);
+            handleConfirmDelete(DeleteData.projectName);
+          }}
+          onCancel={() => setConfirmDeletionPopUp(false)}
+        />
+      )}
+
+      {/* Create project error message */}
+      {showErrorPopup && (
+        <AlertPopup
+          message={errorMessage}
+          title="Error"
+          type="error"
+          onClose={() => {
+            setShowErrorPopup(false);
+            setErrorMessage("");
+          }}
+          autoCloseTime={5000} // Auto-close after 5 seconds
+        />
+      )}
+
+      {/* Create project success message */}
 
       {/* Publishing progress modal */}
       <PublishingModal
