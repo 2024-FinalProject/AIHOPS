@@ -94,6 +94,9 @@ const ProgressBar = ({
   const assessorsData = calculateAssessorsConfirmedData();
   const surveyData = calculateSurveyCompletedData();
 
+  // Check if project is published
+  const isPublished = project.isActive || project.isArchived;
+
   return (
     <div className="progress-container-enhanced">
       <div className="progress-card">
@@ -205,23 +208,25 @@ const ProgressBar = ({
                 )}
             </div>
           </div>
+
+          {/* Publish Button moved inside Design Project section */}
+          {!project.isActive && !project.isArchived && (
+            <div className="publish-container">
+              <button
+                className="publish-btn"
+                disabled={project.isArchived}
+                onClick={() => handlePublish(project.id, project.name)}
+              >
+                Publish Project
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Publish Section */}
-        {!project.isActive && !project.isArchived && (
-          <div className="section publish-section">
-            <button
-              className="publish-btn"
-              disabled={project.isArchived}
-              onClick={() => handlePublish(project.id, project.name)}
-            >
-              Publish Project
-            </button>
-          </div>
-        )}
-
-        {/* Data Collection Section */}
-        <div className="section data-section">
+        {/* Data Collection Section - added inactive class when not published */}
+        <div
+          className={`section data-section ${!isPublished ? "inactive" : ""}`}
+        >
           <h3 className="section-title">Collect Data</h3>
 
           <div className="data-grid">
@@ -253,12 +258,18 @@ const ProgressBar = ({
           </div>
         </div>
 
-        {/* Result Analysis Section */}
-        <div className="section result-section">
+        {/* Result Analysis Section - added inactive class when not published */}
+        <div
+          className={`section result-section ${!isPublished ? "inactive" : ""}`}
+        >
           <h3 className="section-title">Analyze Results</h3>
 
           <div className="result-actions">
-            <button className="analyze-btn" onClick={handleAnalyzeResult}>
+            <button
+              className="analyze-btn"
+              onClick={handleAnalyzeResult}
+              disabled={!isPublished}
+            >
               <span className="btn-icon">📊</span>
               <span className="btn-text">Analyze Result</span>
             </button>
