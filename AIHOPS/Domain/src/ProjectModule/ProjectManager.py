@@ -545,13 +545,14 @@ class ProjectManager():
 
     def admin_remove_default_factor(self, fid):
         """change will persist in all projects in design and also published projects"""
+        with self.project_lock:
+            for project in self.projects.getKeys():
+                p = self.projects.get(project)
+                if p.has_factor(fid):
+                    p.admin_remove_factor(fid)
         res = self.factor_pool.admin_remove_default_factor(fid)
-        if res.success:
-            with self.project_lock:
-                for project in self.projects.getKeys():
-                    p = self.projects.get(project)
-                    if p.has_factor(fid):
-                        p.remove_factor(fid)
         return ResponseSuccessMsg(f"factor {fid} removed successfully, from all projects")
 
+    def get_default_factors(self):
+        return ResponseSuccessObj("got default factors", self.factor_pool.get_default_factors())
 

@@ -269,7 +269,7 @@ class FactorsPool:
         with self.lock:
             for idx, factor in enumerate(DEFAULT_FACTORS):
                 if factor.fid == fid:
-                    res = self.db_access.delete(factor.db_instance)
+                    res = self.db_access.delete_obj_by_query(DBFactors, {"id": factor.fid})
                     if not res.success:
                         raise Exception(f"failed to delete factor {fid} from db: {res.msg}")
                     del DEFAULT_FACTORS[idx]
@@ -278,7 +278,8 @@ class FactorsPool:
                     return ResponseSuccessMsg(f"Default factor {fid} removed successfully.")
             raise KeyError(f"Default factor with id {fid} not found")
 
+    def get_default_factors(self):
+        return [factor.to_dict() for factor in DEFAULT_FACTORS]
 
-
-if __name__ == '__main__':
-    save_default_factors_to_file(DEFAULT_FACTORS)
+# if __name__ == '__main__':
+#     save_default_factors_to_file(DEFAULT_FACTORS, "factors.txt")

@@ -4,6 +4,7 @@ from threading import RLock
 
 from requests import session
 
+from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg
@@ -654,7 +655,7 @@ class Server:
 
 
     def admin_change_default_factor(self, cookie, fid, name, desc, scales_desc, scales_explanation):
-        """change will persist in all projects in design and also published projects"""
+        """change will persist in all projects"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -681,7 +682,7 @@ class Server:
             return ResponseFailMsg(f"Failed to add default factor {name}: {e}")
 
     def admin_remove_default_factor(self, cookie, fid):
-        """change will persist in all projects in design and also published projects"""
+        """change will persist in all projects"""
         try:
             res = self.get_session_member(cookie)
             if not res.success:
@@ -690,6 +691,18 @@ class Server:
             if not session.is_admin:
                 return ResponseFailMsg("user is not admin")
             return self.project_manager.admin_remove_default_factor(fid)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to remove default factor {fid}: {e}")
+
+    def admin_fetch_default_factors(self, cookie):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            if not session.is_admin:
+                return ResponseFailMsg("user is not admin")
+            return self.project_manager.get_default_factors()
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove default factor {fid}: {e}")
 

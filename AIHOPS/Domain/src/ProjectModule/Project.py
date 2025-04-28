@@ -76,7 +76,7 @@ class Project:
         return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
 
     def admin_remove_factor(self, fid):
-        self.vote_manager.remove_factor(fid)
+        self.vote_manager.admin_remove_default_factor(fid)
 
     def set_severity_factors(self, severity_factors):
         self._verify_in_design()

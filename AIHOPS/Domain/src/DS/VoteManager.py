@@ -35,6 +35,14 @@ class VoteManager:
             return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
         return ResponseFailMsg(res.msg)
 
+    def admin_remove_default_factor(self, fid):
+        with self.lock:
+            for actor, votes in self.factors_votes.items():
+                if votes and votes.get(fid, False):
+                    self.db_access.delete_obj_by_query(DBFactorVotes, {"factor_id": fid, "member_email": actor, "project_id": self.pid})
+        return self.remove_factor(fid)
+
+
     def set_factor_vote(self, actor, fid, score, persist=True):
         with self.lock:
             member_votes = self.factors_votes.get(actor)

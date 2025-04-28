@@ -459,6 +459,12 @@ def admin_remove_default_factor():
     res = server.admin_remove_default_factor(int(data["cookie"]), int(data["fid"]))
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/admin/fetch-default-factors", methods=["GET", "POST"])
+def admin_fetch_default_factors():
+    data = request.json
+    res = server.admin_fetch_default_factors(int(data["cookie"]))
+    return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
+
 @app.route("/")
 def hello():
     return jsonify({"msg": "hello"})
