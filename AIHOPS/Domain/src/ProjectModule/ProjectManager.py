@@ -366,6 +366,16 @@ class ProjectManager():
 
     def publish_project(self, pid, actor):
         project = self._verify_owner(pid, actor)
+        # ── uniqueness check: no other published project by this owner may share name+desc
+        for other in self.owners.get(actor):
+            if other.pid != pid \
+               and other.is_published() \
+               and other.name == project.name \
+               and other.desc == project.desc:
+                    return ResponseFailMsg(
+                        f"cannot publish: another project (id={other.pid}) "
+                        f"with name='{project.name}' and same description is already published"
+                    )
         res = project.publish()
         if not res.success:
             return res
