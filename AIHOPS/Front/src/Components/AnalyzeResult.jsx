@@ -332,11 +332,10 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 style={{
                   padding: "12px",
                   borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
                   backgroundColor: "var(--card-background)",
                   flex: "1",
                   margin: "0 8px",
-                  marginBottom: "-20%",
                 }}
               >
                 <p
@@ -359,7 +358,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 style={{
                   padding: "12px",
                   borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
                   backgroundColor: "var(--card-background)",
                   flex: "1",
                   margin: "0 8px",
@@ -383,7 +382,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 style={{
                   padding: "12px",
                   borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
                   backgroundColor: "var(--card-background)",
                   flex: "1",
                   margin: "0 8px",
