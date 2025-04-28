@@ -240,22 +240,26 @@ input::placeholder {
   font-family: Verdana, sans-serif !important;
 }
 
-/* Active state styling for analyze result buttons */
+/* Enhanced active state styling for analyze result buttons */
 .action-btn.active,
 .edit-btn.active {
   background-color: #495057; /* same as in NavBar active state */
   color: #f8f9fa; /* ensures good contrast */
   font-weight: bold;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 8px rgba(73, 80, 87, 0.6); /* Adds a glowing effect */
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease,
+    transform 0.2s ease;
+  transform: scale(1.02); /* Slightly larger when active */
+  border-radius: 8px; /* Slightly more rounded corners for active state */
 }
 
 /* Optional: Adjust hover state for active buttons if needed */
 .action-btn.active:hover,
 .edit-btn.active:hover {
-  background-color: #343a40;
+  background-color: #343a40; /* Darker shade for hover */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), 0 0 10px rgba(52, 58, 64, 0.7); /* More pronounced glow on hover */
+  transform: scale(1.02); /* Slightly larger on hover */
 }
-
 /* Container that holds the row of circles */
 .pagination-indicator {
   display: flex;
