@@ -10,6 +10,9 @@ from Domain.src.Users.Member import Member
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
 
+ADMIN = ["admin", "admin"]
+
+
 class MemberController:
     def __init__(self, server, db_access):
         self.members = ThreadSafeDict()     # name: user
@@ -84,7 +87,14 @@ class MemberController:
         member.verify()
         return res
 
+    def _admin_login(self, user, passwd):
+        if user == ADMIN[0] and passwd == ADMIN[1]:
+            return True
+
     def login(self, email, encrypted_passwd):
+        if self._admin_login(email, encrypted_passwd):
+            return "admin"
+
         # verify user exists
         member = self.members.get(email)
         if member is None:

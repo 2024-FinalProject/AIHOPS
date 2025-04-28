@@ -2,9 +2,11 @@ import random
 import sys
 from threading import RLock
 
+from requests import session
+
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from Domain.src.Session import Session
 from Domain.src.Users.MemberController import MemberController
@@ -13,6 +15,8 @@ from Domain.src.Users.MemberController import MemberController
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import json
+
+
 
 class Server:
     def __init__(self):
@@ -118,7 +122,11 @@ class Server:
                 return res
             session = res.result
             res = self.user_controller.login(name, passwd)
-            if res.success:
+            if res == "admin":
+                session.admin_login()
+                return ResponseSuccessMsg("admin logged in")
+
+            if res != "admin" and res.success:
                 session.login(name)
             return res
         except Exception as e:
@@ -643,6 +651,47 @@ class Server:
             return self.project_manager.get_member_votes(pid, actor)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get members vote on project: {e}")
+
+
+    def admin_change_default_factor(self, cookie, fid, name, desc, scales_desc, scales_explanation):
+        """change will persist in all projects in design and also published projects"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            if not session.is_admin:
+                return ResponseFailMsg("user is not admin")
+            return self.project_manager.admin_change_default_factor(fid, name, desc, scales_desc, scales_explanation)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed change default factor {fid}: {e}")
+
+
+    def admin_add_default_factor(self, cookie, name, desc, scales_desc, scales_explanation):
+        """factor wont be added automatically to any project"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            if not session.is_admin:
+                return ResponseFailMsg("user is not admin")
+            return self.project_manager.admin_add_default_factor(name, desc, scales_desc, scales_explanation)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to add default factor {name}: {e}")
+
+    def admin_remove_default_factor(self, cookie, fid):
+        """change will persist in all projects in design and also published projects"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            if not session.is_admin:
+                return ResponseFailMsg("user is not admin")
+            return self.project_manager.admin_remove_default_factor(fid)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to remove default factor {fid}: {e}")
 
 
 

@@ -11,6 +11,7 @@ from Domain.src.Loggs.Response import ResponseSuccessObj, ResponseSuccessMsg, Re
 from Domain.src.ProjectModule.Project import Project
 
 from Domain.src.Users.Gmailor import Gmailor
+from Tests.AcceptanceTests.UpdateFactorTests import projects
 
 
 class ProjectManager():
@@ -366,16 +367,7 @@ class ProjectManager():
 
     def publish_project(self, pid, actor):
         project = self._verify_owner(pid, actor)
-        # ── uniqueness check: no other published project by this owner may share name+desc
-        for other in self.owners.get(actor):
-            if other.pid != pid \
-               and other.is_published() \
-               and other.name == project.name \
-               and other.desc == project.desc:
-                    return ResponseFailMsg(
-                        f"cannot publish: another project (id={other.pid}) "
-                        f"with name='{project.name}' and same description is already published"
-                    )
+        self._verify_unique_project(actor, project.name, project.desc)
         res = project.publish()
         if not res.success:
             return res
@@ -544,7 +536,23 @@ class ProjectManager():
 
 
 
+    def admin_change_default_factor(self, fid, name, desc, scales_desc, scales_explanation):
+        """change will persist in all projects in design and also published projects"""
+        return self.factor_pool.admin_change_default_factor(fid, name, desc, scales_desc, scales_explanation)
 
+    def admin_add_default_factor(self, name, desc, scales_desc, scales_explanation):
+        """factor wont be added automatically to any project"""
+        return self.factor_pool.admin_add_default_factor(name, desc, scales_desc, scales_explanation)
 
+    def admin_remove_default_factor(self, fid):
+        """change will persist in all projects in design and also published projects"""
+        res = self.factor_pool.admin_remove_default_factor(fid)
+        if res.success:
+            with self.project_lock:
+                for project in projects.getKeys():
+                    p = projects.get(project)
+                    if p.has_factor(fid):
+                        p.remove_factor(fid)
+        return ResponseSuccessMsg(f"factor {fid} removed successfully, from all projects")
 
 

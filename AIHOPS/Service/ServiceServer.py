@@ -439,6 +439,26 @@ def get_project_factors_votes():
     res = server.get_project_factors_votes(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "votes": res.result if res.success else None})
 
+@app.route("/admin/update-default-factor", methods=["POST"])
+def admin_update_default_factor():
+    data = request.json
+    res = server.admin_change_default_factor(int(data["cookie"]), int(data["fid"]), data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/add-default-factor", methods=["POST"])
+def admin_add_default_factor():
+    data = request.json
+    res = server.admin_add_default_factor(int(data["cookie"]), data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/remove-default-factor", methods=["POST"])
+def admin_remove_default_factor():
+    data = request.json
+    res = server.admin_remove_default_factor(int(data["cookie"]), int(data["fid"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
 @app.route("/")
 def hello():
     return jsonify({"msg": "hello"})
