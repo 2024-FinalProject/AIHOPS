@@ -266,8 +266,11 @@ const ProjectsManagement = () => {
 
     await fetchProjects(); // Ensure the projects list is refreshed
     const project = findProjectByID(projectID);
-
-    if (project.severity_factors_inited && project.factors_inited) {
+    if (
+      project.severity_factors_inited &&
+      project.factors_inited &&
+      project.to_invite.length > 0
+    ) {
       // Show the publishing modal with loading state
       setPublishingModalState({
         isOpen: true,
@@ -315,7 +318,9 @@ const ProjectsManagement = () => {
       }
     } else {
       setShowErrorPopup(true);
-      setErrorMessage(errorMessage);
+      setErrorMessage(
+        "Need to complete all of the steps in the design process first."
+      );
     }
   };
 
