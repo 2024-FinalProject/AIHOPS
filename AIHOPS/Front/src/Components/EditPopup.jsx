@@ -805,7 +805,7 @@ const EditPopup = ({
                 htmlFor="UpdateAllProjectsInDesign"
                 className="checkbox-label"
               >
-                Update all projects in design?
+                Update all projects in design
               </label>
             </div>
             <div
