@@ -11,7 +11,6 @@ from Domain.src.Loggs.Response import ResponseSuccessObj, ResponseSuccessMsg, Re
 from Domain.src.ProjectModule.Project import Project
 
 from Domain.src.Users.Gmailor import Gmailor
-from Tests.AcceptanceTests.UpdateFactorTests import projects
 
 
 class ProjectManager():
@@ -549,8 +548,8 @@ class ProjectManager():
         res = self.factor_pool.admin_remove_default_factor(fid)
         if res.success:
             with self.project_lock:
-                for project in projects.getKeys():
-                    p = projects.get(project)
+                for project in self.projects.getKeys():
+                    p = self.projects.get(project)
                     if p.has_factor(fid):
                         p.remove_factor(fid)
         return ResponseSuccessMsg(f"factor {fid} removed successfully, from all projects")

@@ -22,6 +22,7 @@ import About from "./Pages/About";
 import Verify from "./Pages/Verify.jsx";
 import VerifyAutomatic from "./Pages/VerifyAutomatic.jsx";
 import PasswordRecovery from "./Pages/PasswordRecovery.jsx";
+import AdminPage from "./Pages/AdminPage.jsx";
 
 //Google OAuth client ID
 const GOOGLE_CLIENT_ID =
@@ -64,6 +65,7 @@ const AppContent = () => {
         <Route path="/settings" element={<Settings />} />
         <Route path="/about" element={<About />} />
         <Route path="/PasswordRecovery" element={<PasswordRecovery />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
       {/* <AccessibilityMenu /> */}
     </>

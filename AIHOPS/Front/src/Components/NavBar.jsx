@@ -51,6 +51,10 @@ const NavBar = () => {
     navigate("/"); // Redirect to homepage after login
   };
 
+  const handleAdmin = () => {
+    navigate("/admin");
+  };
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -163,6 +167,17 @@ const NavBar = () => {
                         }`}
                     >
                       Register
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link
+                        to="/admin"
+                        className={`nav-link nav-button ${
+                            location.pathname === "/admin" ? "active" : ""
+                        }`}
+                        onClick={handleAdmin}
+                    >
+                      Admin
                     </Link>
                   </li>
                   {/* <li className="nav-item">

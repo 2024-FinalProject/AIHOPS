@@ -1,7 +1,6 @@
 from threading import RLock
 import json
 
-from PIL.ImageFont import load_default
 
 from DAL.DBAccess import DBAccess
 from DAL.Objects.DBFactors import DBFactors
@@ -136,7 +135,7 @@ class Factor:
 #
 # DEFAULT_FACTORS_IDS = [-1,-2,-3,-4,-5,-6,-7, -8]
 
-def save_default_factors_to_file(default_factors, filename):
+def save_default_factors_to_file(default_factors, filename= 'Domain/src/DS/factors.txt'):
     data_to_save = []
     for factor in default_factors:
         data_to_save.append({
@@ -152,7 +151,7 @@ def save_default_factors_to_file(default_factors, filename):
         json.dump(data_to_save, f, ensure_ascii=False, indent=2)
 
 
-def load_default_factors_from_file(filename):
+def load_default_factors_from_file(filename= 'Domain/src/DS/factors.txt'):
     with open(filename, 'r', encoding='utf-8') as f:
         data_loaded = json.load(f)
 
@@ -170,7 +169,7 @@ def load_default_factors_from_file(filename):
 
     return factors
 
-DEFAULT_FACTORS = load_default_factors_from_file('factors.txt')
+DEFAULT_FACTORS = load_default_factors_from_file()
 DEFAULT_FACTORS_IDS = [factor.fid for factor in DEFAULT_FACTORS]
 
 def insert_defaults():
@@ -245,8 +244,10 @@ class FactorsPool:
                 if factor.fid == fid:
                     # update in db
                     res = DEFAULT_FACTORS[idx].update_new(name, desc, scales_desc, scales_explanation, self.db_access)
+                    if not res.success:
+                        raise Exception(f"failed to update factor in db: {res.msg}")
                     # update in txt
-                    save_default_factors_to_file(DEFAULT_FACTORS, "factors.txt")
+                    save_default_factors_to_file(DEFAULT_FACTORS)
                     return ResponseSuccessMsg(f"Default factor {fid} updated successfully.")
             raise KeyError(f"Default factor with id {fid} not found")
 
@@ -258,9 +259,9 @@ class FactorsPool:
             DEFAULT_FACTORS.append(factor)
             DEFAULT_FACTORS_IDS.append(fid)
             res = self.db_access.insert(factor)
-            if not res.seccess:
+            if not res.success:
                 raise Exception(f"failed to insert new factor to db: {res.msg}")
-            save_default_factors_to_file(DEFAULT_FACTORS, "factors.txt")
+            save_default_factors_to_file(DEFAULT_FACTORS)
             return ResponseSuccessMsg(f"Default factor {fid} added successfully.")
 
     def admin_remove_default_factor(self, fid):
@@ -269,15 +270,15 @@ class FactorsPool:
             for idx, factor in enumerate(DEFAULT_FACTORS):
                 if factor.fid == fid:
                     res = self.db_access.delete(factor.db_instance)
-                    if not res.seccess:
+                    if not res.success:
                         raise Exception(f"failed to delete factor {fid} from db: {res.msg}")
                     del DEFAULT_FACTORS[idx]
                     DEFAULT_FACTORS_IDS.remove(fid)
-                    save_default_factors_to_file(DEFAULT_FACTORS, "factors.txt")
+                    save_default_factors_to_file(DEFAULT_FACTORS)
                     return ResponseSuccessMsg(f"Default factor {fid} removed successfully.")
             raise KeyError(f"Default factor with id {fid} not found")
 
 
 
 if __name__ == '__main__':
-    save_default_factors_to_file(DEFAULT_FACTORS, "factors.txt")
+    save_default_factors_to_file(DEFAULT_FACTORS)
