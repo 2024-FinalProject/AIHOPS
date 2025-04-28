@@ -239,6 +239,7 @@ class Project:
     def __eq__(self, other):
         return (
             isinstance(other, Project)
+            and self.pid   == other.pid
             and self.name == other.name
             and self.desc == other.desc
             and self.owner == other.owner

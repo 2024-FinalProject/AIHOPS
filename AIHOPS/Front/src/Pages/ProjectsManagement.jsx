@@ -87,6 +87,14 @@ const ProjectsManagement = () => {
       if (response.data.success) {
         setProjects([...response.data.projects]); // Spread to ensure a new reference
         setIsSuccess(true);
+        //Show the projects in the console - not as an object, but as an array of objects
+        console.log(
+          "Fetched projects:",
+          response.data.projects.map((project) => ({
+            name: project.name,
+            description: project.description,
+          }))
+        );
       } else {
         setMsg(response.data.message);
         setIsSuccess(true);
