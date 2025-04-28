@@ -222,7 +222,7 @@ const ProgressBar = ({
 
         {/* Data Collection Section */}
         <div className="section data-section">
-          <h3 className="section-title">Data Collection</h3>
+          <h3 className="section-title">Collect Data</h3>
 
           <div className="data-grid">
             <div className="data-card">
@@ -255,7 +255,7 @@ const ProgressBar = ({
 
         {/* Result Analysis Section */}
         <div className="section result-section">
-          <h3 className="section-title">Result Analysis</h3>
+          <h3 className="section-title">Analyze Results</h3>
 
           <div className="result-actions">
             <button className="analyze-btn" onClick={handleAnalyzeResult}>
