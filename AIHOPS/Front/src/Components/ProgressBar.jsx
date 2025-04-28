@@ -155,7 +155,7 @@ const ProgressBar = ({
                 </span>
               </button>
               {!project.factors_inited && (
-                <span className="reminder-badge">Unset</span>
+                <span className="reminder-badge">Unconfirmed</span>
               )}
             </div>
 
@@ -179,7 +179,7 @@ const ProgressBar = ({
                 </span>
               </button>
               {!project.severity_factors_inited && (
-                <span className="reminder-badge">Unset</span>
+                <span className="reminder-badge">Unconfirmed</span>
               )}
             </div>
 
@@ -204,7 +204,7 @@ const ProgressBar = ({
                 projectsProgress.member_count > 1
               ) &&
                 !project.isArchived && (
-                  <span className="reminder-badge">Unset</span>
+                  <span className="reminder-badge">Unconfirmed</span>
                 )}
             </div>
           </div>

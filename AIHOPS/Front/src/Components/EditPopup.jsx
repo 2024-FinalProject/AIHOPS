@@ -1240,7 +1240,7 @@ const EditPopup = ({
                         >
                           ✅ Confirm Assessment Dimensions
                           {!selectedProject.factors_inited && (
-                            <span className="reminder-badge">Unset</span>
+                            <span className="reminder-badge">Unconfirmed</span>
                           )}
                         </button>
                       </div>
@@ -1623,7 +1623,7 @@ const EditPopup = ({
               >
                 ✅ Confirm Severity Factors
                 {!selectedProject.severity_factors_inited && (
-                  <span className="reminder-badge">Unset</span>
+                  <span className="reminder-badge">Unconfirmed</span>
                 )}
               </button>
             </div>
