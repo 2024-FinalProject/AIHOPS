@@ -282,7 +282,7 @@ input::placeholder {
 
 .reminder-badge {
   position: inherit;
-  top: -37px; /* Adjust for fine-tuning */
+  top: -39px; /* Adjust for fine-tuning */
   right: -100px; /* Adjust for fine-tuning */
   background-color: #f7b42c; /* Bright color for visibility */
   color: white;
@@ -295,6 +295,7 @@ input::placeholder {
     50%,
     -50%
   ); /* Positions the badge relative to top-right */
+  pointer-events: none !important;
 }
 
 /* Checkbox container */

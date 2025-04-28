@@ -1185,58 +1185,40 @@ const EditPopup = ({
                           </div>
                         </div>
                       ))}
+                    {/* single-row flex: 3 equal columns */}
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        marginTop: "10px",
+                        alignItems: "center",
+                        width: "100%",
+                        marginTop: "10px", // small gap above
                       }}
                     >
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handlePrevious("factors")}
-                        disabled={factorStartIndex === 0}
-                        style={{
-                          cursor:
-                            factorStartIndex === 0 ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        Previous
-                      </button>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          padding: "10px 0",
-                        }}
-                      >
+                      {/* Left cell: Previous */}
+                      <div style={{ flex: 1, textAlign: "left" }}>
+                        {factorStartIndex >= itemsPerPage && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handlePrevious("factors")}
+                          >
+                            Previous
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Middle cell: Confirm */}
+                      <div style={{ flex: 1, textAlign: "center" }}>
                         <button
                           disabled={selectedProject.isActive}
                           className="action-btn confirm-btn"
                           onClick={() =>
-                            handleConfirmFactors(
-                              selectedProject.id,
-                              selectedProject.name
-                            )
+                            handleConfirmFactors(selectedProject.id)
                           }
                           style={{
-                            padding: "8px 18px",
-                            fontSize: "14px",
                             backgroundColor: "#4CAF50",
                             color: "white",
-                            border: "none",
-                            borderRadius: "20px",
-                            cursor: "pointer",
-                            boxShadow: "0 3px 8px rgba(0, 0, 0, 0.1)",
-                            transition: "all 0.2s ease",
-                            position: "relative", // Positioning for the badge
+                            position: "relative", // for badge
                           }}
-                          onMouseOver={(e) =>
-                            (e.target.style.transform = "scale(1.05)")
-                          }
-                          onMouseOut={(e) =>
-                            (e.target.style.transform = "scale(1)")
-                          }
                         >
                           ✅ Confirm Assessment Dimensions
                           {!selectedProject.factors_inited && (
@@ -1244,27 +1226,27 @@ const EditPopup = ({
                           )}
                         </button>
                       </div>
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handleNext("factors")}
-                        disabled={
-                          factorStartIndex + itemsPerPage >=
-                          selectedProject.factors.length
-                        }
-                        style={{
-                          cursor:
-                            factorStartIndex + itemsPerPage >=
-                            selectedProject.factors.length
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                      >
-                        Next
-                      </button>
+
+                      {/* Right cell: Next */}
+                      <div style={{ flex: 1, textAlign: "right" }}>
+                        {factorStartIndex + itemsPerPage <
+                          selectedProject.factors.length && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handleNext("factors")}
+                          >
+                            Next
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    {/* Page indicator for Project Factors */}
+
+                    {/* pagination dots below, centered */}
                     {totalPagesFactors > 1 && (
-                      <div className="pagination-indicator">
+                      <div
+                        className="pagination-indicator"
+                        style={{ marginTop: "8px" }}
+                      >
                         {Array.from({ length: totalPagesFactors }).map(
                           (_, i) => (
                             <span
@@ -1281,11 +1263,7 @@ const EditPopup = ({
                 ) : (
                   <p
                     className="warning"
-                    style={{
-                      textAlign: "center",
-                      marginTop: "15%",
-                      marginLeft: "-3%",
-                    }}
+                    style={{ textAlign: "center", marginTop: "15%" }}
                   >
                     No factors available in the project.
                   </p>
@@ -1441,62 +1419,59 @@ const EditPopup = ({
                           </div>
                         </div>
                       ))}
+                    {/* single-row flex for Prev / Confirm / Next */}
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
                         marginTop: "10px",
                       }}
                     >
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handlePrevious("pool")}
-                        disabled={poolStartIndex === 0}
-                        style={{
-                          cursor:
-                            poolStartIndex === 0 ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        Previous
-                      </button>
-                      <button
-                        className="action-btn confirm-btn"
-                        onClick={handleSubmit}
-                        style={{
-                          marginTop: "10px",
-                          padding: "8px 18px",
-                          fontSize: "14px",
-                          backgroundColor: "#4CAF50",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "5px",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        Add Selected Assessment Dimensions
-                      </button>
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handleNext("pool")}
-                        disabled={
-                          poolStartIndex + itemsPerPage >= factorsPool.length
-                        }
-                        style={{
-                          cursor:
-                            poolStartIndex + itemsPerPage >= factorsPool.length
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                      >
-                        Next
-                      </button>
+                      {/* Left cell: Previous */}
+                      <div style={{ flex: 1, textAlign: "left" }}>
+                        {poolStartIndex > 0 && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handlePrevious("pool")}
+                          >
+                            Previous
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Middle cell: Confirm (Add) */}
+                      <div style={{ flex: 1, textAlign: "center" }}>
+                        <button
+                          className="action-btn confirm-btn"
+                          onClick={handleSubmit}
+                          style={{
+                            backgroundColor: "#4CAF50",
+                            color: "white",
+                          }}
+                        >
+                          Add Selected Assessment Dimensions
+                        </button>
+                      </div>
+
+                      {/* Right cell: Next */}
+                      <div style={{ flex: 1, textAlign: "right" }}>
+                        {poolStartIndex + itemsPerPage < factorsPool.length && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handleNext("pool")}
+                          >
+                            Next
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    {/* Page indicator for Factors Pool */}
+
+                    {/* pagination dots underneath, centered */}
                     {totalPagesPool > 1 && (
                       <div
                         className="pagination-indicator"
-                        style={{ marginBottom: "-20px" }}
+                        style={{ marginTop: "8px" }}
                       >
                         {Array.from({ length: totalPagesPool }).map((_, i) => (
                           <span
@@ -1608,7 +1583,7 @@ const EditPopup = ({
                 }
                 style={{
                   padding: "8px 18px",
-                  fontSize: "14px",
+                  fontSize: "16px",
                   backgroundColor: "#4CAF50",
                   color: "white",
                   border: "none",
