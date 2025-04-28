@@ -332,11 +332,10 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 style={{
                   padding: "12px",
                   borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
                   backgroundColor: "var(--card-background)",
                   flex: "1",
                   margin: "0 8px",
-                  marginBottom: "-20%",
                 }}
               >
                 <p
@@ -359,7 +358,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 style={{
                   padding: "12px",
                   borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
                   backgroundColor: "var(--card-background)",
                   flex: "1",
                   margin: "0 8px",
@@ -383,7 +382,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 style={{
                   padding: "12px",
                   borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
                   backgroundColor: "var(--card-background)",
                   flex: "1",
                   margin: "0 8px",
@@ -528,31 +527,35 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       <div className="analyzePopup-header">
         <button
           onClick={handleRefresh}
+          title="Refresh"
           style={{
-            position: "fixed",
-            top: "80px",
-            right: "85px",
-            padding: "6px 12px",
-            fontSize: "14px",
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            width: "40px",
+            height: "40px",
+            padding: 0,
+            fontSize: "18px",
             backgroundColor: "#007bff",
-            color: "white",
+            color: "#fff",
             border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            fontFamily: "Verdana, sans-serif",
+            borderRadius: "50%",
             display: "flex",
             alignItems: "center",
-            gap: "5px",
-            transition: "background-color 0.2s ease",
+            justifyContent: "center",
+            cursor: "pointer",
+            transition: "background-color 0.2s ease, transform 0.2s ease",
           }}
-          onMouseOver={(e) =>
-            (e.currentTarget.style.backgroundColor = "#0069d9")
-          }
-          onMouseOut={(e) =>
-            (e.currentTarget.style.backgroundColor = "#007bff")
-          }
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = "#0069d9";
+            e.currentTarget.style.transform = "scale(1.05)";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = "#007bff";
+            e.currentTarget.style.transform = "none";
+          }}
         >
-          <span style={{ fontSize: "14px" }}>🔄</span> Refresh
+          🔄
         </button>
       </div>
       {getPopupContent()}

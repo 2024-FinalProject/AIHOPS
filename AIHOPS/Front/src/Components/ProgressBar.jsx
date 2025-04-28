@@ -94,6 +94,9 @@ const ProgressBar = ({
   const assessorsData = calculateAssessorsConfirmedData();
   const surveyData = calculateSurveyCompletedData();
 
+  // Check if project is published
+  const isPublished = project.isActive || project.isArchived;
+
   return (
     <div className="progress-container-enhanced">
       <div className="progress-card">
@@ -152,7 +155,7 @@ const ProgressBar = ({
                 </span>
               </button>
               {!project.factors_inited && (
-                <span className="reminder-badge">Unset</span>
+                <span className="reminder-badge">Unconfirmed</span>
               )}
             </div>
 
@@ -176,7 +179,7 @@ const ProgressBar = ({
                 </span>
               </button>
               {!project.severity_factors_inited && (
-                <span className="reminder-badge">Unset</span>
+                <span className="reminder-badge">Unconfirmed</span>
               )}
             </div>
 
@@ -201,28 +204,30 @@ const ProgressBar = ({
                 projectsProgress.member_count > 1
               ) &&
                 !project.isArchived && (
-                  <span className="reminder-badge">Unset</span>
+                  <span className="reminder-badge">Unconfirmed</span>
                 )}
             </div>
           </div>
+
+          {/* Publish Button moved inside Design Project section */}
+          {!project.isActive && !project.isArchived && (
+            <div className="publish-container">
+              <button
+                className="publish-btn"
+                disabled={project.isArchived}
+                onClick={() => handlePublish(project.id, project.name)}
+              >
+                Publish Project
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Publish Section */}
-        {!project.isActive && !project.isArchived && (
-          <div className="section publish-section">
-            <button
-              className="publish-btn"
-              disabled={project.isArchived}
-              onClick={() => handlePublish(project.id, project.name)}
-            >
-              Publish Project
-            </button>
-          </div>
-        )}
-
-        {/* Data Collection Section */}
-        <div className="section data-section">
-          <h3 className="section-title">Data Collection</h3>
+        {/* Data Collection Section - added inactive class when not published */}
+        <div
+          className={`section data-section ${!isPublished ? "inactive" : ""}`}
+        >
+          <h3 className="section-title">Collect Data</h3>
 
           <div className="data-grid">
             <div className="data-card">
@@ -253,12 +258,18 @@ const ProgressBar = ({
           </div>
         </div>
 
-        {/* Result Analysis Section */}
-        <div className="section result-section">
-          <h3 className="section-title">Result Analysis</h3>
+        {/* Result Analysis Section - added inactive class when not published */}
+        <div
+          className={`section result-section ${!isPublished ? "inactive" : ""}`}
+        >
+          <h3 className="section-title">Analyze Results</h3>
 
           <div className="result-actions">
-            <button className="analyze-btn" onClick={handleAnalyzeResult}>
+            <button
+              className="analyze-btn"
+              onClick={handleAnalyzeResult}
+              disabled={!isPublished}
+            >
               <span className="btn-icon">📊</span>
               <span className="btn-text">Analyze Result</span>
             </button>
