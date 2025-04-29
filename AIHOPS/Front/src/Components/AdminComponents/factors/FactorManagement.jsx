@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import FactorsView from "./FactorsView";
 import EditFactor from "./EditFactor";
+import { useError } from "../../../context/ErrorContext";
 
 export const FactorEditorMode = {
   ADD: "add",

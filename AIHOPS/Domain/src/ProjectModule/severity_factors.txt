@@ -1,7 +1,7 @@
 [
   {
-    "level": "Level 0",
-    "description": "sus",
+    "level": "Leveefasf ee",
+    "description": "12",
     "severity": 0.5
   },
   {
@@ -20,8 +20,8 @@
     "severity": 200
   },
   {
-    "level": "Level 5",
+    "level": "1232123123",
     "description": "idi suda",
-    "severity": 300
+    "severity": 1000
   }
 ]

@@ -13,6 +13,7 @@ const getMyCookie = async () => {
     localStorage.setItem("authToken", cookie);
     localStorage.setItem("userName", "admin");
   }
+  console.log("cookie: ", cookie);
   return cookie;
 };
 
@@ -20,7 +21,7 @@ export const loginAdmin = async () => {
   const cookie = await getMyCookie();
   return await axios.post(`${API_URL}/login`, {
     cookie: cookie,
-    userName: "admin",
+    userName: "admin@admin.com",
     passwd: "admin",
   });
 };

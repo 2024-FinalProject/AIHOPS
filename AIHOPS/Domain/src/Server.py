@@ -123,12 +123,14 @@ class Server:
                 return res
             session = res.result
             res = self.user_controller.login(name, passwd)
-            if res == "admin":
-                session.admin_login()
-                return ResponseSuccessMsg("admin logged in")
+            if not res.success:
+                return res
 
-            if res != "admin" and res.success:
+            if res.is_admin:
+                session.admin_login()
+            else:
                 session.login(name)
+
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to login: {e}")
@@ -664,7 +666,7 @@ class Server:
     def _verify_admin(self, cookie):
         res = self.get_session_member(cookie)
         if not res.success:
-            return res
+            raise Exception("user is not admin")
         if not res.result.is_admin:
             raise Exception("user is not admin")
 

@@ -54,7 +54,7 @@ def verify_automatic():
 def login():
     data = request.json
     res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success})
+    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin})
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}

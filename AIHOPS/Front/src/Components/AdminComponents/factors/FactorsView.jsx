@@ -4,16 +4,23 @@ import {
   removeDefaultFactor,
 } from "../../../api/AdminApi";
 import { FactorEditorMode } from "./FactorManagement";
+import { useError } from "../../../context/ErrorContext";
 
 const FactorsView = ({ handleStartEditFactorParent }) => {
+  const { errorMsg, setErrorMsg } = useError();
   const [factors, setFactors] = useState([]);
 
   const fetchFactors = async () => {
     try {
       const response = await fetchDefaultFactors();
+      if (!response.data.success) {
+        setErrorMsg(response.data.message);
+        return;
+      }
       setFactors(response.data.factors); // <-- here
     } catch (error) {
       console.error("Error fetching factors:", error);
+      setErrorMsg(response.data.message);
     }
   };
 

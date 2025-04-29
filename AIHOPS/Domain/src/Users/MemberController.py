@@ -4,13 +4,13 @@ from DAL.DBAccess import DBAccess
 from DAL.Objects import DBPendingRequests
 from DAL.Objects.DBMember import DBMember
 from Domain.src.DS.IdMaker import IdMaker
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseLogin
 from Domain.src.Users.Gmailor import Gmailor
 from Domain.src.Users.Member import Member
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 
 
-ADMIN = ["admin", "admin"]
+ADMIN = ["admin@admin.com", "admin"]
 
 
 class MemberController:
@@ -93,16 +93,16 @@ class MemberController:
 
     def login(self, email, encrypted_passwd):
         if self._admin_login(email, encrypted_passwd):
-            return "admin"
+            return ResponseLogin(True, "admin logged in", True)
 
         # verify user exists
         member = self.members.get(email)
         if member is None:
-            return Response(False, f'incorrect username or password', None, False)
+            return ResponseLogin(False, 'incorrect username or password')
         # verify correct passwd
         res = member.login(email, encrypted_passwd)
         # return user / error
-        return res
+        return ResponseLogin(res.success, res.message)
 
     def isValidMember(self, email):
         member = self.members.get(email)

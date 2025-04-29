@@ -5,15 +5,13 @@ import "./NavBar.css";
 import { FaUser } from "react-icons/fa"; // <-- For user icon
 import aihops_article from "../assets/AIHOPS.pdf";
 import AccessibilityMenu from "./AccessibilityMenu";
-import {
-  getPendingRequest,
-} from "../api/ProjectApi";
+import { getPendingRequest } from "../api/ProjectApi";
 
 import { IoMdNotificationsOutline } from "react-icons/io"; // Notification bell icon
 
 const NavBar = () => {
   // Pull out userName from the AuthContext
-  const { isAuthenticated, userName, logout } = useAuth();
+  const { isAuthenticated, userName, logout, isAdmin } = useAuth();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -41,7 +39,6 @@ const NavBar = () => {
     }
   };
 
-
   const handleLogout = () => {
     logout();
     navigate("/"); // Redirect to homepage after logout
@@ -58,7 +55,6 @@ const NavBar = () => {
   return (
     <nav className="navbar">
       <div className="navbar-container">
-        
         {/* Left side: AIHOPS + user icon/name (if logged in) */}
         <div className="navbar-left">
           <Link
@@ -107,7 +103,9 @@ const NavBar = () => {
                   <Link
                     to="/projectsmanagement"
                     className={`nav-link nav-button ${
-                      location.pathname === "/projectsmanagement" ? "active" : ""
+                      location.pathname === "/projectsmanagement"
+                        ? "active"
+                        : ""
                     }`}
                   >
                     Projects Management
@@ -126,71 +124,71 @@ const NavBar = () => {
                 </li>
 
                 <li className="nav-item">
-                <Link
-                  to="/notification"
-                  className={`nav-link nav-button ${
-                    location.pathname === "/notification" ? "active" : ""
-                  }`}
-                  state={{ triggerFetch: true }}
-                  style={{ position: "relative", display: "flex", alignItems: "center", gap: "5px" }}
-                >
-                  <IoMdNotificationsOutline size={20} />
-                  Notifications
-                  {newMessages && <span className="new-message-dot" />}
-                </Link>
+                  <Link
+                    to="/notification"
+                    className={`nav-link nav-button ${
+                      location.pathname === "/notification" ? "active" : ""
+                    }`}
+                    state={{ triggerFetch: true }}
+                    style={{
+                      position: "relative",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    <IoMdNotificationsOutline size={20} />
+                    Notifications
+                    {newMessages && <span className="new-message-dot" />}
+                  </Link>
                 </li>
 
                 <li className="nav-item">
-                  <button className="nav-link nav-button" onClick={handleLogout}>
+                  <button
+                    className="nav-link nav-button"
+                    onClick={handleLogout}
+                  >
                     Logout
                   </button>
                 </li>
-              </>
-            ) : (
-                <>
+                {isAdmin && (
                   <li className="nav-item">
                     <Link
-                        to="/login"
-                        className={`nav-link nav-button ${
-                            location.pathname === "/login" ? "active" : ""
-                        }`}
-                        onClick={handleLogin}
-                    >
-                      Login
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link
-                        to="/register"
-                        className={`nav-link nav-button ${
-                            location.pathname === "/register" ? "active" : ""
-                        }`}
-                    >
-                      Register
-                    </Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link
-                        to="/admin"
-                        className={`nav-link nav-button ${
-                            location.pathname === "/admin" ? "active" : ""
-                        }`}
-                        onClick={handleAdmin}
+                      to="/admin"
+                      className={`nav-link nav-button ${
+                        location.pathname === "/admin" ? "active" : ""
+                      }`}
+                      onClick={handleAdmin}
                     >
                       Admin
                     </Link>
                   </li>
-                  {/* <li className="nav-item">
-                    <Link
-                        to="/verify"
-                        className={`nav-link nav-button ${
-                            location.pathname === "/verify" ? "active" : ""
-                        }`}
-                    >
-                      Verify
-                    </Link>
-                  </li> */}
-                </>
+                )}
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link
+                    to="/login"
+                    className={`nav-link nav-button ${
+                      location.pathname === "/login" ? "active" : ""
+                    }`}
+                    onClick={handleLogin}
+                  >
+                    Login
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link
+                    to="/register"
+                    className={`nav-link nav-button ${
+                      location.pathname === "/register" ? "active" : ""
+                    }`}
+                  >
+                    Register
+                  </Link>
+                </li>
+              </>
             )}
           </ul>
         </div>

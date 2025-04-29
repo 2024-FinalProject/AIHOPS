@@ -3,6 +3,8 @@ import axios from "axios";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { SeverityMetadataProvider } from "./context/SeverityMetadataContext.jsx";
+import { ErrorProvider } from "./context/ErrorContext.jsx";
 import "./theme.css";
 
 // Importing the components
@@ -75,7 +77,11 @@ const AppContent = () => {
 const App = () => (
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <AuthProvider>
-      <AppContent />
+      <ErrorProvider>
+        <SeverityMetadataProvider>
+          <AppContent />
+        </SeverityMetadataProvider>
+      </ErrorProvider>
     </AuthProvider>
   </GoogleOAuthProvider>
 );

@@ -19,25 +19,45 @@ const EditFactor = ({ factor, returnFunc, mode }) => {
     returnFunc();
   };
 
+  const handleApiResponse = (response, successMessage, errorMessage) => {
+    if (response?.data?.success) {
+      alert(successMessage);
+    } else {
+      alert(errorMessage);
+    }
+  };
+
+  const handleEdit = async () => {
+    const response = await updateDefaultFactor(
+      factor.id,
+      editedFactorName,
+      editedFactorDescription,
+      editedScaleDescriptions,
+      editedScaleExplanations
+    );
+    handleApiResponse(
+      response,
+      "Edit finished successfully!",
+      "Failed to edit factor."
+    );
+  };
+
+  const handleAdd = async () => {
+    const response = await addDefaultFactor(
+      editedFactorName,
+      editedFactorDescription,
+      editedScaleDescriptions,
+      editedScaleExplanations
+    );
+    handleApiResponse(response, "Added successfully!", "Failed to add factor.");
+  };
+
   const handleActionOnFactor = async () => {
     console.log("performing: ", mode);
     if (mode === FactorEditorMode.EDIT) {
-      const response = await updateDefaultFactor(
-        factor.id,
-        editedFactorName,
-        editedFactorDescription,
-        editedScaleDescriptions,
-        editedScaleExplanations
-      );
-      alert("edit finished successfully? ", response.data.success);
+      await handleEdit();
     } else {
-      const response = await addDefaultFactor(
-        editedFactorName,
-        editedFactorDescription,
-        editedScaleDescriptions,
-        editedScaleExplanations
-      );
-      alert("added successfully? ", response.data.success);
+      await handleAdd();
     }
   };
 
