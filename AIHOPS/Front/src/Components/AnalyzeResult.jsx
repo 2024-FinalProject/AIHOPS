@@ -25,6 +25,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(true);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const fetch_project_progress = async () => {
     let cookie = localStorage.getItem("authToken");
     if (!cookie) {
@@ -58,7 +60,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       alert("must have at least 1 non zero weight");
       return;
     }
-
+    setIsLoading(true);
     try {
       //Turn wighets into a list of weights values:
       let res = await getProjectsScore(cookie, projectId, weightsToUse);
@@ -66,6 +68,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     } catch (error) {
       alert(error);
     }
+    setIsLoading(false);
   };
 
   const fetch_project_factors = async () => {
@@ -116,11 +119,13 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   const handleRefresh = async () => {
+    setIsLoading(true);
     await fetch_project_factors();
     await fetch_project_progress();
     await fetch_project_factors_votes();
     await fetch_project_severity_factors();
     await fetch_project_score(weights);
+    setIsLoading(false);
   };
 
   const fetchAllData = async () => {
@@ -128,6 +133,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     await fetch_project_progress();
     await fetch_project_factors_votes();
     await fetch_project_severity_factors();
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -170,10 +176,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     const total = vals.reduce((s, v) => s + v, 0);
     const avg = vals.length ? (total / vals.length).toFixed(3) : 0;
     return (
-      <p
-        className="default-text"
-        style={{ fontSize: "16px", margin: "10px 0", marginBottom: "-3%" }}
-      >
+      <p className="default-text" style={{ fontSize: "16px" }}>
         <b>Current Assessment Dimensions Score:</b> {avg}
       </p>
     );
@@ -182,30 +185,17 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const getPopupContent = () => {
     switch (analyzePopupType) {
       case "showCurrentScore":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
           <div style={{ textAlign: "center", margin: "10px 0" }}>
-            <h2
-              className="default-text"
-              style={{
-                fontSize: "22px",
-                color: "var(--text-color)",
-                marginBottom: "15px",
-                fontWeight: "600",
-              }}
-            >
-              <u>Current Project Score</u>:
-            </h2>
             {/* Display the formula and score */}
-            <div
-              className="score-display"
-              style={{
-                margin: "0 auto 15px",
-                padding: "8px",
-                backgroundColor: "var(--card-background)",
-                borderRadius: "8px",
-                maxWidth: "600px",
-              }}
-            >
+            <div className="score-display">
               {Object.keys(projectsScore).length > 0 ? (
                 <FormulaDisplay
                   nominator={projectsScore.nominator}
@@ -218,26 +208,17 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               )}
             </div>
 
-            <div style={{ marginBottom: "10px" }}>
-              <h3
-                className="default-text"
-                style={{
-                  fontSize: "16px",
-                  marginBottom: "10px",
-                  color: "var(--text-color)",
-                }}
-              >
-                <u>Apply weight to the assessment dimensions</u>:
-              </h3>
-
+            <div style={{ marginTop: "20px" }}>
               <div
                 className="weight-inputs"
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
                   gap: "8px",
                   justifyContent: "center",
-                  marginBottom: "10px",
+                  marginBottom: "15px",
+                  maxWidth: "850px",
+                  margin: "0 auto 15px",
                 }}
               >
                 {projectFactors.map((f) => (
@@ -287,23 +268,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
               <button
                 onClick={() => fetch_project_score(weights)}
-                style={{
-                  padding: "6px 20px",
-                  fontSize: "14px",
-                  borderRadius: "6px",
-                  border: "none",
-                  cursor: "pointer",
-                  backgroundColor: "#28a745",
-                  color: "#fff",
-                  fontWeight: "500",
-                  transition: "background-color 0.2s ease",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#218838")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#28a745")
-                }
+                className="calculate-button"
+                style={{ marginBottom: "20px" }} /* Add this */
               >
                 Calculate
               </button>
@@ -311,51 +277,65 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "showAssessorsInfo":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-around",
-              maxWidth: "700px",
-              margin: "0 auto",
-              gap: "15px",
-              padding: "10px",
-            }}
-          >
-            <div className="assessor-card">
-              <p className="assessor-count">
-                {projectsProgress.pending_amount +
-                  projectsProgress.member_count -
-                  1}
-              </p>
-              <p className="assessor-label">Invited Assessors</p>
-            </div>
+          <div style={{ textAlign: "center", margin: "15px 0" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                maxWidth: "850px",
+                margin: "0 auto",
+                gap: "15px",
+                padding: "10px",
+              }}
+            >
+              <div className="assessor-card">
+                <p className="assessor-count">
+                  {projectsProgress.pending_amount +
+                    projectsProgress.member_count -
+                    1}
+                </p>
+                <p className="assessor-label">Invited Assessors</p>
+              </div>
 
-            <div className="assessor-card">
-              <p className="assessor-count">
-                {projectsProgress.member_count - 1}
-              </p>
-              <p className="assessor-label">Registered Assessors</p>
-            </div>
+              <div className="assessor-card">
+                <p className="assessor-count">
+                  {projectsProgress.member_count - 1}
+                </p>
+                <p className="assessor-label">Registered Assessors</p>
+              </div>
 
-            <div className="assessor-card">
-              <p className="assessor-count">{projectsProgress.voted_amount}</p>
-              <p className="assessor-label">Completed Assessments</p>
+              <div className="assessor-card">
+                <p className="assessor-count">
+                  {projectsProgress.voted_amount}
+                </p>
+                <p className="assessor-label">Completed Assessments</p>
+              </div>
             </div>
           </div>
         );
       case "showContentFactorsScore":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div style={{ textAlign: "center", marginTop: "15px" }}>
+          <div style={{ textAlign: "center", margin: "15px 0" }}>
             <div
-              className="default-text"
+              className="score-display"
               style={{
-                backgroundColor: "var(--card-background)",
-                padding: "12px",
-                borderRadius: "8px",
                 maxWidth: "700px",
-                margin: "0 auto 15px",
-                marginBottom: "-5px",
+                margin: "0 auto 20px",
               }}
             >
               {Object.keys(projectsScore).length > 0
@@ -364,7 +344,10 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
 
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+              <div
+                className="histogram-container"
+                style={{ maxWidth: "950px", margin: "0 auto" }}
+              >
                 <Histogram
                   factors={projectsScore.factors}
                   factorslist={projectFactors}
@@ -375,21 +358,23 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "showSeverityFactorsScore":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <div
-              style={{
-                backgroundColor: "var(--card-background)",
-                padding: "12px",
-                borderRadius: "8px",
-                maxWidth: "700px",
-                margin: "0 auto 15px",
-                marginBottom: "-10px",
-              }}
-            >
+          <div style={{ textAlign: "center", margin: "15px 0" }}>
+            <div className="score-display">
               <p
                 className="default-text"
-                style={{ fontSize: "15px", marginBottom: "8px" }}
+                style={{
+                  fontSize: "16px",
+                  marginBottom: "10px",
+                  fontWeight: "500",
+                }}
               >
                 <b>Current Severity Factors Score:</b>{" "}
                 {Object.keys(projectsScore).length > 0
@@ -405,7 +390,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
 
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+              <div style={{ maxWidth: "950px", margin: "20px auto 0" }}>
                 <SeverityHistogram
                   severityfactors={projectsScore.severity_damage}
                   severityfactorsValues={projectSeverityFactors}
@@ -415,19 +400,16 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "exportResults":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div style={{ textAlign: "center", marginTop: "80px" }}>
-            <div
-              className="default-text"
-              style={{
-                backgroundColor: "var(--card-background)",
-                padding: "20px",
-                borderRadius: "8px",
-                maxWidth: "700px",
-                margin: "0 auto",
-                marginBottom: "-0.5%",
-              }}
-            >
+          <div style={{ textAlign: "center", margin: "15px 0" }}>
+            <div className="export-container">
               {Object.keys(projectsScore).length > 0 ? (
                 <div
                   style={{
@@ -438,7 +420,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                     gap: "15px",
                   }}
                 >
-                  <p style={{ fontSize: "15px" }}>
+                  <p style={{ fontSize: "15px" }} className="default-text">
                     Click the button below to export all project analysis data
                     to Excel.
                   </p>
@@ -452,7 +434,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                   />
                 </div>
               ) : (
-                "No data available to export"
+                <p className="default-text">No data available to export</p>
               )}
             </div>
           </div>

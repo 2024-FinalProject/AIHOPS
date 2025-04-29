@@ -91,7 +91,7 @@ const SeverityHistogram = ({ severityfactors, severityfactorsValues }) => {
       <circle
         cx={cx}
         cy={cy}
-        r={6}
+        r={7}
         fill="#2563eb"
         onMouseEnter={() => handleDotEnter(props)}
         onMouseLeave={handleDotLeave}
