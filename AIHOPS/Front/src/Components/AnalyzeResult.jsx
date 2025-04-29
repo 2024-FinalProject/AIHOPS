@@ -193,9 +193,15 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
           );
         }
+        if (Object.keys(projectsScore).length == 0) {
+          return (
+            <div className="analyze-content-container">
+              <div className="score-display"> No score available</div>
+            </div>
+          );
+        }
         return (
           <div className="analyze-content-container">
-            {/* Display the formula and score */}
             <div className="score-display">
               {Object.keys(projectsScore).length > 0 ? (
                 <FormulaDisplay
