@@ -21,6 +21,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [projectFactorsVotes, setProjectFactorsVotes] = useState([]);
   const [weights, setWeights] = useState({});
   const [weightsInited, setWeightsInited] = useState(false);
+  const [showFactorWeights, setShowFactorWeights] = useState(false);
 
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(true);
@@ -193,7 +194,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           );
         }
         return (
-          <div style={{ textAlign: "center", margin: "10px 0" }}>
+          <div className="analyze-content-container">
             {/* Display the formula and score */}
             <div className="score-display">
               {Object.keys(projectsScore).length > 0 ? (
@@ -208,71 +209,58 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               )}
             </div>
 
-            <div style={{ marginTop: "20px" }}>
-              <div
-                className="weight-inputs"
+            <div style={{ margin: "25px 0 15px", width: "100%" }}>
+              <h3
+                className="section-subtitle"
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-                  gap: "8px",
-                  justifyContent: "center",
-                  marginBottom: "15px",
-                  maxWidth: "850px",
-                  margin: "0 auto 15px",
+                  textAlign: "center",
+                  fontSize: "14px",
+                  marginTop: "20px",
                 }}
               >
-                {projectFactors.map((f) => (
-                  <div
-                    key={f.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "5px 10px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--border-color)",
-                      backgroundColor: "rgba(255,255,255,0.02)",
-                    }}
-                  >
-                    <span
-                      className="default-text"
-                      style={{
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        textAlign: "left",
-                        flex: "1",
-                      }}
-                    >
-                      {f.name}
-                    </span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={weights[f.id]}
-                      onChange={(e) => handleWeightChange(f.id, e.target.value)}
-                      style={{
-                        width: "45px",
-                        height: "28px",
-                        textAlign: "center",
-                        borderRadius: "4px",
-                        border: "1px solid var(--border-color)",
-                        fontSize: "14px",
-                        backgroundColor: "transparent",
-                        color: "var(--text-color)",
-                      }}
-                    />
-                  </div>
-                ))}
+                <u>Apply Weights to Dimensions</u>:
+              </h3>
+
+              {/* Weight factor toggle section */}
+              <div
+                className={`weight-factor-toggle ${
+                  showFactorWeights ? "open" : ""
+                }`}
+                onClick={() => setShowFactorWeights(!showFactorWeights)}
+              >
+                <span className="default-text">
+                  Configure Dimension Weights
+                </span>
+                <span className="chevron">{showFactorWeights ? "▼" : "▶"}</span>
               </div>
 
-              <button
-                onClick={() => fetch_project_score(weights)}
-                className="calculate-button"
-                style={{ marginBottom: "20px" }} /* Add this */
-              >
-                Calculate
-              </button>
+              {showFactorWeights && (
+                <div className="weight-selection-grid">
+                  {projectFactors.map((f) => (
+                    <div key={f.id} className="weight-item">
+                      <span className="weight-item-name">{f.name}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={weights[f.id]}
+                        onChange={(e) =>
+                          handleWeightChange(f.id, e.target.value)
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ textAlign: "center" }}>
+                <button
+                  onClick={() => fetch_project_score(weights)}
+                  className="calculate-button"
+                >
+                  Calculate Score
+                </button>
+              </div>
             </div>
           </div>
         );
@@ -285,17 +273,9 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           );
         }
         return (
-          <div style={{ textAlign: "center", margin: "15px 0" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                maxWidth: "850px",
-                margin: "0 auto",
-                gap: "15px",
-                padding: "10px",
-              }}
-            >
+          <div className="analyze-content-container">
+            {/* Added a container class for better centering */}
+            <div className="assessors-card-container">
               <div className="assessor-card">
                 <p className="assessor-count">
                   {projectsProgress.pending_amount +
@@ -330,7 +310,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           );
         }
         return (
-          <div style={{ textAlign: "center", margin: "15px 0" }}>
+          <div className="analyze-content-container">
             <div
               className="score-display"
               style={{
@@ -344,10 +324,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
 
             {Object.keys(projectsScore).length > 0 && (
-              <div
-                className="histogram-container"
-                style={{ maxWidth: "950px", margin: "0 auto" }}
-              >
+              <div className="histogram-container">
                 <Histogram
                   factors={projectsScore.factors}
                   factorslist={projectFactors}
@@ -366,7 +343,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           );
         }
         return (
-          <div style={{ textAlign: "center", margin: "15px 0" }}>
+          <div className="analyze-content-container">
             <div className="score-display">
               <p
                 className="default-text"
@@ -390,7 +367,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
 
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: "950px", margin: "20px auto 0" }}>
+              <div className="severtiy-histogram-continaer">
                 <SeverityHistogram
                   severityfactors={projectsScore.severity_damage}
                   severityfactorsValues={projectSeverityFactors}
@@ -408,7 +385,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           );
         }
         return (
-          <div style={{ textAlign: "center", margin: "15px 0" }}>
+          <div className="analyze-content-container">
             <div className="export-container">
               {Object.keys(projectsScore).length > 0 ? (
                 <div
@@ -446,15 +423,13 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
   return (
     <div className="analyzePopup-content">
-      <div className="analyzePopup-header">
-        <button
-          onClick={handleRefresh}
-          title="Refresh"
-          className="refresh-button"
-        >
-          🔄
-        </button>
-      </div>
+      <button
+        onClick={handleRefresh}
+        title="Refresh"
+        className="refresh-button"
+      >
+        🔄
+      </button>
       {getPopupContent()}
     </div>
   );
