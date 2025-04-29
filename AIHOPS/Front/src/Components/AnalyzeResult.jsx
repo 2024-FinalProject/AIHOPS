@@ -314,93 +314,33 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         return (
           <div
             style={{
-              lineHeight: "1.6",
-              margin: "10px",
-              textAlign: "center",
-              marginTop: "80px",
+              display: "flex",
+              justifyContent: "space-around",
+              maxWidth: "700px",
+              margin: "0 auto",
+              gap: "15px",
+              padding: "10px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                maxWidth: "700px",
-                margin: "0 auto",
-              }}
-            >
-              <div
-                style={{
-                  padding: "12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                  backgroundColor: "var(--card-background)",
-                  flex: "1",
-                  margin: "0 8px",
-                }}
-              >
-                <p
-                  className="default-text"
-                  style={{ fontWeight: "600", fontSize: "16px" }}
-                >
-                  {projectsProgress.pending_amount +
-                    projectsProgress.member_count -
-                    1}
-                </p>
-                <p
-                  className="default-text"
-                  style={{ fontSize: "14px", color: "var(--text-color)" }}
-                >
-                  Invited Assessors
-                </p>
-              </div>
+            <div className="assessor-card">
+              <p className="assessor-count">
+                {projectsProgress.pending_amount +
+                  projectsProgress.member_count -
+                  1}
+              </p>
+              <p className="assessor-label">Invited Assessors</p>
+            </div>
 
-              <div
-                style={{
-                  padding: "12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                  backgroundColor: "var(--card-background)",
-                  flex: "1",
-                  margin: "0 8px",
-                }}
-              >
-                <p
-                  className="default-text"
-                  style={{ fontWeight: "600", fontSize: "16px" }}
-                >
-                  {projectsProgress.member_count - 1}
-                </p>
-                <p
-                  className="default-text"
-                  style={{ fontSize: "14px", color: "var(--text-color)" }}
-                >
-                  Registered Assessors
-                </p>
-              </div>
+            <div className="assessor-card">
+              <p className="assessor-count">
+                {projectsProgress.member_count - 1}
+              </p>
+              <p className="assessor-label">Registered Assessors</p>
+            </div>
 
-              <div
-                style={{
-                  padding: "12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.5)",
-                  backgroundColor: "var(--card-background)",
-                  flex: "1",
-                  margin: "0 8px",
-                }}
-              >
-                <p
-                  className="default-text"
-                  style={{ fontWeight: "600", fontSize: "16px" }}
-                >
-                  {projectsProgress.voted_amount}
-                </p>
-                <p
-                  className="default-text"
-                  style={{ fontSize: "14px", color: "var(--text-color)" }}
-                >
-                  Completed Assessments
-                </p>
-              </div>
+            <div className="assessor-card">
+              <p className="assessor-count">{projectsProgress.voted_amount}</p>
+              <p className="assessor-label">Completed Assessments</p>
             </div>
           </div>
         );
@@ -528,32 +468,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         <button
           onClick={handleRefresh}
           title="Refresh"
-          style={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            width: "40px",
-            height: "40px",
-            padding: 0,
-            fontSize: "18px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            transition: "background-color 0.2s ease, transform 0.2s ease",
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.backgroundColor = "#0069d9";
-            e.currentTarget.style.transform = "scale(1.05)";
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.backgroundColor = "#007bff";
-            e.currentTarget.style.transform = "none";
-          }}
+          className="refresh-button"
         >
           🔄
         </button>

@@ -912,63 +912,69 @@ const EditPopup = ({
     switch (popupType) {
       case "analyzeResult":
         return (
-          <div className="default-div">
-            <h1>
-              <u>Results</u>:
-            </h1>
-            <div>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showCurrentScore" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showCurrentScore");
-                }}
-              >
-                Current Score
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showAssessorsInfo" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showAssessorsInfo");
-                }}
-              >
-                Assessors Info
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showContentFactorsScore" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showContentFactorsScore");
-                }}
-              >
-                Assessment Dimension Score
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showSeverityFactorsScore"
-                    ? "active"
-                    : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showSeverityFactorsScore");
-                }}
-              >
-                Severity Factors Score
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "exportResults" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("exportResults");
-                }}
-              >
-                Export to Excel
-              </button>
+          <div className="analyze-results-container">
+            <h1 className="results-heading">Results Analysis</h1>
+            <div className="analyze-buttons-wrapper">
+              <div className="analyze-buttons-container">
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showCurrentScore" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("showCurrentScore");
+                  }}
+                >
+                  Current Score
+                </button>
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showAssessorsInfo" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("showAssessorsInfo");
+                  }}
+                >
+                  Assessors Info
+                </button>
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showContentFactorsScore"
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("showContentFactorsScore");
+                  }}
+                >
+                  Assessment Dimension
+                </button>
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showSeverityFactorsScore"
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("showSeverityFactorsScore");
+                  }}
+                >
+                  Severity Factors
+                </button>
+                <button
+                  className={`action-btn analyze-btn export-btn ${
+                    analyzePopupType === "exportResults" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("exportResults");
+                  }}
+                >
+                  <span className="export-icon">📊</span> Export to Excel
+                </button>
+              </div>
+            </div>
+
+            {/* Display the selected analysis content */}
+            <div className="analysis-content-container">
               <AnalyzeResult
                 analyzePopupType={analyzePopupType}
                 closePopup={closePopup}
