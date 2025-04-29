@@ -457,13 +457,29 @@ def admin_add_default_factor():
 def admin_remove_default_factor():
     data = request.json
     res = server.admin_remove_default_factor(int(data["cookie"]), int(data["fid"]))
-    return jsonify({"message": res.msg, "success": res.success})
+    return (jsonify({"message": res.msg, "success": res.success}))
+
 
 @app.route("/admin/fetch-default-factors", methods=["GET", "POST"])
 def admin_fetch_default_factors():
     data = request.json
     res = server.admin_fetch_default_factors(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
+
+
+@app.route("/admin/fetch-default-severity-factors", methods=["GET", "POST"])
+def admin_fetch_default_severity_factors():
+    data = request.json
+    res = server.admin_fetch_default_severity_factors(int(data["cookie"]))
+    return jsonify({"message": res.msg, "success": res.success, "severity_factors": res.result if res.success else None})
+
+
+@app.route("/admin/update-default-severity-factors", methods=["POST"])
+def admin_update_default_severity_factors():
+    data = request.json
+    res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 
 @app.route("/")
 def hello():

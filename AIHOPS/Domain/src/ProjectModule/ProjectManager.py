@@ -1,4 +1,5 @@
 from threading import RLock
+import json
 
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
@@ -8,7 +9,7 @@ from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
 from Domain.src.Loggs.Response import ResponseSuccessObj, ResponseSuccessMsg, ResponseFailMsg, Response
-from Domain.src.ProjectModule.Project import Project
+from Domain.src.ProjectModule.Project import Project, load_default_severity_factors
 
 from Domain.src.Users.Gmailor import Gmailor
 
@@ -553,6 +554,18 @@ class ProjectManager():
         res = self.factor_pool.admin_remove_default_factor(fid)
         return ResponseSuccessMsg(f"factor {fid} removed successfully, from all projects")
 
+    def admin_update_default_severity_factors(self, severity_factors_full_data, filename='Domain/src/ProjectModule/severity_factors.txt'):
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(severity_factors_full_data, f, indent=2)
+        Project.DEFAULT_SEVERITY_FACTORS = load_default_severity_factors()
+        return ResponseSuccessMsg(f"default severity factors updated successfully")
+
     def get_default_factors(self):
         return ResponseSuccessObj("got default factors", self.factor_pool.get_default_factors())
 
+    def get_default_severity_factors(self, filename='Domain/src/ProjectModule/severity_factors.txt'):
+        with open(filename, 'r', encoding='utf-8') as f:
+            return ResponseSuccessObj("got default severity factors", json.load(f))
+
+# if __name__ == '__main__':
+#     admin_update_default_severity_factors([0.5, 1, 25, 100, 400], 'severity_factors.txt')

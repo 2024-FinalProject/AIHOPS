@@ -73,3 +73,18 @@ export const removeDefaultFactor = async (fid) => {
     fid: fid,
   });
 };
+
+export const fetchDefaultSeverityFactors = async () => {
+  const cookie = await getMyCookie();
+  return await axios.post(`${API_URL}/admin/fetch-default-severity-factors`, {
+    cookie: cookie,
+  });
+};
+
+export const updateDefaultSeverityFactor = async (severityFactors) => {
+  const cookie = await getMyCookie();
+  return await axios.post(`${API_URL}/admin/update-default-severity-factors`, {
+    cookie: cookie,
+    severity_factors: severityFactors,
+  });
+};

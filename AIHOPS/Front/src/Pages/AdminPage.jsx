@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
-import FactorsView from "../Components/AdminComponents/FactorsView";
+import FactorsView from "../Components/AdminComponents/factors/FactorsView";
 import { loginAdmin } from "../api/AdminApi";
-import FactorManagement from "../Components/AdminComponents/FactorManagement";
+import FactorManagement from "../Components/AdminComponents/factors/FactorManagement";
+import SeverityFactorsView from "../Components/AdminComponents/SeverityFactors/SeverityFactorsView";
 
 const AdminPage = () => {
   const [isManagingFactors, setIsManagingFactors] = useState(false);
@@ -36,11 +37,20 @@ const AdminPage = () => {
           Manage Default severity factors
         </Button>
       </div>
-      {isManagingFactors && (
-        <div>
-          <FactorManagement />
-        </div>
-      )}
+      <div>
+        {isManagingFactors && (
+          <div>
+            <FactorManagement />
+          </div>
+        )}
+      </div>
+      <div>
+        {isManagingSeverityFactors && (
+          <div>
+            <SeverityFactorsView />
+          </div>
+        )}
+      </div>
     </>
   );
 };

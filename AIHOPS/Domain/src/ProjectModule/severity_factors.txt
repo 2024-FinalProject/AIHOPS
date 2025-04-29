@@ -1,0 +1,27 @@
+[
+  {
+    "level": "Level 0",
+    "description": "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
+    "severity": 0.5
+  },
+  {
+    "level": "Level 2",
+    "description": "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
+    "severity": 1
+  },
+  {
+    "level": "Level 3",
+    "description": "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
+    "severity": 30
+  },
+  {
+    "level": "Level 4",
+    "description": "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
+    "severity": 100
+  },
+  {
+    "level": "Level 5",
+    "description": "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention.",
+    "severity": 500
+  }
+]

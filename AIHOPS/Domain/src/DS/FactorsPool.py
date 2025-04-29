@@ -172,6 +172,8 @@ def load_default_factors_from_file(filename= 'Domain/src/DS/factors.txt'):
 DEFAULT_FACTORS = load_default_factors_from_file()
 DEFAULT_FACTORS_IDS = [factor.fid for factor in DEFAULT_FACTORS]
 
+# DEFAULT_FACTORS = []
+# DEFAULT_FACTORS_IDS = [factor.fid for factor in DEFAULT_FACTORS]
 def insert_defaults():
     for factor in DEFAULT_FACTORS:
         DBAccess().insert(DBFactors(factor.name, factor.description, factor.fid, factor.owner, factor.scales_desc, factor.scales_explanation))

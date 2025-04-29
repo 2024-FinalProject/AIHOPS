@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addDefaultFactor, updateDefaultFactor } from "../../api/AdminApi";
+import { addDefaultFactor, updateDefaultFactor } from "../../../api/AdminApi";
 import { FactorEditorMode } from "./FactorManagement";
 
 const EditFactor = ({ factor, returnFunc, mode }) => {

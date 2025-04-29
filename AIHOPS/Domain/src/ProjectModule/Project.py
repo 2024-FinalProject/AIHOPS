@@ -1,4 +1,5 @@
 import copy
+import json
 
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
@@ -7,7 +8,17 @@ from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.VoteManager import VoteManager
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
-DEFAULT_SEVERITY_FACTORS = [0.5, 1, 25, 100, 400]
+
+
+
+def load_default_severity_factors(filename='Domain/src/ProjectModule/severity_factors.txt'):
+    with open(filename, 'r', encoding='utf-8') as f:
+        raw_data = json.load(f)
+        return [entry["severity"] for entry in raw_data]
+
+DEFAULT_SEVERITY_FACTORS = load_default_severity_factors()
+#
+# DEFAULT_SEVERITY_FACTORS = [0.5, 1, 25, 100, 400]
 
 class Project:
     def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None):

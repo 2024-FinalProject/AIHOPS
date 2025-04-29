@@ -654,29 +654,27 @@ class Server:
             return ResponseFailMsg(f"Failed to get members vote on project: {e}")
 
 
+# -------------  admin actions ------------------------
+
+    def _verify_admin(self, cookie):
+        res = self.get_session_member(cookie)
+        if not res.success:
+            return res
+        if not res.result.is_admin:
+            raise Exception("user is not admin")
+
     def admin_change_default_factor(self, cookie, fid, name, desc, scales_desc, scales_explanation):
         """change will persist in all projects"""
         try:
-            res = self.get_session_member(cookie)
-            if not res.success:
-                return res
-            session = res.result
-            if not session.is_admin:
-                return ResponseFailMsg("user is not admin")
+            self._verify_admin(cookie)
             return self.project_manager.admin_change_default_factor(fid, name, desc, scales_desc, scales_explanation)
         except Exception as e:
             return ResponseFailMsg(f"Failed change default factor {fid}: {e}")
 
-
     def admin_add_default_factor(self, cookie, name, desc, scales_desc, scales_explanation):
         """factor wont be added automatically to any project"""
         try:
-            res = self.get_session_member(cookie)
-            if not res.success:
-                return res
-            session = res.result
-            if not session.is_admin:
-                return ResponseFailMsg("user is not admin")
+            self._verify_admin(cookie)
             return self.project_manager.admin_add_default_factor(name, desc, scales_desc, scales_explanation)
         except Exception as e:
             return ResponseFailMsg(f"Failed to add default factor {name}: {e}")
@@ -684,27 +682,31 @@ class Server:
     def admin_remove_default_factor(self, cookie, fid):
         """change will persist in all projects"""
         try:
-            res = self.get_session_member(cookie)
-            if not res.success:
-                return res
-            session = res.result
-            if not session.is_admin:
-                return ResponseFailMsg("user is not admin")
+            self._verify_admin(cookie)
             return self.project_manager.admin_remove_default_factor(fid)
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove default factor {fid}: {e}")
 
     def admin_fetch_default_factors(self, cookie):
         try:
-            res = self.get_session_member(cookie)
-            if not res.success:
-                return res
-            session = res.result
-            if not session.is_admin:
-                return ResponseFailMsg("user is not admin")
+            self._verify_admin(cookie)
             return self.project_manager.get_default_factors()
         except Exception as e:
-            return ResponseFailMsg(f"Failed to remove default factor {fid}: {e}")
+            return ResponseFailMsg(f"Failed to fetch default factors: {e}")
 
+    def admin_fetch_default_severity_factors(self, cookie):
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.get_default_severity_factors()
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch default factors: {e}")
+
+    def admin_update_default_severity_factors(self, cookie, severity_factors):
+        """change will not persist in any project, all future projects will be defaulted with these severity factors"""
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.admin_update_default_severity_factors(severity_factors)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed update severity factors: {e}")
 
 

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { fetchDefaultFactors, removeDefaultFactor } from "../../api/AdminApi";
+import {
+  fetchDefaultFactors,
+  removeDefaultFactor,
+} from "../../../api/AdminApi";
 import { FactorEditorMode } from "./FactorManagement";
 
 const FactorsView = ({ handleStartEditFactorParent }) => {
