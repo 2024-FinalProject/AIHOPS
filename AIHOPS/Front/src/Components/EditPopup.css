@@ -371,12 +371,17 @@ input::placeholder {
 /* Buttons Wrapper */
 .analyze-buttons-wrapper {
   width: 100%;
-  display: flex;
-  justify-content: center;
+  background-color: var(--pop-up-background);
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+  padding: 5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
   overflow-x: auto;
-  padding: 10px 0;
-  margin: 15px 0;
-  margin-bottom: -1%;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  margin-bottom: -0.5% !important;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -393,35 +398,53 @@ input::placeholder {
 /* Buttons Container */
 .analyze-buttons-container {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  padding: 0 15px;
-  flex-wrap: nowrap;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 /* Enhanced Analyze Button Style */
 .action-btn.analyze-btn {
+  flex: 1;
   background: linear-gradient(to right, #3a7bd5, #3a6073);
   color: white;
   border: none;
-  border-radius: 10px;
-  padding: 12px 18px;
+  border-radius: 0;
+  padding: 14px 5px;
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
   white-space: nowrap;
   text-align: center;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
   position: relative;
-  overflow: hidden;
-  min-width: 140px;
+  min-width: unset;
+  box-shadow: none;
+  margin: 0;
   letter-spacing: 0.5px;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.action-btn.analyze-btn:last-child {
+  border-right: none;
 }
 
 /* Export button styling */
 .export-btn {
   background: linear-gradient(to right, #2c3e50, #4ca1af) !important;
+}
+
+.action-btn.analyze-btn.export-btn {
+  background: linear-gradient(to right, #2c3e50, #4ca1af);
+  color: white;
+}
+
+.action-btn.analyze-btn.export-btn.active {
+  background: linear-gradient(to right, #2dc8cb, #1c93e2) !important;
+  color: white;
 }
 
 .action-btn.analyze-btn::before {
@@ -445,30 +468,28 @@ input::placeholder {
 }
 
 .action-btn.analyze-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.18);
-  filter: brightness(1.1);
+  filter: brightness(1);
+  transform: translateY(-1px);
 }
 
 /* Active Button State */
 .action-btn.analyze-btn.active {
-  background: linear-gradient(to right, #9324dd, #17c6c3);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(to right, #2dc8cb, #1c93e2);
   font-weight: 600;
   position: relative;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1;
 }
 
 .action-btn.analyze-btn.active::after {
   content: "";
   position: absolute;
-  bottom: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40%;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
   height: 3px;
-  background-color: #ffffff;
-  border-radius: 2px;
+  background-color: transparent;
+  border-radius: 0;
 }
 
 /* Export Button Special Styling */
@@ -507,19 +528,13 @@ input::placeholder {
 /* Responsive Adjustments */
 @media (max-width: 992px) {
   .analyze-buttons-container {
-    justify-content: flex-start;
+    flex-wrap: nowrap;
     overflow-x: auto;
-    padding-bottom: 8px;
   }
 
   .action-btn.analyze-btn {
-    min-width: 130px;
-    padding: 10px 14px;
-    font-size: 0.9rem;
-  }
-
-  .analyze-results-container {
-    padding: 20px 15px;
+    padding: 12px 16px;
+    flex: 0 0 auto;
   }
 }
 

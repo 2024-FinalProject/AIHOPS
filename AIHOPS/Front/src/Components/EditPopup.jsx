@@ -913,18 +913,17 @@ const EditPopup = ({
       case "analyzeResult":
         return (
           <div className="analyze-results-container">
-            <div className="analyze-buttons-wrapper">
+            <nav className="analyze-buttons-wrapper">
               <div className="analyze-buttons-container">
                 <button
                   className={`action-btn analyze-btn ${
                     analyzePopupType === "showCurrentScore" ? "active" : ""
                   }`}
-                  onClick={() => {
-                    setAnalyzePopupType("showCurrentScore");
-                  }}
+                  onClick={() => setAnalyzePopupType("showCurrentScore")}
                 >
                   Current Score
                 </button>
+
                 <button
                   className={`action-btn analyze-btn ${
                     analyzePopupType === "showAssessorsInfo" ? "active" : ""
@@ -959,18 +958,17 @@ const EditPopup = ({
                 >
                   Severity Factors
                 </button>
+
                 <button
-                  className={`action-btn analyze-btn ${
+                  className={`action-btn analyze-btn export-btn ${
                     analyzePopupType === "exportResults" ? "active" : ""
                   }`}
-                  onClick={() => {
-                    setAnalyzePopupType("exportResults");
-                  }}
+                  onClick={() => setAnalyzePopupType("exportResults")}
                 >
-                  <span className="export-icon">📊</span> Export to Excel
+                  <span className="export-icon">📊</span> Export
                 </button>
               </div>
-            </div>
+            </nav>
 
             {/* Display the selected analysis content */}
             <div className="analysis-content-container">
