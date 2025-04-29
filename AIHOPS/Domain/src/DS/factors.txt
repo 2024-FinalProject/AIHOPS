@@ -2,7 +2,7 @@
   {
     "fid": -1,
     "owner": "DEFAULT",
-    "name": "Innovation Availability",
+    "name": "Innovation Availability - 12",
     "description": "The readiness of the innovation for integration into healthcare settings.",
     "scales_desc": [
       "Theoretically Impossible",
@@ -157,6 +157,26 @@
       "Significant effort required to address issues; achievable with dedicated resources.",
       "Small adjustments needed; approvals are likely to be granted.",
       "Meets all regulatory requirements and ethical standards; no additional approvals needed."
+    ]
+  },
+  {
+    "fid": -9,
+    "owner": "DEFAULT",
+    "name": "new factor",
+    "description": "new factor",
+    "scales_desc": [
+      "new factor",
+      "new factor",
+      "new factor",
+      "new factor",
+      "new factor"
+    ],
+    "scales_explanation": [
+      "new factor",
+      "new factor",
+      "new factor",
+      "new factor",
+      "new factor"
     ]
   }
 ]

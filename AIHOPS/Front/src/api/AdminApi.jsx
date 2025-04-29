@@ -50,21 +50,21 @@ export const updateDefaultFactor = async (
   });
 };
 
-// export const addDefaultFactor = async (
-//   cookie,
-//   name,
-//   desc,
-//   scales_desc,
-//   scales_explenation
-// ) => {
-//   return await axios.post(`${API_URL}/admin/add-default-factor`, {
-//     cookie: cookie,
-//     name: name,
-//     desc: desc,
-//     scales_desc: scales_desc,
-//     scales_explenation: scales_explenation,
-//   });
-// };
+export const addDefaultFactor = async (
+  name,
+  desc,
+  scales_desc,
+  scales_explenation
+) => {
+  const cookie = await getMyCookie();
+  return await axios.post(`${API_URL}/admin/add-default-factor`, {
+    cookie: cookie,
+    name: name,
+    desc: desc,
+    scales_desc: scales_desc,
+    scales_explenation: scales_explenation,
+  });
+};
 
 export const removeDefaultFactor = async (fid) => {
   const cookie = await getMyCookie();

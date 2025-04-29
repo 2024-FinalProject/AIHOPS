@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { updateDefaultFactor } from "../../api/AdminApi";
+import { addDefaultFactor, updateDefaultFactor } from "../../api/AdminApi";
+import { FactorEditorMode } from "./FactorManagement";
 
-const EditFactor = ({ factor, returnFunc }) => {
+const EditFactor = ({ factor, returnFunc, mode }) => {
   const [editedFactorName, setEditedFactorName] = useState(factor.name);
   const [editedFactorDescription, setEditedFactorDescription] = useState(
     factor.description
@@ -18,16 +19,26 @@ const EditFactor = ({ factor, returnFunc }) => {
     returnFunc();
   };
 
-  const handleUpdateEditedFactor = async () => {
-    console.log("updating");
-    const response = await updateDefaultFactor(
-      factor.id,
-      editedFactorName,
-      editedFactorDescription,
-      editedScaleDescriptions,
-      editedScaleExplanations
-    );
-    alert("edit finished successfully? ", response.data.success);
+  const handleActionOnFactor = async () => {
+    console.log("performing: ", mode);
+    if (mode === FactorEditorMode.EDIT) {
+      const response = await updateDefaultFactor(
+        factor.id,
+        editedFactorName,
+        editedFactorDescription,
+        editedScaleDescriptions,
+        editedScaleExplanations
+      );
+      alert("edit finished successfully? ", response.data.success);
+    } else {
+      const response = await addDefaultFactor(
+        editedFactorName,
+        editedFactorDescription,
+        editedScaleDescriptions,
+        editedScaleExplanations
+      );
+      alert("added successfully? ", response.data.success);
+    }
   };
 
   return (
@@ -119,9 +130,9 @@ const EditFactor = ({ factor, returnFunc }) => {
               </button>
               <button
                 className="factor-button factor-submit-button"
-                onClick={handleUpdateEditedFactor}
+                onClick={handleActionOnFactor}
               >
-                Update
+                {mode}
               </button>
             </div>
           </div>

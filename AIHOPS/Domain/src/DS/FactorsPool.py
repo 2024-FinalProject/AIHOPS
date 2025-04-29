@@ -258,7 +258,7 @@ class FactorsPool:
             factor = Factor(fid, "DEFAULT",name, desc, scales_desc, scales_explanation)
             DEFAULT_FACTORS.append(factor)
             DEFAULT_FACTORS_IDS.append(fid)
-            res = self.db_access.insert(factor)
+            res = self.db_access.insert(factor.db_instance)
             if not res.success:
                 raise Exception(f"failed to insert new factor to db: {res.msg}")
             save_default_factors_to_file(DEFAULT_FACTORS)

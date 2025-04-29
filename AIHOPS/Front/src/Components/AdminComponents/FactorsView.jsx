@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchDefaultFactors, removeDefaultFactor } from "../../api/AdminApi";
+import { FactorEditorMode } from "./FactorManagement";
 
 const FactorsView = ({ handleStartEditFactorParent }) => {
   const [factors, setFactors] = useState([]);
@@ -19,7 +20,7 @@ const FactorsView = ({ handleStartEditFactorParent }) => {
 
   const handleStartEditFactor = async (factor) => {
     console.log("starting to edit factor ", factor.id);
-    handleStartEditFactorParent(factor);
+    handleStartEditFactorParent(factor, FactorEditorMode.EDIT);
   };
 
   const handleRemove = async (fid) => {
@@ -31,6 +32,15 @@ const FactorsView = ({ handleStartEditFactorParent }) => {
 
   const handleAdd = async () => {
     console.log("adding factor: ");
+
+    const blankFactor = {
+      id: null,
+      name: "",
+      description: "",
+      scales_desc: ["", "", "", "", ""],
+      scales_explanation: ["", "", "", "", ""],
+    };
+    handleStartEditFactorParent(blankFactor, FactorEditorMode.ADD);
   };
 
   return (
