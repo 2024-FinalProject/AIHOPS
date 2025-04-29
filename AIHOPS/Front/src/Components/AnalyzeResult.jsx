@@ -210,17 +210,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
 
             <div style={{ margin: "25px 0 15px", width: "100%" }}>
-              <h3
-                className="section-subtitle"
-                style={{
-                  textAlign: "center",
-                  fontSize: "14px",
-                  marginTop: "20px",
-                }}
-              >
-                <u>Apply Weights to Dimensions</u>:
-              </h3>
-
               {/* Weight factor toggle section */}
               <div
                 className={`weight-factor-toggle ${
@@ -228,9 +217,9 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 }`}
                 onClick={() => setShowFactorWeights(!showFactorWeights)}
               >
-                <span className="default-text">
-                  Configure Dimension Weights
-                </span>
+                <div className="default-text">
+                  <b>Configure Dimension Weights:</b>
+                </div>
                 <span className="chevron">{showFactorWeights ? "▼" : "▶"}</span>
               </div>
 

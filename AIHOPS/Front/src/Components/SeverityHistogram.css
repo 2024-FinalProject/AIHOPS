@@ -47,9 +47,11 @@
   max-width: 250px;
   z-index: 1000;
   position: absolute; /* Position relative to the bar */
-  opacity: 0.9;
-  top: 100px !important; /* Adjust vertical position */
+  opacity: 1;
+  top: 60px !important; /* Adjust vertical position */
+  margin-left: -85px !important; /* Adjust horizontal position */
   pointer-events: none; /* Prevent interfering with mouse events */
+  text-align: center !important;
 }
 
 .custom-tooltip h4 {

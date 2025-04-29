@@ -913,7 +913,6 @@ const EditPopup = ({
       case "analyzeResult":
         return (
           <div className="analyze-results-container">
-            <h1 className="results-heading">Results Analysis</h1>
             <div className="analyze-buttons-wrapper">
               <div className="analyze-buttons-container">
                 <button
@@ -961,7 +960,7 @@ const EditPopup = ({
                   Severity Factors
                 </button>
                 <button
-                  className={`action-btn analyze-btn export-btn ${
+                  className={`action-btn analyze-btn ${
                     analyzePopupType === "exportResults" ? "active" : ""
                   }`}
                   onClick={() => {
