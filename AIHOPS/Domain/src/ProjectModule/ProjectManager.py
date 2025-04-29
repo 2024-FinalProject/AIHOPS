@@ -557,7 +557,7 @@ class ProjectManager():
     def admin_update_default_severity_factors(self, severity_factors_full_data, filename='Domain/src/ProjectModule/severity_factors.txt'):
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(severity_factors_full_data, f, indent=2)
-        Project.DEFAULT_SEVERITY_FACTORS = load_default_severity_factors()
+        load_default_severity_factors()
         return ResponseSuccessMsg(f"default severity factors updated successfully")
 
     def get_default_factors(self):

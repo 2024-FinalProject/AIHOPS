@@ -25,6 +25,7 @@ import FactorInputForm from "./FactorInputForm";
 import { register } from "../api/AuthApi.jsx";
 import AlertPopup from "./AlertPopup";
 import EmailValidator from "email-validator";
+import EditSeverityFactors from "../Components/EditPopupComponents/EditSeverityFactors.jsx";
 
 const EditPopup = ({
   fetchProjects,
@@ -198,32 +199,6 @@ const EditPopup = ({
       }
     } catch (error) {
       console.error(error);
-    }
-  };
-
-  const handleConfirmSeverityFactors = async (pid) => {
-    let cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
-    try {
-      if ((await updateProjectsSeverityFactors()) == -1) {
-        return;
-      }
-      const response = await confirmSeverityFactors(cookie, pid);
-      if (response.data.success) {
-        //alert("Severity factors confirmed successfully");
-        selectedProject.severity_factors_inited = true;
-        await fetch_selected_project(selectedProject);
-      } else {
-        console.log("Error confirming project factors");
-      }
-    } catch (error) {
-      console.log("Error confirming project factors");
     }
   };
 
@@ -1539,103 +1514,7 @@ const EditPopup = ({
       case "editSeverityFactors":
         return (
           <div>
-            <h2
-              className="default-text"
-              style={{ textAlign: "center", marginTop: "-20px" }}
-            >
-              <u>Severity Factors</u>:
-            </h2>
-            <table className="severity-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Level Name</th>
-                  <th>Level Description</th>
-                  <th>Severity Factor</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedProject.severity_factors.map((severity, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>Level {index + 1}</td>
-                    <td>
-                      {
-                        [
-                          "No noticeable effects on operations. Recovery is either unnecessary or instantaneous without any resource involvement.",
-                          "Impacts are small, causing slight disruptions that can be resolved with minimal effort or resources, leaving no long-term effects.",
-                          "Impacts are moderate, requiring resources and temporary adjustments to restore normal operations within a manageable timeframe.",
-                          "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
-                          "Impacts result in extensive disruption, likely overwhelming available resources and making recovery improbable without external intervention.",
-                        ][index]
-                      }
-                    </td>
-                    <td>
-                      {selectedProject.isActive ? (
-                        <span>{severity}</span>
-                      ) : (
-                        <input
-                          type="number"
-                          defaultValue={severity}
-                          className="severity-input"
-                          onChange={(e) => {
-                            const updates = { ...severityUpdates };
-                            updates[index + 1] = Number(e.target.value); // Map to dictionary keys 1-5
-                            setSeverityUpdates(updates);
-                          }}
-                        />
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="severity-factors-warning">
-              <p style={{ textAlign: "center" }}>
-                <b>Note</b>: You cannot add or remove severity factors. You can
-                only update their values.
-              </p>
-            </div>
-            <div className="parent-container">
-              <button
-                disabled={selectedProject.isActive}
-                className="action-btn confirm-btn"
-                onClick={() =>
-                  handleConfirmSeverityFactors(
-                    selectedProject.id,
-                    selectedProject.name
-                  )
-                }
-                style={{
-                  padding: "8px 18px",
-                  fontSize: "14px",
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "20px",
-                  cursor: "pointer",
-                  boxShadow: "0 3px 8px rgba(0, 0, 0, 0.1)",
-                  transition: "all 0.2s ease",
-                  position: "relative", // Positioning for the badge
-                }}
-                onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
-                onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
-              >
-                ✅ Confirm Severity Factors
-                {!selectedProject.severity_factors_inited && (
-                  <span className="reminder-badge">Unset</span>
-                )}
-              </button>
-            </div>
-            {showAlert && (
-              <AlertPopup
-                message={alertMessage}
-                type={alertType}
-                title="Input Validation"
-                onClose={() => setShowAlert(false)}
-                autoCloseTime={3000}
-              />
-            )}
+            <EditSeverityFactors selectedProject={selectedProject} />
           </div>
         );
 

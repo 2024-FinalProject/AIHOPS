@@ -3,57 +3,21 @@ import {
   fetchDefaultSeverityFactors,
   updateDefaultSeverityFactor,
 } from "../../../api/AdminApi";
+import { useSeverityMetadata } from "../../../context/SeverityMetadataContext";
 
 const SeverityFactorsView = () => {
-  const [levelNames, setLevelNames] = useState(["", "", "", "", ""]);
-  const [descriptions, setDescriptions] = useState(["", "", "", "", ""]);
-  const [severities, setSeverities] = useState([0, 0, 0, 0, 0]);
+  const { metadata, setMetadata, saveMetadata } = useSeverityMetadata();
 
-  const loadData = async () => {
-    try {
-      const response = await fetchDefaultSeverityFactors();
-      console.log("API response:", response.data);
-      if (response.data.success) {
-        const severity_factors = response.data.severity_factors;
-        setLevelNames(severity_factors.map((f) => f.level));
-        setDescriptions(severity_factors.map((f) => f.description));
-        setSeverities(severity_factors.map((f) => f.severity));
-      } else {
-        alert("Failed to fetch severity factors: " + response.data.message);
-      }
-    } catch (err) {
-      console.error("Error fetching severity factors:", err);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const handleSave = async () => {
-    const payload = levelNames.map((level, i) => ({
-      level,
-      description: descriptions[i],
-      severity: severities[i],
-    }));
-
-    try {
-      const res = await updateDefaultSeverityFactor(payload);
-      if (res.data.success) {
-        alert("Saved successfully");
-      } else {
-        alert("Save failed: " + res.data.message);
-      }
-    } catch (err) {
-      console.error("Failed to save:", err);
-      alert("Error saving severity factors.");
-    }
+  const handleChange = (index, key, value) => {
+    const updated = [...metadata];
+    updated[index][key] = key === "severity" ? parseFloat(value) || 0 : value;
+    setMetadata(updated);
   };
 
   return (
-    <>
+    <div>
       <h2 style={{ textAlign: "center" }}>
-        <u>Severity Factors</u>
+        <u>Edit Default Severity Factors</u>
       </h2>
       <table className="severity-table">
         <thead>
@@ -61,43 +25,35 @@ const SeverityFactorsView = () => {
             <th>#</th>
             <th>Level Name</th>
             <th>Description</th>
-            <th>Factor</th>
+            <th>Default Value</th>
           </tr>
         </thead>
         <tbody>
-          {[0, 1, 2, 3, 4].map((i) => (
-            <tr key={i}>
-              <td>{i + 1}</td>
+          {metadata.map((item, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
               <td>
                 <input
-                  value={levelNames[i]}
-                  onChange={(e) => {
-                    const next = [...levelNames];
-                    next[i] = e.target.value;
-                    setLevelNames(next);
-                  }}
+                  value={item.level}
+                  onChange={(e) => handleChange(index, "level", e.target.value)}
                 />
               </td>
               <td>
                 <textarea
-                  value={descriptions[i]}
-                  onChange={(e) => {
-                    const next = [...descriptions];
-                    next[i] = e.target.value;
-                    setDescriptions(next);
-                  }}
+                  value={item.description}
+                  onChange={(e) =>
+                    handleChange(index, "description", e.target.value)
+                  }
                   rows={3}
                 />
               </td>
               <td>
                 <input
                   type="number"
-                  value={severities[i]}
-                  onChange={(e) => {
-                    const next = [...severities];
-                    next[i] = parseFloat(e.target.value) || 0;
-                    setSeverities(next);
-                  }}
+                  value={item.severity}
+                  onChange={(e) =>
+                    handleChange(index, "severity", e.target.value)
+                  }
                 />
               </td>
             </tr>
@@ -105,12 +61,12 @@ const SeverityFactorsView = () => {
         </tbody>
       </table>
 
-      <div style={{ marginTop: "20px", textAlign: "center" }}>
-        <button className="action-btn confirm-btn" onClick={handleSave}>
-          💾 Save Severity Factors
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <button onClick={saveMetadata} className="action-btn confirm-btn">
+          💾 Save All Changes
         </button>
       </div>
-    </>
+    </div>
   );
 };
 

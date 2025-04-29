@@ -10,13 +10,15 @@ from Domain.src.DS.VoteManager import VoteManager
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 
 
+DEFAULT_SEVERITY_FACTORS = []
 
 def load_default_severity_factors(filename='Domain/src/ProjectModule/severity_factors.txt'):
+    global DEFAULT_SEVERITY_FACTORS
     with open(filename, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
-        return [entry["severity"] for entry in raw_data]
+        DEFAULT_SEVERITY_FACTORS = [entry["severity"] for entry in raw_data]
 
-DEFAULT_SEVERITY_FACTORS = load_default_severity_factors()
+load_default_severity_factors()
 #
 # DEFAULT_SEVERITY_FACTORS = [0.5, 1, 25, 100, 400]
 

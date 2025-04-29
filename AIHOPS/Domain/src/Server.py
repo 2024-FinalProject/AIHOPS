@@ -653,6 +653,11 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get members vote on project: {e}")
 
+    def fetch_default_severity_factors_full(self, cookie):
+        try:
+            return self.project_manager.get_default_severity_factors()
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch default factors: {e}")
 
 # -------------  admin actions ------------------------
 
@@ -708,5 +713,6 @@ class Server:
             return self.project_manager.admin_update_default_severity_factors(severity_factors)
         except Exception as e:
             return ResponseFailMsg(f"Failed update severity factors: {e}")
+
 
 

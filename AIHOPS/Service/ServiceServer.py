@@ -473,6 +473,15 @@ def admin_fetch_default_severity_factors():
     res = server.admin_fetch_default_severity_factors(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success, "severity_factors": res.result if res.success else None})
 
+@app.route("/fetch-default-severity-factors-full", methods=["GET"])
+def fetch_default_severity_factors_full():
+    cookie = int(request.args.get("cookie", 0))  # fallback to 0 or raise error if missing
+    res = server.fetch_default_severity_factors_full(cookie)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success,
+        "severity_factors": res.result if res.success else None
+    })
 
 @app.route("/admin/update-default-severity-factors", methods=["POST"])
 def admin_update_default_severity_factors():
