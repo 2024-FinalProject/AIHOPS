@@ -4,6 +4,7 @@ import {
   updateDefaultSeverityFactor,
 } from "../../../api/AdminApi";
 import { useSeverityMetadata } from "../../../context/SeverityMetadataContext";
+// import "./SeverityFactorsView.css";
 
 const SeverityFactorsView = () => {
   const { metadata, setMetadata, saveMetadata } = useSeverityMetadata();
@@ -22,10 +23,10 @@ const SeverityFactorsView = () => {
       <table className="severity-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>Level Name</th>
-            <th>Description</th>
-            <th>Default Value</th>
+            <th style={{ width: "5%" }}>#</th>
+            <th style={{ width: "20%" }}>Level Name</th>
+            <th style={{ width: "60%" }}>Description</th> {/* 3x wider */}
+            <th style={{ width: "15%" }}>Default Value</th> {/* 4x narrower */}
           </tr>
         </thead>
         <tbody>
@@ -35,12 +36,14 @@ const SeverityFactorsView = () => {
               <td>
                 <input
                   value={item.level}
+                  style={{ width: "75%" }}
                   onChange={(e) => handleChange(index, "level", e.target.value)}
                 />
               </td>
               <td>
                 <textarea
                   value={item.description}
+                  style={{ width: "100%" }}
                   onChange={(e) =>
                     handleChange(index, "description", e.target.value)
                   }
@@ -51,6 +54,7 @@ const SeverityFactorsView = () => {
                 <input
                   type="number"
                   value={item.severity}
+                  style={{ width: "50%" }}
                   onChange={(e) =>
                     handleChange(index, "severity", e.target.value)
                   }
@@ -62,7 +66,11 @@ const SeverityFactorsView = () => {
       </table>
 
       <div style={{ textAlign: "center", marginTop: "20px" }}>
-        <button onClick={saveMetadata} className="action-btn confirm-btn">
+        <button
+          onClick={saveMetadata}
+          className="action-btn confirm-btn"
+          style={{ color: "blue" }}
+        >
           💾 Save All Changes
         </button>
       </div>
