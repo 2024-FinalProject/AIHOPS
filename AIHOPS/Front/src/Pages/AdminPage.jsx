@@ -49,6 +49,12 @@ const AdminPage = () => {
         <Button onClick={handleManageDefaultSeverityFactors}>
           Manage Default severity factors
         </Button>
+        <Button onClick={() => console.log("not impemented yet")}>
+          research
+        </Button>
+        <Button onClick={() => console.log("not impemented yet")}>
+          update terms and conditions
+        </Button>
       </div>
       <div>
         {isManagingFactors && (
