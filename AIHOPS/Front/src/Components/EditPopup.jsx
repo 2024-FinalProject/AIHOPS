@@ -202,7 +202,6 @@ const EditPopup = ({
     }
   };
 
-
   const handleRemoveMember = async (member) => {
     if (member === selectedProject.founder) {
       alert(`You cannot remove the founder of the project.`);
@@ -1417,7 +1416,10 @@ const EditPopup = ({
       case "editSeverityFactors":
         return (
           <div>
-            <EditSeverityFactors selectedProject={selectedProject} />
+            <EditSeverityFactors
+              selectedProject={selectedProject}
+              closePopup={closePopup}
+            />
           </div>
         );
 

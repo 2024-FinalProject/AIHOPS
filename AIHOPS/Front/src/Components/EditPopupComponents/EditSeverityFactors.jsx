@@ -5,7 +5,7 @@ import {
   setSeverityFactors,
 } from "../../api/ProjectApi";
 
-const EditSeverityFactors = ({ selectedProject }) => {
+const EditSeverityFactors = ({ selectedProject, closePopup }) => {
   const [cookie, setCookie] = useState("");
   const { metadata } = useSeverityMetadata();
   const [severityValues, setSeverityValues] = useState([
@@ -87,6 +87,7 @@ const EditSeverityFactors = ({ selectedProject }) => {
       if (response.data.success) {
         // alert("Severity factors confirmed successfully");
         selectedProject.severity_factors_inited = true;
+        closePopup();
       } else {
         console.log("Error confirming project factors");
       }

@@ -356,3 +356,16 @@ export const fetchDefaultSeverityFactorsFull = async (cookie) => {
     params: { cookie: cookie },
   });
 };
+
+export const getProject = async (cookie, pid) => {
+  return await axios.get(`${API_URL}/get-project`, {
+    params: {
+      cookie: cookie,
+      pid: pid,
+    },
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  });
+};

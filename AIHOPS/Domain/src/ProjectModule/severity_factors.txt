@@ -1,6 +1,6 @@
 [
   {
-    "level": "Leveefasf ee",
+    "level": "Level 1",
     "description": "12",
     "severity": 0.5
   },
