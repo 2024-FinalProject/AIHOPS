@@ -2,7 +2,7 @@
   {
     "fid": -1,
     "owner": "DEFAULT",
-    "name": "Innovation Availability",
+    "name": "Innovation Availability - 2323",
     "description": "The readiness of the innovation for integration into healthcare settings.",
     "scales_desc": [
       "Theoretically Impossible",

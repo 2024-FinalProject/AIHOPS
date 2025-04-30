@@ -199,7 +199,9 @@ class FactorsPool:
     def _find_factor(self, actor, fid):
         with self.lock:
             if fid in DEFAULT_FACTORS_IDS:
-                return DEFAULT_FACTORS[(fid * (-1)) -1]
+                for factor in DEFAULT_FACTORS:
+                    if factor.fid == fid:
+                        return factor
 
             factors_of_member = self.members.get(actor)
             for factor in factors_of_member:
@@ -242,6 +244,7 @@ class FactorsPool:
     def admin_change_default_factor(self, fid, name, desc, scales_desc, scales_explanation):
         """change will persist in all projects in design and also published projects"""
         with self.lock:
+            # update it in file and local list
             for idx, factor in enumerate(DEFAULT_FACTORS):
                 if factor.fid == fid:
                     # update in db
@@ -251,6 +254,7 @@ class FactorsPool:
                     # update in txt
                     save_default_factors_to_file(DEFAULT_FACTORS)
                     return ResponseSuccessMsg(f"Default factor {fid} updated successfully.")
+            # update it in
             raise KeyError(f"Default factor with id {fid} not found")
 
     def admin_add_default_factor(self, name, desc, scales_desc, scales_explanation):

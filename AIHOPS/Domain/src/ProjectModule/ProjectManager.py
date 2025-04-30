@@ -292,7 +292,6 @@ class ProjectManager():
             ret.append(proj.to_dict())
         return ResponseSuccessObj(f"projects for actor {actor} : {ret}", ret)
 
-    # TODO: add to server
     def get_projects_of_member(self, actor):
         """returns all projects actors participates in"""
         # TODO: how to return projects, maybe only active projects

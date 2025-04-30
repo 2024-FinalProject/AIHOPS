@@ -20,7 +20,7 @@ import {
   getProjectProgress,
 } from "../api/ProjectApi";
 import "./EditPopup.css";
-import AnalyzeResult from "./AnalyzeResult";
+import AnalyzeResult from "./AnalyzeResult.jsx";
 import FactorInputForm from "./FactorInputForm";
 import { register } from "../api/AuthApi.jsx";
 import AlertPopup from "./AlertPopup";
@@ -1418,7 +1418,7 @@ const EditPopup = ({
           <div>
             <EditSeverityFactors
               selectedProject={selectedProject}
-              closePopup={closePopup}
+              onClose={closePopup}
             />
           </div>
         );

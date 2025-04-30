@@ -1,10 +1,5 @@
-import React, { useEffect, useState } from "react";
-import {
-  fetchDefaultSeverityFactors,
-  updateDefaultSeverityFactor,
-} from "../../../api/AdminApi";
+import React from "react";
 import { useSeverityMetadata } from "../../../context/SeverityMetadataContext";
-// import "./SeverityFactorsView.css";
 
 const SeverityFactorsView = () => {
   const { metadata, setMetadata, saveMetadata } = useSeverityMetadata();

@@ -45,11 +45,13 @@ const AdminPage = () => {
   };
 
   useEffect(() => {
-    if (!isValidatingToken && !isAdmin) {
-      setErrorMsg("You are not authorized to view this page.");
-      navigate("/");
+    if (!isValidatingToken) {
+      if (!isAdmin) {
+        setErrorMsg("You are not authorized to view this page.");
+        navigate("/");
+      }
     }
-  }, [isAdmin, isValidatingToken]);
+  }, [isValidatingToken]);
 
   return (
     <Container className="py-5">
@@ -59,45 +61,42 @@ const AdminPage = () => {
             Admin Control Panel
           </h2>
 
-          {errorMsg && (
-            <Alert variant="danger" onClose={() => setErrorMsg("")} dismissible>
-              {errorMsg}
-            </Alert>
+          {errorMsg ? (
+            <ErrorDisplay message={errorMsg} onClose={setErrorMsg("")} />
+          ) : (
+            <Row className="justify-content-center mb-4">
+              <Col xs="auto">
+                <div className="d-flex flex-row flex-wrap justify-content-center">
+                  <Button
+                    variant="outline-primary"
+                    size="lg"
+                    className="px-4 py-2 rounded-3 shadow-sm me-3 mb-2"
+                    onClick={handleManageDefaultAssessmentDims}
+                  >
+                    📊 Assessment Dimensions
+                  </Button>
+
+                  <Button
+                    variant="outline-info"
+                    size="lg"
+                    className="px-4 py-2 rounded-3 shadow-sm me-3 mb-2"
+                    onClick={handleManageDefaultSeverityFactors}
+                  >
+                    ⚠️ Severity Factors
+                  </Button>
+
+                  <Button
+                    variant="outline-success"
+                    size="lg"
+                    className="px-4 py-2 rounded-3 shadow-sm mb-2"
+                    onClick={handleResearch}
+                  >
+                    🔍 Research
+                  </Button>
+                </div>
+              </Col>
+            </Row>
           )}
-
-          <Row className="justify-content-center mb-4">
-            <Col xs="auto">
-              <div className="d-flex flex-row flex-wrap justify-content-center">
-                <Button
-                  variant="outline-primary"
-                  size="lg"
-                  className="px-4 py-2 rounded-3 shadow-sm me-3 mb-2"
-                  onClick={handleManageDefaultAssessmentDims}
-                >
-                  📊 Assessment Dimensions
-                </Button>
-
-                <Button
-                  variant="outline-info"
-                  size="lg"
-                  className="px-4 py-2 rounded-3 shadow-sm me-3 mb-2"
-                  onClick={handleManageDefaultSeverityFactors}
-                >
-                  ⚠️ Severity Factors
-                </Button>
-
-                <Button
-                  variant="outline-success"
-                  size="lg"
-                  className="px-4 py-2 rounded-3 shadow-sm mb-2"
-                  onClick={handleResearch}
-                >
-                  🔍 Research
-                </Button>
-              </div>
-            </Col>
-          </Row>
-
           <Row>
             <Col>
               {isManagingFactors && <FactorManagement />}
