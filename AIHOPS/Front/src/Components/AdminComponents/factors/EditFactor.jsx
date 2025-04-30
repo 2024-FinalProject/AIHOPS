@@ -63,7 +63,16 @@ const EditFactor = ({ factor, returnFunc, mode }) => {
 
   return (
     <>
-      <div>EditFactor</div>;
+      <div>
+        <h2 style={{ textAlign: "center" }}>
+          <u>
+            {mode}{" "}
+            {mode === FactorEditorMode.EDIT
+              ? factor.name
+              : "New Assessment Dimension"}
+          </u>
+        </h2>
+      </div>
       <div className="factor-form-container">
         <div className="factor-card">
           <div className="factor-header">

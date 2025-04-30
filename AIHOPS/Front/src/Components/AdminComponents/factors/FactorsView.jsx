@@ -55,7 +55,9 @@ const FactorsView = ({ handleStartEditFactorParent }) => {
 
   return (
     <>
-      <div>FactorsView</div>;
+      <h2 style={{ textAlign: "center" }}>
+        <u>Edit Default Assessment Dimensions</u>
+      </h2>
       <div>
         {factors.map((factor, index) => (
           <div

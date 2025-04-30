@@ -26,7 +26,6 @@ const FactorManagement = () => {
 
   return (
     <>
-      <div>FactorManagement</div>
       {!isEditing && (
         <FactorsView handleStartEditFactorParent={handleStartEditFactor} />
       )}
