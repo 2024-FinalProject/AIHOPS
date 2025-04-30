@@ -202,81 +202,6 @@ const EditPopup = ({
     }
   };
 
-  const updateProjectsSeverityFactors = async () => {
-    const cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return -1;
-    }
-
-    let tempSeverityFactors = [];
-    for (
-      let level = 1;
-      level <= selectedProject.severity_factors.length;
-      level++
-    ) {
-      if (severityUpdates[level] < 0) {
-        setIsSuccess(true);
-        setAlertMessage(
-          "Severity factors cannot be negative.\nPlease enter a valid number for all levels."
-        );
-        setAlertType("warning");
-        setShowAlert(true);
-        return -1;
-      }
-      if (severityUpdates == null || severityUpdates[level] === undefined) {
-        tempSeverityFactors.push(selectedProject.severity_factors[level - 1]);
-        continue;
-      }
-      tempSeverityFactors.push(severityUpdates[level]);
-    }
-
-    for (let i = 1; i < tempSeverityFactors.length; i++) {
-      if (tempSeverityFactors[i - 1] >= tempSeverityFactors[i]) {
-        setIsSuccess(true);
-        setAlertMessage(
-          "Severity factors must be in increasing order.\nCurrently level " +
-            i +
-            " is greater than level " +
-            (i + 1)
-        );
-        setAlertType("warning");
-        setShowAlert(true);
-        return -1;
-      }
-    }
-
-    try {
-      const severityResponse = await setSeverityFactors(
-        cookie,
-        selectedProject.id,
-        tempSeverityFactors
-      );
-      if (!severityResponse.data.success) {
-        setMsg(severityResponse.data.message);
-        setIsSuccess(true);
-        alert(severityResponse.data.message);
-        return -1;
-      }
-      await fetchProjects();
-      selectedProject.severity_factors = (
-        await getProjectSeverityFactors(cookie, selectedProject.id)
-      ).data.severityFactors;
-      await fetch_selected_project(selectedProject);
-      setMsg("Severity factors updated successfully");
-      setIsSuccess(true);
-      closePopup();
-      return 1;
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message;
-      console.error("Error:", errorMessage);
-      setMsg(`Error in updating the severity factors: ${errorMessage}`);
-      setIsSuccess(false);
-      return -1;
-    }
-  };
 
   const handleRemoveMember = async (member) => {
     if (member === selectedProject.founder) {
@@ -780,7 +705,7 @@ const EditPopup = ({
                 htmlFor="UpdateAllProjectsInDesign"
                 className="checkbox-label"
               >
-                Update all projects in design?
+                Update all projects in design
               </label>
             </div>
             <div
@@ -887,63 +812,66 @@ const EditPopup = ({
     switch (popupType) {
       case "analyzeResult":
         return (
-          <div className="default-div">
-            <h1>
-              <u>Results</u>:
-            </h1>
-            <div>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showCurrentScore" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showCurrentScore");
-                }}
-              >
-                Current Score
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showAssessorsInfo" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showAssessorsInfo");
-                }}
-              >
-                Assessors Info
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showContentFactorsScore" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showContentFactorsScore");
-                }}
-              >
-                Assessment Dimension Score
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "showSeverityFactorsScore"
-                    ? "active"
-                    : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("showSeverityFactorsScore");
-                }}
-              >
-                Severity Factors Score
-              </button>
-              <button
-                className={`action-btn edit-btn ${
-                  analyzePopupType === "exportResults" ? "active" : ""
-                }`}
-                onClick={() => {
-                  setAnalyzePopupType("exportResults");
-                }}
-              >
-                Export to Excel
-              </button>
+          <div className="analyze-results-container">
+            <nav className="analyze-buttons-wrapper">
+              <div className="analyze-buttons-container">
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showCurrentScore" ? "active" : ""
+                  }`}
+                  onClick={() => setAnalyzePopupType("showCurrentScore")}
+                >
+                  Current Score
+                </button>
+
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showAssessorsInfo" ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("showAssessorsInfo");
+                  }}
+                >
+                  Assessors Info
+                </button>
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showContentFactorsScore"
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("showContentFactorsScore");
+                  }}
+                >
+                  Assessment Dimension
+                </button>
+                <button
+                  className={`action-btn analyze-btn ${
+                    analyzePopupType === "showSeverityFactorsScore"
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setAnalyzePopupType("showSeverityFactorsScore");
+                  }}
+                >
+                  Severity Factors
+                </button>
+
+                <button
+                  className={`action-btn analyze-btn export-btn ${
+                    analyzePopupType === "exportResults" ? "active" : ""
+                  }`}
+                  onClick={() => setAnalyzePopupType("exportResults")}
+                >
+                  <span className="export-icon">📊</span> Export
+                </button>
+              </div>
+            </nav>
+
+            {/* Display the selected analysis content */}
+            <div className="analysis-content-container">
               <AnalyzeResult
                 analyzePopupType={analyzePopupType}
                 closePopup={closePopup}
@@ -1160,86 +1088,68 @@ const EditPopup = ({
                           </div>
                         </div>
                       ))}
+                    {/* single-row flex: 3 equal columns */}
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        marginTop: "10px",
+                        alignItems: "center",
+                        width: "100%",
+                        marginTop: "10px", // small gap above
                       }}
                     >
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handlePrevious("factors")}
-                        disabled={factorStartIndex === 0}
-                        style={{
-                          cursor:
-                            factorStartIndex === 0 ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        Previous
-                      </button>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          padding: "10px 0",
-                        }}
-                      >
+                      {/* Left cell: Previous */}
+                      <div style={{ flex: 1, textAlign: "left" }}>
+                        {factorStartIndex >= itemsPerPage && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handlePrevious("factors")}
+                          >
+                            Previous
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Middle cell: Confirm */}
+                      <div style={{ flex: 1, textAlign: "center" }}>
                         <button
                           disabled={selectedProject.isActive}
                           className="action-btn confirm-btn"
                           onClick={() =>
-                            handleConfirmFactors(
-                              selectedProject.id,
-                              selectedProject.name
-                            )
+                            handleConfirmFactors(selectedProject.id)
                           }
                           style={{
-                            padding: "8px 18px",
-                            fontSize: "14px",
                             backgroundColor: "#4CAF50",
                             color: "white",
-                            border: "none",
-                            borderRadius: "20px",
-                            cursor: "pointer",
-                            boxShadow: "0 3px 8px rgba(0, 0, 0, 0.1)",
-                            transition: "all 0.2s ease",
-                            position: "relative", // Positioning for the badge
+                            position: "relative", // for badge
                           }}
-                          onMouseOver={(e) =>
-                            (e.target.style.transform = "scale(1.05)")
-                          }
-                          onMouseOut={(e) =>
-                            (e.target.style.transform = "scale(1)")
-                          }
                         >
                           ✅ Confirm Assessment Dimensions
                           {!selectedProject.factors_inited && (
-                            <span className="reminder-badge">Unset</span>
+                            <span className="reminder-badge">Unconfirmed</span>
                           )}
                         </button>
                       </div>
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handleNext("factors")}
-                        disabled={
-                          factorStartIndex + itemsPerPage >=
-                          selectedProject.factors.length
-                        }
-                        style={{
-                          cursor:
-                            factorStartIndex + itemsPerPage >=
-                            selectedProject.factors.length
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                      >
-                        Next
-                      </button>
+
+                      {/* Right cell: Next */}
+                      <div style={{ flex: 1, textAlign: "right" }}>
+                        {factorStartIndex + itemsPerPage <
+                          selectedProject.factors.length && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handleNext("factors")}
+                          >
+                            Next
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    {/* Page indicator for Project Factors */}
+
+                    {/* pagination dots below, centered */}
                     {totalPagesFactors > 1 && (
-                      <div className="pagination-indicator">
+                      <div
+                        className="pagination-indicator"
+                        style={{ marginTop: "8px" }}
+                      >
                         {Array.from({ length: totalPagesFactors }).map(
                           (_, i) => (
                             <span
@@ -1256,11 +1166,7 @@ const EditPopup = ({
                 ) : (
                   <p
                     className="warning"
-                    style={{
-                      textAlign: "center",
-                      marginTop: "15%",
-                      marginLeft: "-3%",
-                    }}
+                    style={{ textAlign: "center", marginTop: "15%" }}
                   >
                     No factors available in the project.
                   </p>
@@ -1416,62 +1322,59 @@ const EditPopup = ({
                           </div>
                         </div>
                       ))}
+                    {/* single-row flex for Prev / Confirm / Next */}
                     <div
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
                         marginTop: "10px",
                       }}
                     >
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handlePrevious("pool")}
-                        disabled={poolStartIndex === 0}
-                        style={{
-                          cursor:
-                            poolStartIndex === 0 ? "not-allowed" : "pointer",
-                        }}
-                      >
-                        Previous
-                      </button>
-                      <button
-                        className="action-btn confirm-btn"
-                        onClick={handleSubmit}
-                        style={{
-                          marginTop: "10px",
-                          padding: "8px 18px",
-                          fontSize: "14px",
-                          backgroundColor: "#4CAF50",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "5px",
-                          cursor: "pointer",
-                          transition: "all 0.2s ease",
-                        }}
-                      >
-                        Add Selected Assessment Dimensions
-                      </button>
-                      <button
-                        className="action-btn edit-btn"
-                        onClick={() => handleNext("pool")}
-                        disabled={
-                          poolStartIndex + itemsPerPage >= factorsPool.length
-                        }
-                        style={{
-                          cursor:
-                            poolStartIndex + itemsPerPage >= factorsPool.length
-                              ? "not-allowed"
-                              : "pointer",
-                        }}
-                      >
-                        Next
-                      </button>
+                      {/* Left cell: Previous */}
+                      <div style={{ flex: 1, textAlign: "left" }}>
+                        {poolStartIndex > 0 && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handlePrevious("pool")}
+                          >
+                            Previous
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Middle cell: Confirm (Add) */}
+                      <div style={{ flex: 1, textAlign: "center" }}>
+                        <button
+                          className="action-btn confirm-btn"
+                          onClick={handleSubmit}
+                          style={{
+                            backgroundColor: "#4CAF50",
+                            color: "white",
+                          }}
+                        >
+                          Add Selected Assessment Dimensions
+                        </button>
+                      </div>
+
+                      {/* Right cell: Next */}
+                      <div style={{ flex: 1, textAlign: "right" }}>
+                        {poolStartIndex + itemsPerPage < factorsPool.length && (
+                          <button
+                            className="action-btn edit-btn"
+                            onClick={() => handleNext("pool")}
+                          >
+                            Next
+                          </button>
+                        )}
+                      </div>
                     </div>
-                    {/* Page indicator for Factors Pool */}
+
+                    {/* pagination dots underneath, centered */}
                     {totalPagesPool > 1 && (
                       <div
                         className="pagination-indicator"
-                        style={{ marginBottom: "-20px" }}
+                        style={{ marginTop: "8px" }}
                       >
                         {Array.from({ length: totalPagesPool }).map((_, i) => (
                           <span

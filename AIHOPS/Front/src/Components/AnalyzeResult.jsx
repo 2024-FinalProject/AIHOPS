@@ -21,9 +21,12 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [projectFactorsVotes, setProjectFactorsVotes] = useState([]);
   const [weights, setWeights] = useState({});
   const [weightsInited, setWeightsInited] = useState(false);
+  const [showFactorWeights, setShowFactorWeights] = useState(false);
 
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(true);
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetch_project_progress = async () => {
     let cookie = localStorage.getItem("authToken");
@@ -58,7 +61,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       alert("must have at least 1 non zero weight");
       return;
     }
-
+    setIsLoading(true);
     try {
       //Turn wighets into a list of weights values:
       let res = await getProjectsScore(cookie, projectId, weightsToUse);
@@ -66,6 +69,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     } catch (error) {
       alert(error);
     }
+    setIsLoading(false);
   };
 
   const fetch_project_factors = async () => {
@@ -116,11 +120,13 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   const handleRefresh = async () => {
+    setIsLoading(true);
     await fetch_project_factors();
     await fetch_project_progress();
     await fetch_project_factors_votes();
     await fetch_project_severity_factors();
     await fetch_project_score(weights);
+    setIsLoading(false);
   };
 
   const fetchAllData = async () => {
@@ -128,6 +134,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     await fetch_project_progress();
     await fetch_project_factors_votes();
     await fetch_project_severity_factors();
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -170,10 +177,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     const total = vals.reduce((s, v) => s + v, 0);
     const avg = vals.length ? (total / vals.length).toFixed(3) : 0;
     return (
-      <p
-        className="default-text"
-        style={{ fontSize: "16px", margin: "10px 0", marginBottom: "-3%" }}
-      >
+      <p className="default-text" style={{ fontSize: "16px" }}>
         <b>Current Assessment Dimensions Score:</b> {avg}
       </p>
     );
@@ -182,30 +186,23 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const getPopupContent = () => {
     switch (analyzePopupType) {
       case "showCurrentScore":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
+        if (Object.keys(projectsScore).length == 0) {
+          return (
+            <div className="analyze-content-container">
+              <div className="score-display"> No score available</div>
+            </div>
+          );
+        }
         return (
-          <div style={{ textAlign: "center", margin: "10px 0" }}>
-            <h2
-              className="default-text"
-              style={{
-                fontSize: "22px",
-                color: "var(--text-color)",
-                marginBottom: "15px",
-                fontWeight: "600",
-              }}
-            >
-              <u>Current Project Score</u>:
-            </h2>
-            {/* Display the formula and score */}
-            <div
-              className="score-display"
-              style={{
-                margin: "0 auto 15px",
-                padding: "8px",
-                backgroundColor: "var(--card-background)",
-                borderRadius: "8px",
-                maxWidth: "600px",
-              }}
-            >
+          <div className="analyze-content-container">
+            <div className="score-display">
               {Object.keys(projectsScore).length > 0 ? (
                 <FormulaDisplay
                   nominator={projectsScore.nominator}
@@ -218,205 +215,102 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
               )}
             </div>
 
-            <div style={{ marginBottom: "10px" }}>
-              <h3
-                className="default-text"
-                style={{
-                  fontSize: "16px",
-                  marginBottom: "10px",
-                  color: "var(--text-color)",
-                }}
-              >
-                <u>Apply weight to the assessment dimensions</u>:
-              </h3>
-
+            <div style={{ margin: "25px 0 15px", width: "100%" }}>
+              {/* Weight factor toggle section */}
               <div
-                className="weight-inputs"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "8px",
-                  justifyContent: "center",
-                  marginBottom: "10px",
-                }}
+                className={`weight-factor-toggle ${
+                  showFactorWeights ? "open" : ""
+                }`}
+                onClick={() => setShowFactorWeights(!showFactorWeights)}
               >
-                {projectFactors.map((f) => (
-                  <div
-                    key={f.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      padding: "5px 10px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--border-color)",
-                      backgroundColor: "rgba(255,255,255,0.02)",
-                    }}
-                  >
-                    <span
-                      className="default-text"
-                      style={{
-                        fontWeight: "500",
-                        fontSize: "14px",
-                        textAlign: "left",
-                        flex: "1",
-                      }}
-                    >
-                      {f.name}
-                    </span>
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={weights[f.id]}
-                      onChange={(e) => handleWeightChange(f.id, e.target.value)}
-                      style={{
-                        width: "45px",
-                        height: "28px",
-                        textAlign: "center",
-                        borderRadius: "4px",
-                        border: "1px solid var(--border-color)",
-                        fontSize: "14px",
-                        backgroundColor: "transparent",
-                        color: "var(--text-color)",
-                      }}
-                    />
-                  </div>
-                ))}
+                <div className="default-text">
+                  <b>Configure Dimension Weights:</b>
+                </div>
+                <span className="chevron">{showFactorWeights ? "▼" : "▶"}</span>
               </div>
 
-              <button
-                onClick={() => fetch_project_score(weights)}
-                style={{
-                  padding: "6px 20px",
-                  fontSize: "14px",
-                  borderRadius: "6px",
-                  border: "none",
-                  cursor: "pointer",
-                  backgroundColor: "#28a745",
-                  color: "#fff",
-                  fontWeight: "500",
-                  transition: "background-color 0.2s ease",
-                }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#218838")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#28a745")
-                }
-              >
-                Calculate
-              </button>
+              {showFactorWeights && (
+                <div className="weight-selection-grid">
+                  {projectFactors.map((f) => (
+                    <div key={f.id} className="weight-item">
+                      <span className="weight-item-name">{f.name}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={weights[f.id]}
+                        onChange={(e) =>
+                          handleWeightChange(f.id, e.target.value)
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ textAlign: "center" }}>
+                <button
+                  onClick={() => fetch_project_score(weights)}
+                  className="calculate-button"
+                >
+                  Calculate Score
+                </button>
+              </div>
             </div>
           </div>
         );
       case "showAssessorsInfo":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div
-            style={{
-              lineHeight: "1.6",
-              margin: "10px",
-              textAlign: "center",
-              marginTop: "80px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                maxWidth: "700px",
-                margin: "0 auto",
-              }}
-            >
-              <div
-                style={{
-                  padding: "12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-                  backgroundColor: "var(--card-background)",
-                  flex: "1",
-                  margin: "0 8px",
-                  marginBottom: "-20%",
-                }}
-              >
-                <p
-                  className="default-text"
-                  style={{ fontWeight: "600", fontSize: "16px" }}
-                >
+          <div className="analyze-content-container">
+            {/* Added a container class for better centering */}
+            <div className="assessors-card-container">
+              <div className="assessor-card">
+                <p className="assessor-count">
                   {projectsProgress.pending_amount +
                     projectsProgress.member_count -
                     1}
                 </p>
-                <p
-                  className="default-text"
-                  style={{ fontSize: "14px", color: "var(--text-color)" }}
-                >
-                  Invited Assessors
-                </p>
+                <p className="assessor-label">Invited Assessors</p>
               </div>
 
-              <div
-                style={{
-                  padding: "12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-                  backgroundColor: "var(--card-background)",
-                  flex: "1",
-                  margin: "0 8px",
-                }}
-              >
-                <p
-                  className="default-text"
-                  style={{ fontWeight: "600", fontSize: "16px" }}
-                >
+              <div className="assessor-card">
+                <p className="assessor-count">
                   {projectsProgress.member_count - 1}
                 </p>
-                <p
-                  className="default-text"
-                  style={{ fontSize: "14px", color: "var(--text-color)" }}
-                >
-                  Registered Assessors
-                </p>
+                <p className="assessor-label">Registered Assessors</p>
               </div>
 
-              <div
-                style={{
-                  padding: "12px",
-                  borderRadius: "8px",
-                  boxShadow: "0 1px 4px rgba(0,0,0,0.05)",
-                  backgroundColor: "var(--card-background)",
-                  flex: "1",
-                  margin: "0 8px",
-                }}
-              >
-                <p
-                  className="default-text"
-                  style={{ fontWeight: "600", fontSize: "16px" }}
-                >
+              <div className="assessor-card">
+                <p className="assessor-count">
                   {projectsProgress.voted_amount}
                 </p>
-                <p
-                  className="default-text"
-                  style={{ fontSize: "14px", color: "var(--text-color)" }}
-                >
-                  Completed Assessments
-                </p>
+                <p className="assessor-label">Completed Assessments</p>
               </div>
             </div>
           </div>
         );
       case "showContentFactorsScore":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div style={{ textAlign: "center", marginTop: "15px" }}>
+          <div className="analyze-content-container">
             <div
-              className="default-text"
+              className="score-display"
               style={{
-                backgroundColor: "var(--card-background)",
-                padding: "12px",
-                borderRadius: "8px",
                 maxWidth: "700px",
-                margin: "0 auto 15px",
-                marginBottom: "-5px",
+                margin: "0 auto 20px",
               }}
             >
               {Object.keys(projectsScore).length > 0
@@ -425,7 +319,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
 
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+              <div className="histogram-container">
                 <Histogram
                   factors={projectsScore.factors}
                   factorslist={projectFactors}
@@ -436,21 +330,23 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "showSeverityFactorsScore":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div style={{ textAlign: "center", marginTop: "20px" }}>
-            <div
-              style={{
-                backgroundColor: "var(--card-background)",
-                padding: "12px",
-                borderRadius: "8px",
-                maxWidth: "700px",
-                margin: "0 auto 15px",
-                marginBottom: "-10px",
-              }}
-            >
+          <div className="analyze-content-container">
+            <div className="score-display">
               <p
                 className="default-text"
-                style={{ fontSize: "15px", marginBottom: "8px" }}
+                style={{
+                  fontSize: "16px",
+                  marginBottom: "10px",
+                  fontWeight: "500",
+                }}
               >
                 <b>Current Severity Factors Score:</b>{" "}
                 {Object.keys(projectsScore).length > 0
@@ -466,7 +362,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
             </div>
 
             {Object.keys(projectsScore).length > 0 && (
-              <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+              <div className="severtiy-histogram-continaer">
                 <SeverityHistogram
                   severityfactors={projectsScore.severity_damage}
                   severityfactorsValues={projectSeverityFactors}
@@ -476,19 +372,16 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "exportResults":
+        if (isLoading) {
+          return (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+            </div>
+          );
+        }
         return (
-          <div style={{ textAlign: "center", marginTop: "80px" }}>
-            <div
-              className="default-text"
-              style={{
-                backgroundColor: "var(--card-background)",
-                padding: "20px",
-                borderRadius: "8px",
-                maxWidth: "700px",
-                margin: "0 auto",
-                marginBottom: "-0.5%",
-              }}
-            >
+          <div className="analyze-content-container">
+            <div className="export-container">
               {Object.keys(projectsScore).length > 0 ? (
                 <div
                   style={{
@@ -499,7 +392,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                     gap: "15px",
                   }}
                 >
-                  <p style={{ fontSize: "15px" }}>
+                  <p style={{ fontSize: "15px" }} className="default-text">
                     Click the button below to export all project analysis data
                     to Excel.
                   </p>
@@ -513,7 +406,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                   />
                 </div>
               ) : (
-                "No data available to export"
+                <p className="default-text">No data available to export</p>
               )}
             </div>
           </div>
@@ -525,36 +418,13 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
   return (
     <div className="analyzePopup-content">
-      <div className="analyzePopup-header">
-        <button
-          onClick={handleRefresh}
-          style={{
-            position: "fixed",
-            top: "80px",
-            right: "85px",
-            padding: "6px 12px",
-            fontSize: "14px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            fontFamily: "Verdana, sans-serif",
-            display: "flex",
-            alignItems: "center",
-            gap: "5px",
-            transition: "background-color 0.2s ease",
-          }}
-          onMouseOver={(e) =>
-            (e.currentTarget.style.backgroundColor = "#0069d9")
-          }
-          onMouseOut={(e) =>
-            (e.currentTarget.style.backgroundColor = "#007bff")
-          }
-        >
-          <span style={{ fontSize: "14px" }}>🔄</span> Refresh
-        </button>
-      </div>
+      <button
+        onClick={handleRefresh}
+        title="Refresh"
+        className="refresh-button"
+      >
+        🔄
+      </button>
       {getPopupContent()}
     </div>
   );

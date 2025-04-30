@@ -177,7 +177,7 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
           display: true,
           text: "Assessment Dimensions",
           font: {
-            size: 14,
+            size: 12,
             weight: "bold",
           },
           color: textColor,
@@ -186,7 +186,7 @@ const Histogram = ({ factors, factorslist, factorVotes = {} }) => {
           autoSkip: false,
           maxRotation: 45, // rotate labels 45° (so they don’t overlap as badly)
           minRotation: 45,
-          font: { size: 12 },
+          font: { size: 10 },
           color: textColor,
         },
         offset: true,
