@@ -36,7 +36,7 @@ const FactorsView = ({ handleStartEditFactorParent }) => {
   const handleRemove = async (fid) => {
     console.log("removing factor: ", fid);
     const response = await removeDefaultFactor(fid);
-    alert("status: ", response.data.message);
+    alert(response.data.message);
     fetchFactors();
   };
 
