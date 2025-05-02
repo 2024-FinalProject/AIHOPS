@@ -92,3 +92,36 @@ class Facade:
             raise Exception(f"failed to set {actor}'s projects: {pid}, factors: {res.msg}")
         return True
 
+    def create_and_publish_project_def_factors(self, actor, name, desc, members):
+        cookie = self._find_cookie(actor)
+        pid = self.create_project(actor, True, name, desc)
+        self.server.confirm_project_factors(cookie, pid)
+        self.server.confirm_project_severity_factors(cookie, pid)
+        self.server.add_members(cookie, pid, members)
+        res = self.server.publish_project(cookie, pid)
+        if not res.success:
+            raise Exception(f"failed to publish {actor}'s project: {pid}")
+        return pid
+
+    def _check_res(self, res, msg):
+        if not res.success:
+            raise Exception(msg)
+
+    def vote(self, actor, pid, factor_vote, severity_vote):
+        cookie = self._find_cookie(actor)
+        factors = self.server.get_project_factors(cookie, pid)
+        for idx, factor in factors:
+            res = self.server.vote_on_factor(cookie, pid, factor.fid, factor_vote[idx])
+            self._check_res(res, f"failed to vote on factor {factor_vote[idx]}: {res.msg}")
+        res = self.server.vote_severities(cookie, pid, severity_vote)
+        self._check_res(res, f"failed to vote on severities {severity_vote}: {res.msg}")
+        return True
+
+    def get_score(self, actor, pid, weights=None):
+        cookie = self._find_cookie(actor)
+        if not weights:
+            amount = len(self.get_projects_factors(actor, pid))
+            weights = [1 for _ in range(amount)]
+        res = self.server.get_score(cookie, pid, weights)
+        self._check_res(res, f"failed to get score: {res.msg}")
+        return res.result

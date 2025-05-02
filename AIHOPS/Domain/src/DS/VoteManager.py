@@ -38,8 +38,14 @@ class VoteManager:
     def admin_remove_default_factor(self, fid):
         with self.lock:
             for actor, votes in self.factors_votes.items():
-                if votes and votes.get(fid, False):
-                    self.db_access.delete_obj_by_query(DBFactorVotes, {"factor_id": fid, "member_email": actor, "project_id": self.pid})
+                if fid in votes:
+                    self.db_access.delete_obj_by_query(
+                        DBFactorVotes,
+                        {"factor_id": fid, "member_email": actor, "project_id": self.pid}
+                    )
+                    del votes[fid]
+
+            self.factors_votes = {k: v for k, v in self.factors_votes.items() if v}  # remove empty entries
         return self.remove_factor(fid)
 
 

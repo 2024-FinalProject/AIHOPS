@@ -135,7 +135,13 @@ class Factor:
 #
 # DEFAULT_FACTORS_IDS = [-1,-2,-3,-4,-5,-6,-7, -8]
 
-def save_default_factors_to_file(default_factors, filename= 'Domain/src/DS/factors.txt'):
+import os
+
+# Get the directory of the current file (e.g., FactorsPool.py)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+filename = os.path.join(base_dir, "factors.txt")
+
+def save_default_factors_to_file(default_factors):
     data_to_save = []
     for factor in default_factors:
         data_to_save.append({
@@ -151,7 +157,7 @@ def save_default_factors_to_file(default_factors, filename= 'Domain/src/DS/facto
         json.dump(data_to_save, f, ensure_ascii=False, indent=2)
 
 
-def load_default_factors_from_file(filename= 'Domain/src/DS/factors.txt'):
+def load_default_factors_from_file():
     with open(filename, 'r', encoding='utf-8') as f:
         data_loaded = json.load(f)
 

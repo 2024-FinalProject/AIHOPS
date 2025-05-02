@@ -1,25 +1,5 @@
 [
   {
-    "fid": -4,
-    "owner": "DEFAULT",
-    "name": "Stakeholder Support",
-    "description": "The level of support or resistance among key stakeholders toward the innovation,including cultural alignment.",
-    "scales_desc": [
-      "Active Opposition",
-      "Minimal Support with Major Resistance",
-      "Mixed Support",
-      "General Support with Minor Reservations",
-      "Strong Support and Cultural Alignment"
-    ],
-    "scales_explanation": [
-      "Critical stakeholders oppose the innovation; conflicts with core cultural values make adoption unacceptable.",
-      "Few stakeholders support; substantial resistance or cultural misalignment present.",
-      "Stakeholder opinions are divided; significant effort needed to build consensus or address cultural resistance.",
-      "Most stakeholders are supportive; minor concernsor cultural adjustments needed.",
-      "Widespread enthusiasm; stakeholders are eager for adoption, and the innovation fully aligns with cultural values and practices."
-    ]
-  },
-  {
     "fid": -5,
     "owner": "DEFAULT",
     "name": "Financial Feasibility",
@@ -40,26 +20,6 @@
     ]
   },
   {
-    "fid": -6,
-    "owner": "DEFAULT",
-    "name": "Training Requirements",
-    "description": "The amount of training required for staff to effectively use the innovation.",
-    "scales_desc": [
-      "Unrealistic Training Demands",
-      "Extensive Training Needed",
-      "Moderate Training Required",
-      "Minimal Training Needed",
-      "No Training Required"
-    ],
-    "scales_explanation": [
-      "Training required is so extensive it’s unattainable or impractical for the organization.",
-      "Significant training efforts required; may strain resources.",
-      "A moderate amount of training is needed; achievable with current resources.",
-      "Brief orientation or simple training sessions are sufficient; easily manageable.",
-      "Staff can use the innovation immediately without additional training."
-    ]
-  },
-  {
     "fid": -7,
     "owner": "DEFAULT",
     "name": "Workflow Impact",
@@ -77,26 +37,6 @@
       "Existing workflows remain unaffected; no disruption.",
       "Some adjustments required; manageable changes to existing workflows that are beneficial.",
       "The innovation greatly enhances workflow efficiency; processes become faster, simpler, or more effective."
-    ]
-  },
-  {
-    "fid": -8,
-    "owner": "DEFAULT",
-    "name": "Regulatory and Ethical Compliance",
-    "description": "The extent to which the innovation meets regulatory requirements and ethical standards necessary for adoption.",
-    "scales_desc": [
-      "Non-Compliant or Ethically Unacceptable",
-      "Major Compliance or Ethical Barriers",
-      "Moderate Compliance or Ethical Challenges",
-      "Minor Compliance or Ethical Issues",
-      "Fully Compliant and Ethically Sound"
-    ],
-    "scales_explanation": [
-      "Cannot meet regulatory requirements or ethical standards; adoption is prohibited.",
-      "Serious concerns make approval unlikely without substantial changes.",
-      "Significant effort required to address issues; achievable with dedicated resources.",
-      "Small adjustments needed; approvals are likely to be granted.",
-      "Meets all regulatory requirements and ethical standards; no additional approvals needed."
     ]
   }
 ]

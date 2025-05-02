@@ -9,12 +9,16 @@ from Domain.src.DS.ThreadSafeList import ThreadSafeList
 from Domain.src.DS.VoteManager import VoteManager
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 
+import os
 
+# Get the directory of the current file (e.g., FactorsPool.py)
+base_dir = os.path.dirname(os.path.abspath(__file__))
+sev_filename = os.path.join(base_dir, "severity_factors.txt")
 DEFAULT_SEVERITY_FACTORS = []
 
-def load_default_severity_factors(filename='Domain/src/ProjectModule/severity_factors.txt'):
+def load_default_severity_factors():
     global DEFAULT_SEVERITY_FACTORS
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(sev_filename, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
         DEFAULT_SEVERITY_FACTORS = [entry["severity"] for entry in raw_data]
 
