@@ -879,21 +879,39 @@ const EditPopup = ({
             </div>
           </div>
         );
-
       case "editName":
         return (
           <div className="edit-project-popup">
-            <h3 style={{ fontSize: "24px" }}>
-              <u>Edit Project's Name</u>:
-            </h3>
-            <textarea
-              className="edit-textarea"
-              defaultValue={selectedProject.name}
-              onChange={(e) => setName(e.target.value)}
-            ></textarea>
-            <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
-              Save
-            </button>
+            <div className="popup-header">
+              <h3 className="popup-title">Project's Name:</h3>
+              <div className="underline-decoration"></div>
+            </div>
+
+            <div className="input-container">
+              <textarea
+                className="edit-textarea modern"
+                defaultValue={selectedProject.name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter project name..."
+              />
+            </div>
+
+            <div className="actions-container">
+              <button
+                className="action-btn cancel-btn"
+                onClick={() => closePopup()}
+              >
+                Cancel
+              </button>
+              <button
+                className="action-btn save-btn"
+                onClick={updateProjectsNameOrDesc}
+              >
+                <span className="btn-icon">✓</span>
+                Save
+              </button>
+            </div>
+
             {showAlert && (
               <AlertPopup
                 message={alertMessage}
@@ -908,17 +926,38 @@ const EditPopup = ({
       case "editDescription":
         return (
           <div className="edit-project-popup">
-            <h3 style={{ fontSize: "24px" }}>
-              <u>Edit Project's Description</u>:
-            </h3>
-            <textarea
-              className="edit-textarea"
-              defaultValue={selectedProject.description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-            <button className="edit-btn" onClick={updateProjectsNameOrDesc}>
-              Save
-            </button>
+            <div className="popup-header">
+              <h3 className="popup-title">Project's Description:</h3>
+              <div className="underline-decoration"></div>
+            </div>
+
+            <div className="input-container">
+              {/* <label className="input-label" style={{ textAlign: "center" }}>
+                <u>Project Description</u>:
+              </label> */}
+              <textarea
+                className="edit-textarea modern"
+                defaultValue={selectedProject.description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter project description..."
+              />
+            </div>
+
+            <div className="actions-container">
+              <button
+                className="action-btn cancel-btn"
+                onClick={() => closePopup()}
+              >
+                Cancel
+              </button>
+              <button
+                className="action-btn save-btn"
+                onClick={updateProjectsNameOrDesc}
+              >
+                <span className="btn-icon">✓</span>
+                Save
+              </button>
+            </div>
             {showAlert && (
               <AlertPopup
                 message={alertMessage}
