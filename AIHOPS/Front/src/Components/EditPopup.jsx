@@ -1457,7 +1457,7 @@ const EditPopup = ({
           <div>
             <EditSeverityFactors
               selectedProject={selectedProject}
-              onClose={closePopup}
+              closePopup={closePopup}
             />
           </div>
         );
