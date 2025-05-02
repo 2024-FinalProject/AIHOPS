@@ -413,7 +413,7 @@ input::placeholder {
   border: none;
   border-radius: 0;
   padding: 14px 5px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -424,21 +424,25 @@ input::placeholder {
   box-shadow: none;
   margin: 0;
   letter-spacing: 0.5px;
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
   overflow: hidden;
+  border-right: 10px solid rgba(0, 0, 0, 0.08);
 }
 
 .action-btn.analyze-btn:last-child {
   border-right: none;
 }
 
+.action-btn.analyze-btn:first-child {
+  border-left: none;
+}
+
 /* Export button styling */
 .export-btn {
-  background: linear-gradient(to right, #2c3e50, #4ca1af) !important;
+  background: linear-gradient(to right, #3a7bd5, #3a6073);
 }
 
 .action-btn.analyze-btn.export-btn {
-  background: linear-gradient(to right, #2c3e50, #4ca1af);
+  background: linear-gradient(to right, #3a7bd5, #3a6073);
   color: white;
 }
 
@@ -475,10 +479,13 @@ input::placeholder {
 /* Active Button State */
 .action-btn.analyze-btn.active {
   background: linear-gradient(to right, #2dc8cb, #1c93e2);
-  font-weight: 600;
+  font-weight: 800;
   position: relative;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   z-index: 1;
+  transform: scale(1.13);
+  border-right: 5px solid transparent !important;
+  border-left: 5px solid transparent !important;
 }
 
 .action-btn.analyze-btn.active::after {
