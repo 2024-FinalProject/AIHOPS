@@ -402,7 +402,7 @@ input::placeholder {
 /* Enhanced Analyze Button Style */
 .action-btn.analyze-btn {
   flex: 1;
-  background: linear-gradient(to right, #3a7bd5, #3a6073);
+  background: linear-gradient(to right, #afafaf, #7c7c7c);
   color: white;
   border: none;
   border-radius: 0;
@@ -432,11 +432,11 @@ input::placeholder {
 
 /* Export button styling */
 .export-btn {
-  background: linear-gradient(to right, #3a7bd5, #3a6073);
+  background: linear-gradient(to right, #afafaf, #7c7c7c);
 }
 
 .action-btn.analyze-btn.export-btn {
-  background: linear-gradient(to right, #3a7bd5, #3a6073);
+  background: linear-gradient(to right, #afafaf, #7c7c7c);
   color: white;
 }
 
