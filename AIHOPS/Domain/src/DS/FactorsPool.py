@@ -196,18 +196,30 @@ class FactorsPool:
             if factor.name == factor_name and factor.description == factor_description:
                 raise NameError(f"factor name {factor_name} already exists")
 
-    def _find_factor(self, actor, fid):
+    def find_factors(self, actor, fids):
         with self.lock:
-            if fid in DEFAULT_FACTORS_IDS:
-                for factor in DEFAULT_FACTORS:
-                    if factor.fid == fid:
-                        return factor
+            if isinstance(fids, int):
+                fids = {fids}
+                return_single = True
+            else:
+                return_single = False
 
-            factors_of_member = self.members.get(actor)
-            for factor in factors_of_member:
-                if factor.fid == fid:
-                    return factor
-        raise KeyError(f"factor {fid} not found")
+            # Build lookup dicts
+            default_map = {f.fid: f for f in DEFAULT_FACTORS}
+            member_factors = self.members.get(actor)
+            member_map = {f.fid: f for f in member_factors}
+
+            results = []
+
+            for fid in fids:
+                if fid in default_map:
+                    results.append(default_map[fid])
+                elif fid in member_map:
+                    results.append(member_map[fid])
+                else:
+                    raise KeyError(f"factor {fid} not found")
+
+            return results[0] if return_single else results
 
     def add_factor(self, actor, factor_name, factor_desc, scales_desc, scales_explanation):
         self._check_id_dup_factor(actor, factor_name, factor_desc)
@@ -218,7 +230,7 @@ class FactorsPool:
         return new_factor
 
     def remove_factor(self, actor, fid):
-        factor = self._find_factor(actor, fid)
+        factor = self.find_factors(actor, fid)
         self.db_access.delete(factor.db_instance)
         self.members.pop(actor, factor)
         return ResponseSuccessMsg(f"factor {fid} removed from {actor}")

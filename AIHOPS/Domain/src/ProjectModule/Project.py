@@ -23,7 +23,7 @@ load_default_severity_factors()
 # DEFAULT_SEVERITY_FACTORS = [0.5, 1, 25, 100, 400]
 
 class Project:
-    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None):
+    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None, project_factors=None):
         self.db_access = db_access
         self.pid = pid
         self.name = name
@@ -44,6 +44,7 @@ class Project:
             self.db_access.insert(self.db_instance)
         else:
             self.db_instance = db_instance
+            self.vote_manager.insert_factors_loaded_from_db(project_factors)
             self.load_from_db()
 
     def _verify_in_design(self):
@@ -238,15 +239,20 @@ class Project:
         return ResponseSuccessMsg(f"project {self.pid} has been archived")
 
     def get_score(self, pending_amount, weights):
-        voted_amount = self.vote_manager.get_partially_voted_amount()
-        if voted_amount == 0:
-            return ResponseFailMsg(f"voted amount is 0")
-        score_res = self.vote_manager.get_score(copy.deepcopy(self.severity_factors), weights)
-        score_res["assessors"] = [pending_amount, self.members.size(), voted_amount]
-        return ResponseSuccessObj(f"retrieving score for {self.pid}",score_res)
+        try:
+            voted_amount = self.vote_manager.get_partially_voted_amount()
+            if voted_amount == 0:
+                return ResponseFailMsg(f"voted amount is 0")
+            score_res = self.vote_manager.get_score(copy.deepcopy(self.severity_factors), weights)
+            score_res["assessors"] = [pending_amount, self.members.size(), voted_amount]
+            return ResponseSuccessObj(f"retrieving score for {self.pid}", score_res)
+        except Exception as e:
+            raise e
+
     
     def get_project_factors_votes(self):
-        return ResponseSuccessObj(f"retriveing scores for factors for project id {self.pid}", self.vote_manager.get_project_factors_votes())
+        scores = self.vote_manager.get_project_factors_votes()
+        return ResponseSuccessObj(f"retriveing scores for factors for project id {self.pid}\nscores: {scores}", self.vote_manager.get_project_factors_votes())
 
     def get_member_votes(self, actor):
         self._verify_member(actor)
@@ -292,12 +298,11 @@ class Project:
             # if not published load to_invite list
             self.load_to_invite()
         # load vote manager data
-        res = self.vote_manager.load_factors()
-        if not res and self.factors_inited:
-            return ResponseFailMsg(f"project {self.pid} factors inited but no factors in db")
+        # res = self.vote_manager.load_factors()
+        # if not res and self.factors_inited:
+        #     return ResponseFailMsg(f"project {self.pid} factors inited but no factors in db")
         self.vote_manager.load_factor_votes()
         self.vote_manager.load_severity_votes()
-
 
     def load_members(self):
         members = self.db_access.load_by_query(DBProjectMembers, {"project_id": self.pid})

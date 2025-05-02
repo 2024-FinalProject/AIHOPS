@@ -1,8 +1,10 @@
 from threading import RLock
 import json
 
+from DAL.Objects.DBFactors import DBFactors
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
+from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
 from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.DS.IdMaker import IdMaker
@@ -93,7 +95,7 @@ class ProjectManager():
         for factor_id in factor_ids:
             try:
                 # Attempt to find the factor
-                factor = self.factor_pool._find_factor(actor, factor_id)
+                factor = self.factor_pool.find_factors(actor, factor_id)
                 project.add_factor(factor)
                 success.append(f"actor: {actor} added factor {factor.name} to project {project.name}")
             except Exception as e:
@@ -442,7 +444,7 @@ class ProjectManager():
             if (fid >= 0) and (len(Active) == 0 and len(Archived) == 0) and (len(inDesign) == 0 or apply_to_all_inDesign):
                 for p in inDesign:
                     self.delete_factor(p, actor, fid)
-                old_factor = self.factor_pool._find_factor(actor, fid)
+                old_factor = self.factor_pool.find_factors(actor, fid)
                 self.delete_factor_from_pool(actor, fid)
                 deleted = True
 
@@ -510,6 +512,21 @@ class ProjectManager():
             for pending in pendings:
                 self.pending_requests.insert(pending.email, pid)
 
+    def _load_factors_ids(self, pid):
+        join_condition = DBProjectFactors.factor_id == DBFactors.id
+        factors_data_res = self.db_access.load_by_join_query(
+            DBProjectFactors, DBFactors,
+            [DBFactors.id],  # Only fetch ID
+            join_condition,
+            {"project_id": pid}
+        )
+
+        if not factors_data_res:
+            return []
+
+        factor_ids = [row.id for row in factors_data_res]
+        return factor_ids
+
     def load_projects_from_db(self):
         existing_projects = self.db_access.load_all(DBProject)
         if existing_projects is None or len(existing_projects) == 0:
@@ -517,8 +534,10 @@ class ProjectManager():
         last_id = 0
         published_pids = []
         for project_data in existing_projects:
+            project_factor_ids = self._load_factors_ids(project_data.id)
+            project_factors = self.factor_pool.find_factors(project_data.owner, project_factor_ids)
             project = Project(project_data.id, project_data.name, project_data.description, project_data.owner,
-                              db_access=self.db_access, db_instance=project_data)
+                              db_access=self.db_access, db_instance=project_data, project_factors=project_factors)
             last_id = max(last_id, project.pid + 1)
             self.projects.insert(project.pid, project)
             self.owners.insert(project.owner, project)

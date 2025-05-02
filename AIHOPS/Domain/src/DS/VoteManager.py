@@ -206,35 +206,39 @@ class VoteManager:
             for fid in fids
         }
 
-    def load_factors(self):
-        join_condition = DBProjectFactors.factor_id == DBFactors.id
-        factors_data_res = self.db_access.load_by_join_query(
-            DBProjectFactors, DBFactors,
-            [DBFactors.name, DBFactors.description, DBFactors.id, DBFactors.owner,
-             DBFactors.scales_desc_0, DBFactors.scales_desc_1, DBFactors.scales_desc_2, DBFactors.scales_desc_3,
-             DBFactors.scales_desc_4,
-             DBFactors.scales_explanation_0, DBFactors.scales_explanation_1, DBFactors.scales_explanation_2,
-             DBFactors.scales_explanation_3, DBFactors.scales_explanation_4],
-            join_condition,
-            {"project_id": self.pid}
-        )
+    def insert_factors_loaded_from_db(self, factors):
+        for factor in factors:
+            self.factors.insert(factor.fid, factor)
 
-        if not factors_data_res or factors_data_res is None or factors_data_res == []:
-            return False
-        else:
-            for factor_data in factors_data_res:
-                # Create lists for scales_desc and scales_explanation by combining the individual columns
-                scales_desc = [factor_data.scales_desc_0, factor_data.scales_desc_1, factor_data.scales_desc_2,
-                               factor_data.scales_desc_3, factor_data.scales_desc_4]
-                scales_explanation = [factor_data.scales_explanation_0, factor_data.scales_explanation_1,
-                                      factor_data.scales_explanation_2, factor_data.scales_explanation_3,
-                                      factor_data.scales_explanation_4]
-
-                # Insert the factor with the lists
-                self.factors.insert(factor_data.id,
-                                    Factor(factor_data.id, factor_data.owner, factor_data.name, factor_data.description,
-                                           scales_desc, scales_explanation, factor_data))
-            return True
+    # def load_factors(self):
+    #     join_condition = DBProjectFactors.factor_id == DBFactors.id
+    #     factors_data_res = self.db_access.load_by_join_query(
+    #         DBProjectFactors, DBFactors,
+    #         [DBFactors.name, DBFactors.description, DBFactors.id, DBFactors.owner,
+    #          DBFactors.scales_desc_0, DBFactors.scales_desc_1, DBFactors.scales_desc_2, DBFactors.scales_desc_3,
+    #          DBFactors.scales_desc_4,
+    #          DBFactors.scales_explanation_0, DBFactors.scales_explanation_1, DBFactors.scales_explanation_2,
+    #          DBFactors.scales_explanation_3, DBFactors.scales_explanation_4],
+    #         join_condition,
+    #         {"project_id": self.pid}
+    #     )
+    #
+    #     if not factors_data_res or factors_data_res is None or factors_data_res == []:
+    #         return False
+    #     else:
+    #         for factor_data in factors_data_res:
+    #             # Create lists for scales_desc and scales_explanation by combining the individual columns
+    #             scales_desc = [factor_data.scales_desc_0, factor_data.scales_desc_1, factor_data.scales_desc_2,
+    #                            factor_data.scales_desc_3, factor_data.scales_desc_4]
+    #             scales_explanation = [factor_data.scales_explanation_0, factor_data.scales_explanation_1,
+    #                                   factor_data.scales_explanation_2, factor_data.scales_explanation_3,
+    #                                   factor_data.scales_explanation_4]
+    #
+    #             # Insert the factor with the lists
+    #             self.factors.insert(factor_data.id,
+    #                                 Factor(factor_data.id, factor_data.owner, factor_data.name, factor_data.description,
+    #                                        scales_desc, scales_explanation, factor_data))
+    #         return True
 
     def load_factor_votes(self):
         query_obj = {"project_id": self.pid}
