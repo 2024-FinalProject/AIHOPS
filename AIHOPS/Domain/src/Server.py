@@ -2,9 +2,12 @@ import random
 import sys
 from threading import RLock
 
+from requests import session
+
+from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from Domain.src.Session import Session
 from Domain.src.Users.MemberController import MemberController
@@ -13,6 +16,8 @@ from Domain.src.Users.MemberController import MemberController
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import json
+
+
 
 class Server:
     def __init__(self):
@@ -118,8 +123,14 @@ class Server:
                 return res
             session = res.result
             res = self.user_controller.login(name, passwd)
-            if res.success:
+            if not res.success:
+                return res
+
+            if res.is_admin:
+                session.admin_login()
+            else:
                 session.login(name)
+
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to login: {e}")
@@ -494,17 +505,15 @@ class Server:
             return ResponseFailMsg(f"Failed to get pending emails for project: {e}")
   
     def get_score(self, cookie, pid, weights):
-
         try:
             res = self.get_session_member(cookie)
             if not res.success:
-                print(self.sessions.keys())
-                print(f"1cookie: {cookie}")
                 return res
             session = res.result
             user_name = session.user_name
 
             res = self.project_manager.get_score(user_name, pid, weights)
+            print(f"this is the score: {res.result}")
             return res
         except Exception as e:
             print(self.sessions.keys())
@@ -643,6 +652,67 @@ class Server:
             return self.project_manager.get_member_votes(pid, actor)
         except Exception as e:
             return ResponseFailMsg(f"Failed to get members vote on project: {e}")
+
+    def fetch_default_severity_factors_full(self, cookie):
+        try:
+            return self.project_manager.get_default_severity_factors()
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch default factors: {e}")
+
+# -------------  admin actions ------------------------
+
+    def _verify_admin(self, cookie):
+        res = self.get_session_member(cookie)
+        if not res.success:
+            raise Exception("user is not admin")
+        if not res.result.is_admin:
+            raise Exception("user is not admin")
+
+    def admin_change_default_factor(self, cookie, fid, name, desc, scales_desc, scales_explanation):
+        """change will persist in all projects"""
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.admin_change_default_factor(fid, name, desc, scales_desc, scales_explanation)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed change default factor {fid}: {e}")
+
+    def admin_add_default_factor(self, cookie, name, desc, scales_desc, scales_explanation):
+        """factor wont be added automatically to any project"""
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.admin_add_default_factor(name, desc, scales_desc, scales_explanation)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to add default factor {name}: {e}")
+
+    def admin_remove_default_factor(self, cookie, fid):
+        """change will persist in all projects"""
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.admin_remove_default_factor(fid)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to remove default factor {fid}: {e}")
+
+    def admin_fetch_default_factors(self, cookie):
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.get_default_factors()
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch default factors: {e}")
+
+    def admin_fetch_default_severity_factors(self, cookie):
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.get_default_severity_factors()
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch default factors: {e}")
+
+    def admin_update_default_severity_factors(self, cookie, severity_factors):
+        """change will not persist in any project, all future projects will be defaulted with these severity factors"""
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.admin_update_default_severity_factors(severity_factors)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed update severity factors: {e}")
 
 
 

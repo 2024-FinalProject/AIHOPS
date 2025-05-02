@@ -13,7 +13,7 @@ import termsConditions from "../assets/TermsAndConditions.txt";
 import "./Login.css";
 
 const Login = () => {
-  const { login, isAuthenticated, isValidatingToken } = useAuth();
+  const { login, isAuthenticated, isValidatingToken, setIsAdmin } = useAuth();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
@@ -78,8 +78,13 @@ const Login = () => {
       }
 
       const response = await loginUser(cookie, userName, password);
-
+      console.log("is_admin value from response:", response?.data?.is_admin);
       if (response.data.success) {
+        if (response.data.is_admin) {
+          setIsAdmin(true);
+          localStorage.setItem("isAdmin", "true");
+        }
+
         setMsg(response.data.message);
         localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);

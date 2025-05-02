@@ -54,7 +54,7 @@ def verify_automatic():
 def login():
     data = request.json
     res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success})
+    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin})
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
@@ -438,6 +438,57 @@ def get_project_factors_votes():
     pid = request.args.get("pid", type=int)
     res = server.get_project_factors_votes(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "votes": res.result if res.success else None})
+
+@app.route("/admin/update-default-factor", methods=["POST"])
+def admin_update_default_factor():
+    data = request.json
+    res = server.admin_change_default_factor(int(data["cookie"]), int(data["fid"]), data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/add-default-factor", methods=["POST"])
+def admin_add_default_factor():
+    data = request.json
+    res = server.admin_add_default_factor(int(data["cookie"]), data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/remove-default-factor", methods=["POST"])
+def admin_remove_default_factor():
+    data = request.json
+    res = server.admin_remove_default_factor(int(data["cookie"]), int(data["fid"]))
+    return (jsonify({"message": res.msg, "success": res.success}))
+
+
+@app.route("/admin/fetch-default-factors", methods=["GET", "POST"])
+def admin_fetch_default_factors():
+    data = request.json
+    res = server.admin_fetch_default_factors(int(data["cookie"]))
+    return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
+
+
+@app.route("/admin/fetch-default-severity-factors", methods=["GET", "POST"])
+def admin_fetch_default_severity_factors():
+    data = request.json
+    res = server.admin_fetch_default_severity_factors(int(data["cookie"]))
+    return jsonify({"message": res.msg, "success": res.success, "severity_factors": res.result if res.success else None})
+
+@app.route("/fetch-default-severity-factors-full", methods=["GET"])
+def fetch_default_severity_factors_full():
+    cookie = int(request.args.get("cookie", 0))  # fallback to 0 or raise error if missing
+    res = server.fetch_default_severity_factors_full(cookie)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success,
+        "severity_factors": res.result if res.success else None
+    })
+
+@app.route("/admin/update-default-severity-factors", methods=["POST"])
+def admin_update_default_severity_factors():
+    data = request.json
+    res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 
 @app.route("/")
 def hello():
