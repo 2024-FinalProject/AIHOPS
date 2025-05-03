@@ -91,6 +91,7 @@ const EditFactor = ({ factor, returnFunc, mode }) => {
                 value={editedFactorName}
                 onChange={(e) => setEditedFactorName(e.target.value)}
                 placeholder="Enter factor name (Required)"
+                maxLength={50}
               />
             </div>
             <div className="factor-input-group">
