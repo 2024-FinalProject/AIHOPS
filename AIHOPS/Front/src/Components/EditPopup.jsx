@@ -222,6 +222,8 @@ const EditPopup = ({
         return (
           <EditSeverityFactors
             selectedProject={selectedProject}
+            fetchProjects={fetchProjects}
+            fetch_selected_project={fetch_selected_project}
             closePopup={closePopup}
           />
         );
