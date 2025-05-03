@@ -96,9 +96,9 @@ const EditSeverityFactors = ({
       selectedProject.severity_factors = fresh.data.severityFactors;
       if (fetch_selected_project) await fetch_selected_project(selectedProject);
 
-      setAlertType("success");
-      setAlertMessage("Severity factors updated successfully.");
-      setShowAlert(true);
+      // setAlertType("success");
+      // setAlertMessage("Severity factors updated successfully.");
+      // setShowAlert(true);
       return 1;
     } catch (err) {
       const msg = err.response?.data?.message || err.message;
@@ -120,9 +120,9 @@ const EditSeverityFactors = ({
         if (fetch_selected_project)
           await fetch_selected_project(selectedProject);
 
-        setAlertType("success");
-        setAlertMessage("Severity factors confirmed successfully.");
-        setShowAlert(true);
+        // setAlertType("success");
+        // setAlertMessage("Severity factors confirmed successfully.");
+        // setShowAlert(true);
 
         setTimeout(() => closePopup(), 500);
       } else {
