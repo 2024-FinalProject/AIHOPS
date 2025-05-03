@@ -126,7 +126,10 @@ const EditFactorComponent = ({
               Update all projects in design
             </label>
           </div>
-          <div className="factor-button-group" style={{ marginRight: "50px" }}>
+          <div
+            className="factor-button-group"
+            style={{ marginLeft: "4%", marginTop: "-1%" }}
+          >
             <button
               className="factor-button factor-cancel-button"
               onClick={handleCancelEdit}

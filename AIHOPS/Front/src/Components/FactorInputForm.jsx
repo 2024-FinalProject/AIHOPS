@@ -129,7 +129,7 @@ const FactorInputForm = ({
             </table>
           </div>
 
-          <div className="factor-button-group">
+          <div className="factor-button-group" style={{ marginLeft: "7%" }}>
             <button
               onClick={onCancel}
               className="factor-button factor-cancel-button"
@@ -140,7 +140,7 @@ const FactorInputForm = ({
               onClick={handleSubmit}
               className="factor-button factor-submit-button"
             >
-              Add Assessment Dimension
+              Add Dimension
             </button>
           </div>
         </CardContent>

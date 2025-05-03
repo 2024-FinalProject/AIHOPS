@@ -261,12 +261,21 @@ const EditContentFactorsComponent = ({
         setMsg(response.data.message);
         setIsSuccess(true);
       } else {
-        alert(response.data.message);
+        setAlertMessage(response.data.message || "Failed to update factor");
+        setAlertType("warning");
+        setShowAlert(true);
+        return;
       }
     } catch (error) {
       console.error("Failed to update: ", error);
       setMsg("Failed to update");
       setIsSuccess(false);
+      setAlertMessage(
+        error.response?.data?.message || error.message || "Failed to update"
+      );
+      setAlertType("warning");
+      setShowAlert(true);
+      return;
     }
 
     await fetchProjects();
