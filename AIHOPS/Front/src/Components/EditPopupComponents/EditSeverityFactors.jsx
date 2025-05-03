@@ -204,11 +204,12 @@ const EditSeverityFactors = ({
             cursor: "pointer",
             boxShadow: "0 3px 8px rgba(0, 0, 0, 0.1)",
             transition: "all 0.2s ease",
+            textAlign: "center",
           }}
           onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
           onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
         >
-          ✅ Confirm Severity Factors
+          <div>✅ Confirm Severity Factors</div>
           {!selectedProject.severity_factors_inited && (
             <span className="reminder-badge">Unconfirmed</span>
           )}

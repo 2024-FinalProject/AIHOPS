@@ -187,7 +187,7 @@ const FactorsListComponent = ({
                   position: "relative", // for badge
                 }}
               >
-                ✅ Confirm Assessment Dimensions
+                <div>✅ Confirm Assessment Dimensions</div>
                 {!selectedProject.factors_inited && (
                   <span className="reminder-badge">Unconfirmed</span>
                 )}

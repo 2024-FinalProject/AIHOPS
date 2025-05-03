@@ -8,6 +8,7 @@ import {
 import AlertPopup from "../AlertPopup";
 import EmailValidator from "email-validator";
 import "../EditPopup.css";
+import InvitingModal from "./InvitingModal";
 
 const ManageAssessors = ({
   fetchProjects,
@@ -22,6 +23,8 @@ const ManageAssessors = ({
   const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
   const [addedMember, setAddedMember] = useState(false);
   const [reloadTrigger, setReloadTrigger] = useState(0);
+  const [isInviting, setIsInviting] = useState(false);
+  const [invitingEmail, setInvitingEmail] = useState("");
 
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -164,12 +167,24 @@ const ManageAssessors = ({
 
     const tempMembersList = [newMemberName];
 
+    // Show inviting message only for published projects
+    if (selectedProject.isActive) {
+      setIsInviting(true);
+      setInvitingEmail(newMemberName);
+    }
+
     try {
       const response = await addMembers(
         cookie,
         selectedProject.id,
         tempMembersList
       );
+
+      // Hide the inviting message after response
+      if (selectedProject.isActive) {
+        setIsInviting(false);
+        setInvitingEmail("");
+      }
 
       if (response.data.success) {
         await fetchProjects(); // Refresh projects after adding the member
@@ -180,9 +195,11 @@ const ManageAssessors = ({
         setIsSuccess(true);
         setAddedMember(true);
 
-        //setAlertMessage("Invitation sent successfully!");
-        //setAlertType("success");
-        //setShowAlert(true);
+        if (selectedProject.isActive) {
+          setAlertMessage("Invitation sent successfully!");
+          setAlertType("success");
+          setShowAlert(true);
+        }
       } else {
         setMsg(response.data.message);
         setAlertMessage(response.data.message);
@@ -191,6 +208,12 @@ const ManageAssessors = ({
         setIsSuccess(true);
       }
     } catch (error) {
+      // Hide the inviting message on error too
+      if (selectedProject.isActive) {
+        setIsInviting(false);
+        setInvitingEmail("");
+      }
+
       const errorMessage = error.response?.data?.message || error.message;
       console.error("Error:", errorMessage);
       setMsg(`Error in adding member: ${errorMessage}`);
@@ -325,6 +348,13 @@ const ManageAssessors = ({
           </p>
         </div>
       )}
+
+      {/* Inviting Modal */}
+      <InvitingModal
+        isOpen={isInviting && selectedProject.isActive}
+        email={invitingEmail}
+        onClose={() => setIsInviting(false)}
+      />
 
       {/* Alert Popup */}
       {showAlert && (
