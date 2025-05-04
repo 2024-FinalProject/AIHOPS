@@ -148,8 +148,9 @@ h2 {
 }
 
 .reminder-badge {
-  position: absolute;
-  left: 25%;
+  position: inherit !important;
+  left: 100% !important;
+  bottom: -30% !important;
   transform: translateX(-50%);
   background-color: #f7b42c;
   color: white;
