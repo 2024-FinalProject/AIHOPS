@@ -256,20 +256,20 @@ input::placeholder {
 }
 
 .reminder-badge {
-  position: inherit;
-  top: -39px; /* Adjust for fine-tuning */
-  right: -100px; /* Adjust for fine-tuning */
-  background-color: #f7b42c; /* Bright color for visibility */
-  color: white;
-  font-size: 8px;
-  font-weight: bold;
-  padding: 4px 8px;
-  border-radius: 12px;
-  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  position: inherit !important;
+  top: 0px !important; /* Adjust for fine-tuning */
+  left: 0px !important; /* Adjust for fine-tuning */
+  background-color: #f7b42c !important; /* Bright color for visibility */
+  color: white !important;
+  font-size: 9px !important;
+  font-weight: bold !important;
+  padding: 4px 8px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2) !important;
   transform: translate(
     50%,
     -50%
-  ); /* Positions the badge relative to top-right */
+  ) !important; /* Positions the badge relative to top-right */
   pointer-events: none !important;
 }
 
