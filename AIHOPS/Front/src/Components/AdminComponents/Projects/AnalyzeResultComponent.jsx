@@ -4,7 +4,9 @@ import AnalyzeResult from "../../AnalyzeResult";
 import "../../EditPopup.css";
 
 const AnalyzeResultComponent = ({ closePopup, selectedProjectId }) => {
-  const [analyzePopupType, setAnalyzePopupType] = useState("");
+  const [analyzePopupType, setAnalyzePopupType] = useState(
+    AnalyzePopupType.ASSESSORS_INFO
+  );
 
   useEffect(() => {
     console.log("showing results for project: %d", selectedProjectId);

@@ -77,6 +77,12 @@ const ProjectsView = ({ title }) => {
           {isSuccess ? (
             <div>
               <div>
+                {projects.length === 0 && (
+                  <div style={{ textAlign: "center", marginTop: "2rem" }}>
+                    <h4>No projects to display</h4>
+                  </div>
+                )}
+
                 {projects.length > 0 && (
                   <div className="sort-container">
                     <button className="sort-button" onClick={toggleSort}>
