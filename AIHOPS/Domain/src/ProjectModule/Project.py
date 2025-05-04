@@ -27,7 +27,7 @@ load_default_severity_factors()
 # DEFAULT_SEVERITY_FACTORS = [0.5, 1, 25, 100, 400]
 
 class Project:
-    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None, project_factors=None):
+    def __init__(self, pid, name, desc, owner, db_access=None, is_default_factors=False, db_instance=None, project_factors=None, is_to_research=False):
         self.db_access = db_access
         self.pid = pid
         self.name = name
@@ -42,9 +42,10 @@ class Project:
         self.published = False
         self.archived = False
         self.severity_factors = DEFAULT_SEVERITY_FACTORS
+        self.is_to_research = is_to_research
 
         if db_instance is None:
-            self.db_instance = DBProject(pid, owner, name, desc)
+            self.db_instance = DBProject(pid, owner, name, desc, is_to_research)
             self.db_access.insert(self.db_instance)
         else:
             self.db_instance = db_instance
@@ -336,3 +337,12 @@ class Project:
         """Check if member has voted on all factors"""
         self._verify_member(actor)
         return self.vote_manager.has_voted_all_factors(actor)
+
+    def stop_research(self):
+        self.db_instance.is_to_research = False
+        try:
+            self.db_instance.save()
+            self.is_to_research = True
+        except Exception as e:
+            self.db_instance.is_to_research = True
+            raise e

@@ -16,7 +16,7 @@ from Domain.src.ProjectModule.Project import Project, load_default_severity_fact
 from Domain.src.Users.Gmailor import Gmailor
 
 
-class ProjectManager():
+class ProjectManager:
     def __init__(self, db_access):
         self.db_access = db_access
         self.projects = ThreadSafeDict()                  # {p_id: Project}
@@ -27,6 +27,8 @@ class ProjectManager():
         self.load_from_db()
         self.gmailor = Gmailor()
         self.project_lock = RLock()
+        self.research_projects = {}
+        self.research_lock = RLock()
 
 
 
@@ -50,7 +52,7 @@ class ProjectManager():
 
     # ------------  Project Creation ------------------------
 
-    def create_project(self, name, description, owner, is_default_factors=True):
+    def create_project(self, name, description, owner, is_default_factors=True, is_to_research=False):
         if not name or name == "":
             return ResponseFailMsg("Name cannot be empty")
         if not description or description == "":
@@ -59,7 +61,7 @@ class ProjectManager():
         self._verify_unique_project(owner, name, description)
         # create Project
         pid = self.project_id_maker.next_id()
-        project = Project(pid, name, description, owner, self.db_access)
+        project = Project(pid, name, description, owner, self.db_access, is_to_research=is_to_research)
         # add to lists
         self.projects.insert(pid, project)
         with self.project_lock:
@@ -70,6 +72,10 @@ class ProjectManager():
             def_facts = self.factor_pool.get_default_factor_ids()
             res_facts = self.add_factors(pid, owner, def_facts)
             msg += res_facts.msg
+
+        if is_to_research:
+            with self.research_lock:
+                self.research_projects[pid] = project
         return ResponseSuccessObj(msg, pid)
 
     def add_project_factor(self, pid, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
@@ -537,12 +543,15 @@ class ProjectManager():
             project_factor_ids = self._load_factors_ids(project_data.id)
             project_factors = self.factor_pool.find_factors(project_data.owner, project_factor_ids)
             project = Project(project_data.id, project_data.name, project_data.description, project_data.owner,
-                              db_access=self.db_access, db_instance=project_data, project_factors=project_factors)
+                              db_access=self.db_access, db_instance=project_data, project_factors=project_factors, is_to_research=project_data.is_to_research)
             last_id = max(last_id, project.pid + 1)
             self.projects.insert(project.pid, project)
             self.owners.insert(project.owner, project)
             if project.is_published():
                 published_pids.append(project.pid)
+
+            if project_data.is_to_research:
+                self.research_projects[project.pid] = project
         self.project_id_maker.start_from(last_id)
         return published_pids
     
@@ -584,6 +593,21 @@ class ProjectManager():
     def get_default_severity_factors(self, filename='Domain/src/ProjectModule/severity_factors.txt'):
         with open(filename, 'r', encoding='utf-8') as f:
             return ResponseSuccessObj("got default severity factors", json.load(f))
+
+    def research_get_projects(self):
+        with self.research_lock:
+            projects = [proj.to_dict() for proj in self.research_projects.values()]
+            return ResponseSuccessObj("got research projects", projects)
+
+    def research_remove_project(self, pid):
+        with self.research_lock:
+            project = self.research_projects.get(pid)
+            if project is None:
+                return ResponseFailMsg(f"research project {pid} not found")
+            project.stop_research()
+            self.research_projects.pop(pid)
+        return ResponseSuccessMsg(f"research project {pid} removed successfully")
+
 
 # if __name__ == '__main__':
 #     admin_update_default_severity_factors([0.5, 1, 25, 100, 400], 'severity_factors.txt')

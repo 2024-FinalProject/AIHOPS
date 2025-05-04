@@ -243,7 +243,7 @@ class Server:
             return ResponseFailMsg(f"Failed to update password: {e}")
     
     # ------------- Project ------------------
-    def create_project(self, cookie, name, description, use_default_factors=False):
+    def create_project(self, cookie, name, description, use_default_factors=False, is_to_research=False):
         """when using default factors, if anything goes wrong with the factor assignment,
                     project will be created without or with partial factors"""
         try:
@@ -251,7 +251,7 @@ class Server:
             if not res.success:
                 return res
             session = res
-            return self.project_manager.create_project(name, description, session.result.user_name, use_default_factors)
+            return self.project_manager.create_project(name, description, session.result.user_name, use_default_factors, is_to_research=is_to_research)
         except Exception as e:
             return ResponseFailMsg(f"Failed to create project: {e}")
     
@@ -715,4 +715,17 @@ class Server:
             return ResponseFailMsg(f"Failed update severity factors: {e}")
 
 
+    def get_research_projects(self, cookie):
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.research_get_projects()
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get research projects: {e}")
+
+    def remove_research_project(self, cookie, pid):
+        try:
+            self._verify_admin(cookie)
+            return self.project_manager.research_remove_project(pid)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to remove research project: {e}")
 
