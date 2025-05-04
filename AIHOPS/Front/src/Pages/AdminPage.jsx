@@ -15,6 +15,7 @@ import SeverityFactorsView from "../Components/AdminComponents/SeverityFactors/S
 import ErrorDisplay from "../Components/MessagesDisplay/ErrorDisplay";
 import { useError } from "../context/ErrorContext";
 import { useAuth } from "../context/AuthContext";
+import ProjectsView from "../Components/AdminComponents/Projects/ProjectsView";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -101,14 +102,7 @@ const AdminPage = () => {
             <Col>
               {isManagingFactors && <FactorManagement />}
               {isManagingSeverityFactors && <SeverityFactorsView />}
-              {showResearch && (
-                <Card className="p-3 mt-3 bg-light border">
-                  <h5 className="text-muted">Research Component Placeholder</h5>
-                  <p>
-                    Here you can display or manage research-related content.
-                  </p>
-                </Card>
-              )}
+              {showResearch && <ProjectsView title={"Projects For Research"} />}
             </Col>
           </Row>
         </Card.Body>

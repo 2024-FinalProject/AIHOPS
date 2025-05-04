@@ -89,3 +89,18 @@ export const updateDefaultSeverityFactor = async (severityFactors) => {
     severity_factors: severityFactors,
   });
 };
+
+export const fetchResearchProjects = async () => {
+  const cookie = await getMyCookie();
+  return await axios.get(`${API_URL}/get-research-projects`, {
+    params: { cookie: cookie },
+  });
+};
+
+export const removeResearchProjects = async (pid) => {
+  const cookie = await getMyCookie();
+  return await axios.get(`${API_URL}/remove-research-project`, {
+    cookie: cookie,
+    pid: pid,
+  });
+};

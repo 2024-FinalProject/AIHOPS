@@ -7,6 +7,7 @@ const CreateProjectPopup = ({
   newProject,
   setNewProject,
   setUseDefaultFactors,
+  setResearch,
   handleCreateProject,
 }) => {
   if (!showCreatePopup) return null; // Do not render anything if the popup is not visible
@@ -65,6 +66,18 @@ const CreateProjectPopup = ({
           />
           <label htmlFor="useDefaultFactors" className="checkbox-label">
             Use default factors
+          </label>
+        </div>
+
+        <div className="checkbox-container">
+          <input
+            type="checkbox"
+            id="research"
+            className="styled-checkbox"
+            onChange={(e) => setResearch(e.target.checked)}
+          />
+          <label htmlFor="research" className="checkbox-label">
+            I accept to share this project for research
           </label>
         </div>
 

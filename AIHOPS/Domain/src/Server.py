@@ -720,6 +720,7 @@ class Server:
             self._verify_admin(cookie)
             return self.project_manager.research_get_projects()
         except Exception as e:
+            print(f"users cookie: {cookie}\nadmins cookie: {[x.cookie for x in self.sessions.values() if x.is_admin]}")
             return ResponseFailMsg(f"Failed to get research projects: {e}")
 
     def remove_research_project(self, cookie, pid):

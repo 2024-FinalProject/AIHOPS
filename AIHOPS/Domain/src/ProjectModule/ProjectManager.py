@@ -14,10 +14,12 @@ from Domain.src.Loggs.Response import ResponseSuccessObj, ResponseSuccessMsg, Re
 from Domain.src.ProjectModule.Project import Project, load_default_severity_factors
 
 from Domain.src.Users.Gmailor import Gmailor
+from Domain.src.Users.MemberController import ADMIN
 
 
 class ProjectManager:
     def __init__(self, db_access):
+        self.research_projects = {}
         self.db_access = db_access
         self.projects = ThreadSafeDict()                  # {p_id: Project}
         self.owners = ThreadSafeDictWithListValue()         # {email: [projects]}
@@ -27,7 +29,6 @@ class ProjectManager:
         self.load_from_db()
         self.gmailor = Gmailor()
         self.project_lock = RLock()
-        self.research_projects = {}
         self.research_lock = RLock()
 
 
@@ -41,13 +42,26 @@ class ProjectManager:
             if proj.is_published() and [proj.name, proj.desc] == [name, desc]:
                 raise NameError("Duplicate Project")
 
+
+    def _check_if_research(self, pid, actor):
+        print(f"actor: {actor}")
+        if actor == ADMIN[0]:
+            print("actor is indeed admin")
+            with self.research_lock:
+                proj = self.research_projects.get(pid)
+                if proj is not None:
+                    return proj
+                print("project is not found")
+        raise NameError(f"actor {actor} not owner of project {pid}")
+
+
     def _verify_owner(self, pid, actor):
         projects = self.owners.get(actor)
         found = False
         for proj in projects:
             if proj.pid == pid:
                 return proj
-        raise NameError(f"actor {actor} not owner of project {pid}")
+        return self._check_if_research(pid, actor)
 
 
     # ------------  Project Creation ------------------------
@@ -597,6 +611,7 @@ class ProjectManager:
     def research_get_projects(self):
         with self.research_lock:
             projects = [proj.to_dict() for proj in self.research_projects.values()]
+            print(f"found {len(projects)} research projects")
             return ResponseSuccessObj("got research projects", projects)
 
     def research_remove_project(self, pid):

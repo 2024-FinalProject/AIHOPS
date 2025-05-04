@@ -17,13 +17,15 @@ export const createProject = async (
   cookie,
   project_name,
   project_desc,
-  use_default_factors
+  use_default_factors,
+  isToResearch
 ) => {
   return await axios.post(`${API_URL}/project/create`, {
     cookie: cookie,
     name: project_name,
     description: project_desc,
     defaultFactors: use_default_factors,
+    isToResearch: isToResearch,
   });
 };
 

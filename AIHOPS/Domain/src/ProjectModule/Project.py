@@ -11,6 +11,8 @@ from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, Respo
 
 import os
 
+from Domain.src.Users.MemberController import ADMIN
+
 # Get the directory of the current file (e.g., FactorsPool.py)
 base_dir = os.path.dirname(os.path.abspath(__file__))
 sev_filename = os.path.join(base_dir, "severity_factors.txt")
@@ -191,7 +193,7 @@ class Project:
         self.members.append_unique(member)
 
     def _verify_member(self, actor):
-        if not self.members.contains(actor):
+        if not self.members.contains(actor) and actor != ADMIN[0]:
             raise ValueError(f"actor {actor} not in project {self.pid}")
 
     def vote_on_factor(self, actor, fid, score):
