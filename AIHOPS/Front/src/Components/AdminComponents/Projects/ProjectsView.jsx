@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
-import ProjectStatusPopup from "../../ProjectStatusPopup";
-import AlertPopup from "../../AlertPopup";
 import "../../../Pages/ProjectsManagement.css";
 import {
   fetchResearchProjects,
   removeResearchProject,
 } from "../../../api/AdminApi";
-import AnalyzeResult from "../../AnalyzeResult";
 import AnalyzeResultComponent from "./AnalyzeResultComponent";
 
 const ProjectsView = ({ title }) => {
@@ -15,7 +12,6 @@ const ProjectsView = ({ title }) => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [currentPopup, setCurrentPopup] = useState(null); //Track the current popup type
   const [isNewFirst, setIsNewFirst] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
