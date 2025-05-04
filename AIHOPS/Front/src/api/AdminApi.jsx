@@ -97,10 +97,9 @@ export const fetchResearchProjects = async () => {
   });
 };
 
-export const removeResearchProjects = async (pid) => {
+export const removeResearchProject = async (pid) => {
   const cookie = await getMyCookie();
   return await axios.get(`${API_URL}/remove-research-project`, {
-    cookie: cookie,
-    pid: pid,
+    params: { cookie: cookie, pid: pid },
   });
 };

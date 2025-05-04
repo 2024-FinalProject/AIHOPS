@@ -343,7 +343,7 @@ class Project:
     def stop_research(self):
         self.db_instance.is_to_research = False
         try:
-            self.db_instance.save()
+            self.db_access.insert(self.db_instance)
             self.is_to_research = True
         except Exception as e:
             self.db_instance.is_to_research = True

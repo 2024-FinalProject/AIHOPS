@@ -84,7 +84,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       if (res.data.success) {
         setProjectFactors(res.data.factors);
       }
-      console.log("project factors: %s", res.data.message);
     } catch (error) {
       alert(error);
     }
