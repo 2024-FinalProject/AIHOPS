@@ -67,18 +67,17 @@ const CreateProjectPopup = ({
           />
           <label htmlFor="useDefaultFactors">
             Use default assessment dimensions
-
           </label>
         </div>
 
-        <div className="checkbox-container">
+        <div className="checkbox-wrapper">
           <input
             type="checkbox"
             id="research"
             className="styled-checkbox"
             onChange={(e) => setResearch(e.target.checked)}
           />
-          <label htmlFor="research" className="checkbox-label">
+          <label htmlFor="research">
             I accept to share this project for research
           </label>
         </div>
