@@ -8,7 +8,12 @@ export const status = {
   DESIGN: "design",
 };
 
-const ProjectsView = ({ projects, renderButtons }) => {
+const ProjectsView = ({
+  projects,
+  renderButtons,
+  renderBody,
+  showStatus = true,
+}) => {
   const [statusFilter, setStatusFilter] = useState("");
   const [isNewFirst, setIsNewFirst] = useState(true);
 
@@ -42,19 +47,21 @@ const ProjectsView = ({ projects, renderButtons }) => {
 
   const renderFilters = () => (
     <div className="pv-filter-container">
-      <div className="pv-filter-group">
-        <span>Status:</span>
-        <select
-          className="pv-select"
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-        >
-          <option value="all">All Projects</option>
-          <option value="published">Published</option>
-          <option value="unpublished">In Design</option>
-          <option value="archived">Archived</option>
-        </select>
-      </div>
+      {showStatus && (
+        <div className="pv-filter-group">
+          <span>Status:</span>
+          <select
+            className="pv-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="all">All Projects</option>
+            <option value="published">Published</option>
+            <option value="unpublished">In Design</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+      )}
       <div className="pv-filter-group">
         <button className="pv-sort-button" onClick={toggleSort}>
           ⇅
@@ -82,10 +89,16 @@ const ProjectsView = ({ projects, renderButtons }) => {
           <div key={project.id} className="pv-card">
             <div className="pv-info">
               <div className="pv-name">{project.name}</div>
-              <div className="pv-description">{project.description}</div>
-              <div className="pv-status-container">
-                {renderStatusIndicator(project)}
-              </div>
+              {renderBody ? (
+                renderBody(project)
+              ) : (
+                <div className="pv-description">{project.description}</div>
+              )}
+              {showStatus && (
+                <div className="pv-status-container">
+                  {renderStatusIndicator(project)}
+                </div>
+              )}
             </div>
             <div className="pv-actions">{renderButtons(project)}</div>
           </div>

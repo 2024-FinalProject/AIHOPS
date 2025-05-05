@@ -578,43 +578,7 @@ html {
   outline: none;
 }
 
-/* Sort Button Styling */
-.sort-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 20px;
-  color: var(--text-color, #333);
-  transition: color 0.3s;
-}
 
-.sort-button:hover {
-  color: #0078d7; /* Highlight on hover */
-}
-
-/* Sort Button Container */
-.sort-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text-color, #333) !important;
-  margin-bottom: 20px;
-  justify-content: flex-end;
-}
-
-.sort-container span {
-  font-size: 14px;
-}
-
-/* Sort Button Styling */
-.sort-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 20px;
-  color: var(--text-color) !important;
-  transition: color 0.3s;
-}
 
 .factors-list,
 .severity-factors-container,

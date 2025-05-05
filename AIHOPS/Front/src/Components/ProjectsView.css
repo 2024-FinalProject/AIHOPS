@@ -66,11 +66,18 @@
 }
 
 .pv-card {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  padding: 16px;
-  transition: transform 0.3s ease;
+  background-color: var(--card-background) !important;
+    color: var(--text-color) !important;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 8px var(--shadow-color);
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    transition: all 0.3s ease;
+    width: 100% !important; /* Ensures it spans most of the container */
+    max-width: 900px !important; /* Prevents excessive width */
+    box-sizing: border-box;
+    text-align: center ;
 }
 
 .pv-card:hover {
