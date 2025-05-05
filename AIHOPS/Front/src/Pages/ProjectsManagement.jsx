@@ -36,6 +36,7 @@ const ProjectsManagement = () => {
     description: "",
   });
   const [useDefaultFactors, setUseDefaultFactors] = useState(false);
+  const [research, setResearch] = useState(false);
 
   // State for publish confirmation
   const [confirmPublishPopUp, setConfirmPublishPopUp] = useState(false);
@@ -364,11 +365,13 @@ const ProjectsManagement = () => {
 
     try {
       console.log(`Using default factors? : ${useDefaultFactors}`);
+      console.log(`is_to_research? : ${research}`);
       const response = await createProject(
         cookie,
         newProject.name,
         newProject.description,
-        useDefaultFactors
+        useDefaultFactors,
+        research
       );
 
       if (response.data.success) {
@@ -562,6 +565,7 @@ const ProjectsManagement = () => {
         newProject={newProject}
         setNewProject={setNewProject}
         setUseDefaultFactors={setUseDefaultFactors}
+        setResearch={setResearch}
         handleCreateProject={handleCreateProject}
       />
 

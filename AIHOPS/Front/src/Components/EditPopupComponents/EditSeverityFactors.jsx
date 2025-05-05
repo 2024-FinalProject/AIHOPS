@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from "react";
+import "../EditPopup.css";
 import { useSeverityMetadata } from "../../context/SeverityMetadataContext";
 import {
   confirmSeverityFactors,
   setSeverityFactors,
+  getProjectSeverityFactors,
 } from "../../api/ProjectApi";
+import AlertPopup from "../AlertPopup";
 
-const EditSeverityFactors = ({ selectedProject, closePopup }) => {
+const EditSeverityFactors = ({
+  selectedProject,
+  fetchProjects,
+  fetch_selected_project,
+  closePopup,
+}) => {
   const [cookie, setCookie] = useState("");
   const { metadata } = useSeverityMetadata();
   const [severityValues, setSeverityValues] = useState([
     ...selectedProject.severity_factors,
   ]);
+
+  // Alert state
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("warning"); // "warning" | "error" | "success"
 
   useEffect(() => {
     setCookie(localStorage.getItem("authToken"));
@@ -29,7 +42,6 @@ const EditSeverityFactors = ({ selectedProject, closePopup }) => {
         message: "There must be exactly 5 severity values.",
       };
     }
-
     for (let i = 0; i < values.length; i++) {
       const val = values[i];
       if (typeof val !== "number" || val <= 0) {
@@ -38,61 +50,90 @@ const EditSeverityFactors = ({ selectedProject, closePopup }) => {
           message: `Severity at position ${i + 1} must be a number > 0.`,
         };
       }
-      if (i > 0 && values[i] < values[i - 1]) {
+      if (i > 0 && values[i] <= values[i - 1]) {
         return {
           valid: false,
           message: `Severity at position ${
             i + 1
-          } must not be less than the previous one.`,
+          } must be greater than the previous one.`,
         };
       }
     }
-
-    return { valid: true, message: "Valid severity values." };
+    return { valid: true };
   };
 
-  const updateSeverityFactors = async () => {
-    const res = validateSeverityValues(severityValues);
-    if (!res.valid) {
-      alert("Invalid: " + check.message);
+  const updateProjectsSeverityFactors = async () => {
+    if (!cookie) {
+      setAlertType("error");
+      setAlertMessage("No authentication token found. Please log in again.");
+      setShowAlert(true);
+      return -1;
+    }
+
+    const { valid, message } = validateSeverityValues(severityValues);
+    if (!valid) {
+      setAlertType("warning");
+      setAlertMessage(message);
+      setShowAlert(true);
       return -1;
     }
 
     try {
-      const response = await setSeverityFactors(
+      const resp = await setSeverityFactors(
         cookie,
         selectedProject.id,
         severityValues
       );
-      if (response.data.success) {
-        // alert("Severity factors updated successfully");
-        selectedProject.severity_factors = [...severityValues];
-        return 1;
-      } else {
-        console.log("Error confirming project factors");
+      if (!resp.data.success) {
+        setAlertType("error");
+        setAlertMessage(resp.data.message);
+        setShowAlert(true);
         return -1;
       }
-    } catch (error) {
-      console.log("Error confirming project factors");
+
+      if (fetchProjects) await fetchProjects();
+      const fresh = await getProjectSeverityFactors(cookie, selectedProject.id);
+      selectedProject.severity_factors = fresh.data.severityFactors;
+      if (fetch_selected_project) await fetch_selected_project(selectedProject);
+
+      // setAlertType("success");
+      // setAlertMessage("Severity factors updated successfully.");
+      // setShowAlert(true);
+      return 1;
+    } catch (err) {
+      const msg = err.response?.data?.message || err.message;
+      setAlertType("error");
+      setAlertMessage(`Error updating severity factors: ${msg}`);
+      setShowAlert(true);
       return -1;
     }
   };
 
   const handleConfirmSeverityFactors = async () => {
-    const updateResponse = updateSeverityFactors();
-    if (updateResponse === -1) return;
+    const updateResult = await updateProjectsSeverityFactors();
+    if (updateResult === -1) return;
 
     try {
-      const response = await confirmSeverityFactors(cookie, selectedProject.id);
-      if (response.data.success) {
-        // alert("Severity factors confirmed successfully");
+      const res = await confirmSeverityFactors(cookie, selectedProject.id);
+      if (res.data.success) {
         selectedProject.severity_factors_inited = true;
-        closePopup();
+        if (fetch_selected_project)
+          await fetch_selected_project(selectedProject);
+
+        // setAlertType("success");
+        // setAlertMessage("Severity factors confirmed successfully.");
+        // setShowAlert(true);
+
+        setTimeout(() => closePopup(), 500);
       } else {
-        console.log("Error confirming project factors");
+        setAlertType("error");
+        setAlertMessage("Error confirming severity factors.");
+        setShowAlert(true);
       }
-    } catch (error) {
-      console.log("Error confirming project factors");
+    } catch (err) {
+      setAlertType("error");
+      setAlertMessage("Error confirming severity factors.");
+      setShowAlert(true);
     }
   };
 
@@ -152,7 +193,7 @@ const EditSeverityFactors = ({ selectedProject, closePopup }) => {
         <button
           disabled={selectedProject.isActive}
           className="action-btn confirm-btn"
-          onClick={() => handleConfirmSeverityFactors(selectedProject.id)}
+          onClick={handleConfirmSeverityFactors}
           style={{
             padding: "8px 18px",
             fontSize: "14px",
@@ -163,17 +204,27 @@ const EditSeverityFactors = ({ selectedProject, closePopup }) => {
             cursor: "pointer",
             boxShadow: "0 3px 8px rgba(0, 0, 0, 0.1)",
             transition: "all 0.2s ease",
-            position: "relative", // Positioning for the badge
+            textAlign: "center",
           }}
           onMouseOver={(e) => (e.target.style.transform = "scale(1.05)")}
           onMouseOut={(e) => (e.target.style.transform = "scale(1)")}
         >
-          ✅ Confirm Severity Factors
+          <div>✅ Confirm Severity Factors</div>
           {!selectedProject.severity_factors_inited && (
-            <span className="reminder-badge">Unset</span>
+            <span className="reminder-badge">Unconfirmed</span>
           )}
         </button>
       </div>
+
+      {showAlert && (
+        <AlertPopup
+          title="Input Validation"
+          message={alertMessage}
+          type={alertType}
+          onClose={() => setShowAlert(false)}
+          autoCloseTime={3000}
+        />
+      )}
     </div>
   );
 };

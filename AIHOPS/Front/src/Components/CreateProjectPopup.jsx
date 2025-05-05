@@ -7,6 +7,7 @@ const CreateProjectPopup = ({
   newProject,
   setNewProject,
   setUseDefaultFactors,
+  setResearch,
   handleCreateProject,
 }) => {
   if (!showCreatePopup) return null;
@@ -66,10 +67,26 @@ const CreateProjectPopup = ({
           />
           <label htmlFor="useDefaultFactors">
             Use default assessment dimensions
+
           </label>
         </div>
 
-        <button className="create-btn" onClick={handleCreateProject}>
+        <div className="checkbox-container">
+          <input
+            type="checkbox"
+            id="research"
+            className="styled-checkbox"
+            onChange={(e) => setResearch(e.target.checked)}
+          />
+          <label htmlFor="research" className="checkbox-label">
+            I accept to share this project for research
+          </label>
+        </div>
+
+        <button
+          className="action-btn update-project-btn"
+          onClick={handleCreateProject}
+        >
           Create Project
         </button>
       </div>

@@ -114,7 +114,7 @@ def update_password():
 # expecting json with {cookie, name, description}
 def create_project():
     data = request.json
-    res = server.create_project(int(data["cookie"]), data["name"], data["description"], bool(data["defaultFactors"]))
+    res = server.create_project(int(data["cookie"]), data["name"], data["description"], bool(data["defaultFactors"]), is_to_research=bool(data["isToResearch"]))
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
 @app.route("/project/factor", methods=["POST"])
@@ -489,6 +489,25 @@ def admin_update_default_severity_factors():
     res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/get-research-projects", methods=["GET"])
+def get_research_projects():
+    cookie = int(request.args.get("cookie", 0))
+    res = server.get_research_projects(cookie)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success,
+        "projects": res.result if res.success else None
+    })
+
+@app.route("/remove-research-project", methods=["GET"])
+def remove_research_project():
+    cookie = int(request.args.get("cookie", 0))
+    pid = int(request.args.get("pid", -1))
+    res = server.remove_research_project(cookie, pid)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success
+    })
 
 @app.route("/")
 def hello():
