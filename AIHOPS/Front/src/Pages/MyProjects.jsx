@@ -317,7 +317,7 @@ const MyProjects = () => {
       ) : (
         <>
           <h1 className="page-heading" style={{ marginBottom: "-100px" }}>
-            <u>Voting on projects</u>
+            <u>Vote On Projects</u>:
           </h1>
 
           {/* Sort toggle button - only show if there are projects */}
