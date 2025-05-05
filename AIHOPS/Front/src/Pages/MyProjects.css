@@ -17,7 +17,7 @@ body {
 /* Page Heading */
 .page-heading {
   text-align: center;
-  font-size: 2rem;
+  font-size: 1.8rem;
   margin-bottom: 20px;
   font-family: Verdana, sans-serif !important;
 }
@@ -151,7 +151,6 @@ body {
   font-family: Verdana, sans-serif !important;
 }
 
-
 /* Popup Content - Flexbox Layout */
 .popup-content {
   display: flex;
@@ -162,7 +161,6 @@ body {
   font-family: Verdana, sans-serif !important;
 }
 
-
 /* Start Voting Button Container */
 .start-vote-container {
   margin-top: auto; /* Push the button to the bottom */
@@ -170,9 +168,6 @@ body {
   justify-content: flex-end; /* Align the button to the right */
   font-family: Verdana, sans-serif !important;
 }
-
-
-
 
 /* Start Voting Button */
 .start-vote-btn {
@@ -388,11 +383,11 @@ body {
 
 /* Container to center the loading text */
 .loading-container {
-  position: fixed;  /* Fixed position to center in the viewport */
+  position: fixed; /* Fixed position to center in the viewport */
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);  /* Centers the container */
-  text-align: center;  /* Centers the text inside the container */
+  transform: translate(-50%, -50%); /* Centers the container */
+  text-align: center; /* Centers the text inside the container */
 }
 
 /* Stylish loading text */

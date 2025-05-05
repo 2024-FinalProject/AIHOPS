@@ -1,11 +1,11 @@
-import React from 'react';
+import React from "react";
 import "./ProjectList.css";
 
-const ProjectList = ({ 
-  projects, 
-  projectVotingStatus, 
-  isBothStatusesComplete, 
-  onVoteClick 
+const ProjectList = ({
+  projects,
+  projectVotingStatus,
+  isBothStatusesComplete,
+  onVoteClick,
 }) => {
   return (
     <div className="projects-list">
@@ -15,9 +15,13 @@ const ProjectList = ({
           className="project-card"
           onClick={() => onVoteClick(project)}
         >
-          <h3 className="text-xl font-semibold"><u>{project.name}</u></h3>
-          <p>{project.description}</p>
-          <p><u>Founder</u>: {project.founder}</p>
+          <h3 className="text-xl font-semibold">
+            <u>{project.name}</u>
+          </h3>
+          <div>{project.description}</div>
+          <p>
+            <u>Founder</u>: {project.founder}
+          </p>
 
           {isBothStatusesComplete(project) && (
             <div className="checkmark"> ✓ </div>
@@ -35,7 +39,9 @@ const ProjectList = ({
             <label>
               <input
                 type="checkbox"
-                checked={projectVotingStatus[project.id]?.severitiesStatus === 1}
+                checked={
+                  projectVotingStatus[project.id]?.severitiesStatus === 1
+                }
                 disabled
               />
               D.Score Voted
