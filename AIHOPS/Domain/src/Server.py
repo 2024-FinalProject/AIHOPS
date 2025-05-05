@@ -546,7 +546,7 @@ class Server:
             if not res.success:
                 return res
             session = res.result
-            return self.project_manager.reject_member(pid, session.result.user_name)
+            return self.project_manager.reject_member(pid, session.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to reject member: {e}")
 

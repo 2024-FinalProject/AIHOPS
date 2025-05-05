@@ -357,10 +357,10 @@ class ProjectManager:
 
     def reject_member(self, pid, actor):
         self._verify_member_in_pending(pid, actor)
-        self.pending_requests.remove(pid, actor)
-        res = self.db_access.delete_obj_by_query(DBProjectMembers, {"project_id": pid, "email": actor})
+        res = self.db_access.delete_obj_by_query(DBPendingRequests, {"project_id": pid, "email": actor})
         if not res.success:
             self.pending_requests.insert(pid, actor)
+        self.pending_requests.remove(actor, pid)
         return ResponseSuccessMsg(f"member {actor} denied participation in project {pid}")
 
     def get_member_votes(self, pid, actor):
