@@ -82,10 +82,7 @@ const CreateProjectPopup = ({
           </label>
         </div>
 
-        <button
-          className="action-btn update-project-btn"
-          onClick={handleCreateProject}
-        >
+        <button className="action-btn create-btn" onClick={handleCreateProject}>
           Create Project
         </button>
       </div>
