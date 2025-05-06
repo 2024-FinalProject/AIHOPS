@@ -15,7 +15,6 @@ import SeverityFactorsView from "../Components/AdminComponents/SeverityFactors/S
 import ErrorDisplay from "../Components/MessagesDisplay/ErrorDisplay";
 import { useError } from "../context/ErrorContext";
 import { useAuth } from "../context/AuthContext";
-import ProjectsView from "../Components/AdminComponents/Projects/ProjectsView";
 import ProjectsManager from "../Components/AdminComponents/Projects/ProjectsManager";
 
 const AdminPage = () => {

@@ -145,32 +145,6 @@ const ProjectsManagement = () => {
     }
   };
 
-  // Filter projects by status
-  const filterProjectsByStatus = (projects) => {
-    if (!projects) return [];
-
-    switch (statusFilter) {
-      case "published":
-        return projects.filter(
-          (project) => project.isActive && !project.isArchived
-        );
-      case "archived":
-        return projects.filter((project) => project.isArchived);
-      case "unpublished":
-        return projects.filter(
-          (project) => !project.isActive && !project.isArchived
-        );
-      default:
-        return projects;
-    }
-  };
-
-  // Get filtered and sorted projects
-  const getFilteredAndSortedProjects = () => {
-    const filteredProjects = filterProjectsByStatus(projects);
-    return isNewFirst ? [...filteredProjects].reverse() : filteredProjects;
-  };
-
   const openPopup = async (project) => {
     fetchProjects();
     setSelectedProject(project);

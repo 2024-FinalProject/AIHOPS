@@ -56,9 +56,9 @@ const ProjectsView = ({
             onChange={(e) => setStatusFilter(e.target.value)}
           >
             <option value="all">All Projects</option>
-            <option value="published">Published</option>
-            <option value="unpublished">In Design</option>
-            <option value="archived">Archived</option>
+            <option value={status.PUBLISHED}>Published</option>
+            <option value={status.DESIGN}>In Design</option>
+            <option value={status.ARCHIVED}>Archived</option>
           </select>
         </div>
       )}
