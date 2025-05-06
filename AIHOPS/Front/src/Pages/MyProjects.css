@@ -22,72 +22,7 @@ body {
   font-family: Verdana, sans-serif !important;
 }
 
-/* Filter Container */
-.sort-container {
-  position: absolute;
-  right: 80px; /* Align to the far right */
-  top: 120px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-family: Verdana, sans-serif !important;
-  color: var(--text-color, #333);
-}
 
-/* Sort Button Styling */
-.sort-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 20px;
-  color: var(--text-color, #333);
-  transition: color 0.3s;
-  font-family: Verdana, sans-serif !important;
-}
-
-.sort-button:hover {
-  color: #0078d7; /* Highlight on hover */
-}
-
-/* Projects List */
-.projects-list {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 equal columns */
-  gap: 20px;
-  margin-bottom: 40px;
-  margin-top: 5%;
-  padding: 50px;
-  font-family: Verdana, sans-serif !important;
-}
-
-/* Project Card */
-.project-card {
-  background-color: #fff;
-  padding: 20px;
-  width: 80%;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  max-width: 400px;
-  margin: 0 auto;
-  text-align: center;
-  font-family: Verdana, sans-serif !important;
-}
-
-.project-card:hover {
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-}
-
-.project-card h3 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  font-family: Verdana, sans-serif !important;
-}
-
-.project-card p {
-  margin: 10px 0;
-  font-family: Verdana, sans-serif !important;
-}
 
 /* Popup Styles */
 .popup-overlay,
@@ -219,31 +154,6 @@ body {
   background-color: #0056b3;
 }
 
-/* Progress Bar
-.vote-progress-container {
-  margin-top: 20px;
-  width: 100%;
-}
-
-.progress-bar {
-  width: 100%;
-  background-color: #e0e0e0;
-  border-radius: 5px;
-  height: 20px;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background-color: #4caf50;
-  border-radius: 5px;
-}
-
-.vote-progress-text {
-  text-align: center;
-  margin-top: 10px;
-  font-size: 1rem;
-  color: #333;
-} */
 
 /* Checkboxes */
 .checkboxes {
@@ -263,13 +173,14 @@ body {
 }
 
 .checkmark {
-  font-size: 3rem;
+  font-size: 2rem;
   color: green;
   font-weight: bold;
   position: relative;
   top: 10px;
   right: 10px;
   font-family: Verdana, sans-serif !important;
+  margin-top: -15px;
 }
 
 /* Voting Type Selector Styles */

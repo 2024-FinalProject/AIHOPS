@@ -15,7 +15,7 @@ import SeverityFactorsView from "../Components/AdminComponents/SeverityFactors/S
 import ErrorDisplay from "../Components/MessagesDisplay/ErrorDisplay";
 import { useError } from "../context/ErrorContext";
 import { useAuth } from "../context/AuthContext";
-import ProjectsView from "../Components/AdminComponents/Projects/ProjectsView";
+import ProjectsManager from "../Components/AdminComponents/Projects/ProjectsManager";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -102,7 +102,7 @@ const AdminPage = () => {
             <Col>
               {isManagingFactors && <FactorManagement />}
               {isManagingSeverityFactors && <SeverityFactorsView />}
-              {showResearch && <ProjectsView title={"Projects For Research"} />}
+              {showResearch && <ProjectsManager />}
             </Col>
           </Row>
         </Card.Body>

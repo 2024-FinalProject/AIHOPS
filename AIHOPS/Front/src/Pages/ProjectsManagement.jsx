@@ -14,6 +14,7 @@ import EditPopup from "../Components/EditPopup";
 import PublishingModal from "../Components/PublishingModal";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
+import ProjectsView from "../Components/ProjectsView";
 
 const ProjectsManagement = () => {
   const [msg, setMsg] = useState("");
@@ -24,10 +25,6 @@ const ProjectsManagement = () => {
   const [currentPopup, setCurrentPopup] = useState(null);
   const [factorUpdates, setFactorUpdates] = useState({});
   const [severityUpdates, setSeverityUpdates] = useState({});
-  const [projectUpdates, setProjectUpdates] = useState({});
-  const [newFactorName, setNewFactorName] = useState("");
-  const [newFactorDescription, setNewFactorDescription] = useState("");
-  const [newMemberName, setNewMemberName] = useState("");
   const [showCreatePopup, setShowCreatePopup] = useState(false);
   const [isNewFirst, setIsNewFirst] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
@@ -146,36 +143,6 @@ const ProjectsManagement = () => {
       setMsg(`Error fetching project: ${errorMessage}`);
       setIsSuccess(false);
     }
-  };
-
-  const toggleSort = () => {
-    setIsNewFirst((prevState) => !prevState);
-  };
-
-  // Filter projects by status
-  const filterProjectsByStatus = (projects) => {
-    if (!projects) return [];
-
-    switch (statusFilter) {
-      case "published":
-        return projects.filter(
-          (project) => project.isActive && !project.isArchived
-        );
-      case "archived":
-        return projects.filter((project) => project.isArchived);
-      case "unpublished":
-        return projects.filter(
-          (project) => !project.isActive && !project.isArchived
-        );
-      default:
-        return projects;
-    }
-  };
-
-  // Get filtered and sorted projects
-  const getFilteredAndSortedProjects = () => {
-    const filteredProjects = filterProjectsByStatus(projects);
-    return isNewFirst ? [...filteredProjects].reverse() : filteredProjects;
   };
 
   const openPopup = async (project) => {
@@ -445,119 +412,46 @@ const ProjectsManagement = () => {
     );
   };
 
-  // Render project cards
-  const renderProjectCards = () => {
-    const filteredAndSortedProjects = getFilteredAndSortedProjects();
-
-    if (filteredAndSortedProjects.length === 0) {
-      return (
-        <div className="empty-projects">
-          <div className="empty-projects-icon">📋</div>
-          <h3>No Projects Found</h3>
-          <p>No projects match your current filter</p>
-        </div>
-      );
-    }
-
-    return (
-      <div className="project-cards">
-        {filteredAndSortedProjects.map((project) => (
-          <div key={project.id} className="project-card">
-            <div className="project-info">
-              <div className="project-name">{project.name}</div>
-              <div className="project-description">{project.description}</div>
-              <div className="project-status">
-                {renderStatusIndicator(project)}
-              </div>
-            </div>
-            <div className="project-actions">
-              <button
-                className="action-btn view-edit-btn"
-                onClick={() => openPopup(project)}
-              >
-                View/Edit
-              </button>
-              <button
-                className="action-btn delete-btn"
-                onClick={() => handleDelete(project.id, project.name)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <section>
-      <div className="projects-management-container">
-        {isSuccess ? (
-          <div className="project-list-container">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <button
-                className="action-btn"
-                onClick={() => setShowCreatePopup(true)}
-                style={{
-                  backgroundColor: "#4CAF50",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                  transition: "all 0.3s ease",
-                  fontFamily: "Verdana, sans-serif",
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
-                }}
-              >
-                Create New Project
-              </button>
-            </div>
-
-            {projects.length > 0 ? (
-              <>
-                <div className="projects-header">
-                  <h2>
-                    <u>Manage Existing Projects</u>:
-                  </h2>
-                </div>
-                {renderFilters()}
-                {renderProjectCards()}
-              </>
-            ) : (
-              renderEmptyState()
-            )}
-          </div>
-        ) : isSuccess === false ? (
-          <div>
-            <h2>Error occurred:</h2>
-            <p className="error-message">{msg}</p>
-          </div>
-        ) : (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <div className="loading-text">Loading projects...</div>
-            <div className="loading-card">
-              <div className="shimmer shimmer-line title"></div>
-              <div className="shimmer shimmer-line content"></div>
-              <div className="shimmer shimmer-line content"></div>
-              <div className="shimmer shimmer-line status"></div>
-            </div>
-          </div>
-        )}
+      <div className="pv-header">
+        <h2>
+          <u>Manage Existing Projects</u>:
+        </h2>
       </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <button
+          className="create-project-btn"
+          onClick={() => setShowCreatePopup(true)}
+        >
+          Create New Project
+        </button>
+      </div>
+      <ProjectsView
+        projects={projects}
+        renderButtons={(project) => (
+          <>
+            <button
+              className="action-btn view-edit-btn"
+              onClick={() => openPopup(project)}
+            >
+              View/Edit
+            </button>
+            <button
+              className="action-btn delete-btn"
+              onClick={() => handleDelete(project.id, project.name)}
+            >
+              Delete
+            </button>
+          </>
+        )}
+      />
 
       <CreateProjectPopup
         showCreatePopup={showCreatePopup}
