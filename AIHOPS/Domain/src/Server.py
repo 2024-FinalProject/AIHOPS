@@ -17,10 +17,11 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import json
 
+from Domain.src.Users.TermsAndConditionsManager import TermsAndConditionsManager
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, socketio):
         self.db_access = DBAccess()
         self.sessions = {}  # map cookies to sessions
         self.enter_lock = RLock()
@@ -28,6 +29,8 @@ class Server:
         self.user_controller = MemberController(self, self.db_access)
         self.project_manager = ProjectManager(self.db_access)
         self.GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
+        self.terms_and_conditions_manager = TermsAndConditionsManager(socketio)
+        self.terms_and_conditions_manager.load()
 
     def clear_db(self):
         self.db_access.clear_db()
@@ -86,12 +89,12 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get session member: {e}")
 
-    def register(self, cookie, name, passwd):
+    def register(self, cookie, name, passwd, tad_version):
         try:
             res = self.get_session_not_member(cookie)
             if not res.success:
                 return res
-            res = self.user_controller.register(name, passwd)
+            res = self.user_controller.register(name, passwd, tad_version)
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to register: {e}")
@@ -130,7 +133,11 @@ class Server:
                 session.admin_login()
             else:
                 session.login(name)
-
+                users_tac_version = self.user_controller.get_tac_version_for_actor(name)
+                if users_tac_version != self.terms_and_conditions_manager.current_version:
+                    res.is_accepted_latest_tac = False
+                    self.terms_and_conditions_manager.get_current()
+                res.terms_version = users_tac_version
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to login: {e}")
@@ -213,7 +220,17 @@ class Server:
             return ResponseFailMsg(f"Invalid Google token: {str(e)}")
         except Exception as e:
             return ResponseFailMsg(f"Failed to check email: {str(e)}")
-        
+
+    def accept_terms_and_conditions(self, cookie, version):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.user_controller.accept_terms_and_conditions(actor, version)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to accept terms and conditions: {str(e)}")
+
     # def update_password(self, cookie, old_passwd, new_passwd):
     #     try:
     #         res = self.get_session_member(cookie)
@@ -725,6 +742,14 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed update severity factors: {e}")
 
+    def admin_update_tac(self, cookie, tac):
+        try:
+            self._verify_admin(cookie)
+            self.terms_and_conditions_manager.update(tac)
+            # TODO: call socket update
+            return ResponseSuccessMsg("terms and conditions successfully updated")
+        except Exception as e:
+            return ResponseFailMsg(f"Failed update severity factors: {e}")
 
     def get_research_projects(self, cookie):
         try:

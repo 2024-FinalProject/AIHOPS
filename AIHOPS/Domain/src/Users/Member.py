@@ -1,10 +1,11 @@
 import hashlib
 
-from Domain.src.Loggs.Response import Response, ResponseSuccessObj
+from DAL.Objects.DBMember import DBMember
+from Domain.src.Loggs.Response import Response, ResponseSuccessObj, ResponseSuccessMsg
 
 
 class Member:
-    def __init__(self, email, passwd, uid, from_db=False, verified=False, is_google_user=False):
+    def __init__(self, email, passwd, uid, from_db=False, verified=False, is_google_user=False, terms_and_conditions_version=-1):
         self.id = uid
         self.email = email
         if from_db:
@@ -14,6 +15,7 @@ class Member:
         self.logged_in = False
         self.verified = verified
         self.is_google_user = is_google_user
+        self.terms_and_conditions_version = terms_and_conditions_version
 
     def verify(self):
         self.verified = True
@@ -53,3 +55,10 @@ class Member:
     
     def update_password(self, passwd):
         self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()
+
+    def accept_terms_and_conditions(self, version, db_access):
+        res = db_access.update_by_query(DBMember, {"id": self.id}, {"terms_and_conditions_version": version})
+        if not res.success:
+            return res
+        self.terms_and_conditions_version = version
+        return ResponseSuccessMsg(f'{self.email} is now accepted terms and conditions version {version}')

@@ -1,10 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { SeverityMetadataProvider } from "./context/SeverityMetadataContext.jsx";
 import { ErrorProvider } from "./context/ErrorContext.jsx";
+import { TermsProvider } from "./context/TermsContext.jsx";
+import { useTerms } from "./context/TermsContext.jsx";
 import "./theme.css";
 
 // Importing the components
@@ -23,6 +25,8 @@ import About from "./Pages/About";
 import VerifyAutomatic from "./Pages/VerifyAutomatic.jsx";
 import PasswordRecovery from "./Pages/PasswordRecovery.jsx";
 import AdminPage from "./Pages/AdminPage.jsx";
+import TermsModal from "./Components/TermsModal.jsx";
+import { startSession } from "./api/AuthApi.jsx";
 
 //Google OAuth client ID
 const GOOGLE_CLIENT_ID =
@@ -30,6 +34,9 @@ const GOOGLE_CLIENT_ID =
 
 const AppContent = () => {
   const { isAuthenticated, login } = useAuth();
+  const [needsAcceptance, setNeedsAcceptance] = useState(false);
+  const [newTermsText, setNewTermsText] = useState("");
+  const { requireAccept, terms, acceptTerms } = useTerms();
 
   useEffect(() => {
     // Fetch session cookie from the /enter endpoint
@@ -38,7 +45,7 @@ const AppContent = () => {
       .then((response) => {
         if (response.data.isAuthenticated) {
           const sessionCookie = response.data.sessionCookie;
-          // login();
+          localStorage.setItem("authToken", sessionCookie);
         }
       })
       .catch((error) => {
@@ -46,8 +53,32 @@ const AppContent = () => {
       });
   }, [login]);
 
+  const getCookie = async () => {
+    const existingToken = localStorage.getItem("authToken");
+    let cookie;
+    if (existingToken) {
+      cookie = existingToken;
+    } else {
+      const session = await startSession();
+      cookie = session.data.cookie;
+    }
+    console.log("got cookie ");
+  };
+
+  useEffect(() => {
+    console.log("starting sesison");
+    getCookie();
+  }, []);
+
   return (
     <>
+      {requireAccept && (
+        <TermsModal
+          text={terms.tac_text}
+          version={terms.version}
+          onAccept={acceptTerms}
+        />
+      )}
       <NavBar />
       <Routes>
         <Route path="/" element={<WelcomePage />} />
@@ -73,7 +104,9 @@ const App = () => (
     <AuthProvider>
       <ErrorProvider>
         <SeverityMetadataProvider>
-          <AppContent />
+          <TermsProvider>
+            <AppContent />
+          </TermsProvider>
         </SeverityMetadataProvider>
       </ErrorProvider>
     </AuthProvider>

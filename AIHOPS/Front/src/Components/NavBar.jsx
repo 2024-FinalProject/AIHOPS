@@ -11,22 +11,29 @@ import { IoMdNotificationsOutline } from "react-icons/io"; // Notification bell 
 
 const NavBar = () => {
   // Pull out userName from the AuthContext
-  const { isAuthenticated, userName, logout, isAdmin } = useAuth();
+  const { isAuthenticated, userName, logout, isAdmin, isValidatingToken } =
+    useAuth();
 
   const location = useLocation();
   const navigate = useNavigate();
   const [newMessages, setNewMessages] = useState(false); // State to track new messages
 
   useEffect(() => {
-    fetchPendingRequest();
-  }, [location.pathname]);
+    if (isAuthenticated) {
+      fetchPendingRequest();
+    }
+  }, [location.pathname, isAuthenticated, isValidatingToken]);
 
   const fetchPendingRequest = async () => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      console.error("authToken not found in localStorage");
-      return;
+    let cookie;
+    if (!isValidatingToken) {
+      cookie = localStorage.getItem("authToken");
+      if (!cookie) {
+        console.error("authToken not found in localStorage");
+        return;
+      }
     }
+
     try {
       const response = await getPendingRequest(cookie);
       if (response.data.success) {

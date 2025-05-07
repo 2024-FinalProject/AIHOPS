@@ -28,12 +28,12 @@ class MemberController:
             return 1
         last_id = 0
         for member_data in registered_users:
-            member = Member(member_data.email, member_data.encrypted_passwd, member_data.id, True, member_data.verified)
+            member = Member(member_data.email, member_data.encrypted_passwd, member_data.id, True, member_data.verified, member_data.terms_and_conditions_version)
             last_id = max(last_id, member.id + 1)
             self.members.insert(member.email, member)
         self.id_maker.start_from(last_id)
 
-    def register(self, email, passwd):
+    def register(self, email, passwd, tad_version):
         # verify username is available
         # add to users
         with self.register_lock:
@@ -51,9 +51,9 @@ class MemberController:
                         return res
 
             uid = self.id_maker.next_id()
-            member = Member(email, passwd, uid)
+            member = Member(email, passwd, uid, terms_and_conditions_version=tad_version)
             # insert to db:
-            res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd))
+            res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd, terms_and_conditions_version=tad_version))
             if not res.success:
                 return res
             self.members.insert(email, member)
@@ -130,6 +130,7 @@ class MemberController:
         member = self.members.get(email)
         if member is None:
             raise Exception(f'invalid user: {email}')
+        return member
 
     def start_password_recovery(self, email):
         self._verify_valid_member(email)
@@ -204,4 +205,11 @@ class MemberController:
         # Use the new login_with_google method that bypasses password verification
         return member.login_with_google(email)
 
+    def accept_terms_and_conditions(self, actor, version):
+        member = self._verify_valid_member(actor)
+        return member.accept_terms_and_conditions(version, self.db_access)
+
+    def get_tac_version_for_actor(self, actor):
+        member = self._verify_valid_member(actor)
+        return member.terms_and_conditions_version
 

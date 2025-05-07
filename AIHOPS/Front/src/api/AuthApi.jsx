@@ -14,8 +14,20 @@ export const verifyAutomatic = async (cookie, token) => {
   return await axios.post(`${API_URL}/verify_automatic`, { cookie, token });
 };
 
-export const register = async (cookie, userName, passwd) => {
-  return await axios.post(`${API_URL}/register`, { cookie, userName, passwd });
+export const register = async (cookie, userName, passwd, version = -1) => {
+  return await axios.post(`${API_URL}/register`, {
+    cookie,
+    userName,
+    passwd,
+    version,
+  });
+};
+
+export const acceptTermsAndConditions = async (cookie, version) => {
+  return await axios.post(`${API_URL}/accept-TAC`, {
+    cookie,
+    version,
+  });
 };
 
 export const loginUser = async (cookie, userName, passwd) => {

@@ -84,8 +84,8 @@ const Login = () => {
           setIsAdmin(true);
           localStorage.setItem("isAdmin", "true");
         }
-
         setMsg(response.data.message);
+        localStorage.setItem("termsVersion", response.data.terms_version);
         localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);
         localStorage.setItem("isLoggedIn", "true");
@@ -160,11 +160,16 @@ const Login = () => {
         localStorage.setItem("termsAccepted", "true");
 
         setMsg(response.data.message);
+        localStorage.setItem("termsVersion", response.data.terms_version);
         localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", response.data.email);
         login(cookie, response.data.email);
         localStorage.setItem("isLoggedIn", "true");
-        navigate("/");
+        if (res.require_terms_acceptance) {
+          navigate("/accept-terms");
+        } else {
+          navigate("/");
+        }
         setIsSuccess(true);
       } else {
         setMsg(response.data.message);

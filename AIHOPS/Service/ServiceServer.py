@@ -1,18 +1,31 @@
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
+from Domain.src.Users.TermsAndConditionsManager import TermsAndConditionsManager
 from Service.config import app
 from flask import Flask, request, jsonify
 from Service.config import Base, engine
 from sqlalchemy import event
+from flask_socketio import SocketIO, emit
 
 from flask_cors import CORS
 
 app = Flask(__name__)
 
 
-CORS(app)
+app = Flask(__name__)
+CORS(app, supports_credentials=True)  # <--- do this right after defining `app`
 
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# @socketio.on("request_terms")
+# def handle_request_terms():
+#     socketio.emit("get_terms", server.terms_and_conditions_manager.get_current())
+#
+# @socketio.on("connect")
+# def send_terms_on_connect():
+#     data = server.terms_and_conditions_manager.get_current()
+#     socketio.emit("get_terms", data)
 
 # --------  init session and user management ---------------
 
@@ -30,8 +43,19 @@ def start_session():
 def register():
     data = request.json
     print("trying to register in service server")
-    res = server.register(int(data["cookie"]), data["userName"], data["passwd"])
+    res = server.register(int(data["cookie"]), data["userName"], data["passwd"], int(data["version"]))
     return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/accept-TAC", methods=["POST"])
+def accept_terms_and_conditions():
+    data = request.json
+    print("accept terms and conditions", data)
+    try:
+        res = server.accept_terms_and_conditions(int(data["cookie"]), int(data["version"]))
+        return jsonify({"message": res.msg, "success": res.success})
+    except Exception as e:
+        print("Error accepting terms:", e)
+        return jsonify({"message": str(e), "success": False}), 500
 
 @app.route("/verify", methods=["POST"])
 # excpecting json with {cookie, user_name, passwd, code}
@@ -54,7 +78,13 @@ def verify_automatic():
 def login():
     data = request.json
     res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin})
+    return jsonify({
+        "message": res.msg,
+        "success": res.success,
+        "is_admin": res.is_admin,
+        "is_accepted_latest_tac": res.is_accepted_latest_tac,
+        "terms_version": res.result.terms_and_conditions_version if res.success else -1  # 👈 ADD THIS
+    })
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
@@ -496,6 +526,12 @@ def admin_update_default_severity_factors():
     res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/admin/update-TAC", methods=["POST"])
+def admin_update_tac():
+    data = request.json
+    res = server.admin_update_tac(int(data["cookie"]), data["tac"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 @app.route("/get-research-projects", methods=["GET"])
 def get_research_projects():
     cookie = int(request.args.get("cookie", 0))
@@ -521,12 +557,34 @@ def hello():
     return jsonify({"msg": "hello"})
 
 # run the backed server
+# if __name__ == "__main__":
+    # Base.metadata.create_all(engine)
+    # FactorsPool.insert_defaults()
+    #
+    # server = Server(socketio)
+    # # running the server
+    # app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    # # app.run(threaded=True, port=5555)  # runs multithreaded
+
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     FactorsPool.insert_defaults()
 
-    server = Server()
-    # running the server
-    app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
-    # app.run(threaded=True, port=5555)  # runs multithreaded
+    server = Server(socketio)  # <-- now it's available
+
+
+    @socketio.on("connect")
+    def send_terms_on_connect():
+        data = server.terms_and_conditions_manager.get_current()
+        emit("get_terms", data)  # use `emit`, not `socketio.emit`, for per-client emit
+
+
+    @socketio.on("request_terms")
+    def handle_request_terms():
+        emit("get_terms", server.terms_and_conditions_manager.get_current())
+
+
+    server.terms_and_conditions_manager.load()  # <- emit to connected clients (if any)
+
+    socketio.run(app, debug=True, port=5555)  # use socketio.run instead of app.run
 
