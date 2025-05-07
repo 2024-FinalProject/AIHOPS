@@ -523,8 +523,6 @@ class ProjectManager:
     def delete_project(self, pid, actor):
         # 1) ownership check
         project = self._verify_owner(pid, actor)
-        if project.owner != actor:
-            return ResponseFailMsg(f"Not authorized to delete project {pid}")
         
         # 2) let DBAccess handle every delete in one transaction
         res = self.db_access.delete_project(pid)
@@ -533,11 +531,9 @@ class ProjectManager:
 
         # 3) clear in‑memory state lastly
         with self.project_lock:
-            project.members.clear()
-            project.to_invite_when_published.clear()
-            project.vote_manager.clear_all_votes()
             self.projects.pop(pid)
             self.owners.remove(actor, project)
+            self.research_projects.pop(pid, None)
             for entry in self.pending_requests.to_list():
                 if pid in entry["value"]:
                     self.pending_requests.remove(entry["key"], pid)
