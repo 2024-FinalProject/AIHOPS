@@ -56,16 +56,17 @@
 .close-btn {
   position: absolute;
   top: 0% !important;
+  right: 0% !important;
   background: none;
   border: none;
   font-size: 24px;
-  color: #888;
+  color: var(--text-color);
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .close-btn:hover {
-  color: #333;
+  color: #d22020;
 }
 
 /* Input group */
