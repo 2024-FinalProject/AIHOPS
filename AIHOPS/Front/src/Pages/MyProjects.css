@@ -22,8 +22,6 @@ body {
   font-family: Verdana, sans-serif !important;
 }
 
-
-
 /* Popup Styles */
 .popup-overlay,
 .description-popup-overlay {
@@ -56,6 +54,14 @@ body {
 .popup-content.open,
 .description-popup-content.open {
   transform: scale(1);
+}
+
+.close-popup {
+  color: var(--text-color) !important;
+}
+
+.close-popup:hover {
+  color: #db1616 !important;
 }
 
 .close-popup,
@@ -153,7 +159,6 @@ body {
 .next-factor-btn:hover {
   background-color: #0056b3;
 }
-
 
 /* Checkboxes */
 .checkboxes {
