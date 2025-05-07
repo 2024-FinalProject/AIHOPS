@@ -6,6 +6,9 @@ from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
+from DAL.Objects.DBFactorVotes import DBFactorVotes
+from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
@@ -517,6 +520,26 @@ class ProjectManager:
         """creates project NTH"""
         pass
 
+    def delete_project(self, pid, actor):
+        # 1) ownership check
+        project = self._verify_owner(pid, actor)
+        
+        # 2) let DBAccess handle every delete in one transaction
+        res = self.db_access.delete_project(pid)
+        if not res.success:
+            return res
+
+        # 3) clear in‑memory state lastly
+        with self.project_lock:
+            self.projects.pop(pid)
+            self.owners.remove(actor, project)
+            self.research_projects.pop(pid, None)
+            for entry in self.pending_requests.to_list():
+                if pid in entry["value"]:
+                    self.pending_requests.remove(entry["key"], pid)
+
+        return ResponseSuccessMsg(f"Project {pid} deleted successfully")
+        
 
     # --------------- Data Base ------------------------
 

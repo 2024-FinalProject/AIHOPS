@@ -267,6 +267,12 @@ class VoteManager:
                       vote.severity_level5]
             self.severity_votes.insert(vote.member_email, values)
 
+    def clear_all_votes(self):
+        """Purge both factor‑ and severity‑vote caches."""
+        with self.lock:
+            self.factors_votes.clear()       # plain dict
+            self.severity_votes.clear()      # ThreadSafeDict
+
 
 
 

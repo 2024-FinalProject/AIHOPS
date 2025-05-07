@@ -237,6 +237,13 @@ def update_project_name_and_desc():
     res = server.update_project_name_and_desc(int(data["cookie"]), int(data["pid"]), data["name"], data["description"])
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/project/delete-project", methods=["POST"])
+# expecting JSON with { cookie, pid }
+def delete_project():
+    data = request.json
+    res = server.delete_project(int(data["cookie"]), int(data["pid"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
 # -------- Project Members Management ---------------
 
 @app.route("/project/add-members", methods=["POST"])

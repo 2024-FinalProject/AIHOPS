@@ -6,6 +6,7 @@ import {
   publishProject,
   setProjectFactors,
   get_project_to_invite,
+  deleteProject,
 } from "../api/ProjectApi";
 import CreateProjectPopup from "../Components/CreateProjectPopup";
 import ProjectStatusPopup from "../Components/ProjectStatusPopup";
@@ -64,6 +65,9 @@ const ProjectsManagement = () => {
   // State for error in project creation
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -191,10 +195,40 @@ const ProjectsManagement = () => {
     setConfirmDeletionPopUp(true);
   };
 
-  const handleConfirmDelete = async () => {
-    alert(
-      "Work in progress. Please check back later. (need to implement delete project functionality)"
-    );
+  const handleConfirmDelete = async (projectID) => {
+    setConfirmDeletionPopUp(false);
+    const cookie = localStorage.getItem("authToken");
+
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
+    }
+
+    try {
+      const response = await deleteProject(cookie, projectID);
+      if (response.data.success) {
+        setIsSuccess(true);
+        setErrorMessage(
+          "Project content factors and severity factors must be initialized before archiving."
+        );
+        setShowSuccessPopup(true);
+        setSuccessMessage("Project deleted successfully.");
+        await fetchProjects();
+      } else {
+        setMsg(response.data.message);
+        setShowErrorPopup(true);
+        setErrorMessage(response.data.message);
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error deleting project: ${errorMessage}`);
+      setShowErrorPopup(true);
+      setErrorMessage(response.data.message);
+      setIsSuccess(false);
+    }
   };
 
   const handleArchive = async (projectID, projectName) => {
@@ -477,7 +511,7 @@ const ProjectsManagement = () => {
           type="info"
           onConfirm={() => {
             setConfirmDeletionPopUp(false);
-            handleConfirmDelete(DeleteData.projectName);
+            handleConfirmDelete(DeleteData.projectID);
           }}
           onCancel={() => setConfirmDeletionPopUp(false)}
         />
@@ -492,6 +526,20 @@ const ProjectsManagement = () => {
           onClose={() => {
             setShowErrorPopup(false);
             setErrorMessage("");
+          }}
+          autoCloseTime={5000}
+        />
+      )}
+
+      {/* Success message popup */}
+      {showSuccessPopup && (
+        <AlertPopup
+          message={successMessage}
+          title="Success"
+          type="success"
+          onClose={() => {
+            setShowSuccessPopup(false);
+            setSuccessMessage("");
           }}
           autoCloseTime={5000}
         />

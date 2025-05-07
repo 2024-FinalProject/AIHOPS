@@ -9,6 +9,14 @@ from DAL.Objects.DBFactors import DBFactors
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Service.config import engine  # Make sure you have your SQLAlchemy engine defined
 
+from sqlalchemy.orm import Session as SASession  # alias so we don’t shadow your Session factory
+from DAL.Objects.DBProjectFactors import DBProjectFactors
+from DAL.Objects.DBPendingRequests import DBPendingRequests
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
+from DAL.Objects.DBFactorVotes import DBFactorVotes
+from DAL.Objects.DBSeverityVotes import DBSeverityVotes
+from DAL.Objects.DBProjectMembers import DBProjectMembers
+from DAL.Objects.DBProject import DBProject
 
 # Create a session factory
 Session = sessionmaker(bind=engine)
@@ -171,3 +179,42 @@ class DBAccess:
             return ResponseFailMsg(f"Failed to retrieve the highest Factor ID")
         finally:
             session.close()  # Close the session
+
+    def delete_all_by_query(self, table, query_obj):
+        with self.lock:
+            session = Session()
+            try:
+                session.query(table).filter_by(**query_obj).delete(synchronize_session=False)
+                session.commit()
+                return ResponseSuccessMsg(f"Deleted rows from {table.__tablename__}.")
+            except SQLAlchemyError as e:
+                session.rollback()
+                return ResponseFailMsg(f"Failed to delete from {table.__tablename__}: {e}")
+            finally:
+                session.close()
+
+    def delete_project(self, pid):
+        """Atomically delete project + all its child rows, or roll back on any failure."""
+        with self.lock:
+            session = Session()  # your sessionmaker
+            try:
+                # begin a transaction
+                with session.begin():
+                    # delete each child table by project_id
+                    session.query(DBProjectFactors).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBPendingRequests).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBProjectSeverityFactor).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBFactorVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBSeverityVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBProjectMembers).filter_by(project_id=pid).delete(synchronize_session=False)
+
+                    # finally delete the project row itself
+                    session.query(DBProject).filter_by(id=pid).delete(synchronize_session=False)
+                # if we reach here, all deletes ran without exception, and session.begin() committed
+                return ResponseSuccessMsg(f"Project {pid} and all its dependents deleted.")
+            except SQLAlchemyError as e:
+                # any error rolls back the entire transaction
+                session.rollback()
+                return ResponseFailMsg(f"delete_project transaction failed: {e}")
+            finally:
+                session.close()

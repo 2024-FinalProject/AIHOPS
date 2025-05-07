@@ -658,6 +658,17 @@ class Server:
             return self.project_manager.get_default_severity_factors()
         except Exception as e:
             return ResponseFailMsg(f"Failed to fetch default factors: {e}")
+        
+    def delete_project(self, cookie, pid):
+        """Verifies session, then hands off to ProjectManager."""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.project_manager.delete_project(pid, session.user_name)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to delete project: {e}")
 
 # -------------  admin actions ------------------------
 
