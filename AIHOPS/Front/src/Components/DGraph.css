@@ -70,7 +70,7 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  background: var(--background-up-background, #f9f9f9);
+  background: var(--background-up-background);
   padding: 4px;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -86,7 +86,7 @@
   text-align: right;
   font-size: 12px;
   color: var(--text-color, #333);
-  background: var(--card-background, #fff);
+  background: var(--background-up-background);
 }
 
 .input-group-chart span {
