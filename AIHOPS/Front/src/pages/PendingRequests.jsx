@@ -5,8 +5,9 @@ import {
   acceptProjByUser,
   rejectProjByUser,
 } from "../api/ProjectApi";
-import "./PendingRequestList.css";
 import { useNavigate } from "react-router-dom";
+import ProjectsView from "../Components/ProjectsView";
+import "./PendingRequests.css";
 
 const PendingRequestList = () => {
   const location = useLocation();
@@ -16,13 +17,7 @@ const PendingRequestList = () => {
   const [selectedElement, setSelectedElement] = useState("");
   const [isNewFirst, setIsNewFirst] = useState(false);
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
-
-  const requestListTest = [
-    { title: "Request 1", description: "Description 1", id: 1 },
-    { title: "Request 2", description: "Description 2", id: 2 },
-    { title: "Request 3", description: "Description 3", id: 3 },
-  ];
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   // Fetch Pending Requests
   const fetchPendingRequest = async () => {
@@ -146,29 +141,22 @@ const PendingRequestList = () => {
 
   useEffect(() => {
     if (!isLoggedIn) {
-        console.log("Redirecting to /");
-        navigate("/");
+      console.log("Redirecting to /");
+      navigate("/");
     }
-  }
-  , [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate]);
 
   return (
     <div className="pending-request-list-page">
-        {isLoading && (
-          <div className="loading-container">
-            <div className="loading-text">Loading...</div>
-          </div>
-        )}
+      {isLoading && (
+        <div className="loading-container">
+          <div className="loading-text">Loading...</div>
+        </div>
+      )}
       <div className="center-container">
         <h1 className="pending-request-title">
           <u>You have been invited to projects</u>:
         </h1>
-        <div className="sort-container">
-          <button className="sort-button" onClick={toggleSort}>
-            ⇅
-          </button>
-          {isNewFirst ? "Newest First" : "Oldest First"}
-        </div>
       </div>
 
       {/* Error State */}
@@ -176,60 +164,54 @@ const PendingRequestList = () => {
 
       {/* No Requests */}
       {!isLoading && !error && requestList.length === 0 && (
-        <p style = {{textAlign: 'center'}}>There are currently no pending requests</p>
+        <p style={{ textAlign: "center" }}>
+          There are currently no pending requests
+        </p>
       )}
 
       {/* Display Pending Requests */}
-      <div className="pending-request-wrapper">
-        {!isLoading && !error && requestList.length > 0 && (
-          <div className="email-list-container">
-            {sortRequestList.map((request) => (
-              <div
-                key={request.id} // Prefer id if available
-                className={`email-item ${
-                  request === selectedElement ? "selected" : ""
-                }`}
-                onClick={(e) => handleSelectRequest(e, request)}
+      {!isLoading && !error && requestList.length > 0 && (
+        <ProjectsView
+          showStatus={false}
+          projects={sortRequestList}
+          renderButtons={(project) => (
+            <div
+              style={{ display: "flex", gap: "12px", justifyContent: "center" }}
+            >
+              <button
+                className="modern-btn accept-btn"
+                onClick={(e) => handleAccept(e, project)}
               >
-                <span className="email-status">
-                    {request.isActive ? "🟢 Active" : "🔴 Inactive"}
-                  </span>
-                <div className="email-header">
-                  <h4 className="email-subject">
-                    <span className="underline ">Project Name</span>:{" "}
-                    {request.name}
-                  </h4>
-                  <h4 className="email-subject">
-                    <span className="underline ">Project Description</span>:{" "}
-                    {request.description}
-                  </h4>
-                  <h5 className="email-sender">
-                    <span className="underline ">Founder</span>:{" "}
-                    {request.founder}
-                  </h5>
-              
-                </div>
-                <div className="email-footer">
-                  <div className="email-actions">
-                    <button
-                      className="email-button accept"
-                      onClick={(e) => handleAccept(e, request)}
-                    >
-                      ✅ Accept
-                    </button>
-                    <button
-                      className="email-button reject"
-                      onClick={(e) => handleReject(e, request)}
-                    >
-                      ❌ Reject
-                    </button>
-                  </div>
-                </div>
+                ✅ Accept
+              </button>
+              <button
+                className="modern-btn reject-btn"
+                onClick={(e) => handleReject(e, project)}
+              >
+                ❌ Reject
+              </button>
+            </div>
+          )}
+          renderBody={(project) => (
+            <div>
+              <div style={{ marginBottom: "6px" }}>
+                <span className="underline" style={{ fontWeight: "bold" }}>
+                  Project Description:
+                </span>{" "}
+                <span style={{ fontWeight: "normal" }}>
+                  {project.description}
+                </span>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <div>
+                <span className="underline" style={{ fontWeight: "bold" }}>
+                  Founder:
+                </span>{" "}
+                <span style={{ fontWeight: "normal" }}>{project.founder}</span>
+              </div>
+            </div>
+          )}
+        />
+      )}
     </div>
   );
 };

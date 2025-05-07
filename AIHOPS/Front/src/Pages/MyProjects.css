@@ -22,8 +22,6 @@ body {
   font-family: Verdana, sans-serif !important;
 }
 
-
-
 /* Popup Styles */
 .popup-overlay,
 .description-popup-overlay {
@@ -56,6 +54,14 @@ body {
 .popup-content.open,
 .description-popup-content.open {
   transform: scale(1);
+}
+
+.close-popup {
+  color: var(--text-color) !important;
+}
+
+.close-popup:hover {
+  color: #db1616 !important;
 }
 
 .close-popup,
@@ -153,7 +159,6 @@ body {
 .next-factor-btn:hover {
   background-color: #0056b3;
 }
-
 
 /* Checkboxes */
 .checkboxes {
@@ -315,6 +320,38 @@ body {
   color: #fff;
   border-radius: 50px;
   animation: pulse 1.5s infinite ease-in-out;
+}
+
+.vote-btn {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  background-color: #f4f6fa;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vote-btn input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #4caf50;
+}
+
+.vote-btn:hover {
+  background-color: #e6ecf5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.vote-btn.voted {
+  background-color: #dff0d8;
+  border-color: #c3e6cb;
+  color: #2e7031;
 }
 
 /* Animation for the loading text */
