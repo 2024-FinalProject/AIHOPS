@@ -1,5 +1,6 @@
 import React from "react";
 import "../EditPopup.css";
+import AlertPopup from "../AlertPopup";
 
 const FactorsListComponent = ({
   selectedProject,
@@ -16,9 +17,27 @@ const FactorsListComponent = ({
   setShowExistingContentFactors,
   setAddNewFactorShow,
   setFromExistingFactorsPage,
+  // Add these props for alert functionality
+  showAlert,
+  alertMessage,
+  alertType,
+  setShowAlert
 }) => {
   return (
     <div>
+      {/* Add the alert popup at the top of the component */}
+      {showAlert && (
+        <div style={{ margin: "10px 0", textAlign: "center" }}>
+          <AlertPopup
+            title={alertType === "success" ? "Success" : alertType === "info" ? "Information" : "Input Validation"}
+            message={alertMessage}
+            type={alertType}
+            onClose={() => setShowAlert(false)}
+            autoCloseTime={alertType === "success" ? 2000 : 3000}
+          />
+        </div>
+      )}
+      
       <div
         style={{
           alignItems: "center",
