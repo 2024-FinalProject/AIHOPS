@@ -38,7 +38,7 @@
   border: none;
   cursor: pointer;
   font-size: 20px;
-  color: #333;
+  color: var(--text-color) !important;
   transition: color 0.3s;
 }
 
