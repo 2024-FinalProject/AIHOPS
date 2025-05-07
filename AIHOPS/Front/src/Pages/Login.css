@@ -204,7 +204,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 105vh;
   background-color: rgba(0, 0, 0, 0.5); /* semi-transparent dark background */
   display: flex;
   justify-content: center;
@@ -215,7 +215,7 @@
 .terms-modal {
   position: relative;
   max-width: 800px;
-  background-color: white;
+  background-color: var(--card-background) !important;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
