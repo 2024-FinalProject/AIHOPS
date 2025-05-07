@@ -371,3 +371,10 @@ export const getProject = async (cookie, pid) => {
     },
   });
 };
+
+export const deleteProject = async (cookie, pid) => {
+  return await axios.post(`${API_URL}/project/delete-project`, {
+    cookie: cookie,
+    pid: pid,
+  });
+};

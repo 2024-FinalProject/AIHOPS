@@ -171,3 +171,16 @@ class DBAccess:
             return ResponseFailMsg(f"Failed to retrieve the highest Factor ID")
         finally:
             session.close()  # Close the session
+
+    def delete_all_by_query(self, table, query_obj):
+        with self.lock:
+            session = Session()
+            try:
+                session.query(table).filter_by(**query_obj).delete(synchronize_session=False)
+                session.commit()
+                return ResponseSuccessMsg(f"Deleted rows from {table.__tablename__}.")
+            except SQLAlchemyError as e:
+                session.rollback()
+                return ResponseFailMsg(f"Failed to delete from {table.__tablename__}: {e}")
+            finally:
+                session.close()

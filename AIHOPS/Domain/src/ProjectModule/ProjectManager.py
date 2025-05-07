@@ -6,6 +6,9 @@ from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
 from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
+from DAL.Objects.DBFactorVotes import DBFactorVotes
+from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
@@ -517,6 +520,64 @@ class ProjectManager:
         """creates project NTH"""
         pass
 
+    def delete_project(self, pid, actor):
+        # 1) ownership check → returns the Project instance
+        project = self._verify_owner(pid, actor)
+        if not project or project.owner != actor:
+            return ResponseFailMsg(f"Not authorized to delete project {pid}")
+
+        # 2) in‑memory caches first
+        with self.project_lock:
+            # 2.0 project votes: clear all votes
+            project.vote_manager.clear_all_votes()
+
+            # 2.1 projects cache: keyed by pid → returns the same Project instance
+            if self.projects.get(pid) is None:
+                return ResponseFailMsg(f"Backend cache missing project {pid}")
+            self.projects.pop(pid)
+
+            # 2.2 owners cache: list of Project instances
+            owner_list = self.owners.get(actor)
+            if owner_list is None:
+                return ResponseFailMsg(f"Owners cache has no entry for user '{actor}'")
+            if project not in owner_list:
+                return ResponseFailMsg(
+                    f"Owners cache for '{actor}' does not contain project {pid}. "
+                    f"Current list: {owner_list}"
+                )
+            # remove the actual object
+            self.owners.remove(actor, project)
+
+            # 2.3 pending_requests cache: (still ints)
+            for entry in self.pending_requests.to_list():
+                email = entry["key"]
+                if pid in entry["value"]:
+                    self.pending_requests.remove(email, pid)
+
+            # 3) DB child rows
+            res = self.db_access.delete_all_by_query(DBProjectFactors, {"project_id": pid})
+            if not res.success:
+                return ResponseFailMsg(f"Failed to delete factors: {res.msg}")
+            res = self.db_access.delete_all_by_query(DBPendingRequests, {"project_id": pid})
+            if not res.success:
+                return ResponseFailMsg(f"Failed to delete pending‑requests: {res.msg}")
+            res = self.db_access.delete_all_by_query(DBProjectSeverityFactor, {"project_id": pid})
+            if not res.success:
+                return ResponseFailMsg(f"Failed to delete severity factors: {res.msg}")
+            res = self.db_access.delete_all_by_query(DBFactorVotes, {"project_id": pid})
+            if not res.success:
+                return ResponseFailMsg(f"Failed to delete factor votes: {res.msg}")
+            res = self.db_access.delete_all_by_query(DBSeverityVotes, {"project_id": pid})
+            if not res.success:
+                return ResponseFailMsg(f"Failed to delete severity votes: {res.msg}")
+
+            # 4) DB main project row
+            res = self.db_access.delete_obj_by_query(DBProject, {"id": pid})
+            if not res.success:
+                return ResponseFailMsg(f"Failed to delete project row: {res.msg}")
+
+            return ResponseSuccessMsg(f"Project {pid} deleted successfully")
+        
 
     # --------------- Data Base ------------------------
 
