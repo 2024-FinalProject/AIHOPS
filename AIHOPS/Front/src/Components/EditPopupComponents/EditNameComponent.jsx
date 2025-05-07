@@ -1,16 +1,80 @@
 import React, { useState } from "react";
 import "../EditPopup.css";
 import AlertPopup from "../AlertPopup";
+import { update_project_name_and_desc } from "../../api/ProjectApi";
 
 const EditNameComponent = ({
   selectedProject,
+  fetchProjects,
+  fetch_selected_project,
+  setIsSuccess,
+  setMsg,
   closePopup,
-  updateProjectsNameOrDesc,
-  setName,
 }) => {
+  const [newName, setNewName] = useState(selectedProject.name || "");
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("warning");
+
+  const updateProjectsNameOrDesc = async () => {
+    if (!newName.trim()) {
+      setAlertType("warning");
+      setAlertMessage("Project name cannot be empty");
+      setShowAlert(true);
+      return;
+    }
+
+    const cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      setAlertType("error");
+      setAlertMessage("No authentication token found. Please log in again.");
+      setShowAlert(true);
+      setIsSuccess(false);
+      return;
+    }
+
+    try {
+      // Update the project name immediately in the selectedProject object
+      // This allows the change to be visible right away in the parent components
+      selectedProject.name = newName;
+      
+      const response = await update_project_name_and_desc(
+        cookie,
+        selectedProject.id,
+        newName,
+        selectedProject.description
+      );
+
+      if (response.data.success) {
+        // Show success message
+        setAlertType("success");
+        setAlertMessage("Project name updated successfully!");
+        setShowAlert(true);
+        
+        // Refresh data in the background
+        await fetchProjects();
+        await fetch_selected_project(selectedProject);
+        setIsSuccess(true);
+        
+        // Set a short timeout before closing to allow user to see success message
+        setTimeout(() => {
+          closePopup();
+        }, 1000);
+      } else {
+        setAlertType("error");
+        setAlertMessage(response.data.message || "Failed to update project name");
+        setShowAlert(true);
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      setAlertType("error");
+      setAlertMessage(`Error updating project name: ${errorMessage}`);
+      setShowAlert(true);
+      setMsg(`Error updating project name: ${errorMessage}`);
+      setIsSuccess(false);
+    }
+  };
 
   return (
     <div className="edit-project-popup">
@@ -22,14 +86,14 @@ const EditNameComponent = ({
       <div className="input-container">
         <textarea
           className="edit-textarea modern"
-          defaultValue={selectedProject.name}
-          onChange={(e) => setName(e.target.value)}
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
           placeholder="Enter project name..."
         />
       </div>
 
       <div className="actions-container">
-        <button className="action-btn cancel-btn" onClick={() => closePopup()}>
+        <button className="action-btn cancel-btn" onClick={closePopup}>
           Cancel
         </button>
         <button
