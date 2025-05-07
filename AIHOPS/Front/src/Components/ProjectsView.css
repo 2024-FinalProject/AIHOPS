@@ -8,8 +8,14 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  margin-left: 200px;
+  margin-right: 200px;
   flex-wrap: wrap;
   gap: 15px;
+}
+
+.pv-filter-group:last-child {
+  margin-left: auto;
 }
 
 .pv-filter-group {

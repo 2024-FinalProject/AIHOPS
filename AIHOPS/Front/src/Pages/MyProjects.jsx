@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import VotingTypeSelector from "../Components/VotingTypeSelector";
 import DGraph from "../Components/DGraph";
 import {
   getProjectsMember,
@@ -282,43 +281,49 @@ const MyProjects = () => {
           <ProjectsView
             showStatus={false}
             projects={projects}
-            renderButtons={(project) => (
-              <div
-                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-              >
-                {isBothStatusesComplete(project) && (
-                  <div className="checkmark">✓</div>
-                )}
-                <div className="checkboxes">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={
-                        projectVotingStatus[project.id]?.votingStatus === 1
-                      }
-                      disabled
-                    />
-                    Factors Voted
-                  </label>
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={
-                        projectVotingStatus[project.id]?.severitiesStatus === 1
-                      }
-                      disabled
-                    />
-                    D.Score Voted
-                  </label>
-                </div>
-                <button
-                  className="action-btn view-edit-btn"
-                  onClick={() => handleVoteClick(project)}
+            renderButtons={(project) => {
+              const votingStatus = projectVotingStatus[project.id] || {};
+              const isFactorsDone = votingStatus.votingStatus === 1;
+              const isDScoreDone = votingStatus.severitiesStatus === 1;
+
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                  }}
                 >
-                  Vote
-                </button>
-              </div>
-            )}
+                  {isBothStatusesComplete(project) && (
+                    <div className="checkmark">✓</div>
+                  )}
+
+                  <button
+                    className={`vote-btn ${isFactorsDone ? "voted" : ""}`}
+                    onClick={() => {
+                      setCurrentProject(project);
+                      setCurrentVotingType("factors");
+                      setIsVoteStarted(true);
+                      updateFactorsVotes(project.id);
+                    }}
+                  >
+                    <input type="checkbox" checked={isFactorsDone} readOnly />
+                    <span>Vote on Factors</span>
+                  </button>
+
+                  <button
+                    className={`vote-btn ${isDScoreDone ? "voted" : ""}`}
+                    onClick={() => {
+                      setCurrentProject(project);
+                      setShowDScoreVote(true);
+                    }}
+                  >
+                    <input type="checkbox" checked={isDScoreDone} readOnly />
+                    <span>Vote on D.Score</span>
+                  </button>
+                </div>
+              );
+            }}
             renderBody={(project) => (
               <div>
                 <p>
