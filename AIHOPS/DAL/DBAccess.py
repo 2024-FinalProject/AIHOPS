@@ -17,6 +17,7 @@ from DAL.Objects.DBFactorVotes import DBFactorVotes
 from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from DAL.Objects.DBProjectMembers import DBProjectMembers
 from DAL.Objects.DBProject import DBProject
+from DAL.Objects.DBMember import DBMember
 
 # Create a session factory
 Session = sessionmaker(bind=engine)
@@ -216,5 +217,34 @@ class DBAccess:
                 # any error rolls back the entire transaction
                 session.rollback()
                 return ResponseFailMsg(f"delete_project transaction failed: {e}")
+            finally:
+                session.close()
+
+    def delete_member_and_projects(self, member_email):
+        """Atomically delete a member plus every project they own, or roll back on failure."""
+        with self.lock:
+            session = Session()
+            try:
+                # begin a transaction
+                with session.begin():
+                    # 1) delete every project they own
+                    owned = session.query(DBProject).filter_by(owner=member_email).all()
+                    for proj in owned:
+                        pid = proj.id
+                        session.query(DBProjectFactors).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBPendingRequests).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBProjectSeverityFactor).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBFactorVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBSeverityVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBProjectMembers).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBProject).filter_by(id=pid).delete(synchronize_session=False)
+
+                    # 3) finally delete the member row
+                    session.query(DBMember).filter_by(email=member_email).delete(synchronize_session=False)
+                # commit happens automatically on exiting session.begin()
+                return ResponseSuccessMsg(f"Member {member_email} and all owned projects deleted.")
+            except SQLAlchemyError as e:
+                session.rollback()
+                return ResponseFailMsg(f"delete_member_and_projects failed: {e}")
             finally:
                 session.close()

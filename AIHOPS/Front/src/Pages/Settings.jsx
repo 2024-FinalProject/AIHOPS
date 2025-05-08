@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import './Settings.css'; // Import the CSS
-import { useAuth } from '../context/AuthContext';
+import React, { useState, useEffect } from "react";
+import "./Settings.css"; // Import the CSS
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { deleteAccount } from "../api/AuthApi";
 
 const SettingsPage = () => {
   const { theme, toggleTheme } = useAuth();
   const navigate = useNavigate();
-  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const { logout } = useAuth();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -31,29 +33,64 @@ const SettingsPage = () => {
 
   const SectionHeader = ({ title, section, isOpen }) => (
     <div
-      className={`section-header ${isOpen ? 'open' : ''}`}
+      className={`section-header ${isOpen ? "open" : ""}`}
       onClick={() => toggleSection(section)}
     >
       <span className="section-title">{title}</span>
-      <button className="toggle-button">{isOpen ? '−' : '+'}</button>
+      <button className="toggle-button">{isOpen ? "−" : "+"}</button>
     </div>
   );
+
+  const handleDeleteAccount = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("No authentication token found. Please log in again.");
+      return;
+    }
+
+    try {
+      const response = await deleteAccount(token);
+      if (response.data.success) {
+        logout();
+        navigate("/");
+      } else {
+        console.error("Failed to delete account:", response.data.message);
+        alert("Failed to delete account. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert(
+        "An error occurred while deleting the account. Please try again later."
+      );
+    }
+  };
 
   return (
     <div className="settings-container">
       <div className="settings-box">
-        <h2 style={{ textAlign: "center" ,marginTop: "-10px"}}>
+        <h2 style={{ textAlign: "center", marginTop: "-10px" }}>
           <u>Settings</u>:
         </h2>
 
         {/* Security Section */}
-        <SectionHeader title="Security" section="security" isOpen={openSections.security} />
+        <SectionHeader
+          title="Security"
+          section="security"
+          isOpen={openSections.security}
+        />
         {openSections.security && (
           <div className="section-content">
-            <SectionHeader title="Delete Account" section="deleteAccount" isOpen={openSections.deleteAccount} />
+            <SectionHeader
+              title="Delete Account"
+              section="deleteAccount"
+              isOpen={openSections.deleteAccount}
+            />
             {openSections.deleteAccount && (
               <div className="inner-section-content">
-                <button className="button button-red" onClick={() => alert("Delete Account Not Implemented Yet!")}>
+                <button
+                  className="button button-red"
+                  onClick={() => handleDeleteAccount()}
+                >
                   Delete Account
                 </button>
               </div>
@@ -62,24 +99,37 @@ const SettingsPage = () => {
         )}
 
         {/* Appearance Section */}
-        <SectionHeader title="Appearance" section="appearance" isOpen={openSections.appearance} />
+        <SectionHeader
+          title="Appearance"
+          section="appearance"
+          isOpen={openSections.appearance}
+        />
         {openSections.appearance && (
           <div className="section-content">
-            <button 
-              className="button button-blue" 
+            <button
+              className="button button-blue"
               onClick={toggleTheme}
-              style={{ width: 'auto', padding: '10px 20px' }}
+              style={{ width: "auto", padding: "10px 20px" }}
             >
-              Toggle {theme === 'light' ? 'Dark' : 'Light'} Theme
+              Toggle {theme === "light" ? "Dark" : "Light"} Theme
             </button>
           </div>
         )}
 
         {/* Profile Picture Section (Simplified from Personalization) */}
-        <SectionHeader title="Profile Picture" section="profilePicture" isOpen={openSections.profilePicture} />
+        <SectionHeader
+          title="Profile Picture"
+          section="profilePicture"
+          isOpen={openSections.profilePicture}
+        />
         {openSections.profilePicture && (
           <div className="section-content">
-            <button className="button button-blue" onClick={() => alert("Upload Profile Picture Not Implemented Yet!")}>
+            <button
+              className="button button-blue"
+              onClick={() =>
+                alert("Upload Profile Picture Not Implemented Yet!")
+              }
+            >
               Upload Profile Picture
             </button>
           </div>
