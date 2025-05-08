@@ -18,7 +18,10 @@ const NavBar = () => {
   const [newMessages, setNewMessages] = useState(false); // State to track new messages
 
   useEffect(() => {
-    fetchPendingRequest();
+    if (isAuthenticated) {
+      console.log("authenticated");
+      fetchPendingRequest();
+    }
   }, [location.pathname]);
 
   const fetchPendingRequest = async () => {

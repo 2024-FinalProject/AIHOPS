@@ -115,7 +115,7 @@ export const AuthProvider = ({ children }) => {
   }, [theme]); // Added theme as dependency
 
   const startNewSession = async () => {
-    localStorage.clear();
+    console.log("auth context starting new seession");
     const response = await startSession();
     if (!response.data.success) {
       console.error("failed to start a new session %s", response.data.message);
