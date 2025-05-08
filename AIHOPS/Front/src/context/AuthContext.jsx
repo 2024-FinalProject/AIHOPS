@@ -29,11 +29,7 @@ export const AuthProvider = ({ children }) => {
   );
   const navigate = useNavigate();
 
-  const login = (token, username) => {
-    if (token !== authToken) {
-      setAuthToken(token);
-      localStorage.setItem("authToken", token);
-    }
+  const login = (username) => {
     setUserName(username);
     setIsAuthenticated(true);
     localStorage.setItem("userName", username);

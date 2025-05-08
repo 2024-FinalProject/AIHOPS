@@ -60,9 +60,11 @@ export const checkEmailExists = async (tokenId) => {
   return await axios.post(`${API_URL}/check_email_exists`, { tokenId });
 };
 
-export const isValidSession = async (email) => {
+export const isValidSession = async (cookie, email) => {
   return await axios.get(`${API_URL}/is-valid-session`, {
     params: {
+      skipAuth: true,
+      cookie: cookie,
       email: email,
     },
     headers: {
