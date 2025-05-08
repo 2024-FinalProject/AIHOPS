@@ -25,6 +25,7 @@ import PasswordRecovery from "./Pages/PasswordRecovery.jsx";
 import AdminPage from "./Pages/AdminPage.jsx";
 
 import { isValidSession } from "./api/AuthApi.jsx";
+import { Button } from "react-bootstrap";
 
 //Google OAuth client ID
 const GOOGLE_CLIENT_ID =
@@ -55,6 +56,20 @@ const AppContent = () => {
   return (
     <>
       <NavBar />
+      <Button
+        variant="primary"
+        onClick={() => {
+          setTimeout(() => {
+            console.log(
+              "cookie after delay:",
+
+              localStorage.getItem("authToken")
+            );
+          }, 500);
+        }}
+      >
+        Log Cookie
+      </Button>
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/register" element={<Register />} />

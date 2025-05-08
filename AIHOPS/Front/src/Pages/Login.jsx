@@ -27,7 +27,7 @@ const Login = () => {
   // Terms and conditions state
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
-  const [termsScrolled, setTermsScrolled] = useState(false);
+  const [termsScrolled, setTermsScrolled] = useState(true);
 
   const termsRef = useRef(null);
 
