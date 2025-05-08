@@ -62,3 +62,7 @@ export const googleLogin = async (cookie, tokenId) => {
 export const checkEmailExists = async (cookie, tokenId) => {
   return await axios.post(`${API_URL}/check_email_exists`, { cookie, tokenId });
 };
+
+export const deleteAccount = async (cookie) => {
+  return await axios.post(`${API_URL}/delete_account`, { cookie });
+};
