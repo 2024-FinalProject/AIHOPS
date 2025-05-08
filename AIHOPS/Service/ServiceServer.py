@@ -78,6 +78,9 @@ def verify_automatic():
 def login():
     data = request.json
     res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
+    if not res.success:
+        return jsonify({"message": res.msg, "success": res.success})
+    print(f'user logged in: {data["userName"]}, need to accept terms and conditions: {res.is_accepted_latest_tac}, last accepted version: {res.terms_version}')
     return jsonify({
         "message": res.msg,
         "success": res.success,

@@ -185,8 +185,9 @@ class MemberController:
     def login_with_google(self, email):
         """Login a user that authenticated through Google without password check"""
         member = self.members.get(email)
+        print(f'google user: {email}, terms version: {member.terms_and_conditions_version}')
         if member is None:
-            return Response(False, f'User {email} not found', None, False)
+            return ResponseLogin(True, 'google user logged in', False)
         
         if not member.verified:
             # Update verification status for the Google user

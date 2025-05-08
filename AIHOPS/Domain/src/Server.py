@@ -189,6 +189,11 @@ class Server:
             
             if login_res.success:
                 session.login(email)
+                users_tac_version = self.user_controller.get_tac_version_for_actor(email)
+                if users_tac_version != self.terms_and_conditions_manager.current_version:
+                    res.is_accepted_latest_tac = False
+                    self.terms_and_conditions_manager.get_current()
+                res.terms_version = users_tac_version
                 return Response(True, f"Successfully logged in with Google as {email}", {"email": email}, False)
             
             return login_res
