@@ -26,16 +26,8 @@ const PendingRequestList = () => {
 
     try {
       console.log("Fetching pending requests...");
-      const cookie = localStorage.getItem("authToken");
 
-      if (!cookie) {
-        setError("Authentication token not found");
-        console.error("authToken not found in localStorage");
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await getPendingRequest(cookie);
+      const response = await getPendingRequest();
 
       if (response.data.success) {
         // setRequestList(requestListTest); // Use the fetched request list here
@@ -61,13 +53,6 @@ const PendingRequestList = () => {
     e.stopPropagation(); // Stop the click from triggering ListGroup.Item's onClick
     console.log("Accepted request:", request);
     try {
-      const cookie = localStorage.getItem("authToken");
-
-      if (!cookie) {
-        setError("Authentication token not found");
-        console.error("authToken not found in localStorage");
-        return;
-      }
       // Ensure the request object contains id
       if (!request?.id == undefined || request?.id == null) {
         setError("Project ID is missing");
@@ -75,7 +60,7 @@ const PendingRequestList = () => {
         return;
       }
 
-      const response = await acceptProjByUser(cookie, request.id);
+      const response = await acceptProjByUser(request.id);
       if (response.data.success) {
         console.log("Project accepted");
         fetchPendingRequest(); // Refresh the list after successful acceptance
@@ -95,13 +80,6 @@ const PendingRequestList = () => {
     console.log("Rejected request:", request);
 
     try {
-      const cookie = localStorage.getItem("authToken");
-
-      if (!cookie) {
-        setError("Authentication token not found");
-        console.error("authToken not found in localStorage");
-        return;
-      }
       // Ensure the request object contains id
       if (!request?.id == undefined || request?.id == null) {
         setError("Project ID is missing");
@@ -109,7 +87,7 @@ const PendingRequestList = () => {
         return;
       }
 
-      const response = await rejectProjByUser(cookie, request.id);
+      const response = await rejectProjByUser(request.id);
       if (response.data.success) {
         console.log("Project rejected");
         fetchPendingRequest(); // Refresh the list after successful rejection

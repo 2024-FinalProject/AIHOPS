@@ -14,7 +14,6 @@ const EditSeverityFactors = ({
   fetch_selected_project,
   closePopup,
 }) => {
-  const [cookie, setCookie] = useState("");
   const { metadata } = useSeverityMetadata();
   const [severityValues, setSeverityValues] = useState([
     ...selectedProject.severity_factors,
@@ -24,10 +23,6 @@ const EditSeverityFactors = ({
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("warning"); // "warning" | "error" | "success"
-
-  useEffect(() => {
-    setCookie(localStorage.getItem("authToken"));
-  }, []);
 
   const handleSeverityChange = (index, value) => {
     const updated = [...severityValues];
@@ -63,13 +58,7 @@ const EditSeverityFactors = ({
   };
 
   const updateProjectsSeverityFactors = async () => {
-    if (!cookie) {
-      setAlertType("error");
-      setAlertMessage("No authentication token found. Please log in again.");
-      setShowAlert(true);
-      return -1;
-    }
-
+    
     const { valid, message } = validateSeverityValues(severityValues);
     if (!valid) {
       setAlertType("warning");
@@ -80,7 +69,6 @@ const EditSeverityFactors = ({
 
     try {
       const resp = await setSeverityFactors(
-        cookie,
         selectedProject.id,
         severityValues
       );
@@ -92,7 +80,7 @@ const EditSeverityFactors = ({
       }
 
       if (fetchProjects) await fetchProjects();
-      const fresh = await getProjectSeverityFactors(cookie, selectedProject.id);
+      const fresh = await getProjectSeverityFactors(selectedProject.id);
       selectedProject.severity_factors = fresh.data.severityFactors;
       if (fetch_selected_project) await fetch_selected_project(selectedProject);
 
@@ -114,7 +102,7 @@ const EditSeverityFactors = ({
     if (updateResult === -1) return;
 
     try {
-      const res = await confirmSeverityFactors(cookie, selectedProject.id);
+      const res = await confirmSeverityFactors(selectedProject.id);
       if (res.data.success) {
         selectedProject.severity_factors_inited = true;
         if (fetch_selected_project)

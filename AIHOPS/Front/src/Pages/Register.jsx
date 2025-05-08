@@ -10,7 +10,9 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
-  const [existingToken, setExistingToken] = useState(localStorage.getItem("authToken"));
+  const [existingToken, setExistingToken] = useState(
+    localStorage.getItem("authToken")
+  );
   const { login } = useAuth();
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -27,7 +29,9 @@ const Register = () => {
     e.preventDefault();
 
     if (!termsAccepted) {
-      setMsg("Please read and accept the terms and conditions, then click on register again.");
+      setMsg(
+        "Please read and accept the terms and conditions, then click on register again."
+      );
       setIsSuccess(false);
       await delay(3000); //3 sec
       setShowTermsConditions(true);
@@ -37,21 +41,13 @@ const Register = () => {
     setMsg("");
     setIsSuccess(null);
     try {
-      let cookie;
-      if (existingToken) {
-        cookie = existingToken;
-      } else {
-        const session = await startSession();
-        cookie = session.data.cookie;
-      }
-
-      const response = await register(cookie, userName, password);
+      const response = await register(userName, password);
 
       if (response.data.success) {
-        const frontMsg = "A verification email has been sent.\nCheck your spam inbox if you don't see it.";
+        const frontMsg =
+          "A verification email has been sent.\nCheck your spam inbox if you don't see it.";
         setMsg(frontMsg);
         setIsSuccess(true);
-        localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);
       } else {
         setMsg(response.data.message);
@@ -140,7 +136,15 @@ const Register = () => {
         </form>
 
         {msg && (
-          <div className={`register-alert ${isSuccess === true ? "success" : isSuccess === false ? "danger" : ""}`}>
+          <div
+            className={`register-alert ${
+              isSuccess === true
+                ? "success"
+                : isSuccess === false
+                ? "danger"
+                : ""
+            }`}
+          >
             {msg}
           </div>
         )}
@@ -150,14 +154,11 @@ const Register = () => {
       {showTermsConditions && (
         <div className="modal-overlay">
           <div className="terms-modal">
-          <h2 style={{ textAlign: "center" }}>Terms and Conditions</h2>
+            <h2 style={{ textAlign: "center" }}>Terms and Conditions</h2>
 
-            <div
-            ref={termsRef}
-            className="terms-content" 
-          >
-            {termsContent}
-          </div>
+            <div ref={termsRef} className="terms-content">
+              {termsContent}
+            </div>
             <button
               onClick={handleAcceptTerms}
               disabled={!termsScrolled}
@@ -166,11 +167,11 @@ const Register = () => {
               {termsScrolled ? "I Accept" : "Scroll to bottom to accept"}
             </button>
             <button
-            onClick={() => setShowTermsConditions(false)}
-            className="close-terms-btn"
-          >
-            &times;
-          </button>
+              onClick={() => setShowTermsConditions(false)}
+              className="close-terms-btn"
+            >
+              &times;
+            </button>
           </div>
         </div>
       )}

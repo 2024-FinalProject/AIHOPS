@@ -16,20 +16,12 @@ const ProgressBar = ({
   const [projectsProgress, setProjectsProgress] = useState({});
 
   useEffect(() => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      return;
-    }
     fetch_project_progress();
   }, [project]);
 
   const fetch_project_progress = async () => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      return;
-    }
     try {
-      const res = await getProjectProgress(cookie, project.id);
+      const res = await getProjectProgress(project.id);
       if (res.data.success) {
         setProjectsProgress(res.data.progress);
       } else {

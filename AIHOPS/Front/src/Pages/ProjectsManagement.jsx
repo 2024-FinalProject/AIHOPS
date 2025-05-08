@@ -77,16 +77,8 @@ const ProjectsManagement = () => {
   };
 
   const fetchProjects = async () => {
-    let cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
     try {
-      const response = await getProjects(cookie);
+      const response = await getProjects();
       if (response.data.success) {
         setProjects([...response.data.projects]);
         setIsSuccess(true);
@@ -121,14 +113,6 @@ const ProjectsManagement = () => {
   }, []);
 
   const fetch_selected_project = async (project) => {
-    let cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
     try {
       {
         await fetchProjects();
@@ -157,14 +141,6 @@ const ProjectsManagement = () => {
       initialSeverityUpdates[i] = project.severity_factors[i - 1];
     }
     setSeverityUpdates(initialSeverityUpdates);
-
-    let cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
 
     setShowPopup(true);
   };
@@ -197,16 +173,9 @@ const ProjectsManagement = () => {
 
   const handleConfirmDelete = async (projectID) => {
     setConfirmDeletionPopUp(false);
-    const cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
 
     try {
-      const response = await deleteProject(cookie, projectID);
+      const response = await deleteProject(projectID);
       if (response.data.success) {
         setIsSuccess(true);
         setErrorMessage(
@@ -243,16 +212,8 @@ const ProjectsManagement = () => {
     const project = findProjectByID(projectID);
 
     if (project.severity_factors_inited && project.factors_inited) {
-      const cookie = localStorage.getItem("authToken");
-
-      if (!cookie) {
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
-      }
-
       try {
-        const response = await archiveProject(cookie, project.id);
+        const response = await archiveProject(project.id);
 
         if (response.data.success) {
           setIsSuccess(true);
@@ -299,16 +260,8 @@ const ProjectsManagement = () => {
         isComplete: false,
       });
 
-      const cookie = localStorage.getItem("authToken");
-      if (!cookie) {
-        setPublishingModalState({ isOpen: false, isComplete: false });
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
-      }
-
       try {
-        const response = await publishProject(cookie, project.id);
+        const response = await publishProject(project.id);
         if (response.data.success) {
           await fetchProjects();
           if (selectedProject) {
@@ -350,14 +303,6 @@ const ProjectsManagement = () => {
   };
 
   const handleCreateProject = async () => {
-    const cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
     if (newProject.name === "" || newProject.description === "") {
       setShowErrorPopup(true);
       setErrorMessage("Please enter a valid project name and description.");
@@ -368,7 +313,6 @@ const ProjectsManagement = () => {
       console.log(`Using default factors? : ${useDefaultFactors}`);
       console.log(`is_to_research? : ${research}`);
       const response = await createProject(
-        cookie,
         newProject.name,
         newProject.description,
         useDefaultFactors,

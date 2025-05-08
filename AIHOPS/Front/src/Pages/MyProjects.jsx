@@ -48,21 +48,14 @@ const MyProjects = () => {
   const fetchProjects = async () => {
     try {
       setLoading(true); // Make sure loading is true when fetching
-      const cookie = localStorage.getItem("authToken");
-      if (!cookie) {
-        console.error("Authentication token not found");
-        setLoading(false);
-        return;
-      }
-
-      const response = await getProjectsMember(cookie);
+      const response = await getProjectsMember();
       if (response.data.success) {
         const fetchedProjects = response.data.projects || [];
         console.log("Fetched projects:", fetchedProjects); // Debug logging
         setProjects(fetchedProjects);
 
         // Sort projects by default order (newest first)
-        await initializeProjectVotingStatuses(fetchedProjects, cookie);
+        await initializeProjectVotingStatuses(fetchedProjects);
       } else {
         console.error("Failed to fetch projects:", response.data.message);
       }
@@ -73,13 +66,13 @@ const MyProjects = () => {
     }
   };
 
-  const initializeProjectVotingStatuses = async (projects, cookie) => {
+  const initializeProjectVotingStatuses = async (projects) => {
     const initialStatus = {};
 
     await Promise.all(
       projects.map(async (project) => {
         try {
-          const voteResponse = await getMemberVoteOnProject(cookie, project.id);
+          const voteResponse = await getMemberVoteOnProject(project.id);
           if (voteResponse.data.success) {
             const factorVotes = voteResponse.data.votes.factor_votes || {};
             const severityVotes = voteResponse.data.votes.severity_votes || [];
@@ -126,11 +119,7 @@ const MyProjects = () => {
 
   const handleFactorSubmit = async (factorId, score) => {
     try {
-      const cookie = localStorage.getItem("authToken");
-      if (!cookie) return false;
-
       const response = await submitFactorVote(
-        cookie,
         currentProject.id,
         factorId,
         score
@@ -181,12 +170,7 @@ const MyProjects = () => {
 
   const updateFactorsVotes = async (projectId) => {
     try {
-      const cookie = localStorage.getItem("authToken");
-      if (!cookie) {
-        alert("Authentication token not found");
-        return;
-      }
-      const response = await getMemberVoteOnProject(cookie, projectId);
+      const response = await getMemberVoteOnProject(projectId);
       if (response.data.success) {
         const apiFactorVotes = response.data.votes.factor_votes || {};
         // load both into local vote‐state AND "submitted" state
@@ -231,12 +215,7 @@ const MyProjects = () => {
   // Function to handle D-score vote completion
   const handleDScoreVoteComplete = async (percentages) => {
     try {
-      const cookie = localStorage.getItem("authToken");
-      const response = await submitDScoreVotes(
-        cookie,
-        currentProject.id,
-        percentages
-      );
+      const response = await submitDScoreVotes(currentProject.id, percentages);
       if (response.data.success) {
         setProjectVotingStatus((prev) => ({
           ...prev,

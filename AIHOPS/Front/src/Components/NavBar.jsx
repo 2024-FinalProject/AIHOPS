@@ -22,13 +22,8 @@ const NavBar = () => {
   }, [location.pathname]);
 
   const fetchPendingRequest = async () => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      console.error("authToken not found in localStorage");
-      return;
-    }
     try {
-      const response = await getPendingRequest(cookie);
+      const response = await getPendingRequest();
       if (response.data.success) {
         setNewMessages(response.data.requests.length > 0); // Check if there are new messages
       } else {

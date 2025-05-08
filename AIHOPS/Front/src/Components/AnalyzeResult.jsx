@@ -29,14 +29,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetch_project_progress = async () => {
-    let cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
     try {
-      let res = await getProjectProgress(cookie, projectId);
+      let res = await getProjectProgress(projectId);
       if (res.data.success) setProjectsProgress(res.data.progress);
     } catch (error) {
       alert(error);
@@ -45,13 +39,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
   const fetch_project_score = async (weightsToUse) => {
     console.log("trying to fetch score witth weights: ", weights);
-
-    let cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
 
     //check all weights not zero
     const hasPositiveWeight = Object.values(weightsToUse).some(
@@ -64,7 +51,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
     setIsLoading(true);
     try {
       //Turn wighets into a list of weights values:
-      let res = await getProjectsScore(cookie, projectId, weightsToUse);
+      let res = await getProjectsScore(projectId, weightsToUse);
       if (res.data.success) setProjectsScore(res.data.score);
     } catch (error) {
       alert(error);
@@ -73,14 +60,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   const fetch_project_factors = async () => {
-    let cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
     try {
-      let res = await getProjectFactors(cookie, projectId);
+      let res = await getProjectFactors(projectId);
       if (res.data.success) {
         setProjectFactors(res.data.factors);
       }
@@ -90,14 +71,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   const fetch_project_severity_factors = async () => {
-    let cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
     try {
-      let res = await getProjectSeverityFactors(cookie, projectId);
+      let res = await getProjectSeverityFactors(projectId);
       if (res.data.success) setProjectSeverityFactors(res.data.severityFactors);
     } catch (error) {
       alert(error);
@@ -105,14 +80,8 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   const fetch_project_factors_votes = async () => {
-    let cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
     try {
-      let res = await getProjectFactorVotes(cookie, projectId);
+      let res = await getProjectFactorVotes(projectId);
       if (res.data.success) setProjectFactorsVotes(res.data.votes);
     } catch (error) {
       alert(error);
@@ -138,12 +107,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   };
 
   useEffect(() => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
     fetchAllData();
   }, []);
 

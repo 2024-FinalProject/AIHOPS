@@ -31,24 +31,16 @@ const EditPopup = ({
   const [reloadTrigger, setReloadTrigger] = useState(0);
 
   useEffect(() => {
-    const cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
-    fetch_pending_invites(cookie, selectedProject.id);
-    fetch_pending_requests(cookie, selectedProject.id);
+    fetch_pending_invites(selectedProject.id);
+    fetch_pending_requests(selectedProject.id);
     fetch_factors_pool();
 
     setAnalyzePopupType("showAssessorsInfo");
   }, [reloadTrigger]);
 
-  const fetch_pending_invites = async (cookie, projectId) => {
+  const fetch_pending_invites = async (projectId) => {
     try {
-      const response = await get_project_to_invite(cookie, projectId);
+      const response = await get_project_to_invite(projectId);
       if (response?.data) {
         setProjectsPendingInvites(response.data.invites);
       } else {
@@ -60,12 +52,9 @@ const EditPopup = ({
     }
   };
 
-  const fetch_pending_requests = async (cookie, projectId) => {
+  const fetch_pending_requests = async (projectId) => {
     try {
-      const response = await get_pending_requests_for_project(
-        cookie,
-        projectId
-      );
+      const response = await get_pending_requests_for_project(projectId);
       if (response?.data) {
         setProjectsPendingRequests(response.data.emails);
       } else {
@@ -78,18 +67,8 @@ const EditPopup = ({
   };
 
   const fetch_factors_pool = async () => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
     try {
-      const response = await getProjectsFactorsPoolOfMember(
-        cookie,
-        selectedProject.id
-      );
+      const response = await getProjectsFactorsPoolOfMember(selectedProject.id);
       if (response?.data) {
         setFactorsPool(response.data.factors);
       } else {
@@ -103,12 +82,9 @@ const EditPopup = ({
 
   const refreshData = async () => {
     // Helper function to refresh data
-    const cookie = localStorage.getItem("authToken");
-    if (cookie) {
-      await fetchProjects();
-      await fetch_selected_project(selectedProject);
-      setReloadTrigger((prev) => prev + 1);
-    }
+    await fetchProjects();
+    await fetch_selected_project(selectedProject);
+    setReloadTrigger((prev) => prev + 1);
   };
 
   const getPopupContent = () => {

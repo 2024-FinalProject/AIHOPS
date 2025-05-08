@@ -1,9 +1,8 @@
-import axios from "axios";
+import axios from "./axiosInstance";
 const API_URL = "http://localhost:5555";
 
 export const verify = async (cookie, userName, passwd, code) => {
   return await axios.post(`${API_URL}/verify`, {
-    cookie,
     userName,
     passwd,
     code,
@@ -11,23 +10,23 @@ export const verify = async (cookie, userName, passwd, code) => {
 };
 
 export const verifyAutomatic = async (cookie, token) => {
-  return await axios.post(`${API_URL}/verify_automatic`, { cookie, token });
+  return await axios.post(`${API_URL}/verify_automatic`, { token });
 };
 
 export const register = async (cookie, userName, passwd) => {
-  return await axios.post(`${API_URL}/register`, { cookie, userName, passwd });
+  return await axios.post(`${API_URL}/register`, { userName, passwd });
 };
 
 export const loginUser = async (cookie, userName, passwd) => {
-  return await axios.post(`${API_URL}/login`, { cookie, userName, passwd });
+  return await axios.post(`${API_URL}/login`, { userName, passwd });
 };
 
 export const logoutUser = async (cookie) => {
-  return await axios.post(`${API_URL}/logout`, { cookie });
+  return await axios.post(`${API_URL}/logout`, {});
 };
 
 export const startSession = async () => {
-  const response = await axios.get(`${API_URL}/enter`);
+  const response = await axios.get(`${API_URL}/enter`, { skipAuth: true });
   // const cookie = response.data.cookie;
   // localStorage.setItem("authToken", cookie);
 
@@ -40,14 +39,12 @@ export const startSession = async () => {
 
 export const startPasswordRecovery = async (cookie, email) => {
   return await axios.post(`${API_URL}/start_password_recovery`, {
-    cookie,
     email,
   });
 };
 
 export const updatePassword = async (cookie, email, password, code) => {
   return await axios.post(`${API_URL}/update_password`, {
-    cookie,
     email,
     password,
     code,
@@ -56,17 +53,16 @@ export const updatePassword = async (cookie, email, password, code) => {
 
 //Google Login method:
 export const googleLogin = async (cookie, tokenId) => {
-  return await axios.post(`${API_URL}/google_login`, { cookie, tokenId });
+  return await axios.post(`${API_URL}/google_login`, { tokenId });
 };
 
 export const checkEmailExists = async (cookie, tokenId) => {
-  return await axios.post(`${API_URL}/check_email_exists`, { cookie, tokenId });
+  return await axios.post(`${API_URL}/check_email_exists`, { tokenId });
 };
 
 export const isValidSession = async (cookie, email) => {
   return await axios.get(`${API_URL}/is-valid-session`, {
     params: {
-      cookie: cookie,
       email: email,
     },
     headers: {
