@@ -65,7 +65,19 @@ class ProjectManager:
             if proj.pid == pid:
                 return proj
         return self._check_if_research(pid, actor)
+    
+    def cleanup_member(self, member_email):
+        """Remove all in-memory traces of this user’s projects and pending requests."""
+        # Remove all projects they own from owners, projects, and research_projects
+        owned_projects = self.owners.dict.pop(member_email, [])
+        for proj in owned_projects:
+            pid = proj.pid
+            # Remove from the main projects map
+            self.projects.dict.pop(pid, None)
+            # If it was a research project, remove it too
+            self.research_projects.pop(pid, None)
 
+        return ResponseSuccessMsg(f"Cleaned up all traces of {member_email} from memory.")
 
     # ------------  Project Creation ------------------------
 

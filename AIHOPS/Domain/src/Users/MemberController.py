@@ -205,3 +205,18 @@ class MemberController:
         return member.login_with_google(email)
 
 
+    def delete_account(self, email):
+        """Delete this member and all their projects."""
+        # 1) verify the member exists
+        member = self.members.get(email)
+        if member is None:
+            return ResponseFailMsg(f"invalid user: {email}")
+
+        # 2) perform atomic DB deletion
+        res = self.db_access.delete_member_and_projects(email)
+        if not res.success:
+            return res
+
+        # 3) clean up in-memory state
+        self.members.pop(email)
+        return ResponseSuccessMsg(f"Member {email} and all their projects have been deleted.")

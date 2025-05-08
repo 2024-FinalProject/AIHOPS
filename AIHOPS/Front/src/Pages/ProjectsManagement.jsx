@@ -324,6 +324,8 @@ const ProjectsManagement = () => {
         setNewProject({ name: "", description: "" });
         await fetchProjects();
         setShowCreatePopup(false);
+        setSuccessMessage("Project created successfully.");
+        setShowSuccessPopup(true);
       } else {
         setErrorMessage(response.data.message);
         setShowErrorPopup(true);

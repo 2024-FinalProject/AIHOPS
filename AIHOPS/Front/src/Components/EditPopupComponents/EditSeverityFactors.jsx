@@ -19,7 +19,7 @@ const EditSeverityFactors = ({
     ...selectedProject.severity_factors,
   ]);
 
-  // Alert state
+  // Alert state - make sure these are defined at the component level
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("warning"); // "warning" | "error" | "success"
@@ -68,6 +68,9 @@ const EditSeverityFactors = ({
     }
 
     try {
+      // Update the severity factors immediately in the selectedProject object
+      selectedProject.severity_factors = [...severityValues];
+      
       const resp = await setSeverityFactors(
         selectedProject.id,
         severityValues
@@ -79,14 +82,18 @@ const EditSeverityFactors = ({
         return -1;
       }
 
+      // Show success message
+      setAlertType("success");
+      setAlertMessage("Severity factors updated successfully!");
+      setShowAlert(true);
+      console.log("Setting alert: success - Severity factors updated successfully!");
+
+      // Refresh data in the background
       if (fetchProjects) await fetchProjects();
       const fresh = await getProjectSeverityFactors(selectedProject.id);
       selectedProject.severity_factors = fresh.data.severityFactors;
       if (fetch_selected_project) await fetch_selected_project(selectedProject);
 
-      // setAlertType("success");
-      // setAlertMessage("Severity factors updated successfully.");
-      // setShowAlert(true);
       return 1;
     } catch (err) {
       const msg = err.response?.data?.message || err.message;
@@ -104,15 +111,21 @@ const EditSeverityFactors = ({
     try {
       const res = await confirmSeverityFactors(selectedProject.id);
       if (res.data.success) {
+        // Update the property immediately in the UI
         selectedProject.severity_factors_inited = true;
         if (fetch_selected_project)
           await fetch_selected_project(selectedProject);
 
-        // setAlertType("success");
-        // setAlertMessage("Severity factors confirmed successfully.");
-        // setShowAlert(true);
+        // Show success message
+        setAlertType("success");
+        setAlertMessage("Severity factors confirmed successfully!");
+        setShowAlert(true);
+        console.log("Setting alert: success - Severity factors confirmed successfully!");
 
-        setTimeout(() => closePopup(), 500);
+        // Delay closing the popup to show the success message
+        setTimeout(() => {
+          closePopup();
+        }, 2000);
       } else {
         setAlertType("error");
         setAlertMessage("Error confirming severity factors.");
@@ -133,6 +146,19 @@ const EditSeverityFactors = ({
       >
         <u>Edit Severity Factors</u>:
       </h2>
+
+      {/* Display the alert at the top for better visibility */}
+      {showAlert && (
+        <div style={{ margin: "10px 0 20px 0" }}>
+          <AlertPopup
+            title={alertType === "success" ? "Success" : "Input Validation"}
+            message={alertMessage}
+            type={alertType}
+            onClose={() => setShowAlert(false)}
+            autoCloseTime={alertType === "success" ? 2000 : 3000}
+          />
+        </div>
+      )}
 
       <table className="severity-table">
         <thead>
@@ -203,16 +229,6 @@ const EditSeverityFactors = ({
           )}
         </button>
       </div>
-
-      {showAlert && (
-        <AlertPopup
-          title="Input Validation"
-          message={alertMessage}
-          type={alertType}
-          onClose={() => setShowAlert(false)}
-          autoCloseTime={3000}
-        />
-      )}
     </div>
   );
 };

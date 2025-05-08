@@ -111,6 +111,13 @@ def update_password():
     res = server.update_password(int(data["cookie"]), data["email"], data["password"], data["code"])
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/delete_account", methods=["POST"])
+# expecting json with {cookie}
+def delete_account():
+    data = request.json
+    res = server.delete_account(int(data["cookie"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
 # -------- Project Management ---------------
 
 @app.route("/project/create", methods=["POST"])

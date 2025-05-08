@@ -257,6 +257,19 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to check session: {e}")
 
+    def delete_account(self, cookie):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            res = self.user_controller.delete_account(session.user_name)
+            if not res.success:
+                return res
+            return self.project_manager.cleanup_member(session.user_name)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to delete account: {e}")
+
     # ------------- Project ------------------
     def create_project(self, cookie, name, description, use_default_factors=False, is_to_research=False):
         """when using default factors, if anything goes wrong with the factor assignment,

@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from "react";
 import "./Settings.css"; // Import the CSS
-import { updatePassword } from "../api/AuthApi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { use } from "react";
+import { deleteAccount } from "../api/AuthApi";
+import AlertPopup from "../Components/AlertPopup";
 
 const SettingsPage = () => {
   const { theme, toggleTheme } = useAuth();
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const { logout } = useAuth();
+  const [alertVerifyPopup, setAlertVerifyPopup] = useState(false);
+  const [alertyVerifyMessage, setAlertVerifyMessage] = useState(
+    "Are you sure you want to delete your account?" +
+      "This action cannot be undone - all of your data will be permenantely deleted."
+  );
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -19,19 +25,9 @@ const SettingsPage = () => {
 
   const [openSections, setOpenSections] = useState({
     security: false,
-    changePassword: false,
     deleteAccount: false,
     appearance: false,
-    personalization: false,
-    privacy: false,
-  });
-
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [privacySettings, setPrivacySettings] = useState({
-    shareScales: false,
-    allowResearch: false,
+    profilePicture: false,
   });
 
   const toggleSection = (section) => {
@@ -39,41 +35,6 @@ const SettingsPage = () => {
       ...prev,
       [section]: !prev[section],
     }));
-  };
-
-  const handlePasswordChange = async () => {
-    if (newPassword !== confirmPassword) {
-      alert("The new password does not match with the verified password!");
-      return;
-    }
-
-    if (
-      currentPassword === "" ||
-      newPassword === "" ||
-      confirmPassword === ""
-    ) {
-      alert("Please fill in all fields!");
-      return;
-    }
-
-    if (newPassword === currentPassword) {
-      alert("The new password cannot be the same as the current password!");
-      return;
-    }
-
-    try {
-      let res = await updatePassword(currentPassword, newPassword);
-      if (res.data.success) {
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        alert("Password updated successfully!");
-      } else {
-        alert("Error in updating the password: " + res.data.message);
-      }
-    } catch (error) {
-      alert("Error in updating the password!");
-    }
   };
 
   const SectionHeader = ({ title, section, isOpen }) => (
@@ -85,6 +46,30 @@ const SettingsPage = () => {
       <button className="toggle-button">{isOpen ? "−" : "+"}</button>
     </div>
   );
+
+  const handleDeleteAccount = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      console.error("No authentication token found. Please log in again.");
+      return;
+    }
+
+    try {
+      const response = await deleteAccount(token);
+      if (response.data.success) {
+        logout();
+        navigate("/");
+      } else {
+        console.error("Failed to delete account:", response.data.message);
+        alert("Failed to delete account. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert(
+        "An error occurred while deleting the account. Please try again later."
+      );
+    }
+  };
 
   return (
     <div className="settings-container">
@@ -102,46 +87,6 @@ const SettingsPage = () => {
         {openSections.security && (
           <div className="section-content">
             <SectionHeader
-              title="Change Password"
-              section="changePassword"
-              isOpen={openSections.changePassword}
-            />
-            {openSections.changePassword && (
-              <div className="inner-section-content">
-                <input
-                  type="password"
-                  placeholder="Current password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="password-input"
-                  style={{ fontFamily: "Verdana, sans-serif" }}
-                />
-                <input
-                  type="password"
-                  placeholder="New password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="password-input"
-                  style={{ fontFamily: "Verdana, sans-serif" }}
-                />
-                <input
-                  type="password"
-                  placeholder="Verify new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="password-input"
-                  style={{ fontFamily: "Verdana, sans-serif" }}
-                />
-                <button
-                  onClick={handlePasswordChange}
-                  className="button button-green"
-                >
-                  Update Password
-                </button>
-              </div>
-            )}
-
-            <SectionHeader
               title="Delete Account"
               section="deleteAccount"
               isOpen={openSections.deleteAccount}
@@ -150,7 +95,7 @@ const SettingsPage = () => {
               <div className="inner-section-content">
                 <button
                   className="button button-red"
-                  onClick={() => alert("Delete Account Not Implemented Yet!")}
+                  onClick={() => setAlertVerifyPopup(true)}
                 >
                   Delete Account
                 </button>
@@ -177,13 +122,13 @@ const SettingsPage = () => {
           </div>
         )}
 
-        {/* Personalization Section */}
+        {/* Profile Picture Section (Simplified from Personalization) */}
         <SectionHeader
-          title="Personalization"
-          section="personalization"
-          isOpen={openSections.personalization}
+          title="Profile Picture"
+          section="profilePicture"
+          isOpen={openSections.profilePicture}
         />
-        {openSections.personalization && (
+        {openSections.profilePicture && (
           <div className="section-content">
             <button
               className="button button-blue"
@@ -193,77 +138,21 @@ const SettingsPage = () => {
             >
               Upload Profile Picture
             </button>
-            <button
-              className="button button-blue"
-              onClick={() => alert("Change Name Not Implemented Yet!")}
-              style={{ marginLeft: "10px" }}
-            >
-              Change Name
-            </button>
-            <button
-              className="button button-blue"
-              onClick={() => alert("Change Organization Not Implemented Yet!")}
-              style={{ marginLeft: "10px" }}
-            >
-              Change Organization
-            </button>
-            <button
-              className="button button-blue"
-              onClick={() => alert("Change Position Not Implemented Yet!")}
-              style={{ marginLeft: "10px" }}
-            >
-              Change Position
-            </button>
-          </div>
-        )}
-
-        {/* Privacy Section */}
-        <SectionHeader
-          title="Privacy"
-          section="privacy"
-          isOpen={openSections.privacy}
-        />
-        {openSections.privacy && (
-          <div className="section-content privacy-content">
-            <label className="privacy-option">
-              <input
-                type="checkbox"
-                checked={privacySettings.shareScales}
-                onChange={() =>
-                  setPrivacySettings((prev) => ({
-                    ...prev,
-                    shareScales: !prev.shareScales,
-                  }))
-                }
-                className="checkbox-input"
-              />
-              Content scales I create can be shared with other users.
-            </label>
-
-            <label className="privacy-option">
-              <input
-                type="checkbox"
-                checked={privacySettings.allowResearch}
-                onChange={() =>
-                  setPrivacySettings((prev) => ({
-                    ...prev,
-                    allowResearch: !prev.allowResearch,
-                  }))
-                }
-                className="checkbox-input"
-              />
-              Data from my project may be used for academic research.
-            </label>
-
-            <button
-              className="button button-blue"
-              onClick={() => alert("Not Implemented Yet!")}
-            >
-              Save Privacy Settings
-            </button>
           </div>
         )}
       </div>
+      {alertVerifyPopup && (
+        <AlertPopup
+          message={alertyVerifyMessage}
+          type={"info"}
+          title={"Delete Account"}
+          onCancel={() => setAlertVerifyPopup(false)}
+          onConfirm={() => {
+            setAlertVerifyPopup(false);
+            handleDeleteAccount();
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -73,3 +73,7 @@ export const isValidSession = async (cookie, email) => {
     },
   });
 };
+
+export const deleteAccount = async (cookie) => {
+  return await axios.post(`${API_URL}/delete_account`, { cookie });
+};

@@ -95,31 +95,60 @@ const EditContentFactorsComponent = ({
   const handleSubmit = async () => {
     const factorIds = selectedFactors.map((factor) => factor.id);
     if (factorIds.length === 0) {
-      alert("Please select at least one factor to add.");
+      setAlertType("warning");
+      setAlertMessage("Please select at least one factor to add.");
+      setShowAlert(true);
       return;
     }
 
-    const response = await setProjectFactors(selectedProject.id, factorIds);
-
-    if (response.data.success) {
-      setIsSuccess(true);
-      //Get fresh project data
-      await fetchProjects();
-      await fetch_selected_project(selectedProject);
-      selectedProject.factors = (
-        await getProjectFactors(selectedProject.id)
-      ).data.factors;
-      await fetch_factors_pool();
-      adjustPaginationAfterDeletion(
-        "pool",
-        factorsPool.length - selectedFactors.length
+    try {
+      const response = await setProjectFactors(
+        selectedProject.id,
+        factorIds
       );
-      setSelectedFactors([]);
-      selectedProject.factors_inited = false;
-    } else {
-      setMsg(response.data.message);
-      alert(response.data.message);
-      setIsSuccess(true);
+
+      if (response.data.success) {
+        // Update project factors immediately in the UI
+        selectedProject.factors_inited = false;
+
+        // Show success message
+        setAlertType("success");
+        setAlertMessage(`${selectedFactors.length} factor(s) added successfully!`);
+        setShowAlert(true);
+
+        // Refresh data in the background
+        await fetchProjects();
+        await fetch_selected_project(selectedProject);
+        selectedProject.factors = (
+          await getProjectFactors(selectedProject.id)
+        ).data.factors;
+        await fetch_factors_pool();
+
+        adjustPaginationAfterDeletion(
+          "pool",
+          factorsPool.length - selectedFactors.length
+        );
+
+        // Clear selection and return to factors list view after a brief delay
+        setTimeout(() => {
+          setSelectedFactors([]);
+          setShowPoolContentFactors(false);
+          setShowExistingContentFactors(true);
+        }, 1500);
+
+        setIsSuccess(true);
+      } else {
+        setAlertType("error");
+        setAlertMessage(response.data.message);
+        setShowAlert(true);
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      setAlertType("error");
+      setAlertMessage(`Error adding factors: ${errorMessage}`);
+      setShowAlert(true);
+      setIsSuccess(false);
     }
   };
 
@@ -147,6 +176,13 @@ const EditContentFactorsComponent = ({
 
       if (response.data.success) {
         setIsSuccess(true);
+
+        // Show success message
+        setAlertType("success");
+        setAlertMessage("Factor added successfully!");
+        setShowAlert(true);
+
+        // Refresh data
         await fetchProjects();
         await fetch_selected_project(selectedProject);
         selectedProject.factors = (
@@ -158,20 +194,29 @@ const EditContentFactorsComponent = ({
         setNewFactorDescription("");
         setScaleDescriptions(Array(5).fill(""));
         setScaleExplanations(Array(5).fill(""));
-        setAddNewFactorShow(false);
-        setShowExistingContentFactors(true);
+
+        // Reset unconfirmed status
         selectedProject.factors_inited = false;
         await fetch_selected_project(selectedProject);
         await fetch_factors_pool();
+
+        // Return to the factors list view after a brief delay
+        setTimeout(() => {
+          setAddNewFactorShow(false);
+          setShowExistingContentFactors(true);
+        }, 1500);
       } else {
-        setMsg(response.data.message);
-        alert(response.data.message);
-        setIsSuccess(true);
+        setAlertType("error");
+        setAlertMessage(response.data.message);
+        setShowAlert(true);
+        setIsSuccess(false);
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
       console.error("Error:", errorMessage);
-      setMsg(`Error in adding factor: ${errorMessage}`);
+      setAlertType("error");
+      setAlertMessage(`Error in adding factor: ${errorMessage}`);
+      setShowAlert(true);
       setIsSuccess(false);
     }
   };
@@ -332,22 +377,46 @@ const EditContentFactorsComponent = ({
   };
 
   const handleConfirmFactors = async (pid) => {
-    if (selectedProject.factors.length == 0) {
-      alert("Please add at least one factor in order to confirm");
+    if (selectedProject.factors.length === 0) {
+      setAlertType("warning");
+      setAlertMessage("Please add at least one assessment dimension in order to confirm");
+      setShowAlert(true);
       return;
     }
 
     try {
+      // Show a "processing" message
+      setAlertType("info");
+      setAlertMessage("Confirming assessment dimensions...");
+      setShowAlert(true);
+
       const response = await confirmProjectFactors(pid);
+
       if (response.data.success) {
+        // Update the property immediately in the UI
         selectedProject.factors_inited = true;
-        fetch_selected_project(selectedProject);
-        closePopup();
+        await fetch_selected_project(selectedProject);
+
+        // Show success message
+        setAlertType("success");
+        setAlertMessage("Assessment dimensions confirmed successfully!");
+        setShowAlert(true);
+        console.log("Setting success alert for assessment dimensions confirmation");
+
+        // Delay closing the popup to show the success message
+        setTimeout(() => {
+          closePopup();
+        }, 2000);
       } else {
-        console.log("Error confirming project factors");
+        setAlertType("error");
+        setAlertMessage(response.data.message || "Error confirming assessment dimensions");
+        setShowAlert(true);
       }
     } catch (error) {
-      console.log("Error confirming project factors");
+      const errorMessage = error.response?.data?.message || error.message;
+      setAlertType("error");
+      setAlertMessage(`Error confirming assessment dimensions: ${errorMessage}`);
+      setShowAlert(true);
     }
   };
 
