@@ -27,7 +27,7 @@ const Login = () => {
   // Terms and conditions state
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
-  const [termsScrolled, setTermsScrolled] = useState(false);
+  const [termsScrolled, setTermsScrolled] = useState(true);
 
   const termsRef = useRef(null);
 
@@ -68,16 +68,7 @@ const Login = () => {
     setMsg("");
 
     try {
-      const existingToken = localStorage.getItem("authToken");
-      let cookie;
-      if (existingToken) {
-        cookie = existingToken;
-      } else {
-        const session = await startSession();
-        cookie = session.data.cookie;
-      }
-
-      const response = await loginUser(cookie, userName, password);
+      const response = await loginUser(userName, password);
       console.log("is_admin value from response:", response?.data?.is_admin);
       if (response.data.success) {
         if (response.data.is_admin) {
@@ -86,10 +77,9 @@ const Login = () => {
         }
 
         setMsg(response.data.message);
-        localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);
         localStorage.setItem("isLoggedIn", "true");
-        login(cookie, userName);
+        login(userName);
         navigate("/");
         setIsSuccess(true);
       } else {
@@ -108,16 +98,7 @@ const Login = () => {
     setMsg("");
 
     try {
-      const existingToken = localStorage.getItem("authToken");
-      let cookie;
-      if (existingToken) {
-        cookie = existingToken;
-      } else {
-        const session = await startSession();
-        cookie = session.data.cookie;
-      }
-
-      const response = await startPasswordRecovery(cookie, userName);
+      const response = await startPasswordRecovery(userName);
       if (response.data.success) {
         setIsSuccess(true);
         setMsg(response.data.message);
@@ -143,16 +124,7 @@ const Login = () => {
     }
 
     try {
-      const existingToken = localStorage.getItem("authToken");
-      let cookie;
-      if (existingToken) {
-        cookie = existingToken;
-      } else {
-        const session = await startSession();
-        cookie = session.data.cookie;
-      }
-
-      const response = await googleLogin(cookie, credentialToUse);
+      const response = await googleLogin(credentialToUse);
 
       if (response.data.success) {
         // Mark that terms were accepted in this session and persistently
@@ -160,9 +132,8 @@ const Login = () => {
         localStorage.setItem("termsAccepted", "true");
 
         setMsg(response.data.message);
-        localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", response.data.email);
-        login(cookie, response.data.email);
+        login(response.data.email);
         localStorage.setItem("isLoggedIn", "true");
         navigate("/");
         setIsSuccess(true);
@@ -186,16 +157,9 @@ const Login = () => {
     try {
       // First check if the user already exists
       const existingToken = localStorage.getItem("authToken");
-      let cookie;
-      if (existingToken) {
-        cookie = existingToken;
-      } else {
-        const session = await startSession();
-        cookie = session.data.cookie;
-      }
 
       // Call new endpoint to check if email exists
-      const checkEmailResponse = await checkEmailExists(cookie, cred);
+      const checkEmailResponse = await checkEmailExists(cred);
 
       if (checkEmailResponse.data.userExists) {
         // User exists, proceed with Google login directly

@@ -241,7 +241,22 @@ class Server:
             return self.user_controller.recover_password(email, passwd, code)
         except Exception as e:
             return ResponseFailMsg(f"Failed to update password: {e}")
-        
+
+    def is_valid_session(self, cookie, email):
+        """if email is None -> check if cookie exists
+            if email is not None -> check if cookie exists and logged in as email"""
+        try:
+            session = self.sessions.get(cookie, None)
+            if session is None:
+                return ResponseFailMsg(f"Session not found: {cookie}")
+            if email is None:
+                return ResponseSuccessMsg(f"Session found: {cookie}")
+            if session.is_logged_in() is False or session.user_name != email:
+                return ResponseFailMsg(f"session not logged in: {email}")
+            return ResponseSuccessMsg(f"session found: {cookie}, logged in as {email}")
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to check session: {e}")
+
     def delete_account(self, cookie):
         try:
             res = self.get_session_member(cookie)
@@ -254,7 +269,7 @@ class Server:
             return self.project_manager.cleanup_member(session.user_name)
         except Exception as e:
             return ResponseFailMsg(f"Failed to delete account: {e}")
-    
+
     # ------------- Project ------------------
     def create_project(self, cookie, name, description, use_default_factors=False, is_to_research=False):
         """when using default factors, if anything goes wrong with the factor assignment,

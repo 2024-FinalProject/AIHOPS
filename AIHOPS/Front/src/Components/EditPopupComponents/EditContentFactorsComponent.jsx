@@ -93,15 +93,6 @@ const EditContentFactorsComponent = ({
   };
 
   const handleSubmit = async () => {
-    let cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setAlertType("error");
-      setAlertMessage("No authentication token found. Please log in again.");
-      setShowAlert(true);
-      setIsSuccess(false);
-      return;
-    }
-  
     const factorIds = selectedFactors.map((factor) => factor.id);
     if (factorIds.length === 0) {
       setAlertType("warning");
@@ -109,43 +100,42 @@ const EditContentFactorsComponent = ({
       setShowAlert(true);
       return;
     }
-  
+
     try {
       const response = await setProjectFactors(
-        cookie,
         selectedProject.id,
         factorIds
       );
-  
+
       if (response.data.success) {
         // Update project factors immediately in the UI
         selectedProject.factors_inited = false;
-        
+
         // Show success message
         setAlertType("success");
         setAlertMessage(`${selectedFactors.length} factor(s) added successfully!`);
         setShowAlert(true);
-        
+
         // Refresh data in the background
         await fetchProjects();
         await fetch_selected_project(selectedProject);
         selectedProject.factors = (
-          await getProjectFactors(cookie, selectedProject.id)
+          await getProjectFactors(selectedProject.id)
         ).data.factors;
         await fetch_factors_pool();
-        
+
         adjustPaginationAfterDeletion(
           "pool",
           factorsPool.length - selectedFactors.length
         );
-        
+
         // Clear selection and return to factors list view after a brief delay
         setTimeout(() => {
           setSelectedFactors([]);
           setShowPoolContentFactors(false);
           setShowExistingContentFactors(true);
         }, 1500);
-        
+
         setIsSuccess(true);
       } else {
         setAlertType("error");
@@ -175,51 +165,41 @@ const EditContentFactorsComponent = ({
   };
 
   const handleAddFactor = async (formData) => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setAlertType("error");
-      setAlertMessage("No authentication token found. Please log in again.");
-      setShowAlert(true);
-      setIsSuccess(false);
-      return;
-    }
-  
     try {
       const response = await addProjectFactor(
-        cookie,
         selectedProject.id,
         formData.name,
         formData.description,
         formData.scaleDescriptions,
         formData.scaleExplanations
       );
-  
+
       if (response.data.success) {
         setIsSuccess(true);
-        
+
         // Show success message
         setAlertType("success");
         setAlertMessage("Factor added successfully!");
         setShowAlert(true);
-        
+
         // Refresh data
         await fetchProjects();
         await fetch_selected_project(selectedProject);
         selectedProject.factors = (
-          await getProjectFactors(cookie, selectedProject.id)
+          await getProjectFactors(selectedProject.id)
         ).data.factors;
-  
+
         // Reset all form fields
         setNewFactorName("");
         setNewFactorDescription("");
         setScaleDescriptions(Array(5).fill(""));
         setScaleExplanations(Array(5).fill(""));
-        
+
         // Reset unconfirmed status
         selectedProject.factors_inited = false;
         await fetch_selected_project(selectedProject);
         await fetch_factors_pool();
-        
+
         // Return to the factors list view after a brief delay
         setTimeout(() => {
           setAddNewFactorShow(false);
@@ -263,13 +243,6 @@ const EditContentFactorsComponent = ({
   };
 
   const handleUpdateEditedFactor = async () => {
-    let cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
     if (!editedFactorName || !editedFactorDescription) {
       setAlertMessage("Please enter a factor name and description.");
       setAlertType("warning");
@@ -293,7 +266,6 @@ const EditContentFactorsComponent = ({
       }
 
       const response = await updateProjectFactor(
-        cookie,
         editingFactor.id,
         projectId,
         editedFactorName,
@@ -327,7 +299,7 @@ const EditContentFactorsComponent = ({
     await fetchProjects();
     await fetch_selected_project(selectedProject);
     selectedProject.factors = (
-      await getProjectFactors(cookie, selectedProject.id)
+      await getProjectFactors(selectedProject.id)
     ).data.factors;
     fetch_factors_pool();
     setEditingFactor(null);
@@ -345,23 +317,12 @@ const EditContentFactorsComponent = ({
         `Are you sure you want to delete the factor "${factorName} from the project"?`
       )
     ) {
-      let cookie = localStorage.getItem("authToken");
-      if (!cookie) {
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
-      }
-
       try {
-        const res = await deleteProjectFactor(
-          cookie,
-          selectedProject.id,
-          factorId
-        );
+        const res = await deleteProjectFactor(selectedProject.id, factorId);
         if (res.data.success) {
           await fetchProjects();
           selectedProject.factors = (
-            await getProjectFactors(cookie, selectedProject.id)
+            await getProjectFactors(selectedProject.id)
           ).data.factors;
           await fetch_selected_project(selectedProject);
           await fetch_factors_pool();
@@ -392,15 +353,8 @@ const EditContentFactorsComponent = ({
         `Are you sure you want to delete the factor "${factorName} from the pool"?`
       )
     ) {
-      let cookie = localStorage.getItem("authToken");
-      if (!cookie) {
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
-      }
-
       try {
-        const res = await deleteFactorFromPool(cookie, factorId);
+        const res = await deleteFactorFromPool(factorId);
         if (res.data.success) {
           await fetchProjects();
           await fetch_selected_project(selectedProject);
@@ -423,41 +377,32 @@ const EditContentFactorsComponent = ({
   };
 
   const handleConfirmFactors = async (pid) => {
-    let cookie = localStorage.getItem("authToken");
-  
-    if (!cookie) {
-      setAlertType("error");
-      setAlertMessage("No authentication token found. Please log in again.");
-      setShowAlert(true);
-      return;
-    }
-  
     if (selectedProject.factors.length === 0) {
       setAlertType("warning");
       setAlertMessage("Please add at least one assessment dimension in order to confirm");
       setShowAlert(true);
       return;
     }
-  
+
     try {
       // Show a "processing" message
       setAlertType("info");
       setAlertMessage("Confirming assessment dimensions...");
       setShowAlert(true);
-      
-      const response = await confirmProjectFactors(cookie, pid);
-      
+
+      const response = await confirmProjectFactors(pid);
+
       if (response.data.success) {
         // Update the property immediately in the UI
         selectedProject.factors_inited = true;
         await fetch_selected_project(selectedProject);
-        
+
         // Show success message
         setAlertType("success");
         setAlertMessage("Assessment dimensions confirmed successfully!");
         setShowAlert(true);
         console.log("Setting success alert for assessment dimensions confirmation");
-        
+
         // Delay closing the popup to show the success message
         setTimeout(() => {
           closePopup();

@@ -108,14 +108,8 @@ const DGraph = ({ onVoteComplete, projectId }) => {
   }, [percentages, severityLevels]);
 
   const fetchPreviousVotes = async () => {
-    const authToken = localStorage.getItem("authToken");
-    if (!authToken) {
-      console.error("No authentication token found");
-      return;
-    }
-
     try {
-      const response = await getMemberVoteOnProject(authToken, projectId);
+      const response = await getMemberVoteOnProject(projectId);
       if (response.data.success) {
         const votes = response.data.votes;
         const severityVotes = votes.severity_votes || [];

@@ -1,11 +1,9 @@
-import axios from "axios";
+import axios from "./axiosInstance";
 const API_URL = "http://localhost:5555";
 
-export const getProjects = async (cookie) => {
+export const getProjects = async () => {
   return await axios.get(`${API_URL}/projects`, {
-    params: {
-      cookie: cookie,
-    },
+    params: {},
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
@@ -14,14 +12,12 @@ export const getProjects = async (cookie) => {
 };
 
 export const createProject = async (
-  cookie,
   project_name,
   project_desc,
   use_default_factors,
   isToResearch
 ) => {
   return await axios.post(`${API_URL}/project/create`, {
-    cookie: cookie,
     name: project_name,
     description: project_desc,
     defaultFactors: use_default_factors,
@@ -29,44 +25,38 @@ export const createProject = async (
   });
 };
 
-export const publishProject = async (cookie, project_id) => {
+export const publishProject = async (project_id) => {
   return await axios.post(`${API_URL}/project/publish`, {
-    cookie: cookie,
     pid: project_id,
   });
 };
 
-export const archiveProject = async (cookie, project_id) => {
+export const archiveProject = async (project_id) => {
   return await axios.post(`${API_URL}/project/archive`, {
-    cookie: cookie,
     pid: project_id,
   });
 };
 
 export const update_project_name_and_desc = async (
-  cookie,
   project_id,
   project_name,
   project_desc
 ) => {
   return await axios.post(`${API_URL}/project/update-name-and-desc`, {
-    cookie: cookie,
     pid: project_id,
     name: project_name,
     description: project_desc,
   });
 };
 
-export const setProjectFactors = async (cookie, project_id, factors) => {
+export const setProjectFactors = async (project_id, factors) => {
   return await axios.post(`${API_URL}/project/factors`, {
-    cookie: cookie,
     pid: project_id,
     factors: factors,
   });
 };
 
 export const addProjectFactor = async (
-  cookie,
   project_id,
   factor_name,
   factor_desc,
@@ -74,7 +64,6 @@ export const addProjectFactor = async (
   scales_explanation
 ) => {
   return await axios.post(`${API_URL}/project/factor`, {
-    cookie: cookie,
     pid: project_id,
     factor_name: factor_name,
     factor_desc: factor_desc,
@@ -83,9 +72,8 @@ export const addProjectFactor = async (
   });
 };
 
-export const deleteProjectFactor = async (cookie, project_id, factor_id) => {
+export const deleteProjectFactor = async (project_id, factor_id) => {
   return await axios.post(`${API_URL}/project/delete-factor`, {
-    cookie: cookie,
     pid: project_id,
     fid: factor_id,
   });
@@ -93,7 +81,6 @@ export const deleteProjectFactor = async (cookie, project_id, factor_id) => {
 
 //TODO: new
 export const updateProjectFactor = async (
-  cookie,
   factor_id,
   pid,
   factor_name,
@@ -103,7 +90,6 @@ export const updateProjectFactor = async (
   apply_to_all_inDesign
 ) => {
   return await axios.post(`${API_URL}/project/update-factor`, {
-    cookie: cookie,
     fid: factor_id,
     pid: pid,
     name: factor_name,
@@ -114,59 +100,48 @@ export const updateProjectFactor = async (
   });
 };
 
-export const deleteFactorFromPool = async (cookie, factor_id) => {
+export const deleteFactorFromPool = async (factor_id) => {
   return await axios.post(`${API_URL}/project/factor/delete-from-pool`, {
-    cookie: cookie,
     fid: factor_id,
   });
 };
 
-export const confirmProjectFactors = async (cookie, project_id) => {
+export const confirmProjectFactors = async (project_id) => {
   return await axios.post(`${API_URL}/project/confirm-factors`, {
-    cookie: cookie,
     pid: project_id,
   });
 };
 
-export const setSeverityFactors = async (
-  cookie,
-  project_id,
-  severity_factors
-) => {
+export const setSeverityFactors = async (project_id, severity_factors) => {
   return await axios.post(`${API_URL}/project/severity-factors`, {
-    cookie: cookie,
     pid: project_id,
     severityFactors: severity_factors,
   });
 };
 
-export const confirmSeverityFactors = async (cookie, project_id) => {
+export const confirmSeverityFactors = async (project_id) => {
   return await axios.post(`${API_URL}/project/confirm-severity-factors`, {
-    cookie: cookie,
     pid: project_id,
   });
 };
 
-export const addMembers = async (cookie, project_id, members) => {
+export const addMembers = async (project_id, members) => {
   return await axios.post(`${API_URL}/project/add-members`, {
-    cookie: cookie,
     pid: project_id,
     members: members,
   });
 };
 
-export const removeMember = async (cookie, project_id, member) => {
+export const removeMember = async (project_id, member) => {
   return await axios.post(`${API_URL}/project/remove-member`, {
-    cookie: cookie,
     pid: project_id,
     member: member,
   });
 };
 
-export const get_pending_requests_for_project = async (cookie, project_id) => {
+export const get_pending_requests_for_project = async (project_id) => {
   return await axios.get(`${API_URL}/project/pending-requests-project`, {
     params: {
-      cookie: cookie,
       pid: project_id,
     },
     headers: {
@@ -176,10 +151,9 @@ export const get_pending_requests_for_project = async (cookie, project_id) => {
   });
 };
 
-export const get_project_to_invite = async (cookie, project_id) => {
+export const get_project_to_invite = async (project_id) => {
   return await axios.get(`${API_URL}/project/to-invite`, {
     params: {
-      cookie: cookie,
       pid: project_id,
     },
     headers: {
@@ -189,10 +163,9 @@ export const get_project_to_invite = async (cookie, project_id) => {
   });
 };
 
-export const getProjectFactors = async (cookie, project_id) => {
+export const getProjectFactors = async (project_id) => {
   return await axios.get(`${API_URL}/project/get-factors`, {
     params: {
-      cookie: cookie,
       pid: project_id,
     },
     headers: {
@@ -202,10 +175,9 @@ export const getProjectFactors = async (cookie, project_id) => {
   });
 };
 
-export const getProjectProgress = async (cookie, project_id) => {
+export const getProjectProgress = async (project_id) => {
   return await axios.get(`${API_URL}/project/get-progress`, {
     params: {
-      cookie: cookie,
       pid: project_id,
     },
     headers: {
@@ -215,10 +187,9 @@ export const getProjectProgress = async (cookie, project_id) => {
   });
 };
 
-export const getProjectSeverityFactors = async (cookie, project_id) => {
+export const getProjectSeverityFactors = async (project_id) => {
   return await axios.get(`${API_URL}/project/get-severity-factors`, {
     params: {
-      cookie: cookie,
       pid: project_id,
     },
     headers: {
@@ -228,52 +199,48 @@ export const getProjectSeverityFactors = async (cookie, project_id) => {
   });
 };
 
-export const getFactorsPoolOfMember = async (cookie) => {
+export const getFactorsPoolOfMember = async () => {
   return await axios.get(`${API_URL}/project/get-factors-pool`, {
-    params: { cookie },
+    params: {},
   });
 };
 
-export const getProjectsFactorsPoolOfMember = async (cookie, project_id) => {
+export const getProjectsFactorsPoolOfMember = async (project_id) => {
   return await axios.get(`${API_URL}/project/get-projects-factors-pool`, {
-    params: { cookie, pid: project_id },
+    params: { pid: project_id },
   });
 };
 
-export const getPendingRequest = async (cookie) => {
+export const getPendingRequest = async () => {
   return await axios.get(`${API_URL}/project/pending-requests`, {
-    params: { cookie },
+    params: {},
   });
 };
 
-export const acceptProjByUser = async (cookie, projId) => {
+export const acceptProjByUser = async (projId) => {
   return await axios.post(`${API_URL}/project/members/approve`, {
-    cookie,
     projId,
   });
 };
 
-export const rejectProjByUser = async (cookie, projId) => {
+export const rejectProjByUser = async (projId) => {
   return await axios.post(`${API_URL}/project/members/reject`, {
-    cookie,
     projId,
   });
 };
 
-export const submitFactorVote = async (cookie, pid, factorId, score) => {
+export const submitFactorVote = async (pid, factorId, score) => {
   return await axios.post(`${API_URL}/project/vote_on_factor`, {
-    cookie,
     pid,
     factorId,
     score,
   });
 };
 
-export const getMemberVoteOnProject = async (cookie, projectId) => {
+export const getMemberVoteOnProject = async (projectId) => {
   try {
     const response = await axios.get(`${API_URL}/project/get-member-votes`, {
       params: {
-        cookie,
         pid: projectId, //explicitly pass the project id because type mismatch, don't change this!
       },
     });
@@ -283,11 +250,10 @@ export const getMemberVoteOnProject = async (cookie, projectId) => {
   }
 };
 
-export const getProjectFactorVotes = async (cookie, projectId) => {
+export const getProjectFactorVotes = async (projectId) => {
   try {
     const response = await axios.get(`${API_URL}/project/get-factor-votes`, {
       params: {
-        cookie,
         pid: projectId, //explicitly pass the project id because type mismatch, don't change this!
       },
     });
@@ -297,24 +263,23 @@ export const getProjectFactorVotes = async (cookie, projectId) => {
   }
 };
 
-export const getProjectsMember = async (cookie) => {
+export const getProjectsMember = async () => {
   return await axios.get(`${API_URL}/project/get-projects-member`, {
-    params: { cookie },
+    params: {},
   });
 };
 
-export const submitDScoreVotes = async (cookie, projectId, votes) => {
+export const submitDScoreVotes = async (projectId, votes) => {
   return axios.post(`${API_URL}/project/vote_on_severities`, {
-    cookie,
     pid: projectId,
     severityFactors: votes,
   });
 };
 
 //maybe need to move this function to my project page file
-export const checkProjectVotingStatus = async (cookie, project_id) => {
+export const checkProjectVotingStatus = async (project_id) => {
   try {
-    const voteResponse = await getMemberVoteOnProject(cookie, project_id);
+    const voteResponse = await getMemberVoteOnProject(project_id);
     if (voteResponse.data.success) {
       const factorVotes = voteResponse.data.votes.factor_votes || {};
       const severityVotes = voteResponse.data.votes.severity_votes || [];
@@ -322,8 +287,8 @@ export const checkProjectVotingStatus = async (cookie, project_id) => {
       const validFactorVotesCount = Object.values(factorVotes).length;
       const validSeverityVotesCount = severityVotes.length;
 
-      const totalFactors = (await getProjectFactors(cookie, project_id)).data
-        .factors.length;
+      const totalFactors = (await getProjectFactors(project_id)).data.factors
+        .length;
 
       return {
         votingStatus: validFactorVotesCount / totalFactors,
@@ -344,25 +309,23 @@ export const checkProjectVotingStatus = async (cookie, project_id) => {
   }
 };
 
-export const getProjectsScore = async (cookie, pid, weights) => {
+export const getProjectsScore = async (pid, weights) => {
   console.log("weights", weights);
   return await axios.post(`${API_URL}/project/score`, {
-    cookie: cookie,
     pid: pid,
     weights: weights,
   });
 };
 
-export const fetchDefaultSeverityFactorsFull = async (cookie) => {
+export const fetchDefaultSeverityFactorsFull = async () => {
   return await axios.get(`${API_URL}/fetch-default-severity-factors-full`, {
-    params: { cookie: cookie },
+    params: {},
   });
 };
 
-export const getProject = async (cookie, pid) => {
+export const getProject = async (pid) => {
   return await axios.get(`${API_URL}/get-project`, {
     params: {
-      cookie: cookie,
       pid: pid,
     },
     headers: {
@@ -372,9 +335,8 @@ export const getProject = async (cookie, pid) => {
   });
 };
 
-export const deleteProject = async (cookie, pid) => {
+export const deleteProject = async (pid) => {
   return await axios.post(`${API_URL}/project/delete-project`, {
-    cookie: cookie,
     pid: pid,
   });
 };

@@ -1,7 +1,10 @@
-import { confirmProjectFactors, confirmSeverityFactors } from "../api/ProjectApi";
+import {
+  confirmProjectFactors,
+  confirmSeverityFactors,
+} from "../api/ProjectApi";
 import React, { useEffect } from "react";
 import "./ProjectStatusPopup.css";
-import ProgressBar from '../Components/ProgressBar';
+import ProgressBar from "../Components/ProgressBar";
 
 const ProjectStatusPopup = ({
   fetch_selected_project,
@@ -14,14 +17,9 @@ const ProjectStatusPopup = ({
   handleManageAssessors,
   handleAnalyzeResult,
   handleArchive,
-  handlePublish
+  handlePublish,
 }) => {
-
   useEffect(() => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      return;
-    }
     fetch_selected_project(selectedProject);
   }, []);
 

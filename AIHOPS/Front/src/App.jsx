@@ -24,31 +24,52 @@ import VerifyAutomatic from "./Pages/VerifyAutomatic.jsx";
 import PasswordRecovery from "./Pages/PasswordRecovery.jsx";
 import AdminPage from "./Pages/AdminPage.jsx";
 
+import { Button } from "react-bootstrap";
+
+import { isValidSession } from "./api/AuthApi.jsx";
+
 //Google OAuth client ID
 const GOOGLE_CLIENT_ID =
   "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com";
 
 const AppContent = () => {
-  const { isAuthenticated, login } = useAuth();
+  const { getMyCookie, isValidatingToken, logout } = useAuth();
 
   useEffect(() => {
-    // Fetch session cookie from the /enter endpoint
-    axios
-      .get("/enter")
-      .then((response) => {
-        if (response.data.isAuthenticated) {
-          const sessionCookie = response.data.sessionCookie;
-          // login();
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching session cookie: ", error);
-      });
-  }, [login]);
+    const init = async () => {
+      if (isValidatingToken) return;
+      const cookie = await getMyCookie();
+      await startup(cookie);
+    };
+    init();
+  }, [isValidatingToken, location.pathname]);
+
+  const startup = async (cookie) => {
+    console.log("cookie on startup", cookie);
+    const email = localStorage.getItem("userName");
+    const response = await isValidSession(cookie, email);
+    console.log("session check response", response);
+    if (!response.data.success) {
+      logout();
+    }
+  };
 
   return (
     <>
       <NavBar />
+      <Button
+        variant="primary"
+        onClick={() => {
+          setTimeout(() => {
+            console.log(
+              "cookie after delay:",
+              localStorage.getItem("authToken")
+            );
+          }, 500);
+        }}
+      >
+        Log Cookie
+      </Button>
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/register" element={<Register />} />

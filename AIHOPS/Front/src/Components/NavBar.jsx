@@ -18,17 +18,15 @@ const NavBar = () => {
   const [newMessages, setNewMessages] = useState(false); // State to track new messages
 
   useEffect(() => {
-    fetchPendingRequest();
+    if (isAuthenticated) {
+      console.log("authenticated");
+      fetchPendingRequest();
+    }
   }, [location.pathname]);
 
   const fetchPendingRequest = async () => {
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      console.error("authToken not found in localStorage");
-      return;
-    }
     try {
-      const response = await getPendingRequest(cookie);
+      const response = await getPendingRequest();
       if (response.data.success) {
         setNewMessages(response.data.requests.length > 0); // Check if there are new messages
       } else {

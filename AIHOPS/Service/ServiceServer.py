@@ -22,7 +22,10 @@ CORS(app)
 def start_session():
     res = server.enter()
     print("from service server: " + str(res.result.cookie))
-    return jsonify({"cookie": str(res.result.cookie)})
+    return jsonify({
+            "success": True,
+            "cookie": str(res.result.cookie)
+        })
 
 
 @app.route("/register", methods=["POST"])
@@ -518,6 +521,16 @@ def remove_research_project():
     cookie = int(request.args.get("cookie", 0))
     pid = int(request.args.get("pid", -1))
     res = server.remove_research_project(cookie, pid)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success
+    })
+
+@app.route("/is-valid-session", methods=["GET"])
+def is_valid_session():
+    cookie = int(request.args.get("cookie", 0))
+    email = request.args.get("email", None)
+    res = server.is_valid_session(cookie, email)
     return jsonify({
         "message": res.msg,
         "success": res.success

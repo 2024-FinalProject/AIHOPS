@@ -31,21 +31,13 @@ const ManageAssessors = ({
   const [alertType, setAlertType] = useState("warning");
 
   useEffect(() => {
-    const cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
-    fetch_pending_invites(cookie, selectedProject.id);
-    fetch_pending_requests(cookie, selectedProject.id);
+    fetch_pending_invites(selectedProject.id);
+    fetch_pending_requests(selectedProject.id);
   }, [reloadTrigger]);
 
-  const fetch_pending_invites = async (cookie, projectId) => {
+  const fetch_pending_invites = async (projectId) => {
     try {
-      const response = await get_project_to_invite(cookie, projectId);
+      const response = await get_project_to_invite(projectId);
       if (response?.data) {
         setProjectsPendingInvites(response.data.invites);
       } else {
@@ -57,12 +49,9 @@ const ManageAssessors = ({
     }
   };
 
-  const fetch_pending_requests = async (cookie, projectId) => {
+  const fetch_pending_requests = async (projectId) => {
     try {
-      const response = await get_pending_requests_for_project(
-        cookie,
-        projectId
-      );
+      const response = await get_pending_requests_for_project(projectId);
       if (response?.data) {
         setProjectsPendingRequests(response.data.emails);
       } else {
@@ -82,25 +71,17 @@ const ManageAssessors = ({
       return;
     }
 
-    const cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
     try {
-      const response = await removeMember(cookie, selectedProject.id, member);
+      const response = await removeMember(selectedProject.id, member);
 
       if (response.data.success) {
         await fetchProjects(); // Refresh the project data after removal
-        await fetch_pending_invites(cookie, selectedProject.id);
+        await fetch_pending_invites(selectedProject.id);
         selectedProject.members = selectedProject.members.filter(
           (memberItem) => memberItem !== member
         );
         await fetch_selected_project(selectedProject);
-        await fetch_pending_requests(cookie, selectedProject.id);
+        await fetch_pending_requests(selectedProject.id);
         setIsSuccess(true);
         // Trigger reload to refresh the lists
         setReloadTrigger((prev) => prev + 1);
@@ -157,14 +138,6 @@ const ManageAssessors = ({
       return;
     }
 
-    const cookie = localStorage.getItem("authToken");
-
-    if (!cookie) {
-      setMsg("No authentication token found. Please log in again.");
-      setIsSuccess(false);
-      return;
-    }
-
     const tempMembersList = [newMemberName];
 
     // Show inviting message only for published projects
@@ -174,11 +147,7 @@ const ManageAssessors = ({
     }
 
     try {
-      const response = await addMembers(
-        cookie,
-        selectedProject.id,
-        tempMembersList
-      );
+      const response = await addMembers(selectedProject.id, tempMembersList);
 
       // Hide the inviting message after response
       if (selectedProject.isActive) {
@@ -188,8 +157,8 @@ const ManageAssessors = ({
 
       if (response.data.success) {
         await fetchProjects(); // Refresh projects after adding the member
-        await fetch_pending_invites(cookie, selectedProject.id);
-        await fetch_pending_requests(cookie, selectedProject.id);
+        await fetch_pending_invites(selectedProject.id);
+        await fetch_pending_requests(selectedProject.id);
         // Clear the input field after adding
         setNewMemberName("");
         setIsSuccess(true);
