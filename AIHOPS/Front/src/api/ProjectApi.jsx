@@ -1,11 +1,9 @@
 import axios from "./axiosInstance";
 const API_URL = "http://localhost:5555";
 
-export const getProjects = async (cookie) => {
+export const getProjects = async () => {
   return await axios.get(`${API_URL}/projects`, {
-    params: {
-      cookie: cookie,
-    },
+    params: {},
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",

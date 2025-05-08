@@ -42,7 +42,7 @@ const AppContent = () => {
       await startup(cookie);
     };
     init();
-  }, [isValidatingToken]);
+  }, [isValidatingToken, location.pathname]);
 
   const startup = async (cookie) => {
     console.log("cookie on startup", cookie);
