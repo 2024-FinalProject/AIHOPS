@@ -62,3 +62,16 @@ export const googleLogin = async (cookie, tokenId) => {
 export const checkEmailExists = async (cookie, tokenId) => {
   return await axios.post(`${API_URL}/check_email_exists`, { cookie, tokenId });
 };
+
+export const isValidSession = async (cookie, email) => {
+  return await axios.get(`${API_URL}/is-valid-session`, {
+    params: {
+      cookie: cookie,
+      email: email,
+    },
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  });
+};

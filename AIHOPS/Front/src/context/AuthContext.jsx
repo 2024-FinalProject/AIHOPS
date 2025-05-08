@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { startSession } from "../api/AuthApi";
 
 const AuthContext = createContext(null);
 
@@ -71,6 +72,9 @@ export const AuthProvider = ({ children }) => {
       setIsValidatingToken(true);
       const token = localStorage.getItem("authToken");
       const isLoggedIn = localStorage.getItem("isLoggedIn");
+      const username = localStorage.getItem("userName");
+      const admin = localStorage.getItem("isAdmin") === "true";
+
       if (
         !isLoggedIn ||
         !(await validateAuthLoggedIn(isLoggedIn)) ||
@@ -80,10 +84,15 @@ export const AuthProvider = ({ children }) => {
         setAuthToken(null);
         setUserName(null);
         setIsAuthenticated(false);
+        setIsAdmin(false);
         localStorage.removeItem("authToken");
         localStorage.removeItem("userName");
+        localStorage.removeItem("isAdmin");
       } else {
+        setAuthToken(token);
+        setUserName(username);
         setIsAuthenticated(true);
+        setIsAdmin(admin);
       }
       setIsValidatingToken(false);
     };
@@ -105,6 +114,30 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, [theme]); // Added theme as dependency
 
+  const startNewSession = async () => {
+    localStorage.clear();
+    const response = await startSession();
+    if (!response.data.success) {
+      console.error("failed to start a new session %s", response.data.message);
+      return -1;
+    } else {
+      console.log("started a new session");
+      const cookie = response.data.cookie;
+      localStorage.setItem("authToken", cookie);
+      return cookie;
+    }
+  };
+
+  const getMyCookie = async () => {
+    const cookie = localStorage.getItem("authToken");
+    if (!cookie) {
+      console.log("cookie not found");
+      logout();
+      return startNewSession();
+    }
+    return cookie;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -118,6 +151,7 @@ export const AuthProvider = ({ children }) => {
         toggleTheme,
         isAdmin,
         setIsAdmin,
+        getMyCookie,
       }}
     >
       {children}
