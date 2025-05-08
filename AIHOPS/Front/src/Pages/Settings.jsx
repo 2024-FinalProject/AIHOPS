@@ -48,14 +48,8 @@ const SettingsPage = () => {
   );
 
   const handleDeleteAccount = async () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      console.error("No authentication token found. Please log in again.");
-      return;
-    }
-
     try {
-      const response = await deleteAccount(token);
+      const response = await deleteAccount();
       if (response.data.success) {
         logout();
         navigate("/");
