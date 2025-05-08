@@ -130,7 +130,7 @@ const FactorVotingModal = ({
     }
   };
 
-  const getPyramidRows = (factors, maxWidth = 900, itemWidth = 170) => {
+  const getPyramidRows = (factors, maxWidth = 900, itemWidth = 230) => {
     const itemsPerRow = Math.floor(maxWidth / itemWidth);
     const rows = [];
 
@@ -165,46 +165,42 @@ const FactorVotingModal = ({
 
         {/* Pyramid Tabs */}
         <div className="factor-tabs-pyramid">
-          {getPyramidRows(project.factors).map((row, rowIndex) => (
-            <div className="pyramid-row" key={rowIndex}>
-              {row.map((f) => {
-                const hasVote =
-                  submittedVotes[f.id] !== undefined ||
-                  factorVotes[f.id] !== undefined;
-                const voteVal =
-                  submittedVotes[f.id] !== undefined
-                    ? submittedVotes[f.id]
-                    : factorVotes[f.id];
-                const isActive =
-                  project.factors.indexOf(f) === currentFactorIndex;
+  {project.factors.map((f) => {
+    const hasVote =
+      submittedVotes[f.id] !== undefined || factorVotes[f.id] !== undefined;
+    const voteVal =
+      submittedVotes[f.id] !== undefined
+        ? submittedVotes[f.id]
+        : factorVotes[f.id];
+    const isActive =
+      project.factors.indexOf(f) === currentFactorIndex;
 
-                return (
-                  <div
-                    key={f.id}
-                    className={`factor-tab ${isActive ? "selected" : ""}`}
-                    onClick={() =>
-                      project.factors.indexOf(f) !== currentFactorIndex &&
-                      onSelectFactor(project.factors.indexOf(f))
-                    }
-                  >
-                    <span style={{ fontSize: "12px" }}>{f.name}</span>
-                    {hasVote && (
-                      <span
-                        className={`vote-indicator vote-indicator-${voteVal}`}
-                        style={{
-                          backgroundColor: "#7fc68d",
-                          color: "black",
-                        }}
-                      >
-                        {voteVal}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
-        </div>
+    return (
+      <div
+        key={f.id}
+        className={`factor-tab ${isActive ? "selected" : ""}`}
+        onClick={() =>
+          project.factors.indexOf(f) !== currentFactorIndex &&
+          onSelectFactor(project.factors.indexOf(f))
+        }
+      >
+        <span className="factor-name">{f.name}</span>
+        {hasVote && (
+          <span
+            className={`vote-indicator vote-indicator-${voteVal}`}
+            style={{
+              backgroundColor: "#7fc68d",
+              color: "black",
+            }}
+          >
+            {voteVal}
+          </span>
+        )}
+      </div>
+    );
+  })}
+</div>
+
 
         {/* Progress */}
         <div className="progress-bar-container">

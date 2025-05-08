@@ -234,34 +234,13 @@
   background-color: #2563eb; /* Darker blue on hover */
 }
 
-.factor-tab {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background-color: white;
-  border-radius: 8px;
-  font-weight: 500;
-  color: #4b5563;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-
-}
 
 .factor-tab:hover {
   background-color: #f3f4f6;
   transform: translateY(-2px);
 }
 
-.factor-tab.selected {
-  background-color: #dbeafe;
-  color: #1e40af;
-  font-weight: 600;
-  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.2);
-}
+
 
 .vote-indicator {
   display: flex;
@@ -864,16 +843,58 @@
 .tabs-nav-button:active {
   background-color: #bfdbfe !important;
 }
-.factor-tabs-pyramid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-}
+
 
 .pyramid-row {
   display: flex;
   justify-content: center;
   gap: 10px;
 }
+
+
+.factor-tabs-pyramid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
+  margin-bottom: 16px;
+}
+
+.factor-button {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-width: 160px;
+  min-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.factor-button .factor-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factor-button .vote-indicator {
+  margin-left: 8px;
+  background-color: #7fc68d;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.factor-button.selected {
+  border: 2px solid #333;
+}
+
