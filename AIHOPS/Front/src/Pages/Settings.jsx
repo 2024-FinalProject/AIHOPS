@@ -3,12 +3,18 @@ import "./Settings.css"; // Import the CSS
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { deleteAccount } from "../api/AuthApi";
+import AlertPopup from "../Components/AlertPopup";
 
 const SettingsPage = () => {
   const { theme, toggleTheme } = useAuth();
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const { logout } = useAuth();
+  const [alertVerifyPopup, setAlertVerifyPopup] = useState(false);
+  const [alertyVerifyMessage, setAlertVerifyMessage] = useState(
+    "Are you sure you want to delete your account?" +
+      "This action cannot be undone - all of your data will be permenantely deleted."
+  );
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -89,7 +95,7 @@ const SettingsPage = () => {
               <div className="inner-section-content">
                 <button
                   className="button button-red"
-                  onClick={() => handleDeleteAccount()}
+                  onClick={() => setAlertVerifyPopup(true)}
                 >
                   Delete Account
                 </button>
@@ -135,6 +141,18 @@ const SettingsPage = () => {
           </div>
         )}
       </div>
+      {alertVerifyPopup && (
+        <AlertPopup
+          message={alertyVerifyMessage}
+          type={"info"}
+          title={"Delete Account"}
+          onCancel={() => setAlertVerifyPopup(false)}
+          onConfirm={() => {
+            setAlertVerifyPopup(false);
+            handleDeleteAccount();
+          }}
+        />
+      )}
     </div>
   );
 };
