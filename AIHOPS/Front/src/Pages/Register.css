@@ -8,7 +8,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 90vh; 
+  min-height: 90vh;
   margin: 0 auto;
 }
 
@@ -16,11 +16,11 @@ body {
   background-color: var(--card-background) !important;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 375px;
   text-align: center;
-  margin: -150px auto 0; 
+  margin: -150px auto 0;
 }
 
 .register-card h2 {
@@ -34,7 +34,7 @@ body {
 }
 
 .register-form-group {
-  margin-bottom: 0.5rem; 
+  margin-bottom: 0.5rem;
   font-family: Verdana, sans-serif !important;
 }
 
@@ -108,11 +108,10 @@ body {
 .terms-modal {
   position: relative;
   max-width: 800px;
-  background-color: white;
+  background-color: var(--card-background) !important;
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  
 }
 
 .terms-content {
@@ -143,8 +142,6 @@ body {
   background-color: #aaa;
   cursor: not-allowed;
 }
-
-
 
 .close-terms-btn {
   position: absolute;

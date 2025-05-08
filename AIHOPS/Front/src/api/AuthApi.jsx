@@ -27,7 +27,11 @@ export const logoutUser = async (cookie) => {
 };
 
 export const startSession = async () => {
-  return await axios.get(`${API_URL}/enter`);
+  const response = await axios.get(`${API_URL}/enter`);
+  // const cookie = response.data.cookie;
+  // localStorage.setItem("authToken", cookie);
+
+  return response;
 };
 
 // export const updatePassword = async (cookie, oldPasswd, newPasswd) => {
@@ -57,4 +61,8 @@ export const googleLogin = async (cookie, tokenId) => {
 
 export const checkEmailExists = async (cookie, tokenId) => {
   return await axios.post(`${API_URL}/check_email_exists`, { cookie, tokenId });
+};
+
+export const deleteAccount = async (cookie) => {
+  return await axios.post(`${API_URL}/delete_account`, { cookie });
 };

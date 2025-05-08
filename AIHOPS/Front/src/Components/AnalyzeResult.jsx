@@ -186,13 +186,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const getPopupContent = () => {
     switch (analyzePopupType) {
       case "showCurrentScore":
-        if (isLoading) {
-          return (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          );
-        }
         if (Object.keys(projectsScore).length == 0) {
           return (
             <div className="analyze-content-container">
@@ -260,13 +253,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "showAssessorsInfo":
-        if (isLoading) {
-          return (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          );
-        }
         return (
           <div className="analyze-content-container">
             {/* Added a container class for better centering */}
@@ -297,13 +283,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "showContentFactorsScore":
-        if (isLoading) {
-          return (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          );
-        }
         return (
           <div className="analyze-content-container">
             <div
@@ -330,13 +309,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "showSeverityFactorsScore":
-        if (isLoading) {
-          return (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          );
-        }
         return (
           <div className="analyze-content-container">
             <div className="score-display">
@@ -372,13 +344,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
           </div>
         );
       case "exportResults":
-        if (isLoading) {
-          return (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-            </div>
-          );
-        }
         return (
           <div className="analyze-content-container">
             <div className="export-container">
@@ -415,6 +380,20 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         return null;
     }
   };
+
+  if (isLoading) {
+    return (
+      <div
+        className="analyze-content-container"
+        style={{ display: "flex", flexGrow: 1 }}
+      >
+        <div className="loading-spinner">
+          {/* <p style={{ fontSize: "30px" }}> Loading... </p> */}
+          <div className="spinner"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="analyzePopup-content">

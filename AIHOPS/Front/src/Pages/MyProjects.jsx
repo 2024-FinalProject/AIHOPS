@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import VotingTypeSelector from "../Components/VotingTypeSelector";
 import DGraph from "../Components/DGraph";
 import {
   getProjectsMember,
@@ -8,10 +7,10 @@ import {
   submitDScoreVotes,
   checkProjectVotingStatus,
 } from "../api/ProjectApi";
-import ProjectList from "../Components/ProjectList";
 import FactorVotingModal from "../Components/FactorVotingModal";
 import "./MyProjects.css";
 import { useNavigate } from "react-router-dom";
+import ProjectsView from "../Components/ProjectsView";
 
 const MyProjects = () => {
   // State Management
@@ -45,39 +44,6 @@ const MyProjects = () => {
     return status && status.votingStatus === 1 && status.severitiesStatus === 1;
   };
 
-  // Handle sort order change
-  const toggleSort = () => {
-    setIsNewestFirst((prevState) => !prevState);
-    sortProjects(!isNewestFirst);
-  };
-
-  // Sort projects based on the selected order
-  const sortProjects = (newestFirst) => {
-    if (!projects || projects.length === 0) {
-      console.log("No projects to sort");
-      setFilteredProjects([]);
-      return;
-    }
-
-    console.log(
-      `Sorting ${projects.length} projects by ${
-        newestFirst ? "newest" : "oldest"
-      }`
-    );
-    let sortedProjects = [...projects];
-
-    if (newestFirst) {
-      // Sort by ID in descending order (higher ID = newer)
-      sortedProjects.sort((a, b) => b.id - a.id);
-    } else {
-      // Sort by ID in ascending order (lower ID = older)
-      sortedProjects.sort((a, b) => a.id - b.id);
-    }
-
-    console.log("Sorted projects:", sortedProjects);
-    setFilteredProjects(sortedProjects);
-  };
-
   // Project Fetching and Initialization
   const fetchProjects = async () => {
     try {
@@ -96,7 +62,6 @@ const MyProjects = () => {
         setProjects(fetchedProjects);
 
         // Sort projects by default order (newest first)
-        sortProjects(isNewestFirst);
         await initializeProjectVotingStatuses(fetchedProjects, cookie);
       } else {
         console.error("Failed to fetch projects:", response.data.message);
@@ -301,13 +266,6 @@ const MyProjects = () => {
     }
   }, []);
 
-  // This effect ensures filteredProjects is updated whenever projects change
-  useEffect(() => {
-    if (projects && projects.length > 0) {
-      sortProjects(isNewestFirst);
-    }
-  }, [projects]);
-
   return (
     <div className="my-projects-container">
       {loading ? (
@@ -316,25 +274,63 @@ const MyProjects = () => {
         </div>
       ) : (
         <>
-          <h1 className="page-heading" style={{ marginBottom: "-100px" }}>
-            <u>Voting on projects</u>
+          <h1 className="page-heading" style={{ marginBottom: "20px" }}>
+            <u>Vote On Projects</u>:
           </h1>
 
-          {/* Sort toggle button - only show if there are projects */}
-          {filteredProjects.length > 0 && (
-            <div className="sort-container">
-              <button className="sort-button" onClick={toggleSort}>
-                ⇅
-              </button>
-              {isNewestFirst ? "Newest First" : "Oldest First"}
-            </div>
-          )}
+          <ProjectsView
+            showStatus={false}
+            projects={projects}
+            renderButtons={(project) => {
+              const votingStatus = projectVotingStatus[project.id] || {};
+              const isFactorsDone = votingStatus.votingStatus === 1;
+              const isDScoreDone = votingStatus.severitiesStatus === 1;
 
-          <ProjectList
-            projects={filteredProjects}
-            projectVotingStatus={projectVotingStatus}
-            isBothStatusesComplete={isBothStatusesComplete}
-            onVoteClick={handleVoteClick}
+              return (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
+                  }}
+                >
+                  {isBothStatusesComplete(project) && (
+                    <div className="checkmark">✓</div>
+                  )}
+
+                  <button
+                    className={`vote-btn ${isFactorsDone ? "voted" : ""}`}
+                    onClick={() => {
+                      setCurrentProject(project);
+                      setCurrentVotingType("factors");
+                      setIsVoteStarted(true);
+                      updateFactorsVotes(project.id);
+                    }}
+                  >
+                    <input type="checkbox" checked={isFactorsDone} readOnly />
+                    <span>Vote on Factors</span>
+                  </button>
+
+                  <button
+                    className={`vote-btn ${isDScoreDone ? "voted" : ""}`}
+                    onClick={() => {
+                      setCurrentProject(project);
+                      setShowDScoreVote(true);
+                    }}
+                  >
+                    <input type="checkbox" checked={isDScoreDone} readOnly />
+                    <span>Vote on D.Score</span>
+                  </button>
+                </div>
+              );
+            }}
+            renderBody={(project) => (
+              <div>
+                <p>
+                  <b>Founder:</b> {project.founder}
+                </p>
+              </div>
+            )}
           />
 
           {showVotePopup && (
@@ -355,18 +351,6 @@ const MyProjects = () => {
               </div>
             </div>
           )}
-
-          {!loading &&
-            (filteredProjects == null || filteredProjects.length === 0) && (
-              <div
-                className="default-text"
-                style={{ marginTop: "40px", textAlign: "center" }}
-              >
-                <div className="default-text" style={{ fontSize: "17px" }}>
-                  <i>There are currently no projects to vote on</i>...
-                </div>
-              </div>
-            )}
 
           {currentProject && isVoteStarted && (
             <FactorVotingModal

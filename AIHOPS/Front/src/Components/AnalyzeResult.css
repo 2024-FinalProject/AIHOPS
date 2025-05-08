@@ -277,8 +277,13 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 200px;
+  height: 100%;
   width: 100%;
+  position: absolute;
+  top: 33%;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .spinner {
@@ -287,7 +292,7 @@ button:hover {
   height: 40px;
   border-radius: 50%;
   border-left-color: #4776e6;
-  animation: spin 1s linear infinite;
+  animation: spin 2s linear infinite;
 }
 
 @keyframes spin {

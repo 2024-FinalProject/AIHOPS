@@ -3,6 +3,8 @@ import axios from "axios";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { SeverityMetadataProvider } from "./context/SeverityMetadataContext.jsx";
+import { ErrorProvider } from "./context/ErrorContext.jsx";
 import "./theme.css";
 
 // Importing the components
@@ -13,15 +15,14 @@ import AccessibilityMenu from "./Components/AccessibilityMenu";
 import WelcomePage from "./Pages/WelcomePage";
 import Register from "./Pages/Register";
 import Login from "./Pages/Login";
-import Notification from "./pages/PendingRequests";
-import ProjectsManagement_old from "./Pages/ProjectsManagement_old";
+import Notification from "./Pages/PendingRequests";
 import ProjectsManagement from "./Pages/ProjectsManagement";
 import MyProjects from "./Pages/MyProjects";
 import Settings from "./Pages/Settings";
 import About from "./Pages/About";
-import Verify from "./Pages/Verify.jsx";
 import VerifyAutomatic from "./Pages/VerifyAutomatic.jsx";
 import PasswordRecovery from "./Pages/PasswordRecovery.jsx";
+import AdminPage from "./Pages/AdminPage.jsx";
 
 //Google OAuth client ID
 const GOOGLE_CLIENT_ID =
@@ -56,14 +57,11 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/notification" element={<Notification />} />
         <Route path="/projectsmanagement" element={<ProjectsManagement />} />
-        <Route
-          path="/projectsmanagement_old"
-          element={<ProjectsManagement_old />}
-        />
         <Route path="/myprojects" element={<MyProjects />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/about" element={<About />} />
         <Route path="/PasswordRecovery" element={<PasswordRecovery />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
       {/* <AccessibilityMenu /> */}
     </>
@@ -73,7 +71,11 @@ const AppContent = () => {
 const App = () => (
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <AuthProvider>
-      <AppContent />
+      <ErrorProvider>
+        <SeverityMetadataProvider>
+          <AppContent />
+        </SeverityMetadataProvider>
+      </ErrorProvider>
     </AuthProvider>
   </GoogleOAuthProvider>
 );

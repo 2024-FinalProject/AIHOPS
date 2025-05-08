@@ -6,14 +6,16 @@ import {
   publishProject,
   setProjectFactors,
   get_project_to_invite,
+  deleteProject,
 } from "../api/ProjectApi";
 import CreateProjectPopup from "../Components/CreateProjectPopup";
 import ProjectStatusPopup from "../Components/ProjectStatusPopup";
 import AlertPopup from "../Components/AlertPopup";
-import EditPopup from "../Components/EditPopup"; //Component for secondary popups
-import PublishingModal from "../Components/PublishingModal"; // Import the new component
+import EditPopup from "../Components/EditPopup";
+import PublishingModal from "../Components/PublishingModal";
 import { useNavigate } from "react-router-dom";
 import "./ProjectsManagement.css";
+import ProjectsView from "../Components/ProjectsView";
 
 const ProjectsManagement = () => {
   const [msg, setMsg] = useState("");
@@ -21,20 +23,18 @@ const ProjectsManagement = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [currentPopup, setCurrentPopup] = useState(null); //Track the current popup type
+  const [currentPopup, setCurrentPopup] = useState(null);
   const [factorUpdates, setFactorUpdates] = useState({});
   const [severityUpdates, setSeverityUpdates] = useState({});
-  const [projectUpdates, setProjectUpdates] = useState({});
-  const [newFactorName, setNewFactorName] = useState("");
-  const [newFactorDescription, setNewFactorDescription] = useState("");
-  const [newMemberName, setNewMemberName] = useState("");
   const [showCreatePopup, setShowCreatePopup] = useState(false);
-  const [isNewFirst, setIsNewFirst] = useState(false);
+  const [isNewFirst, setIsNewFirst] = useState(true);
+  const [statusFilter, setStatusFilter] = useState("all");
   const [newProject, setNewProject] = useState({
     name: "",
     description: "",
   });
   const [useDefaultFactors, setUseDefaultFactors] = useState(false);
+  const [research, setResearch] = useState(false);
 
   // State for publish confirmation
   const [confirmPublishPopUp, setConfirmPublishPopUp] = useState(false);
@@ -62,15 +62,18 @@ const ProjectsManagement = () => {
     projectName: "",
   });
 
-  // State for error in  project creation
+  // State for error in project creation
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   const navigate = useNavigate();
 
   const findProjectByID = (id) => {
     const foundProject = projects.find((project) => project.id === id);
-    return foundProject; //returns the project if found, or undefined if not found
+    return foundProject;
   };
 
   const fetchProjects = async () => {
@@ -85,9 +88,8 @@ const ProjectsManagement = () => {
     try {
       const response = await getProjects(cookie);
       if (response.data.success) {
-        setProjects([...response.data.projects]); // Spread to ensure a new reference
+        setProjects([...response.data.projects]);
         setIsSuccess(true);
-        //Show the projects in the console - not as an object, but as an array of objects
         console.log(
           "Fetched projects:",
           response.data.projects.map((project) => ({
@@ -147,14 +149,6 @@ const ProjectsManagement = () => {
     }
   };
 
-  const toggleSort = () => {
-    setIsNewFirst((prevState) => !prevState);
-  };
-
-  const sortProjects = isNewFirst
-    ? [...(projects || [])].reverse()
-    : projects || [];
-
   const openPopup = async (project) => {
     fetchProjects();
     setSelectedProject(project);
@@ -193,19 +187,48 @@ const ProjectsManagement = () => {
   };
 
   const returnToMainPopup = () => {
-    setCurrentPopup(null); // Reset to the main popup
+    setCurrentPopup(null);
   };
 
-  const handleDelete = async (projectName) => {
-    setDeleteData({ projectName });
+  const handleDelete = async (projectID, projectName) => {
+    setDeleteData({ projectID, projectName });
     setConfirmDeletionPopUp(true);
   };
 
-  //  TODO: Implement the delete project functionality
-  const handleConfirmDelete = async (projectName) => {
-    alert(
-      "Work in progress. Please check back later. (need to implement delete project functionality)"
-    );
+  const handleConfirmDelete = async (projectID) => {
+    setConfirmDeletionPopUp(false);
+    const cookie = localStorage.getItem("authToken");
+
+    if (!cookie) {
+      setMsg("No authentication token found. Please log in again.");
+      setIsSuccess(false);
+      return;
+    }
+
+    try {
+      const response = await deleteProject(cookie, projectID);
+      if (response.data.success) {
+        setIsSuccess(true);
+        setErrorMessage(
+          "Project content factors and severity factors must be initialized before archiving."
+        );
+        setShowSuccessPopup(true);
+        setSuccessMessage("Project deleted successfully.");
+        await fetchProjects();
+      } else {
+        setMsg(response.data.message);
+        setShowErrorPopup(true);
+        setErrorMessage(response.data.message);
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message;
+      console.error("Error:", errorMessage);
+      setMsg(`Error deleting project: ${errorMessage}`);
+      setShowErrorPopup(true);
+      setErrorMessage(response.data.message);
+      setIsSuccess(false);
+    }
   };
 
   const handleArchive = async (projectID, projectName) => {
@@ -216,7 +239,7 @@ const ProjectsManagement = () => {
   const handleConfirmArchive = async () => {
     setShowArchivePopup(false);
     const { projectID, projectName } = archiveData;
-    await fetchProjects(); // Ensure the projects list is refreshed
+    await fetchProjects();
     const project = findProjectByID(projectID);
 
     if (project.severity_factors_inited && project.factors_inited) {
@@ -232,9 +255,8 @@ const ProjectsManagement = () => {
         const response = await archiveProject(cookie, project.id);
 
         if (response.data.success) {
-          //alert(`Archived project: "${project.name}".`);
           setIsSuccess(true);
-          await fetchProjects(); // Refresh project list after archiving
+          await fetchProjects();
           selectedProject.isActive = false;
           selectedProject.isArchived = true;
         } else {
@@ -249,29 +271,29 @@ const ProjectsManagement = () => {
       }
     } else {
       setShowErrorPopup(true);
-      setErrorMessage(errorMessage);
+      setErrorMessage(
+        "Project content factors and severity factors must be initialized before archiving."
+      );
     }
   };
 
-  // Initial publish handler - shows confirmation popup
   const handlePublish = async (projectID, projectName) => {
     setPublishData({ projectID, projectName });
     setConfirmPublishPopUp(true);
   };
 
-  // Execute publishing after confirmation
   const handleConfirmPublish = async () => {
     setConfirmPublishPopUp(false);
     const { projectID, projectName } = publishData;
 
-    await fetchProjects(); // Ensure the projects list is refreshed
+    await fetchProjects();
     const project = findProjectByID(projectID);
+
     if (
       project.severity_factors_inited &&
       project.factors_inited &&
       project.to_invite.length > 0
     ) {
-      // Show the publishing modal with loading state
       setPublishingModalState({
         isOpen: true,
         isComplete: false,
@@ -288,13 +310,11 @@ const ProjectsManagement = () => {
       try {
         const response = await publishProject(cookie, project.id);
         if (response.data.success) {
-          // Update project state
           await fetchProjects();
           if (selectedProject) {
             selectedProject.isActive = true;
           }
 
-          // Show success state in modal
           setPublishingModalState({
             isOpen: true,
             isComplete: true,
@@ -302,14 +322,12 @@ const ProjectsManagement = () => {
 
           setIsSuccess(true);
         } else {
-          // Hide modal and show error
           setPublishingModalState({ isOpen: false, isComplete: false });
           setShowErrorPopup(true);
           setErrorMessage(response.data.message);
           setIsSuccess(true);
         }
       } catch (error) {
-        // Hide modal and show error
         setPublishingModalState({ isOpen: false, isComplete: false });
         const errorMessage = error.response?.data?.message || error.message;
         console.error("Error:", errorMessage);
@@ -324,7 +342,6 @@ const ProjectsManagement = () => {
     }
   };
 
-  // Close the publishing modal
   const closePublishingModal = () => {
     setPublishingModalState({
       isOpen: false,
@@ -342,7 +359,6 @@ const ProjectsManagement = () => {
     }
 
     if (newProject.name === "" || newProject.description === "") {
-      // alert("Please enter a valid project name and description.");
       setShowErrorPopup(true);
       setErrorMessage("Please enter a valid project name and description.");
       return;
@@ -350,19 +366,22 @@ const ProjectsManagement = () => {
 
     try {
       console.log(`Using default factors? : ${useDefaultFactors}`);
+      console.log(`is_to_research? : ${research}`);
       const response = await createProject(
         cookie,
         newProject.name,
         newProject.description,
-        useDefaultFactors
+        useDefaultFactors,
+        research
       );
 
       if (response.data.success) {
-        //alert(`Created project: "${newProject.name}" successfully.`);
         setIsSuccess(true);
         setNewProject({ name: "", description: "" });
         await fetchProjects();
         setShowCreatePopup(false);
+        setSuccessMessage("Project created successfully.");
+        setShowSuccessPopup(true);
       } else {
         setErrorMessage(response.data.message);
         setShowErrorPopup(true);
@@ -377,100 +396,44 @@ const ProjectsManagement = () => {
 
   return (
     <section>
-      <div className="projects-management-container">
-        {isSuccess ? (
-          <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                marginBottom: "20px",
-              }}
-            >
-              <button
-                className="action-btn"
-                onClick={() => setShowCreatePopup(true)}
-                style={{
-                  backgroundColor: "#4CAF50",
-                  padding: "12px 24px",
-                  fontSize: "16px",
-                  fontWeight: "bold",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                  transition: "all 0.3s ease",
-                  fontFamily: "Verdana, sans-serif",
-                }}
-                onMouseOver={(e) => {
-                  e.target.style.transform = "translateY(-2px)";
-                  e.target.style.boxShadow = "0 4px 8px rgba(0,0,0,0.2)";
-                }}
-                onMouseOut={(e) => {
-                  e.target.style.transform = "translateY(0)";
-                  e.target.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
-                }}
-              >
-                Create New Project
-              </button>
-            </div>
-
-            {projects.length > 0 && (
-              <div className="sort-container">
-                <button className="sort-button" onClick={toggleSort}>
-                  ⇅
-                </button>
-                {isNewFirst ? "Newest First" : "Oldest First"}
-              </div>
-            )}
-
-            {projects.length > 0 && (
-              <h2 style={{ textAlign: "center" }}>
-                <u>Manage Existing Projects</u>
-              </h2>
-            )}
-
-            {sortProjects.map((project) => (
-              <div key={project.id} className="project-card">
-                <div className="project-info">
-                  <div>
-                    <strong>Name:</strong> {project.name}
-                  </div>
-                  <div style={{ margin: "10px 0" }}>
-                    <strong>Description:</strong> {project.description}
-                  </div>
-                  <div>
-                    <strong>Published:</strong>{" "}
-                    {project.isActive ? "Yes" : "No"} &nbsp;&nbsp;|&nbsp;&nbsp;
-                    <strong>Archived:</strong>{" "}
-                    {project.isArchived ? "Yes" : "No"}
-                  </div>
-                </div>
-                <div className="project-actions">
-                  <button
-                    className="action-btn view-edit-btn"
-                    onClick={() => openPopup(project)}
-                  >
-                    View/Edit
-                  </button>
-                  <button
-                    className="action-btn delete-btn"
-                    onClick={() => handleDelete(project.name)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : isSuccess === false ? (
-          <div>
-            <h2>Error occurred:</h2>
-            <p className="error-message">{msg}</p>
-          </div>
-        ) : (
-          <div className="loading-container">
-            <div className="loading-text">Loading...</div>
-          </div>
-        )}
+      <div className="pv-header">
+        <h2>
+          <u>Manage Existing Projects</u>:
+        </h2>
       </div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <button
+          className="create-project-btn"
+          onClick={() => setShowCreatePopup(true)}
+        >
+          Create New Project
+        </button>
+      </div>
+      <ProjectsView
+        projects={projects}
+        renderButtons={(project) => (
+          <>
+            <button
+              className="action-btn view-edit-btn"
+              onClick={() => openPopup(project)}
+            >
+              View/Edit
+            </button>
+            <button
+              className="action-btn delete-btn"
+              onClick={() => handleDelete(project.id, project.name)}
+            >
+              Delete
+            </button>
+          </>
+        )}
+      />
 
       <CreateProjectPopup
         showCreatePopup={showCreatePopup}
@@ -478,6 +441,7 @@ const ProjectsManagement = () => {
         newProject={newProject}
         setNewProject={setNewProject}
         setUseDefaultFactors={setUseDefaultFactors}
+        setResearch={setResearch}
         handleCreateProject={handleCreateProject}
       />
 
@@ -549,13 +513,13 @@ const ProjectsManagement = () => {
           type="info"
           onConfirm={() => {
             setConfirmDeletionPopUp(false);
-            handleConfirmDelete(DeleteData.projectName);
+            handleConfirmDelete(DeleteData.projectID);
           }}
           onCancel={() => setConfirmDeletionPopUp(false)}
         />
       )}
 
-      {/* Create project error message */}
+      {/* Error message popup */}
       {showErrorPopup && (
         <AlertPopup
           message={errorMessage}
@@ -565,11 +529,23 @@ const ProjectsManagement = () => {
             setShowErrorPopup(false);
             setErrorMessage("");
           }}
-          autoCloseTime={5000} // Auto-close after 5 seconds
+          autoCloseTime={5000}
         />
       )}
 
-      {/* Create project success message */}
+      {/* Success message popup */}
+      {showSuccessPopup && (
+        <AlertPopup
+          message={successMessage}
+          title="Success"
+          type="success"
+          onClose={() => {
+            setShowSuccessPopup(false);
+            setSuccessMessage("");
+          }}
+          autoCloseTime={5000}
+        />
+      )}
 
       {/* Publishing progress modal */}
       <PublishingModal

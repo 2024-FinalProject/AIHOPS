@@ -26,7 +26,7 @@ const PublishingModal = ({ isOpen, isComplete, onClose }) => {
         {!isComplete ? (
           <div className="publishing-loading">
             <h3>Publishing{dots}</h3>
-            <div className="loading-spinner"></div>
+            {/* <div className="loading-spinner"></div> */}
             <p>Sending invites and setting up your project...</p>
           </div>
         ) : (

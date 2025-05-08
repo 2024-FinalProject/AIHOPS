@@ -4,10 +4,13 @@ from DAL.DBAccess import DBAccess
 from DAL.Objects import DBPendingRequests
 from DAL.Objects.DBMember import DBMember
 from Domain.src.DS.IdMaker import IdMaker
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseLogin
 from Domain.src.Users.Gmailor import Gmailor
 from Domain.src.Users.Member import Member
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
+
+
+ADMIN = ["admin@admin.com", "admin"]
 
 
 class MemberController:
@@ -84,15 +87,22 @@ class MemberController:
         member.verify()
         return res
 
+    def _admin_login(self, user, passwd):
+        if user == ADMIN[0] and passwd == ADMIN[1]:
+            return True
+
     def login(self, email, encrypted_passwd):
+        if self._admin_login(email, encrypted_passwd):
+            return ResponseLogin(True, "admin logged in", True)
+
         # verify user exists
         member = self.members.get(email)
         if member is None:
-            return Response(False, f'incorrect username or password', None, False)
+            return ResponseLogin(False, 'incorrect username or password')
         # verify correct passwd
         res = member.login(email, encrypted_passwd)
         # return user / error
-        return res
+        return ResponseLogin(res.success, res.message)
 
     def isValidMember(self, email):
         member = self.members.get(email)
@@ -195,3 +205,18 @@ class MemberController:
         return member.login_with_google(email)
 
 
+    def delete_account(self, email):
+        """Delete this member and all their projects."""
+        # 1) verify the member exists
+        member = self.members.get(email)
+        if member is None:
+            return ResponseFailMsg(f"invalid user: {email}")
+
+        # 2) perform atomic DB deletion
+        res = self.db_access.delete_member_and_projects(email)
+        if not res.success:
+            return res
+
+        # 3) clean up in-memory state
+        self.members.pop(email)
+        return ResponseSuccessMsg(f"Member {email} and all their projects have been deleted.")

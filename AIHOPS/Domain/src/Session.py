@@ -1,5 +1,6 @@
 from Domain.src.IService import IService
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
+from Domain.src.Users.MemberController import ADMIN
 
 
 class Session:
@@ -8,6 +9,7 @@ class Session:
         self.cookie = cookie
         self.user_name = "None"
         self.is_member = False
+        self.is_admin = False
 
     def to_json(self):
         str = "Guest"
@@ -34,3 +36,8 @@ class Session:
 
     def getUserName(self):
         return self.user_name
+
+    def admin_login(self):
+        self.user_name = ADMIN[0]
+        self.is_member = True
+        self.is_admin = True
