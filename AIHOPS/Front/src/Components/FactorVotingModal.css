@@ -9,6 +9,8 @@
   background-color: #fecaca;
   border-color: #dc2626;
   box-shadow: 0 0 0 2px #fca5a5;
+  color: white;
+
 }
 
 .factor-option-1 {
@@ -21,10 +23,12 @@
   background-color: #fed7aa;
   border-color: #ea580c;
   box-shadow: 0 0 0 2px #fdba74;
+  color: white;
+
 }
 
 .factor-option-2 {
-  background-color: #d1fae5;
+  background-color: #86e3b3;
   border: 2px solid #10b981;
   color: #065f46;
 }
@@ -33,30 +37,36 @@
   background-color: #a7f3d0;
   border-color: #059669;
   box-shadow: 0 0 0 2px #6ee7b7;
+  color: white;
+
 }
 
-.factor-option-3 {
-  background-color: #dbeafe;
-  border: 2px solid #3b82f6;
-  color: #1e40af;
+.factor-option-3{
+  background-color: #6c9e85;
+  border: 5x solid #010403;
+  color: #07291f;
 }
+
 
 .factor-option-3.selected {
-  background-color: #bfdbfe;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px #93c5fd;
+  background-color: #3f5248;
+  border:  #00000004;
+  color: white;
+  box-shadow: 0 0 0 2px #bbf7d0;
 }
 
+
 .factor-option-4 {
-  background-color: #e0e7ff;
-  border: 2px solid #6366f1;
-  color: #3730a3;
+  background-color: #08582d;
+  border: 2px solid #091f17;
+  color: #000000;
 }
 
 .factor-option-4.selected {
-  background-color: #c7d2fe;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 2px #a5b4fc;
+  background-color: #025b2d;
+  border: 2px solid #1e684f;
+  color: white;
+  box-shadow: 0 0 0 2px #278b66;
 } /* Improved Factor Voting Modal Styles */
 
 /* Modal overlay and content */
@@ -209,7 +219,7 @@
 }
 
 .factor-tabs-container::-webkit-scrollbar-track {
-  background: #e5e7eb; /* Light gray track */
+  background: #ebeae5; /* Light gray track */
   border-radius: 10px;
 }
 
@@ -224,33 +234,13 @@
   background-color: #2563eb; /* Darker blue on hover */
 }
 
-.factor-tab {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background-color: white;
-  border-radius: 8px;
-  font-weight: 500;
-  color: #4b5563;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
 
 .factor-tab:hover {
   background-color: #f3f4f6;
   transform: translateY(-2px);
 }
 
-.factor-tab.selected {
-  background-color: #dbeafe;
-  color: #1e40af;
-  font-weight: 600;
-  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.2);
-}
+
 
 .vote-indicator {
   display: flex;
@@ -403,6 +393,10 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
+.factor-content:last-child {
+  margin-bottom: 0;
+}
+
 .factor-header {
   text-align: center;
   margin-bottom: 12px;
@@ -480,11 +474,13 @@
 .factor-table .description-cell {
   width: 25%;
   color: black;
+  text-align: center;
 }
 
 .factor-table .explanation-cell {
   color: #4b5563;
   width: 55%;
+  text-align: center;
 }
 
 .factor-table tr.selected-row {
@@ -537,7 +533,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
+  margin-top: 4px;
   gap: 10px;
 }
 
@@ -652,6 +648,17 @@
   }
 }
 
+.modal-content {
+  padding: 20px 20px 10px 20px; /* Reduce bottom padding */
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .modal-content {
@@ -684,6 +691,7 @@
     width: 100%;
   }
 }
+
 
 .vote-option-container {
   display: flex;
@@ -727,7 +735,7 @@
 
 /* Table headers */
 .factor-table th {
-  background-color: #f3f4f6;
+  background-color: #f3f6f4;
   padding: 10px 12px;
   text-align: left;
   font-weight: 600;
@@ -835,3 +843,58 @@
 .tabs-nav-button:active {
   background-color: #bfdbfe !important;
 }
+
+
+.pyramid-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+
+.factor-tabs-pyramid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
+  margin-bottom: 16px;
+}
+
+.factor-button {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-width: 160px;
+  min-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.factor-button .factor-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factor-button .vote-indicator {
+  margin-left: 8px;
+  background-color: #7fc68d;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.factor-button.selected {
+  border: 2px solid #333;
+}
+

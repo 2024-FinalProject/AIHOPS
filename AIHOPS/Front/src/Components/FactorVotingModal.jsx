@@ -15,7 +15,7 @@ const FactorVotingModal = ({
   onPrevFactor,
   onSelectFactor,
   countVotedFactors,
-  handleFactorSubmit, // takes (factorId, score)
+  handleFactorSubmit,
 }) => {
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,6 +130,31 @@ const FactorVotingModal = ({
     }
   };
 
+  const getPyramidRows = (factors, maxWidth = 900, itemWidth = 230) => {
+    const itemsPerRow = Math.floor(maxWidth / itemWidth);
+    const rows = [];
+
+    for (let i = 0; i < factors.length; i += itemsPerRow) {
+      rows.push(factors.slice(i, i + itemsPerRow));
+    }
+
+    return rows;
+  };
+
+  // const getPyramidRows = (factors) => {
+  //   const rows = [];
+  //   let remaining = [...factors];
+  //   let rowLength = Math.ceil(remaining.length / 2); // wider starting row
+
+  //   while (remaining.length > 0) {
+  //     const row = remaining.splice(0, rowLength);
+  //     rows.push(row);
+  //     rowLength = Math.max(1, rowLength - 1); // gentle shrink
+  //   }
+
+  //   return rows;
+  // };
+
   return (
     <div className="modal-overlay">
       <div className="modal-content">
@@ -138,62 +163,44 @@ const FactorVotingModal = ({
         </button>
         <h2 className="modal-title">Vote on dimensions for {project.name}</h2>
 
-        {/* Tabs */}
-        <div className="factor-tabs-wrapper">
-          <button
-            className={`tabs-nav-button ${
-              canScrollLeft ? "active" : "disabled"
-            }`}
-            onClick={() => handleScroll("left")}
-            disabled={!canScrollLeft}
-          >
-            <ChevronLeft size={20} />
-          </button>
+        {/* Pyramid Tabs */}
+        <div className="factor-tabs-pyramid">
+  {project.factors.map((f) => {
+    const hasVote =
+      submittedVotes[f.id] !== undefined || factorVotes[f.id] !== undefined;
+    const voteVal =
+      submittedVotes[f.id] !== undefined
+        ? submittedVotes[f.id]
+        : factorVotes[f.id];
+    const isActive =
+      project.factors.indexOf(f) === currentFactorIndex;
 
-          <div className="factor-tabs-scroll-container">
-            <div ref={tabsContainerRef} className="factor-tabs-container">
-              {project.factors.map((f, idx) => {
-                const hasVote =
-                  submittedVotes[f.id] !== undefined ||
-                  factorVotes[f.id] !== undefined;
-                const voteVal =
-                  submittedVotes[f.id] !== undefined
-                    ? submittedVotes[f.id]
-                    : factorVotes[f.id];
-                const isActive = idx === currentFactorIndex;
-                return (
-                  <div
-                    key={f.id}
-                    ref={isActive ? selectedTabRef : null}
-                    className={`factor-tab ${isActive ? "selected" : ""}`}
-                    onClick={() =>
-                      idx !== currentFactorIndex && onSelectFactor(idx)
-                    }
-                  >
-                    <span>{f.name}</span>
-                    {hasVote && (
-                      <span
-                        className={`vote-indicator vote-indicator-${voteVal}`}
-                      >
-                        {voteVal}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <button
-            className={`tabs-nav-button ${
-              canScrollRight ? "active" : "disabled"
-            }`}
-            onClick={() => handleScroll("right")}
-            disabled={!canScrollRight}
+    return (
+      <div
+        key={f.id}
+        className={`factor-tab ${isActive ? "selected" : ""}`}
+        onClick={() =>
+          project.factors.indexOf(f) !== currentFactorIndex &&
+          onSelectFactor(project.factors.indexOf(f))
+        }
+      >
+        <span className="factor-name">{f.name}</span>
+        {hasVote && (
+          <span
+            className={`vote-indicator vote-indicator-${voteVal}`}
+            style={{
+              backgroundColor: "#7fc68d",
+              color: "black",
+            }}
           >
-            <ChevronRight size={20} />
-          </button>
-        </div>
+            {voteVal}
+          </span>
+        )}
+      </div>
+    );
+  })}
+</div>
+
 
         {/* Progress */}
         <div className="progress-bar-container">
@@ -219,9 +226,11 @@ const FactorVotingModal = ({
               <table className="factor-table">
                 <thead>
                   <tr>
-                    <th style={{ textAlign: "center" }}>Vote</th>
-                    <th>Description</th>
-                    {hasExplanations && <th>Explanation</th>}
+                    <th style={{ textAlign: "center", width: "100px" }}>Vote</th>
+                    <th style={{ textAlign: "center" }}>Description </th>
+                    {hasExplanations && (
+                      <th style={{ textAlign: "center" }}>Explanation</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -260,7 +269,6 @@ const FactorVotingModal = ({
           </div>
         )}
 
-        {/* Error Alert Only */}
         {errorMessage && (
           <AlertPopup
             title="Error"
