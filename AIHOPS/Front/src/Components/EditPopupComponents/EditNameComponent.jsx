@@ -24,22 +24,12 @@ const EditNameComponent = ({
       return;
     }
 
-    const cookie = localStorage.getItem("authToken");
-    if (!cookie) {
-      setAlertType("error");
-      setAlertMessage("No authentication token found. Please log in again.");
-      setShowAlert(true);
-      setIsSuccess(false);
-      return;
-    }
-
     try {
       // Update the project name immediately in the selectedProject object
       // This allows the change to be visible right away in the parent components
       selectedProject.name = newName;
       
       const response = await update_project_name_and_desc(
-        cookie,
         selectedProject.id,
         newName,
         selectedProject.description

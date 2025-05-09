@@ -61,6 +61,8 @@ const EditContentFactorsComponent = ({
   const totalPagesPool = Math.ceil(factorsPool.length / itemsPerPage);
   const currentPagePool = poolStartIndex / itemsPerPage;
 
+  const [shouldCloseAfterAlert, setShouldCloseAfterAlert] = useState(false);
+
   const handleNext = (type) => {
     if (
       type === "factors" &&
@@ -383,30 +385,20 @@ const EditContentFactorsComponent = ({
       setShowAlert(true);
       return;
     }
-
+  
     try {
-      // Show a "processing" message
-      setAlertType("info");
-      setAlertMessage("Confirming assessment dimensions...");
-      setShowAlert(true);
-
       const response = await confirmProjectFactors(pid);
-
+      
       if (response.data.success) {
         // Update the property immediately in the UI
         selectedProject.factors_inited = true;
         await fetch_selected_project(selectedProject);
-
-        // Show success message
+        
+        // Show single success message
         setAlertType("success");
         setAlertMessage("Assessment dimensions confirmed successfully!");
+        setShouldCloseAfterAlert(true); // Set flag to close after user dismisses alert
         setShowAlert(true);
-        console.log("Setting success alert for assessment dimensions confirmation");
-
-        // Delay closing the popup to show the success message
-        setTimeout(() => {
-          closePopup();
-        }, 2000);
       } else {
         setAlertType("error");
         setAlertMessage(response.data.message || "Error confirming assessment dimensions");
@@ -417,6 +409,16 @@ const EditContentFactorsComponent = ({
       setAlertType("error");
       setAlertMessage(`Error confirming assessment dimensions: ${errorMessage}`);
       setShowAlert(true);
+    }
+  };
+
+  const handleAlertClose = () => {
+    setShowAlert(false);
+    
+    // If we were waiting to close the popup, do it now
+    if (shouldCloseAfterAlert) {
+      setShouldCloseAfterAlert(false);
+      closePopup();
     }
   };
 

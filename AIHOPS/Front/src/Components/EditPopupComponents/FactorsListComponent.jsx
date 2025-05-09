@@ -25,7 +25,6 @@ const FactorsListComponent = ({
 }) => {
   return (
     <div>
-      {/* Add the alert popup at the top of the component */}
       {showAlert && (
         <div style={{ margin: "10px 0", textAlign: "center" }}>
           <AlertPopup
