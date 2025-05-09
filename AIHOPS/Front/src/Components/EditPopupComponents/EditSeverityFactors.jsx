@@ -19,10 +19,13 @@ const EditSeverityFactors = ({
     ...selectedProject.severity_factors,
   ]);
 
-  // Alert state - make sure these are defined at the component level
+  // Single alert state
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("warning"); // "warning" | "error" | "success"
+  
+  // Flag to track if we should close after alert
+  const [shouldCloseAfterAlert, setShouldCloseAfterAlert] = useState(false);
 
   const handleSeverityChange = (index, value) => {
     const updated = [...severityValues];
@@ -57,14 +60,23 @@ const EditSeverityFactors = ({
     return { valid: true };
   };
 
-  const updateProjectsSeverityFactors = async () => {
+  const handleAlertClose = () => {
+    setShowAlert(false);
     
+    // If we were waiting to close the popup, do it now
+    if (shouldCloseAfterAlert) {
+      setShouldCloseAfterAlert(false);
+      closePopup();
+    }
+  };
+
+  const updateProjectsSeverityFactors = async () => {
     const { valid, message } = validateSeverityValues(severityValues);
     if (!valid) {
       setAlertType("warning");
       setAlertMessage(message);
       setShowAlert(true);
-      return -1;
+      return false;
     }
 
     try {
@@ -75,18 +87,13 @@ const EditSeverityFactors = ({
         selectedProject.id,
         severityValues
       );
+      
       if (!resp.data.success) {
         setAlertType("error");
         setAlertMessage(resp.data.message);
         setShowAlert(true);
-        return -1;
+        return false;
       }
-
-      // Show success message
-      setAlertType("success");
-      setAlertMessage("Severity factors updated successfully!");
-      setShowAlert(true);
-      console.log("Setting alert: success - Severity factors updated successfully!");
 
       // Refresh data in the background
       if (fetchProjects) await fetchProjects();
@@ -94,19 +101,19 @@ const EditSeverityFactors = ({
       selectedProject.severity_factors = fresh.data.severityFactors;
       if (fetch_selected_project) await fetch_selected_project(selectedProject);
 
-      return 1;
+      return true;
     } catch (err) {
       const msg = err.response?.data?.message || err.message;
       setAlertType("error");
       setAlertMessage(`Error updating severity factors: ${msg}`);
       setShowAlert(true);
-      return -1;
+      return false;
     }
   };
 
   const handleConfirmSeverityFactors = async () => {
-    const updateResult = await updateProjectsSeverityFactors();
-    if (updateResult === -1) return;
+    const updateSuccess = await updateProjectsSeverityFactors();
+    if (!updateSuccess) return;
 
     try {
       const res = await confirmSeverityFactors(selectedProject.id);
@@ -116,16 +123,11 @@ const EditSeverityFactors = ({
         if (fetch_selected_project)
           await fetch_selected_project(selectedProject);
 
-        // Show success message
+        // Show success message - single alert
         setAlertType("success");
         setAlertMessage("Severity factors confirmed successfully!");
+        setShouldCloseAfterAlert(true); // Set flag to close after user dismisses alert
         setShowAlert(true);
-        console.log("Setting alert: success - Severity factors confirmed successfully!");
-
-        // Delay closing the popup to show the success message
-        setTimeout(() => {
-          closePopup();
-        }, 2000);
       } else {
         setAlertType("error");
         setAlertMessage("Error confirming severity factors.");
@@ -147,15 +149,15 @@ const EditSeverityFactors = ({
         <u>Edit Severity Factors</u>:
       </h2>
 
-      {/* Display the alert at the top for better visibility */}
+      {/* Single alert display */}
       {showAlert && (
         <div style={{ margin: "10px 0 20px 0" }}>
           <AlertPopup
             title={alertType === "success" ? "Success" : "Input Validation"}
             message={alertMessage}
             type={alertType}
-            onClose={() => setShowAlert(false)}
-            autoCloseTime={alertType === "success" ? 2000 : 3000}
+            onClose={handleAlertClose}
+            // No auto-close time - let user dismiss it manually
           />
         </div>
       )}
