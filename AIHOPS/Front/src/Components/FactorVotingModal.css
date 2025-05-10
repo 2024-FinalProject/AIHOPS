@@ -240,6 +240,12 @@
   transform: translateY(-2px);
 }
 
+.factor-tab.selected {
+  background-color: #e1effe;
+  color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
 
 
 .vote-indicator {
@@ -877,6 +883,7 @@
   font-size: 12px;
   cursor: pointer;
 }
+
 
 .factor-button .factor-name {
   flex: 1;
