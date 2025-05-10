@@ -17,10 +17,11 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import json
 
+from Domain.src.Users.TACController import TACController
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, socketio=None):
         self.db_access = DBAccess()
         self.sessions = {}  # map cookies to sessions
         self.enter_lock = RLock()
@@ -28,6 +29,8 @@ class Server:
         self.user_controller = MemberController(self, self.db_access)
         self.project_manager = ProjectManager(self.db_access)
         self.GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
+        self.tac_controller = TACController(socketio)
+        self.tac_controller.load()
 
     def clear_db(self):
         self.db_access.clear_db()
@@ -86,12 +89,12 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get session member: {e}")
 
-    def register(self, cookie, name, passwd):
+    def register(self, cookie, name, passwd, accepted_terms_version=-1):
         try:
             res = self.get_session_not_member(cookie)
             if not res.success:
                 return res
-            res = self.user_controller.register(name, passwd)
+            res = self.user_controller.register(name, passwd, accepted_terms_version)
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to register: {e}")
@@ -116,6 +119,9 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to register: {e}")
 
+    def _is_need_to_accept_new_terms_anc_conditions(self, version):
+        return self.tac_controller.current_version > version
+
     def login(self, cookie, name, passwd):
         try:
             res = self.get_session(cookie)
@@ -129,6 +135,7 @@ class Server:
             if res.is_admin:
                 session.admin_login()
             else:
+                res.need_to_accept_new_terms = self._is_need_to_accept_new_terms_anc_conditions(res.accepted_tac_version)
                 session.login(name)
 
             return res
@@ -145,7 +152,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to logout: {e}")
         
-    def google_login(self, cookie, token_id):
+    def google_login(self, cookie, token_id, accepted_terms_version=-1):
         try:
             # Verify the Google token
             id_info = id_token.verify_oauth2_token(
@@ -172,18 +179,20 @@ class Server:
                 # User doesn't exist, create one with a random password
                 import secrets
                 random_password = secrets.token_hex(16)
-                register_res = self.user_controller.register_google_user(email, random_password)
+                register_res = self.user_controller.register_google_user(email, random_password, accepted_terms_version)
                 
                 if not register_res.success:
                     return register_res
             
             # Login the user with Google authentication
             login_res = self.user_controller.login_with_google(email)
+            login_res.need_to_accept_new_terms= self._is_need_to_accept_new_terms_anc_conditions(login_res.accepted_tac_version)
+            print(f"{email} accepted: {login_res.accepted_tac_version}, current version: {self.tac_controller.current_version}")
             
             if login_res.success:
                 session.login(email)
-                return Response(True, f"Successfully logged in with Google as {email}", {"email": email}, False)
-            
+                login_res.result = {"email": email}
+
             return login_res
         
         except ValueError as e:
@@ -213,7 +222,17 @@ class Server:
             return ResponseFailMsg(f"Invalid Google token: {str(e)}")
         except Exception as e:
             return ResponseFailMsg(f"Failed to check email: {str(e)}")
-        
+
+    def accept_terms(self, cookie, version):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.user_controller.accept_terms(actor, version)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to accept terms: {str(e)}")
+
     # def update_password(self, cookie, old_passwd, new_passwd):
     #     try:
     #         res = self.get_session_member(cookie)
@@ -752,6 +771,13 @@ class Server:
             return self.project_manager.admin_update_default_severity_factors(severity_factors)
         except Exception as e:
             return ResponseFailMsg(f"Failed update severity factors: {e}")
+
+    def admin_update_terms_and_conditions(self, cookie, updated_terms):
+        try:
+            self._verify_admin(cookie)
+            return self.tac_controller.update(updated_terms)
+        except Exception as e:
+            return ResponseFailMsg(f"admin failed update terms and conditions: {e}")
 
 
     def get_research_projects(self, cookie):

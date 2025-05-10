@@ -1,17 +1,18 @@
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
-from Service.config import app
+from Service.config import app, socketio
 from flask import Flask, request, jsonify
 from Service.config import Base, engine
 from sqlalchemy import event
+from flask_socketio import emit
 
 from flask_cors import CORS
 
-app = Flask(__name__)
-
-
-CORS(app)
+# app = Flask(__name__)
+#
+#
+# CORS(app)
 
 
 # --------  init session and user management ---------------
@@ -33,7 +34,7 @@ def start_session():
 def register():
     data = request.json
     print("trying to register in service server")
-    res = server.register(int(data["cookie"]), data["userName"], data["passwd"])
+    res = server.register(int(data["cookie"]), data["userName"], data["passwd"], int(data["acceptedTermsVersion"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/verify", methods=["POST"])
@@ -57,7 +58,8 @@ def verify_automatic():
 def login():
     data = request.json
     res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin})
+    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin,
+                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms})
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
@@ -66,11 +68,18 @@ def logout():
     res = server.logout(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/accept-terms", methods=["POST"])
+def accept_terms():
+    data = request.json
+    res = server.accept_terms(int(data["cookie"]), int(data["acceptedTermsVersion"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
 @app.route("/google_login", methods=["POST"])
 def google_login():
     data = request.json
-    res = server.google_login(int(data["cookie"]), data["tokenId"])
-    response_data = {"message": res.msg, "success": res.success}
+    res = server.google_login(int(data["cookie"]), data["tokenId"], int(data["acceptedTermsVersion"]))
+    response_data = {"message": res.msg, "success": res.success,
+                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms}
     
     if res.success and hasattr(res, 'result') and isinstance(res.result, dict) and 'email' in res.result:
         response_data["email"] = res.result["email"]
@@ -506,6 +515,13 @@ def admin_update_default_severity_factors():
     res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/admin/update-terms-and-conditions", methods=["POST"])
+def admin_update_terms_and_conditions():
+    data = request.json
+    print(f"trying to update tac: {data['updatedTXT']}")
+    res = server.admin_update_terms_and_conditions(int(data["cookie"]), data["updatedTXT"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 @app.route("/get-research-projects", methods=["GET"])
 def get_research_projects():
     cookie = int(request.args.get("cookie", 0))
@@ -540,13 +556,28 @@ def is_valid_session():
 def hello():
     return jsonify({"msg": "hello"})
 
+@socketio.on("connect")
+def handle_connect():
+    print("socket_connected")
+    tac_data = server.tac_controller.get_current()
+    emit("get_terms", tac_data)
+
+
+@socketio.on("request_terms")
+def handle_request_terms():
+    tac_data = server.tac_controller.get_current()
+    emit("get_terms", tac_data)
+
 # run the backed server
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     FactorsPool.insert_defaults()
 
-    server = Server()
+    server = Server(socketio)
     # running the server
-    app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    # app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    socketio.run(app,port=5555)  # when debug mode runs only 1 thread
     # app.run(threaded=True, port=5555)  # runs multithreaded
+
+
 

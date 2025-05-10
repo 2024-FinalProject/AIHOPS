@@ -1,10 +1,10 @@
 import hashlib
 
-from Domain.src.Loggs.Response import Response, ResponseSuccessObj
+from Domain.src.Loggs.Response import Response, ResponseSuccessObj, ResponseLogin
 
 
 class Member:
-    def __init__(self, email, passwd, uid, from_db=False, verified=False, is_google_user=False):
+    def __init__(self, email, passwd, uid, from_db=False, verified=False, is_google_user=False, accepted_tac_version=-1):
         self.id = uid
         self.email = email
         if from_db:
@@ -14,6 +14,7 @@ class Member:
         self.logged_in = False
         self.verified = verified
         self.is_google_user = is_google_user
+        self.accepted_tac_version = accepted_tac_version
 
     def verify(self):
         self.verified = True
@@ -34,12 +35,12 @@ class Member:
     def login_with_google(self, email):
         """Login without password verification for Google-authenticated users"""
         if not self.verified:
-            return Response(False, f'{email} is not verified', None, False)
+            return ResponseLogin(False, f'{email} is not verified')
         if self.email != email:
-            return Response(False, 'incorrect credentials', None, False)
+            return ResponseLogin(False, 'incorrect credentials')
         
         self.logged_in = True
-        return Response(True, f'user: {email} is now logged in via Google', self, False)
+        return ResponseLogin(True, f'user: {email} is now logged in via Google', accepted_tac_version=self.accepted_tac_version)
 
     def logout(self):
         self.logged_in = False

@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { SeverityMetadataProvider } from "./context/SeverityMetadataContext.jsx";
 import { ErrorProvider } from "./context/ErrorContext.jsx";
+import { TermsProvider } from "./context/TermsContext.jsx";
 import "./theme.css";
 
 // Importing the components
@@ -27,13 +28,17 @@ import AdminPage from "./Pages/AdminPage.jsx";
 import { Button } from "react-bootstrap";
 
 import { isValidSession } from "./api/AuthApi.jsx";
+import { useTerms } from "./context/TermsContext.jsx";
+import TermsModal from "./Components/Terms/TermsModal.jsx";
 
 //Google OAuth client ID
 const GOOGLE_CLIENT_ID =
   "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com";
 
 const AppContent = () => {
-  const { getMyCookie, isValidatingToken, logout } = useAuth();
+  const { getMyCookie, isValidatingToken, logout, isAdmin } = useAuth();
+  const { mustAcceptNewTerms, acceptTerms, termsText, termsVersion } =
+    useTerms();
 
   useEffect(() => {
     const init = async () => {
@@ -45,10 +50,10 @@ const AppContent = () => {
   }, [isValidatingToken, location.pathname]);
 
   const startup = async (cookie) => {
-    console.log("cookie on startup", cookie);
+    // console.log("cookie on startup", cookie);
     const email = localStorage.getItem("userName");
     const response = await isValidSession(cookie, email);
-    console.log("session check response", response);
+    // console.log("session check response", response);
     if (!response.data.success) {
       logout();
     }
@@ -57,19 +62,13 @@ const AppContent = () => {
   return (
     <>
       <NavBar />
-      <Button
-        variant="primary"
-        onClick={() => {
-          setTimeout(() => {
-            console.log(
-              "cookie after delay:",
-              localStorage.getItem("authToken")
-            );
-          }, 500);
-        }}
-      >
-        Log Cookie
-      </Button>
+      {mustAcceptNewTerms && !isAdmin && (
+        <TermsModal
+          text={termsText}
+          version={termsVersion}
+          onAccept={acceptTerms}
+        />
+      )}
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/register" element={<Register />} />
@@ -94,7 +93,9 @@ const App = () => (
     <AuthProvider>
       <ErrorProvider>
         <SeverityMetadataProvider>
-          <AppContent />
+          <TermsProvider>
+            <AppContent />
+          </TermsProvider>
         </SeverityMetadataProvider>
       </ErrorProvider>
     </AuthProvider>

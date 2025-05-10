@@ -111,13 +111,13 @@ export const AuthProvider = ({ children }) => {
   }, [theme]); // Added theme as dependency
 
   const startNewSession = async () => {
-    console.log("auth context starting new seession");
+    // console.log("auth context starting new seession");
     const response = await startSession();
     if (!response.data.success) {
       console.error("failed to start a new session %s", response.data.message);
       return -1;
     } else {
-      console.log("started a new session");
+      // console.log("started a new session");
       const cookie = response.data.cookie;
       localStorage.setItem("authToken", cookie);
       return cookie;

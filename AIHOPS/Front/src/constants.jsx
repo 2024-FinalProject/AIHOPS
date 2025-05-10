@@ -5,3 +5,5 @@ export const AnalyzePopupType = {
   SEVERITY_FACTORS: "showSeverityFactorsScore",
   EXPORT_RESULTS: "exportResults",
 };
+
+export const API_URL = "http://localhost:5555";
