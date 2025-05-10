@@ -13,8 +13,12 @@ export const verifyAutomatic = async (token) => {
   return await axios.post(`${API_URL}/verify_automatic`, { token });
 };
 
-export const register = async (userName, passwd) => {
-  return await axios.post(`${API_URL}/register`, { userName, passwd });
+export const register = async (userName, passwd, acceptedTermsVersion = 0) => {
+  return await axios.post(`${API_URL}/register`, {
+    userName,
+    passwd,
+    acceptedTermsVersion,
+  });
 };
 
 export const loginUser = async (userName, passwd) => {
@@ -52,8 +56,11 @@ export const updatePassword = async (email, password, code) => {
 };
 
 //Google Login method:
-export const googleLogin = async (tokenId) => {
-  return await axios.post(`${API_URL}/google_login`, { tokenId });
+export const googleLogin = async (tokenId, acceptedTermsVersion = 0) => {
+  return await axios.post(`${API_URL}/google_login`, {
+    tokenId,
+    acceptedTermsVersion,
+  });
 };
 
 export const checkEmailExists = async (tokenId) => {

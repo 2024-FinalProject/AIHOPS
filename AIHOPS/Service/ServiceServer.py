@@ -34,7 +34,7 @@ def start_session():
 def register():
     data = request.json
     print("trying to register in service server")
-    res = server.register(int(data["cookie"]), data["userName"], data["passwd"])
+    res = server.register(int(data["cookie"]), data["userName"], data["passwd"], int(data["acceptedTermsVersion"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/verify", methods=["POST"])
@@ -58,7 +58,8 @@ def verify_automatic():
 def login():
     data = request.json
     res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin})
+    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin,
+                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms})
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
@@ -70,8 +71,9 @@ def logout():
 @app.route("/google_login", methods=["POST"])
 def google_login():
     data = request.json
-    res = server.google_login(int(data["cookie"]), data["tokenId"])
-    response_data = {"message": res.msg, "success": res.success}
+    res = server.google_login(int(data["cookie"]), data["tokenId"], int(data["acceptedTermsVersion"]))
+    response_data = {"message": res.msg, "success": res.success,
+                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms}
     
     if res.success and hasattr(res, 'result') and isinstance(res.result, dict) and 'email' in res.result:
         response_data["email"] = res.result["email"]

@@ -89,12 +89,12 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to get session member: {e}")
 
-    def register(self, cookie, name, passwd):
+    def register(self, cookie, name, passwd, accepted_terms_version=-1):
         try:
             res = self.get_session_not_member(cookie)
             if not res.success:
                 return res
-            res = self.user_controller.register(name, passwd)
+            res = self.user_controller.register(name, passwd, accepted_terms_version)
             return res
         except Exception as e:
             return ResponseFailMsg(f"Failed to register: {e}")
@@ -119,6 +119,9 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to register: {e}")
 
+    def _is_need_to_accept_new_terms_anc_conditions(self, version):
+        return self.tac_controller.current_version < version
+
     def login(self, cookie, name, passwd):
         try:
             res = self.get_session(cookie)
@@ -132,6 +135,7 @@ class Server:
             if res.is_admin:
                 session.admin_login()
             else:
+                res.need_to_accept_new_terms = self._is_need_to_accept_new_terms_anc_conditions(res.accepted_tac_version)
                 session.login(name)
 
             return res
@@ -148,7 +152,7 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to logout: {e}")
         
-    def google_login(self, cookie, token_id):
+    def google_login(self, cookie, token_id, accepted_terms_version=-1):
         try:
             # Verify the Google token
             id_info = id_token.verify_oauth2_token(
@@ -175,7 +179,7 @@ class Server:
                 # User doesn't exist, create one with a random password
                 import secrets
                 random_password = secrets.token_hex(16)
-                register_res = self.user_controller.register_google_user(email, random_password)
+                register_res = self.user_controller.register_google_user(email, random_password, accepted_terms_version)
                 
                 if not register_res.success:
                     return register_res
@@ -185,8 +189,8 @@ class Server:
             
             if login_res.success:
                 session.login(email)
-                return Response(True, f"Successfully logged in with Google as {email}", {"email": email}, False)
-            
+                login_res.result = {"email": email}
+
             return login_res
         
         except ValueError as e:

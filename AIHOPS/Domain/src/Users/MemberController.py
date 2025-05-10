@@ -28,12 +28,12 @@ class MemberController:
             return 1
         last_id = 0
         for member_data in registered_users:
-            member = Member(member_data.email, member_data.encrypted_passwd, member_data.id, True, member_data.verified)
+            member = Member(member_data.email, member_data.encrypted_passwd, member_data.id, True, member_data.verified, accepted_tac_version=member_data.accepted_tac_version)
             last_id = max(last_id, member.id + 1)
             self.members.insert(member.email, member)
         self.id_maker.start_from(last_id)
 
-    def register(self, email, passwd):
+    def register(self, email, passwd, accepted_tac_version=-1):
         # verify username is available
         # add to users
         with self.register_lock:
@@ -51,9 +51,9 @@ class MemberController:
                         return res
 
             uid = self.id_maker.next_id()
-            member = Member(email, passwd, uid)
+            member = Member(email, passwd, uid, accepted_tac_version=accepted_tac_version)
             # insert to db:
-            res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd))
+            res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd, accepted_tac_version=accepted_tac_version))
             if not res.success:
                 return res
             self.members.insert(email, member)
@@ -102,7 +102,7 @@ class MemberController:
         # verify correct passwd
         res = member.login(email, encrypted_passwd)
         # return user / error
-        return ResponseLogin(res.success, res.message)
+        return ResponseLogin(res.success, res.message, accepted_tac_version=member.accepted_tac_version)
 
     def isValidMember(self, email):
         member = self.members.get(email)
@@ -148,7 +148,7 @@ class MemberController:
             return ResponseFailMsg(f'password recovery failed for {email}')
         return ResponseSuccessMsg(f'password recovery for {email} has been successful')
     
-    def register_google_user(self, email, passwd):
+    def register_google_user(self, email, passwd, accepted_tac_version=-1):
         """Register a user that authenticated through Google"""
         with self.register_lock:
             member = self.members.get(email)
@@ -170,10 +170,10 @@ class MemberController:
 
             uid = self.id_maker.next_id()
             # Create a new member and set is_google_user to True
-            member = Member(email, passwd, uid, from_db=False, verified=True, is_google_user=True)
+            member = Member(email, passwd, uid, from_db=False, verified=True, is_google_user=True, accepted_tac_version=accepted_tac_version)
             
             # Insert to db with is_google_user flag set to True
-            res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd, is_verified=True, is_google_user=True))
+            res = self.db_access.insert(DBMember(uid, email, member.encrypted_passwd, is_verified=True, is_google_user=True, accepted_tac_version=accepted_tac_version))
             if not res.success:
                 return res
             
@@ -185,7 +185,7 @@ class MemberController:
         """Login a user that authenticated through Google without password check"""
         member = self.members.get(email)
         if member is None:
-            return Response(False, f'User {email} not found', None, False)
+            return ResponseLogin(False, f'User {email} not found')
         
         if not member.verified:
             # Update verification status for the Google user
@@ -193,13 +193,13 @@ class MemberController:
             member.is_google_user = True
             res = self.db_access.update_by_query(DBMember, {"email": email}, {"verified": True, "is_google_user": True})
             if not res.success:
-                return res
+                return ResponseLogin(res.success, res.msg)
         elif not hasattr(member, 'is_google_user') or not member.is_google_user:
             # Update existing user to mark as Google user
             member.is_google_user = True
             res = self.db_access.update_by_query(DBMember, {"email": email}, {"is_google_user": True})
             if not res.success:
-                return res
+                return ResponseLogin(res.success, res.msg)
         
         # Use the new login_with_google method that bypasses password verification
         return member.login_with_google(email)

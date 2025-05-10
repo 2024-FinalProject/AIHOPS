@@ -115,6 +115,7 @@ const Login = () => {
 
         setMsg(response.data.message);
         localStorage.setItem("userName", response.data.email);
+        console.log("logged in as %s", response.data.email);
         login(response.data.email);
         localStorage.setItem("isLoggedIn", "true");
         navigate("/");
