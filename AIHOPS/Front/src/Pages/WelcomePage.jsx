@@ -16,7 +16,7 @@ const WelcomePage = () => {
             </h1>
             <p className="welcome-subtitle">
               <b>A</b>doption of <b>I</b>nnovation by <b>H</b>ealthcare <b>O</b>
-              rganizations
+              rganizations<br></br>
               <b>P</b>rerequisites <b>S</b>cale
             </p>
           </header>
