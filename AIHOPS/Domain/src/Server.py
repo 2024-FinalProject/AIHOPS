@@ -17,10 +17,11 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import json
 
+from Domain.src.Users.TACController import TACController
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, socketio=None):
         self.db_access = DBAccess()
         self.sessions = {}  # map cookies to sessions
         self.enter_lock = RLock()
@@ -28,6 +29,8 @@ class Server:
         self.user_controller = MemberController(self, self.db_access)
         self.project_manager = ProjectManager(self.db_access)
         self.GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
+        self.tac_controller = TACController(socketio)
+        self.tac_controller.load()
 
     def clear_db(self):
         self.db_access.clear_db()

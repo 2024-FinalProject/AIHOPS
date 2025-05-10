@@ -1,28 +1,22 @@
-import React, { useState, useEffect, useRef } from "react";
-import { startSession, register } from "../api/AuthApi";
+import React, { useState, useEffect } from "react";
+import { register } from "../api/AuthApi";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 import termsConditions from "../assets/TermsAndConditions.txt";
 import "./Register.css";
+import TermsModal from "../Components/Terms/TermsModal";
 
 const Register = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
-  const [existingToken, setExistingToken] = useState(
-    localStorage.getItem("authToken")
-  );
-  const { login } = useAuth();
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
-  const [termsScrolled, setTermsScrolled] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  const termsRef = useRef(null);
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleRegister = async (e) => {
@@ -60,18 +54,9 @@ const Register = () => {
     }
   };
 
-  const handleScroll = () => {
-    const el = termsRef.current;
-    if (el && el.scrollTop + el.clientHeight >= el.scrollHeight) {
-      setTermsScrolled(true);
-    }
-  };
-
   const handleAcceptTerms = () => {
-    if (termsScrolled) {
-      setTermsAccepted(true);
-      setShowTermsConditions(false);
-    }
+    setTermsAccepted(true);
+    setShowTermsConditions(false);
   };
 
   useEffect(() => {
@@ -86,14 +71,6 @@ const Register = () => {
       .then(setTermsContent)
       .catch(console.error);
   }, [isLoggedIn, navigate]);
-
-  useEffect(() => {
-    const el = termsRef.current;
-    if (el) {
-      el.addEventListener("scroll", handleScroll);
-      return () => el.removeEventListener("scroll", handleScroll);
-    }
-  }, [showTermsConditions]);
 
   return (
     <div className="register-container">
@@ -152,28 +129,11 @@ const Register = () => {
 
       {/* Modal for Terms and Conditions */}
       {showTermsConditions && (
-        <div className="modal-overlay">
-          <div className="terms-modal">
-            <h2 style={{ textAlign: "center" }}>Terms and Conditions</h2>
-
-            <div ref={termsRef} className="terms-content">
-              {termsContent}
-            </div>
-            <button
-              onClick={handleAcceptTerms}
-              disabled={!termsScrolled}
-              className="accept-terms-btn"
-            >
-              {termsScrolled ? "I Accept" : "Scroll to bottom to accept"}
-            </button>
-            <button
-              onClick={() => setShowTermsConditions(false)}
-              className="close-terms-btn"
-            >
-              &times;
-            </button>
-          </div>
-        </div>
+        <TermsModal
+          text={termsContent}
+          version={0}
+          onAccept={handleAcceptTerms}
+        />
       )}
     </div>
   );

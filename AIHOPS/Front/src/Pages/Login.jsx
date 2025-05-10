@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  startSession,
   loginUser,
   startPasswordRecovery,
   googleLogin,
@@ -11,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import termsConditions from "../assets/TermsAndConditions.txt";
 import "./Login.css";
+import TermsModal from "../Components/Terms/TermsModal";
 
 const Login = () => {
   const { login, isAuthenticated, isValidatingToken, setIsAdmin } = useAuth();
@@ -27,9 +27,6 @@ const Login = () => {
   // Terms and conditions state
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
-  const [termsScrolled, setTermsScrolled] = useState(true);
-
-  const termsRef = useRef(null);
 
   // Load terms and conditions
   useEffect(() => {
@@ -38,23 +35,6 @@ const Login = () => {
       .then(setTermsContent)
       .catch(console.error);
   }, []);
-
-  // Handle terms scroll event
-  const handleScroll = () => {
-    const el = termsRef.current;
-    if (el && el.scrollTop + el.clientHeight >= el.scrollHeight) {
-      setTermsScrolled(true);
-    }
-  };
-
-  // Set up scroll event listener
-  useEffect(() => {
-    const el = termsRef.current;
-    if (el) {
-      el.addEventListener("scroll", handleScroll);
-      return () => el.removeEventListener("scroll", handleScroll);
-    }
-  }, [showTermsConditions]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -155,9 +135,6 @@ const Login = () => {
     const cred = credentialResponse.credential;
 
     try {
-      // First check if the user already exists
-      const existingToken = localStorage.getItem("authToken");
-
       // Call new endpoint to check if email exists
       const checkEmailResponse = await checkEmailExists(cred);
 
@@ -183,10 +160,9 @@ const Login = () => {
 
   // Handle terms acceptance
   const handleAcceptTerms = () => {
-    if (termsScrolled) {
-      setShowTermsConditions(false);
-      completeGoogleLogin();
-    }
+    setShowTermsConditions(false);
+    setPendingGoogleCredential(null);
+    completeGoogleLogin();
   };
 
   return (
@@ -252,30 +228,11 @@ const Login = () => {
 
       {/* Modal for Terms and Conditions */}
       {showTermsConditions && (
-        <div className="modal-overlay">
-          <div className="terms-modal">
-            <h2 style={{ textAlign: "center" }}>Terms and Conditions</h2>
-            <div ref={termsRef} className="terms-content">
-              {termsContent}
-            </div>
-            <button
-              onClick={handleAcceptTerms}
-              disabled={!termsScrolled}
-              className="accept-terms-btn"
-            >
-              {termsScrolled ? "I Accept" : "Scroll to bottom to accept"}
-            </button>
-            <button
-              onClick={() => {
-                setShowTermsConditions(false);
-                setPendingGoogleCredential(null);
-              }}
-              className="close-terms-btn"
-            >
-              &times;
-            </button>
-          </div>
-        </div>
+        <TermsModal
+          text={termsContent}
+          version={0}
+          onAccept={handleAcceptTerms}
+        />
       )}
     </section>
   );
