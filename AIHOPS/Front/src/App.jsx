@@ -50,10 +50,10 @@ const AppContent = () => {
   }, [isValidatingToken, location.pathname]);
 
   const startup = async (cookie) => {
-    console.log("cookie on startup", cookie);
+    // console.log("cookie on startup", cookie);
     const email = localStorage.getItem("userName");
     const response = await isValidSession(cookie, email);
-    console.log("session check response", response);
+    // console.log("session check response", response);
     if (!response.data.success) {
       logout();
     }
