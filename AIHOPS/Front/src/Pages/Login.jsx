@@ -11,6 +11,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import termsConditions from "../assets/TermsAndConditions.txt";
 import "./Login.css";
 import TermsModal from "../Components/Terms/TermsModal";
+import { useTerms } from "../context/TermsContext";
 
 const Login = () => {
   const { login, isAuthenticated, isValidatingToken, setIsAdmin } = useAuth();
@@ -27,6 +28,7 @@ const Login = () => {
   // Terms and conditions state
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
+  const { termsText } = useTerms();
 
   // Load terms and conditions
   useEffect(() => {
@@ -228,11 +230,7 @@ const Login = () => {
 
       {/* Modal for Terms and Conditions */}
       {showTermsConditions && (
-        <TermsModal
-          text={termsContent}
-          version={0}
-          onAccept={handleAcceptTerms}
-        />
+        <TermsModal text={termsText} version={0} onAccept={handleAcceptTerms} />
       )}
     </section>
   );

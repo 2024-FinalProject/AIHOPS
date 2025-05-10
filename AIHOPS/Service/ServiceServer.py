@@ -507,6 +507,13 @@ def admin_update_default_severity_factors():
     res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/admin/update-terms-and-conditions", methods=["POST"])
+def admin_update_terms_and_conditions():
+    data = request.json
+    print(f"trying to update tac: {data['updatedTXT']}")
+    res = server.admin_update_terms_and_conditions(int(data["cookie"]), data["updatedTXT"])
+    return jsonify({"message": res.msg, "success": res.success})
+
 @app.route("/get-research-projects", methods=["GET"])
 def get_research_projects():
     cookie = int(request.args.get("cookie", 0))
@@ -541,7 +548,17 @@ def is_valid_session():
 def hello():
     return jsonify({"msg": "hello"})
 
+@socketio.on("connect")
+def handle_connect():
+    print("socket_connected")
+    tac_data = server.tac_controller.get_current()
+    emit("get_terms", tac_data)
 
+
+@socketio.on("request_terms")
+def handle_request_terms():
+    tac_data = server.tac_controller.get_current()
+    emit("get_terms", tac_data)
 
 # run the backed server
 if __name__ == "__main__":
@@ -554,14 +571,5 @@ if __name__ == "__main__":
     socketio.run(app,port=5555)  # when debug mode runs only 1 thread
     # app.run(threaded=True, port=5555)  # runs multithreaded
 
-    @socketio.on("connect")
-    def handle_connect():
-        tac_data = server.tac_controller.get_current()
-        emit("get_terms", tac_data)
 
-
-    @socketio.on("request_terms")
-    def handle_request_terms():
-        tac_data = server.tac_controller.get_current()
-        emit("get_terms", tac_data)
 

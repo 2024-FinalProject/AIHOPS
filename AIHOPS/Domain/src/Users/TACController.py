@@ -32,6 +32,7 @@ class TACController:
 
     def update(self, tac_text):
         """Saves a new version of the terms and conditions and notifies clients"""
+        print(f"trying to update tac Controller")
         if self.current_version == -1:
             try:
                 self.load()
@@ -44,6 +45,7 @@ class TACController:
 
         with open(path, 'w', encoding='utf-8') as f:
             f.write(tac_text)
+        print ("written to file")
 
         self.current_version = new_version
         self.current_text = tac_text

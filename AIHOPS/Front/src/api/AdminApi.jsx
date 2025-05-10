@@ -1,6 +1,6 @@
 import axios from "axios";
 import { startSession } from "../api/AuthApi";
-const API_URL = "http://localhost:5555";
+import { API_URL } from "../constants";
 
 const getMyCookie = async () => {
   const existingToken = localStorage.getItem("authToken");
@@ -101,5 +101,13 @@ export const removeResearchProject = async (pid) => {
   const cookie = await getMyCookie();
   return await axios.get(`${API_URL}/remove-research-project`, {
     params: { cookie: cookie, pid: pid },
+  });
+};
+
+export const updateTermsAndConditions = async (updatedTXT) => {
+  const cookie = await getMyCookie();
+  return await axios.post(`${API_URL}/admin/update-terms-and-conditions`, {
+    cookie: cookie,
+    updatedTXT: updatedTXT,
   });
 };

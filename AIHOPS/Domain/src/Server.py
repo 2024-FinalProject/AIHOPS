@@ -756,6 +756,13 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed update severity factors: {e}")
 
+    def admin_update_terms_and_conditions(self, cookie, updated_terms):
+        try:
+            self._verify_admin(cookie)
+            return self.tac_controller.update(updated_terms)
+        except Exception as e:
+            return ResponseFailMsg(f"admin failed update terms and conditions: {e}")
+
 
     def get_research_projects(self, cookie):
         try:

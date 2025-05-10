@@ -16,6 +16,7 @@ import ErrorDisplay from "../Components/MessagesDisplay/ErrorDisplay";
 import { useError } from "../context/ErrorContext";
 import { useAuth } from "../context/AuthContext";
 import ProjectsManager from "../Components/AdminComponents/Projects/ProjectsManager";
+import EditTAC from "../Components/AdminComponents/EditTAC";
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -26,21 +27,32 @@ const AdminPage = () => {
   const [isManagingSeverityFactors, setIsManagingSeverityFactors] =
     useState(false);
   const [showResearch, setShowResearch] = useState(false);
+  const [editTAC, setEditTAC] = useState(false);
 
   const handleManageDefaultAssessmentDims = () => {
     setIsManagingFactors(true);
     setIsManagingSeverityFactors(false);
     setShowResearch(false);
+    setEditTAC(false);
   };
 
   const handleManageDefaultSeverityFactors = () => {
     setIsManagingFactors(false);
     setIsManagingSeverityFactors(true);
     setShowResearch(false);
+    setEditTAC(false);
   };
 
   const handleResearch = () => {
     setShowResearch(true);
+    setIsManagingFactors(false);
+    setIsManagingSeverityFactors(false);
+    setEditTAC(false);
+  };
+
+  const handleEditTAC = () => {
+    setEditTAC(true);
+    setShowResearch(false);
     setIsManagingFactors(false);
     setIsManagingSeverityFactors(false);
   };
@@ -94,6 +106,14 @@ const AdminPage = () => {
                   >
                     🔍 Research
                   </Button>
+                  <Button
+                    variant="outline-success"
+                    size="lg"
+                    className="px-4 py-2 rounded-3 shadow-sm mb-2"
+                    onClick={handleEditTAC}
+                  >
+                    Edit Terms & Conditions
+                  </Button>
                 </div>
               </Col>
             </Row>
@@ -103,6 +123,7 @@ const AdminPage = () => {
               {isManagingFactors && <FactorManagement />}
               {isManagingSeverityFactors && <SeverityFactorsView />}
               {showResearch && <ProjectsManager />}
+              {editTAC && <EditTAC />}
             </Col>
           </Row>
         </Card.Body>
