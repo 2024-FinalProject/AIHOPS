@@ -120,7 +120,7 @@ class Server:
             return ResponseFailMsg(f"Failed to register: {e}")
 
     def _is_need_to_accept_new_terms_anc_conditions(self, version):
-        return self.tac_controller.current_version < version
+        return self.tac_controller.current_version > version
 
     def login(self, cookie, name, passwd):
         try:
@@ -186,6 +186,8 @@ class Server:
             
             # Login the user with Google authentication
             login_res = self.user_controller.login_with_google(email)
+            login_res.need_to_accept_new_terms= self._is_need_to_accept_new_terms_anc_conditions(login_res.accepted_tac_version)
+            print(f"{email} accepted: {login_res.accepted_tac_version}, current version: {self.tac_controller.current_version}")
             
             if login_res.success:
                 session.login(email)
@@ -220,7 +222,17 @@ class Server:
             return ResponseFailMsg(f"Invalid Google token: {str(e)}")
         except Exception as e:
             return ResponseFailMsg(f"Failed to check email: {str(e)}")
-        
+
+    def accept_terms(self, cookie, version):
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            actor = res.result.user_name
+            return self.user_controller.accept_terms(actor, version)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to accept terms: {str(e)}")
+
     # def update_password(self, cookie, old_passwd, new_passwd):
     #     try:
     #         res = self.get_session_member(cookie)

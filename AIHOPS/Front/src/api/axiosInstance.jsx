@@ -14,7 +14,7 @@ const axiosInstance = axios.create({
 // Add a request interceptor
 axiosInstance.interceptors.request.use(async (config) => {
   const cookie = localStorage.getItem("authToken");
-  console.log("there was am api cookie: %s", cookie);
+  // console.log("there was am api cookie: %s", cookie);
   if (cookie) {
     if (config.method === "get") {
       config.params = { ...config.params, cookie };

@@ -84,3 +84,9 @@ export const isValidSession = async (cookie, email) => {
 export const deleteAccount = async () => {
   return await axios.post(`${API_URL}/delete_account`, {});
 };
+
+export const acceptNewTerms = async (acceptedTermsVersion = 0) => {
+  return await axios.post(`${API_URL}/accept-terms`, {
+    acceptedTermsVersion,
+  });
+};

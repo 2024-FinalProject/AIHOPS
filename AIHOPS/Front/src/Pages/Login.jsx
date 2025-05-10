@@ -28,7 +28,7 @@ const Login = () => {
   // Terms and conditions state
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
-  const { termsText } = useTerms();
+  const { termsText, setMustAcceptNewTerms } = useTerms();
 
   // Load terms and conditions
   useEffect(() => {
@@ -56,6 +56,10 @@ const Login = () => {
         if (response.data.is_admin) {
           setIsAdmin(true);
           localStorage.setItem("isAdmin", "true");
+        }
+
+        if (response.data.need_to_accept_new_terms) {
+          setMustAcceptNewTerms(true);
         }
 
         setMsg(response.data.message);
@@ -109,9 +113,13 @@ const Login = () => {
       const response = await googleLogin(credentialToUse);
 
       if (response.data.success) {
-        // Mark that terms were accepted in this session and persistently
-        sessionStorage.setItem("termsAcceptedSession", "true");
-        localStorage.setItem("termsAccepted", "true");
+        console.log(
+          "must_accept_terms: %s",
+          response.data.need_to_accept_new_terms
+        );
+        if (response.data.need_to_accept_new_terms) {
+          setMustAcceptNewTerms(true);
+        }
 
         setMsg(response.data.message);
         localStorage.setItem("userName", response.data.email);

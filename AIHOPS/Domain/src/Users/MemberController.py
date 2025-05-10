@@ -220,3 +220,12 @@ class MemberController:
         # 3) clean up in-memory state
         self.members.pop(email)
         return ResponseSuccessMsg(f"Member {email} and all their projects have been deleted.")
+
+    def accept_terms(self, actor, version):
+        self._verify_valid_member(actor)
+        member = self.members.get(actor)
+        res = self.db_access.update_by_query(DBMember, {"email": actor}, {"accepted_tac_version": version})
+        if not res.success:
+            return res
+        member.accepted_tac_version = version
+        return ResponseSuccessMsg(f'Accepted terms for {actor} version {version}')

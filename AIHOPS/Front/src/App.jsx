@@ -28,6 +28,7 @@ import AdminPage from "./Pages/AdminPage.jsx";
 import { Button } from "react-bootstrap";
 
 import { isValidSession } from "./api/AuthApi.jsx";
+import { useTerms } from "./context/TermsContext.jsx";
 import TermsModal from "./Components/Terms/TermsModal.jsx";
 
 //Google OAuth client ID
@@ -35,7 +36,9 @@ const GOOGLE_CLIENT_ID =
   "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com";
 
 const AppContent = () => {
-  const { getMyCookie, isValidatingToken, logout } = useAuth();
+  const { getMyCookie, isValidatingToken, logout, isAdmin } = useAuth();
+  const { mustAcceptNewTerms, acceptTerms, termsText, termsVersion } =
+    useTerms();
 
   useEffect(() => {
     const init = async () => {
@@ -59,6 +62,13 @@ const AppContent = () => {
   return (
     <>
       <NavBar />
+      {mustAcceptNewTerms && !isAdmin && (
+        <TermsModal
+          text={termsText}
+          version={termsVersion}
+          onAccept={acceptTerms}
+        />
+      )}
       <Routes>
         <Route path="/" element={<WelcomePage />} />
         <Route path="/register" element={<Register />} />
