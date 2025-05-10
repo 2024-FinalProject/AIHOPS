@@ -1,17 +1,18 @@
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
-from Service.config import app
+from Service.config import app, socketio
 from flask import Flask, request, jsonify
 from Service.config import Base, engine
 from sqlalchemy import event
+from flask_socketio import emit
 
 from flask_cors import CORS
 
-app = Flask(__name__)
-
-
-CORS(app)
+# app = Flask(__name__)
+#
+#
+# CORS(app)
 
 
 # --------  init session and user management ---------------
@@ -540,13 +541,27 @@ def is_valid_session():
 def hello():
     return jsonify({"msg": "hello"})
 
+
+
 # run the backed server
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     FactorsPool.insert_defaults()
 
-    server = Server()
+    server = Server(socketio)
     # running the server
-    app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    # app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    socketio.run(app,port=5555)  # when debug mode runs only 1 thread
     # app.run(threaded=True, port=5555)  # runs multithreaded
+
+    @socketio.on("connect")
+    def handle_connect():
+        tac_data = server.tac_controller.get_current()
+        emit("get_terms", tac_data)
+
+
+    @socketio.on("request_terms")
+    def handle_request_terms():
+        tac_data = server.tac_controller.get_current()
+        emit("get_terms", tac_data)
 

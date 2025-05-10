@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import termsConditions from "../assets/TermsAndConditions.txt";
 import "./Register.css";
 import TermsModal from "../Components/Terms/TermsModal";
+import { useTerms } from "../context/TermsContext";
 
 const Register = () => {
   const [userName, setUserName] = useState("");
@@ -15,6 +16,7 @@ const Register = () => {
 
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
+  const { termsText } = useTerms();
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -129,11 +131,7 @@ const Register = () => {
 
       {/* Modal for Terms and Conditions */}
       {showTermsConditions && (
-        <TermsModal
-          text={termsContent}
-          version={0}
-          onAccept={handleAcceptTerms}
-        />
+        <TermsModal text={termsText} version={0} onAccept={handleAcceptTerms} />
       )}
     </div>
   );
