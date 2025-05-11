@@ -22,14 +22,13 @@ const TermsModal = ({ text, version, onAccept }) => {
   }, []);
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
+    <div className="tac-modal-overlay">
+      <div className="tac-modal">
         <h2>Terms and Conditions (v{version})</h2>
-        <div className="modal-content" ref={contentRef}>
-          {console.log("Rendering terms modal with:", text)}
+        <div className="tac-modal-content" ref={contentRef}>
           <ReactMarkdown>{text}</ReactMarkdown>
         </div>
-        <div className="modal-actions">
+        <div className="tac-modal-actions">
           <button onClick={onAccept} disabled={!scrolledToBottom}>
             {scrolledToBottom ? "I Accept" : "Scroll to bottom to accept"}
           </button>
