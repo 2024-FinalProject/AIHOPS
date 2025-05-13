@@ -17,52 +17,64 @@ const EditDescriptionComponent = ({
   const [alertType, setAlertType] = useState("warning");
 
   const updateProjectsNameOrDesc = async () => {
-    if (!newDescription.trim()) {
+    if (!newName.trim()) { // or !newDescription.trim() for EditDescriptionComponent
       setAlertType("warning");
-      setAlertMessage("Project description cannot be empty");
+      setAlertMessage("Field cannot be empty");
       setShowAlert(true);
       return;
     }
 
     try {
-      // Update the project description immediately in the selectedProject object
-      // This allows the change to be visible right away in the parent components
-      selectedProject.description = newDescription;
+      // Update the project immediately in the selectedProject object
+      selectedProject.name = newName; // or selectedProject.description = newDescription
       
       const response = await update_project_name_and_desc(
+        cookie,
         selectedProject.id,
         selectedProject.name,
-        newDescription
+        selectedProject.description
       );
-
+  
       if (response.data.success) {
-        // Show success message
+        // Show success message with longer display
         setAlertType("success");
-        setAlertMessage("Project description updated successfully!");
+        setAlertMessage("Updated successfully!");
         setShowAlert(true);
-        
-        // Refresh data in the background
-        await fetchProjects();
-        await fetch_selected_project(selectedProject);
         setIsSuccess(true);
         
-        // Set a short timeout before closing to allow user to see success message
-        setTimeout(() => {
-          closePopup();
-        }, 1000);
+        // Don't auto-close, let the user control when to close
+        // Instead, use the shouldCloseAfterAlert pattern
+        setShouldCloseAfterAlert(true);
       } else {
         setAlertType("error");
-        setAlertMessage(response.data.message || "Failed to update project description");
+        setAlertMessage(response.data.message || "Failed to update");
         setShowAlert(true);
         setIsSuccess(false);
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
       setAlertType("error");
-      setAlertMessage(`Error updating project description: ${errorMessage}`);
+      setAlertMessage(`Error updating: ${errorMessage}`);
       setShowAlert(true);
-      setMsg(`Error updating project description: ${errorMessage}`);
+      setMsg(`Error updating: ${errorMessage}`);
       setIsSuccess(false);
+    }
+  };
+  
+  // Also add the handleAlertClose function:
+  const handleAlertClose = () => {
+    setShowAlert(false);
+    
+    // If we were waiting to close the popup, do it now
+    if (shouldCloseAfterAlert) {
+      setShouldCloseAfterAlert(false);
+      
+      // Refresh data first to ensure changes are propagated
+      fetchProjects().then(() => {
+        fetch_selected_project(selectedProject).then(() => {
+          closePopup();
+        });
+      });
     }
   };
 
