@@ -17,12 +17,16 @@ const FactorsListComponent = ({
   setShowExistingContentFactors,
   setAddNewFactorShow,
   setFromExistingFactorsPage,
-  // Add these props for alert functionality
+  // Alert props
   showAlert,
   alertMessage,
   alertType,
-  setShowAlert
+  setShowAlert,
+  handleAlertClose
 }) => {
+  // Use the provided handleAlertClose function or fall back to just hiding the alert
+  const onAlertClose = handleAlertClose || (() => setShowAlert(false));
+
   return (
     <div>
       {showAlert && (
@@ -31,8 +35,8 @@ const FactorsListComponent = ({
             title={alertType === "success" ? "Success" : alertType === "info" ? "Information" : "Input Validation"}
             message={alertMessage}
             type={alertType}
-            onClose={() => setShowAlert(false)}
-            autoCloseTime={alertType === "success" ? 2000 : 3000}
+            onClose={onAlertClose}
+            autoCloseTime={0} // No auto-close - let the user control
           />
         </div>
       )}

@@ -1,20 +1,21 @@
+
 import React, { useState, useEffect } from "react";
 import {
   get_project_to_invite,
   get_pending_requests_for_project,
   getProjectsFactorsPoolOfMember,
-  getProjectFactors,
+  getProjectFactors
 } from "../api/ProjectApi";
 import "./EditPopup.css";
 
-// Import the newly created components
+// Import components
 import EditNameComponent from "./EditPopupComponents/EditNameComponent";
 import EditDescriptionComponent from "./EditPopupComponents/EditDescriptionComponent";
 import ManageAssessorsComponent from "./EditPopupComponents/ManageAssessorsComponent";
 import EditContentFactorsComponent from "./EditPopupComponents/EditContentFactorsComponent";
-import EditSeverityFactors from "../Components/EditPopupComponents/EditSeverityFactors.jsx";
-import EditFactorComponent from "./EditPopupComponents/EditFactorComponent";
-import AnalyzeResult from "./AnalyzeResult.jsx";
+import EditSeverityFactors from "./EditPopupComponents/EditSeverityFactors";
+import UpdateFactorPopup from "./EditPopupComponents/UpdateFactorPopup";
+import AnalyzeResult from "./AnalyzeResult";
 
 const EditPopup = ({
   fetchProjects,
@@ -24,31 +25,21 @@ const EditPopup = ({
   closePopup,
   popupType,
   selectedProject,
-  factorId = null, // Add factorId prop for update factor popup
+  factorId = null,
 }) => {
   const [projectsPendingInvites, setProjectsPendingInvites] = useState([]);
   const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
   const [factorsPool, setFactorsPool] = useState([]);
   const [analyzePopupType, setAnalyzePopupType] = useState("");
   const [reloadTrigger, setReloadTrigger] = useState(0);
-  const [editingFactor, setEditingFactor] = useState(null);
 
   useEffect(() => {
     fetch_pending_invites(selectedProject.id);
     fetch_pending_requests(selectedProject.id);
     fetch_factors_pool();
 
-    // If we have a factorId for direct edit, find the factor
-    if (factorId && popupType === "updateFactor") {
-      // Find the factor in the project
-      const factor = selectedProject.factors.find(f => f.id === factorId);
-      if (factor) {
-        setEditingFactor(factor);
-      }
-    }
-
     setAnalyzePopupType("showAssessorsInfo");
-  }, [reloadTrigger, factorId, popupType, selectedProject]);
+  }, [reloadTrigger, selectedProject.id]);
 
   const fetch_pending_invites = async (projectId) => {
     try {
@@ -90,13 +81,6 @@ const EditPopup = ({
       console.error("Error fetching factors pool:", error);
       setFactorsPool([]); // Set empty array in case of error
     }
-  };
-
-  const refreshData = async () => {
-    // Helper function to refresh data
-    await fetchProjects();
-    await fetch_selected_project(selectedProject);
-    setReloadTrigger((prev) => prev + 1);
   };
 
   const getPopupContent = () => {
@@ -207,10 +191,10 @@ const EditPopup = ({
           />
         );
       case "updateFactor":
-        return editingFactor ? (
-          <EditFactorComponent
-            editingFactor={editingFactor}
-            isStandalone={true}
+        // Use our dedicated UpdateFactorPopup component
+        return (
+          <UpdateFactorPopup
+            factorId={factorId}
             selectedProject={selectedProject}
             fetchProjects={fetchProjects}
             fetch_selected_project={fetch_selected_project}
@@ -218,8 +202,6 @@ const EditPopup = ({
             setMsg={setMsg}
             closePopup={closePopup}
           />
-        ) : (
-          <div className="loading">Loading factor data...</div>
         );
       case "editSeverityFactors":
         return (

@@ -52,6 +52,13 @@ const EditContentFactorsComponent = ({
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("warning");
+  const [isUpdateSuccessful, setIsUpdateSuccessful] = useState(false);
+  
+  // State for confirmation popups
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [factorToDelete, setFactorToDelete] = useState(null);
+  const [deleteFromPool, setDeleteFromPool] = useState(false);
+  const [showAddConfirm, setShowAddConfirm] = useState(false);
 
   const itemsPerPage = 8;
   const totalPagesFactors = Math.ceil(
@@ -60,8 +67,6 @@ const EditContentFactorsComponent = ({
   const currentPageFactors = factorStartIndex / itemsPerPage;
   const totalPagesPool = Math.ceil(factorsPool.length / itemsPerPage);
   const currentPagePool = poolStartIndex / itemsPerPage;
-
-  const [shouldCloseAfterAlert, setShouldCloseAfterAlert] = useState(false);
 
   const handleNext = (type) => {
     if (
@@ -94,7 +99,7 @@ const EditContentFactorsComponent = ({
     );
   };
 
-  const handleSubmit = async () => {
+  const handlePreSubmit = () => {
     const factorIds = selectedFactors.map((factor) => factor.id);
     if (factorIds.length === 0) {
       setAlertType("warning");
@@ -102,6 +107,16 @@ const EditContentFactorsComponent = ({
       setShowAlert(true);
       return;
     }
+    
+    // Show confirmation popup for adding factors
+    setShowAddConfirm(true);
+  };
+
+  const handleSubmit = async () => {
+    // Close the confirmation popup first
+    setShowAddConfirm(false);
+    
+    const factorIds = selectedFactors.map((factor) => factor.id);
 
     try {
       const response = await setProjectFactors(
@@ -131,12 +146,10 @@ const EditContentFactorsComponent = ({
           factorsPool.length - selectedFactors.length
         );
 
-        // Clear selection and return to factors list view after a brief delay
-        setTimeout(() => {
-          setSelectedFactors([]);
-          setShowPoolContentFactors(false);
-          setShowExistingContentFactors(true);
-        }, 1500);
+        // Clear selection and return to factors list view
+        setSelectedFactors([]);
+        setShowPoolContentFactors(false);
+        setShowExistingContentFactors(true);
 
         setIsSuccess(true);
       } else {
@@ -202,11 +215,9 @@ const EditContentFactorsComponent = ({
         await fetch_selected_project(selectedProject);
         await fetch_factors_pool();
 
-        // Return to the factors list view after a brief delay
-        setTimeout(() => {
-          setAddNewFactorShow(false);
-          setShowExistingContentFactors(true);
-        }, 1500);
+        // Return to the factors list view
+        setAddNewFactorShow(false);
+        setShowExistingContentFactors(true);
       } else {
         setAlertType("error");
         setAlertMessage(response.data.message);
@@ -233,10 +244,18 @@ const EditContentFactorsComponent = ({
     setShowExistingContentFactors(false);
     setShowPoolContentFactors(false);
     setAddNewFactorShow(false);
+    setIsUpdateSuccessful(false);
+    
+    // Reset alert state when starting to edit a factor
+    setShowAlert(false);
   };
 
   const handleCancelEdit = () => {
     setEditingFactor(null);
+    
+    // Reset alert state when canceling an edit
+    setShowAlert(false);
+    
     if (fromExistingFactorsPage) {
       setShowExistingContentFactors(true);
     } else {
@@ -251,7 +270,7 @@ const EditContentFactorsComponent = ({
       setShowAlert(true);
       return;
     }
-    console.log(editedFactorName);
+
     if (editedScaleDescriptions.some((desc) => !desc)) {
       setAlertMessage(
         "Please fill in all scale descriptions. Descriptions are required for all score levels."
@@ -278,13 +297,26 @@ const EditContentFactorsComponent = ({
       );
 
       if (response.data.success) {
+        // Update parent component state
         setMsg(response.data.message);
         setIsSuccess(true);
+        
+        // Refresh project data
+        await fetchProjects();
+        await fetch_selected_project(selectedProject);
+        selectedProject.factors = (
+          await getProjectFactors(selectedProject.id)
+        ).data.factors;
+        await fetch_factors_pool();
+        
+        // Show success message
+        setAlertType("success");
+        setAlertMessage("Assessment dimension updated successfully!");
+        setShowAlert(true);
       } else {
         setAlertMessage(response.data.message || "Failed to update factor");
         setAlertType("warning");
         setShowAlert(true);
-        return;
       }
     } catch (error) {
       console.error("Failed to update: ", error);
@@ -295,32 +327,49 @@ const EditContentFactorsComponent = ({
       );
       setAlertType("warning");
       setShowAlert(true);
-      return;
-    }
-
-    await fetchProjects();
-    await fetch_selected_project(selectedProject);
-    selectedProject.factors = (
-      await getProjectFactors(selectedProject.id)
-    ).data.factors;
-    fetch_factors_pool();
-    setEditingFactor(null);
-
-    if (fromExistingFactorsPage) {
-      setShowExistingContentFactors(true);
-    } else {
-      setShowPoolContentFactors(true);
     }
   };
 
-  const handleDeleteFactor = async (factorName, factorId) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete the factor "${factorName} from the project"?`
-      )
-    ) {
-      try {
-        const res = await deleteProjectFactor(selectedProject.id, factorId);
+  const handleInitiateDeleteFactor = (factorName, factorId) => {
+    setFactorToDelete({ name: factorName, id: factorId });
+    setDeleteFromPool(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleInitiateDeleteFactorFromPool = (factorName, factorId) => {
+    setFactorToDelete({ name: factorName, id: factorId });
+    setDeleteFromPool(true);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    // Close the confirmation popup
+    setShowDeleteConfirm(false);
+    
+    if (!factorToDelete) return;
+    
+    try {
+      if (deleteFromPool) {
+        // Delete from pool
+        const res = await deleteFactorFromPool(factorToDelete.id);
+        if (res.data.success) {
+          await fetchProjects();
+          await fetch_selected_project(selectedProject);
+          await fetch_factors_pool();
+          adjustPaginationAfterDeletion("pool", factorsPool.length);
+          
+          // Show success message
+          setAlertType("success");
+          setAlertMessage(`Assessment dimension "${factorToDelete.name}" deleted successfully from pool!`);
+          setShowAlert(true);
+        } else {
+          setAlertType("error");
+          setAlertMessage(res.data.message);
+          setShowAlert(true);
+        }
+      } else {
+        // Delete from project
+        const res = await deleteProjectFactor(selectedProject.id, factorToDelete.id);
         if (res.data.success) {
           await fetchProjects();
           selectedProject.factors = (
@@ -333,49 +382,37 @@ const EditContentFactorsComponent = ({
             "factors",
             selectedProject.factors.length
           );
+          
+          // Show success message
+          setAlertType("success");
+          setAlertMessage(`Assessment dimension "${factorToDelete.name}" deleted successfully from project!`);
+          setShowAlert(true);
         } else {
-          alert(res.data.message);
+          setAlertType("error");
+          setAlertMessage(res.data.message);
+          setShowAlert(true);
         }
-      } catch (error) {
-        console.error("Error deleting factor:", error);
-        setMsg(
-          `Error deleting factor: ${
-            error.response?.data?.message || error.message
-          }`
-        );
-        setIsSuccess(false);
-        alert(error.message);
       }
+    } catch (error) {
+      console.error("Error deleting factor:", error);
+      setMsg(
+        `Error deleting factor: ${
+          error.response?.data?.message || error.message
+        }`
+      );
+      setIsSuccess(false);
+      setAlertType("error");
+      setAlertMessage(`Error deleting factor: ${error.message}`);
+      setShowAlert(true);
     }
+    
+    // Clear the factor to delete
+    setFactorToDelete(null);
   };
 
-  const handleDeleteFactorFromPool = async (factorName, factorId) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete the factor "${factorName} from the pool"?`
-      )
-    ) {
-      try {
-        const res = await deleteFactorFromPool(factorId);
-        if (res.data.success) {
-          await fetchProjects();
-          await fetch_selected_project(selectedProject);
-          await fetch_factors_pool();
-          adjustPaginationAfterDeletion("pool", factorsPool.length);
-        } else {
-          alert(res.data.message);
-        }
-      } catch (error) {
-        console.error("Error deleting factor:", error);
-        setMsg(
-          `Error deleting factor: ${
-            error.response?.data?.message || error.message
-          }`
-        );
-        setIsSuccess(false);
-        alert(error.message);
-      }
-    }
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setFactorToDelete(null);
   };
 
   const handleConfirmFactors = async (pid) => {
@@ -387,7 +424,7 @@ const EditContentFactorsComponent = ({
     }
   
     try {
-      const response = await confirmProjectFactors(cookie, pid);
+      const response = await confirmProjectFactors(pid);
       
       if (response.data.success) {
         // Update the property immediately in the UI
@@ -399,8 +436,10 @@ const EditContentFactorsComponent = ({
         setAlertMessage("Assessment dimensions confirmed successfully!");
         setShowAlert(true);
         
-        // Make sure the state shows we should close on alert dismissal
-        setShouldCloseAfterAlert(true);
+        // Immediately close the popup and return to parent
+        if (closePopup) {
+          closePopup();
+        }
       } else {
         setAlertType("error");
         setAlertMessage(response.data.message || "Error confirming assessment dimensions");
@@ -414,23 +453,20 @@ const EditContentFactorsComponent = ({
     }
   };
   
-  // Also make sure to have the handleAlertClose function:
   const handleAlertClose = () => {
     setShowAlert(false);
     
-    // If we flagged to close after alert
-    if (shouldCloseAfterAlert) {
-      setShouldCloseAfterAlert(false);
-      
-      // Make sure we fully close out to the project management page
-      if (closePopup) {
-        // Make sure any parent popups are also closed
-        // This ensures we go back to the project management page
-        closePopup();
-      }
+    // If this is a success alert after updating a factor, return to factors page
+    if (alertType === "success" && editingFactor) {
+      handleCancelEdit();
     }
   };
 
+  const handleCancelAddConfirm = () => {
+    setShowAddConfirm(false);
+  };
+
+  // If we're showing an editing form
   if (editingFactor) {
     return (
       <EditFactorComponent
@@ -451,6 +487,8 @@ const EditContentFactorsComponent = ({
         alertMessage={alertMessage}
         alertType={alertType}
         setShowAlert={setShowAlert}
+        handleAlertClose={handleAlertClose}
+        isUpdateSuccessful={isUpdateSuccessful}
       />
     );
   }
@@ -463,7 +501,7 @@ const EditContentFactorsComponent = ({
           factorStartIndex={factorStartIndex}
           itemsPerPage={itemsPerPage}
           handleStartEditFactor={handleStartEditFactor}
-          handleDeleteFactor={handleDeleteFactor}
+          handleDeleteFactor={handleInitiateDeleteFactor}
           handlePrevious={handlePrevious}
           handleNext={handleNext}
           handleConfirmFactors={handleConfirmFactors}
@@ -477,6 +515,7 @@ const EditContentFactorsComponent = ({
           alertMessage={alertMessage}
           alertType={alertType}
           setShowAlert={setShowAlert}
+          handleAlertClose={handleAlertClose}
         />
       )}
 
@@ -486,11 +525,11 @@ const EditContentFactorsComponent = ({
           selectedFactors={selectedFactors}
           handleCheckboxChange={handleCheckboxChange}
           handleStartEditFactor={handleStartEditFactor}
-          handleDeleteFactorFromPool={handleDeleteFactorFromPool}
+          handleDeleteFactorFromPool={handleInitiateDeleteFactorFromPool}
           poolStartIndex={poolStartIndex}
           itemsPerPage={itemsPerPage}
           handlePrevious={handlePrevious}
-          handleSubmit={handleSubmit}
+          handleSubmit={handlePreSubmit}
           handleNext={handleNext}
           totalPagesPool={totalPagesPool}
           currentPagePool={currentPagePool}
@@ -502,6 +541,7 @@ const EditContentFactorsComponent = ({
           alertMessage={alertMessage}
           alertType={alertType}
           setShowAlert={setShowAlert}
+          handleAlertClose={handleAlertClose}
         />
       )}
 
@@ -518,6 +558,67 @@ const EditContentFactorsComponent = ({
           scaleExplanations={scaleExplanations}
           setScaleExplanations={setScaleExplanations}
         />
+      )}
+      
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirm && factorToDelete && (
+        <div className="confirmation-overlay">
+          <div className="confirmation-content">
+            <div className="confirmation-icon" style={{ backgroundColor: "#ffe5e5", color: "#ff4444" }}>
+              <span style={{ fontSize: '28px' }}>🗑️</span>
+            </div>
+            <h3 className="confirmation-title">Confirm Deletion</h3>
+            <p className="confirmation-message">
+              Are you sure you want to delete the assessment dimension "{factorToDelete.name}" 
+              from the {deleteFromPool ? "pool" : "project"}?
+            </p>
+            <div className="confirmation-buttons">
+              <button 
+                className="confirmation-button cancel" 
+                onClick={handleCancelDelete}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirmation-button confirm" 
+                onClick={handleConfirmDelete}
+                style={{ backgroundColor: "#ff4444" }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Add Confirmation Popup */}
+      {showAddConfirm && (
+        <div className="confirmation-overlay">
+          <div className="confirmation-content">
+            <div className="confirmation-icon" style={{ backgroundColor: "#d1fae5", color: "#10b981" }}>
+              <span style={{ fontSize: '28px' }}>➕</span>
+            </div>
+            <h3 className="confirmation-title">Confirm Addition</h3>
+            <p className="confirmation-message">
+              Are you sure you want to add {selectedFactors.length} selected assessment dimension(s) to the project?
+            </p>
+            <div className="confirmation-buttons">
+              <button 
+                className="confirmation-button cancel" 
+                onClick={handleCancelAddConfirm}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirmation-button confirm" 
+                onClick={handleSubmit}
+                style={{ backgroundColor: "#4CAF50" }}
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
