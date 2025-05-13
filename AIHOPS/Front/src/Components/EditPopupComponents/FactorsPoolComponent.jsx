@@ -23,7 +23,11 @@ const FactorsPoolComponent = ({
   alertMessage,
   alertType,
   setShowAlert,
+  handleAlertClose
 }) => {
+  // Use the provided handleAlertClose function or fall back to just hiding the alert
+  const onAlertClose = handleAlertClose || (() => setShowAlert(false));
+  
   return (
     <div>
       <div
@@ -72,6 +76,20 @@ const FactorsPoolComponent = ({
           <u> Assessment Dimensions Pool</u>:
         </b>
       </div>
+      
+      {/* Alert popup */}
+      {showAlert && (
+        <div style={{ margin: "10px 0", textAlign: "center" }}>
+          <AlertPopup
+            title={alertType === "success" ? "Success" : alertType === "info" ? "Information" : "Input Validation"}
+            message={alertMessage}
+            type={alertType}
+            onClose={onAlertClose}
+            autoCloseTime={0} // No auto-close - let the user control
+          />
+        </div>
+      )}
+      
       {factorsPool.length > 0 ? (
         <>
           {factorsPool
@@ -231,15 +249,6 @@ const FactorsPoolComponent = ({
         >
           No Assessment Dimensions available in the pool.
         </div>
-      )}
-      {showAlert && (
-        <AlertPopup
-          message={alertMessage}
-          type={alertType}
-          title="Input Validation"
-          onClose={() => setShowAlert(false)}
-          autoCloseTime={3000}
-        />
       )}
     </div>
   );
