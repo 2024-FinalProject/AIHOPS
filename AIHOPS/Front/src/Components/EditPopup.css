@@ -714,3 +714,192 @@ input::placeholder {
     transform: translate(-50%, -50%) scale(1);
   }
 }
+
+
+/* Blue theme styling for Edit components */
+.blue-gradient {
+  background: linear-gradient(135deg, #1a73e8, #0d47a1) !important;
+}
+
+.blue-focus:focus {
+  border-color: #1a73e8 !important;
+  box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.25) !important;
+}
+
+.blue-save-btn {
+  background: linear-gradient(to right, #1a73e8, #0d47a1) !important;
+  color: white !important;
+  font-weight: bold !important;
+  border: none !important;
+  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.blue-save-btn:hover {
+  background: linear-gradient(to right, #0d47a1, #1565c0) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 12px rgba(26, 115, 232, 0.4) !important;
+}
+
+/* Enhanced popup styling */
+.edit-project-popup {
+  border-radius: 16px !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15), 0 8px 10px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden !important;
+  max-width: 600px !important; /* Slightly wider for better proportions */
+}
+
+/* Header improvements */
+.popup-header {
+  padding: 24px 25px !important;
+}
+
+.popup-title {
+  font-size: 1.8rem !important;
+  letter-spacing: 0.5px !important;
+  font-weight: 700 !important;
+  color: white !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.underline-decoration {
+  height: 3px !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  margin: 12px auto 0 !important;
+  width: 80px !important; /* Shorter line for better aesthetics */
+  border-radius: 2px !important;
+}
+
+/* Input improvements */
+.input-container {
+  padding: 30px 35px 20px !important;
+  background-color: #f5f8ff !important; /* Light blue background */
+}
+
+.edit-textarea.modern {
+  border: 2px solid rgba(26, 115, 232, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 18px !important;
+  font-size: 1.1rem !important;
+  background-color: white !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+  line-height: 1.5 !important;
+}
+
+.edit-textarea.modern::placeholder {
+  color: #92a0b3 !important;
+}
+
+/* Button container improvements */
+.actions-container {
+  padding: 16px 35px 30px !important;
+  background-color: #f5f8ff !important;
+  display: flex !important;
+  justify-content: center !important;
+  gap: 18px !important;
+}
+
+/* Button styling improvements */
+.action-btn {
+  padding: 12px 28px !important;
+  font-size: 1.1rem !important;
+  border-radius: 50px !important; /* More rounded buttons */
+  font-weight: 600 !important;
+  letter-spacing: 0.4px !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+}
+
+.cancel-btn {
+  background-color: #e0e0e0 !important;
+  color: #5f6368 !important;
+}
+
+.cancel-btn:hover {
+  background-color: #d5d5d5 !important;
+  transform: translateY(-2px) !important;
+}
+
+.btn-icon {
+  margin-right: 8px !important;
+  font-weight: bold !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .edit-project-popup {
+    width: 90% !important;
+    max-width: 450px !important;
+  }
+  
+  .popup-title {
+    font-size: 1.5rem !important;
+  }
+  
+  .input-container,
+  .actions-container {
+    padding: 20px !important;
+  }
+  
+  .action-btn {
+    padding: 10px 20px !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Button improvements while maintaining current colors */
+.action-btn {
+  padding: 6px 15px !important;
+  border: none !important;
+  border-radius: 20px !important; /* Rounded corners */
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  min-width: 80px !important; /* Consistent button width */
+  text-align: center !important;
+}
+
+/* Add hover effects */
+.action-btn:hover,
+button.edit-btn:hover,
+button.delete-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Improve the factor item styling */
+.factor-item {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 12px 15px !important;
+  margin-bottom: 4px !important;
+  background-color: #f9f9f9 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+}
+
+/* Ensure buttons are properly spaced */
+.factor-item > div:last-child {
+  display: flex !important;
+  gap: 8px !important;
+  flex-shrink: 0 !important; /* Prevent buttons from shrinking */
+}
+
+/* Fix for top buttons */
+.action-btn.edit-btn[style*="borderRadius: 20px"] {
+  border-radius: 20px !important;
+}
+
+/* Button sizing and alignment for header buttons */
+button[style*="margin-left: -200px"],
+button[style*="margin-right: -200px"],
+button[style*="margin-right: 120px"] {
+  padding: 8px 16px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  min-width: 140px !important;
+}

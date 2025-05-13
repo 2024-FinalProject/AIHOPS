@@ -287,7 +287,7 @@ const MyProjects = () => {
                     }}
                   >
                     <input type="checkbox" checked={isFactorsDone} readOnly />
-                    <span>Vote on Factors</span>
+                    <span>Vote on Assessment Dimensions</span>
                   </button>
 
                   <button
@@ -298,7 +298,7 @@ const MyProjects = () => {
                     }}
                   >
                     <input type="checkbox" checked={isDScoreDone} readOnly />
-                    <span>Vote on D.Score</span>
+                    <span>Vote on Risk Assessment</span>
                   </button>
                 </div>
               );

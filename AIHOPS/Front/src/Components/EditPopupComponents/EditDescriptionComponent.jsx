@@ -15,21 +15,21 @@ const EditDescriptionComponent = ({
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("warning");
+  const [shouldCloseAfterAlert, setShouldCloseAfterAlert] = useState(false);
 
   const updateProjectsNameOrDesc = async () => {
-    if (!newName.trim()) { // or !newDescription.trim() for EditDescriptionComponent
+    if (!newDescription.trim()) {
       setAlertType("warning");
-      setAlertMessage("Field cannot be empty");
+      setAlertMessage("Project description cannot be empty");
       setShowAlert(true);
       return;
     }
 
     try {
       // Update the project immediately in the selectedProject object
-      selectedProject.name = newName; // or selectedProject.description = newDescription
+      selectedProject.description = newDescription;
       
       const response = await update_project_name_and_desc(
-        cookie,
         selectedProject.id,
         selectedProject.name,
         selectedProject.description
@@ -38,30 +38,26 @@ const EditDescriptionComponent = ({
       if (response.data.success) {
         // Show success message with longer display
         setAlertType("success");
-        setAlertMessage("Updated successfully!");
+        setAlertMessage("Project description updated successfully!");
+        setShouldCloseAfterAlert(true);
         setShowAlert(true);
         setIsSuccess(true);
-        
-        // Don't auto-close, let the user control when to close
-        // Instead, use the shouldCloseAfterAlert pattern
-        setShouldCloseAfterAlert(true);
       } else {
         setAlertType("error");
-        setAlertMessage(response.data.message || "Failed to update");
+        setAlertMessage(response.data.message || "Failed to update project description");
         setShowAlert(true);
         setIsSuccess(false);
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || error.message;
       setAlertType("error");
-      setAlertMessage(`Error updating: ${errorMessage}`);
+      setAlertMessage(`Error updating project description: ${errorMessage}`);
       setShowAlert(true);
-      setMsg(`Error updating: ${errorMessage}`);
+      setMsg(`Error updating project description: ${errorMessage}`);
       setIsSuccess(false);
     }
   };
   
-  // Also add the handleAlertClose function:
   const handleAlertClose = () => {
     setShowAlert(false);
     
@@ -80,14 +76,14 @@ const EditDescriptionComponent = ({
 
   return (
     <div className="edit-project-popup">
-      <div className="popup-header">
-        <h3 className="popup-title">Project's Description:</h3>
+      <div className="popup-header blue-gradient">
+        <h3 className="popup-title">Project Description</h3>
         <div className="underline-decoration"></div>
       </div>
 
       <div className="input-container">
         <textarea
-          className="edit-textarea modern"
+          className="edit-textarea modern blue-focus"
           value={newDescription}
           onChange={(e) => setNewDescription(e.target.value)}
           placeholder="Enter project description..."
@@ -100,7 +96,7 @@ const EditDescriptionComponent = ({
           Cancel
         </button>
         <button
-          className="action-btn save-btn"
+          className="action-btn save-btn blue-save-btn"
           onClick={updateProjectsNameOrDesc}
         >
           <span className="btn-icon">✓</span>
@@ -112,9 +108,9 @@ const EditDescriptionComponent = ({
         <AlertPopup
           message={alertMessage}
           type={alertType}
-          title="Input Validation"
-          onClose={() => setShowAlert(false)}
-          autoCloseTime={3000}
+          title={alertType === "success" ? "Success" : "Input Validation"}
+          onClose={handleAlertClose}
+          autoCloseTime={alertType === "success" ? 2000 : 3000}
         />
       )}
     </div>
