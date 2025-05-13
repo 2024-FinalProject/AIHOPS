@@ -165,42 +165,41 @@ const FactorVotingModal = ({
 
         {/* Pyramid Tabs */}
         <div className="factor-tabs-pyramid">
-  {project.factors.map((f) => {
-    const hasVote =
-      submittedVotes[f.id] !== undefined || factorVotes[f.id] !== undefined;
-    const voteVal =
-      submittedVotes[f.id] !== undefined
-        ? submittedVotes[f.id]
-        : factorVotes[f.id];
-    const isActive =
-      project.factors.indexOf(f) === currentFactorIndex;
+          {project.factors.map((f) => {
+            const hasVote =
+              submittedVotes[f.id] !== undefined ||
+              factorVotes[f.id] !== undefined;
+            const voteVal =
+              submittedVotes[f.id] !== undefined
+                ? submittedVotes[f.id]
+                : factorVotes[f.id];
+            const isActive = project.factors.indexOf(f) === currentFactorIndex;
 
-    return (
-      <div
-        key={f.id}
-        className={`factor-tab ${isActive ? "selected" : ""}`}
-        onClick={() =>
-          project.factors.indexOf(f) !== currentFactorIndex &&
-          onSelectFactor(project.factors.indexOf(f))
-        }
-      >
-        <span className="factor-name">{f.name}</span>
-        {hasVote && (
-          <span
-            className={`vote-indicator vote-indicator-${voteVal}`}
-            style={{
-              backgroundColor: "#7fc68d",
-              color: "black",
-            }}
-          >
-            {voteVal}
-          </span>
-        )}
-      </div>
-    );
-  })}
-</div>
-
+            return (
+              <div
+                key={f.id}
+                className={`factor-tab ${isActive ? "selected" : ""}`}
+                onClick={() =>
+                  project.factors.indexOf(f) !== currentFactorIndex &&
+                  onSelectFactor(project.factors.indexOf(f))
+                }
+              >
+                <span className="factor-name">{f.name}</span>
+                {hasVote && (
+                  <span
+                    className={`vote-indicator vote-indicator-${voteVal}`}
+                    style={{
+                      backgroundColor: "#9069d8",
+                      color: "black",
+                    }}
+                  >
+                    {voteVal}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
 
         {/* Progress */}
         <div className="progress-bar-container">
@@ -226,7 +225,9 @@ const FactorVotingModal = ({
               <table className="factor-table">
                 <thead>
                   <tr>
-                    <th style={{ textAlign: "center", width: "100px" }}>Vote</th>
+                    <th style={{ textAlign: "center", width: "100px" }}>
+                      Vote
+                    </th>
                     <th style={{ textAlign: "center" }}>Description </th>
                     {hasExplanations && (
                       <th style={{ textAlign: "center" }}>Explanation</th>

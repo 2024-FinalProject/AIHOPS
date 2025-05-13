@@ -10,7 +10,6 @@
   border-color: #dc2626;
   box-shadow: 0 0 0 2px #fca5a5;
   color: white;
-
 }
 
 .factor-option-1 {
@@ -24,49 +23,45 @@
   border-color: #ea580c;
   box-shadow: 0 0 0 2px #fdba74;
   color: white;
-
 }
 
 .factor-option-2 {
-  background-color: #86e3b3;
-  border: 2px solid #10b981;
+  background-color: #d6e139e8;
+  border: 2px solid #adbb2f;
   color: #065f46;
 }
 
 .factor-option-2.selected {
-  background-color: #a7f3d0;
+  background-color: #d7e81be8;
+  border-color: #adbb2f;
+  box-shadow: 0 0 0 2px #e5e76e;
+  color: white;
+}
+
+.factor-option-3 {
+  background-color: #86e3b3e8;
+  border: 2px solid #10b981;
+  color: #065f46;
+}
+
+.factor-option-3.selected {
+  background-color: #1fe488e8;
   border-color: #059669;
   box-shadow: 0 0 0 2px #6ee7b7;
   color: white;
-
 }
-
-.factor-option-3{
-  background-color: #6c9e85;
-  border: 5x solid #010403;
-  color: #07291f;
-}
-
-
-.factor-option-3.selected {
-  background-color: #3f5248;
-  border:  #00000004;
-  color: white;
-  box-shadow: 0 0 0 2px #bbf7d0;
-}
-
 
 .factor-option-4 {
-  background-color: #08582d;
-  border: 2px solid #091f17;
+  background-color: #25f41ee8;
+  border: 2px solid #2bce26e8 !important;
   color: #000000;
 }
 
 .factor-option-4.selected {
-  background-color: #025b2d;
-  border: 2px solid #1e684f;
+  background-color: #09ff00e9;
+  border: 2px solid #2bce26e8;
   color: white;
-  box-shadow: 0 0 0 2px #278b66;
+  box-shadow: 0 0 0 2px #27a323e8;
 } /* Improved Factor Voting Modal Styles */
 
 /* Modal overlay and content */
@@ -234,7 +229,6 @@
   background-color: #2563eb; /* Darker blue on hover */
 }
 
-
 .factor-tab:hover {
   background-color: #f3f4f6;
   transform: translateY(-2px);
@@ -246,7 +240,6 @@
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
-
 
 .vote-indicator {
   display: flex;
@@ -698,7 +691,6 @@
   }
 }
 
-
 .vote-option-container {
   display: flex;
   flex-direction: column;
@@ -850,13 +842,11 @@
   background-color: #bfdbfe !important;
 }
 
-
 .pyramid-row {
   display: flex;
   justify-content: center;
   gap: 10px;
 }
-
 
 .factor-tabs-pyramid {
   display: flex;
@@ -884,7 +874,6 @@
   cursor: pointer;
 }
 
-
 .factor-button .factor-name {
   flex: 1;
   white-space: nowrap;
@@ -904,4 +893,3 @@
 .factor-button.selected {
   border: 2px solid #333;
 }
-
