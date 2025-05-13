@@ -15,6 +15,7 @@ const EditNameComponent = ({
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("warning");
+  const [shouldCloseAfterAlert, setShouldCloseAfterAlert] = useState(false);
 
   const updateProjectsNameOrDesc = async () => {
     if (!newName.trim()) {
@@ -25,31 +26,22 @@ const EditNameComponent = ({
     }
 
     try {
-      // Update the project name immediately in the selectedProject object
-      // This allows the change to be visible right away in the parent components
+      // Update the project immediately in the selectedProject object
       selectedProject.name = newName;
       
       const response = await update_project_name_and_desc(
         selectedProject.id,
-        newName,
+        selectedProject.name,
         selectedProject.description
       );
-
+  
       if (response.data.success) {
-        // Show success message
+        // Show success message with longer display
         setAlertType("success");
         setAlertMessage("Project name updated successfully!");
+        setShouldCloseAfterAlert(true);
         setShowAlert(true);
-        
-        // Refresh data in the background
-        await fetchProjects();
-        await fetch_selected_project(selectedProject);
         setIsSuccess(true);
-        
-        // Set a short timeout before closing to allow user to see success message
-        setTimeout(() => {
-          closePopup();
-        }, 1000);
       } else {
         setAlertType("error");
         setAlertMessage(response.data.message || "Failed to update project name");
@@ -65,20 +57,38 @@ const EditNameComponent = ({
       setIsSuccess(false);
     }
   };
+  
+  const handleAlertClose = () => {
+    setShowAlert(false);
+    
+    // If we were waiting to close the popup, do it now
+    if (shouldCloseAfterAlert) {
+      setShouldCloseAfterAlert(false);
+      
+      // Refresh data first to ensure changes are propagated
+      fetchProjects().then(() => {
+        fetch_selected_project(selectedProject).then(() => {
+          closePopup();
+        });
+      });
+    }
+  };
 
   return (
     <div className="edit-project-popup">
-      <div className="popup-header">
-        <h3 className="popup-title">Project's Name:</h3>
+      <div className="popup-header blue-gradient">
+        <h3 className="popup-title">Project Name</h3>
         <div className="underline-decoration"></div>
       </div>
 
       <div className="input-container">
         <textarea
-          className="edit-textarea modern"
+          className="edit-textarea modern blue-focus"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           placeholder="Enter project name..."
+          rows={2}
+          maxLength={100}
         />
       </div>
 
@@ -87,7 +97,7 @@ const EditNameComponent = ({
           Cancel
         </button>
         <button
-          className="action-btn save-btn"
+          className="action-btn save-btn blue-save-btn"
           onClick={updateProjectsNameOrDesc}
         >
           <span className="btn-icon">✓</span>
@@ -99,9 +109,9 @@ const EditNameComponent = ({
         <AlertPopup
           message={alertMessage}
           type={alertType}
-          title="Input Validation"
-          onClose={() => setShowAlert(false)}
-          autoCloseTime={3000}
+          title={alertType === "success" ? "Success" : "Input Validation"}
+          onClose={handleAlertClose}
+          autoCloseTime={alertType === "success" ? 2000 : 3000}
         />
       )}
     </div>

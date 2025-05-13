@@ -387,18 +387,20 @@ const EditContentFactorsComponent = ({
     }
   
     try {
-      const response = await confirmProjectFactors(pid);
+      const response = await confirmProjectFactors(cookie, pid);
       
       if (response.data.success) {
         // Update the property immediately in the UI
         selectedProject.factors_inited = true;
         await fetch_selected_project(selectedProject);
         
-        // Show single success message
+        // Show success message
         setAlertType("success");
         setAlertMessage("Assessment dimensions confirmed successfully!");
-        setShouldCloseAfterAlert(true); // Set flag to close after user dismisses alert
         setShowAlert(true);
+        
+        // Make sure the state shows we should close on alert dismissal
+        setShouldCloseAfterAlert(true);
       } else {
         setAlertType("error");
         setAlertMessage(response.data.message || "Error confirming assessment dimensions");
@@ -411,14 +413,21 @@ const EditContentFactorsComponent = ({
       setShowAlert(true);
     }
   };
-
+  
+  // Also make sure to have the handleAlertClose function:
   const handleAlertClose = () => {
     setShowAlert(false);
     
-    // If we were waiting to close the popup, do it now
+    // If we flagged to close after alert
     if (shouldCloseAfterAlert) {
       setShouldCloseAfterAlert(false);
-      closePopup();
+      
+      // Make sure we fully close out to the project management page
+      if (closePopup) {
+        // Make sure any parent popups are also closed
+        // This ensures we go back to the project management page
+        closePopup();
+      }
     }
   };
 

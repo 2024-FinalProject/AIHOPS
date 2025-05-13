@@ -13,6 +13,7 @@ import EditDescriptionComponent from "./EditPopupComponents/EditDescriptionCompo
 import ManageAssessorsComponent from "./EditPopupComponents/ManageAssessorsComponent";
 import EditContentFactorsComponent from "./EditPopupComponents/EditContentFactorsComponent";
 import EditSeverityFactors from "../Components/EditPopupComponents/EditSeverityFactors.jsx";
+import EditFactorComponent from "./EditPopupComponents/EditFactorComponent";
 import AnalyzeResult from "./AnalyzeResult.jsx";
 
 const EditPopup = ({
@@ -23,20 +24,31 @@ const EditPopup = ({
   closePopup,
   popupType,
   selectedProject,
+  factorId = null, // Add factorId prop for update factor popup
 }) => {
   const [projectsPendingInvites, setProjectsPendingInvites] = useState([]);
   const [projectsPendingRequests, setProjectsPendingRequests] = useState([]);
   const [factorsPool, setFactorsPool] = useState([]);
   const [analyzePopupType, setAnalyzePopupType] = useState("");
   const [reloadTrigger, setReloadTrigger] = useState(0);
+  const [editingFactor, setEditingFactor] = useState(null);
 
   useEffect(() => {
     fetch_pending_invites(selectedProject.id);
     fetch_pending_requests(selectedProject.id);
     fetch_factors_pool();
 
+    // If we have a factorId for direct edit, find the factor
+    if (factorId && popupType === "updateFactor") {
+      // Find the factor in the project
+      const factor = selectedProject.factors.find(f => f.id === factorId);
+      if (factor) {
+        setEditingFactor(factor);
+      }
+    }
+
     setAnalyzePopupType("showAssessorsInfo");
-  }, [reloadTrigger]);
+  }, [reloadTrigger, factorId, popupType, selectedProject]);
 
   const fetch_pending_invites = async (projectId) => {
     try {
@@ -193,6 +205,21 @@ const EditPopup = ({
             factorsPool={factorsPool}
             fetch_factors_pool={fetch_factors_pool}
           />
+        );
+      case "updateFactor":
+        return editingFactor ? (
+          <EditFactorComponent
+            editingFactor={editingFactor}
+            isStandalone={true}
+            selectedProject={selectedProject}
+            fetchProjects={fetchProjects}
+            fetch_selected_project={fetch_selected_project}
+            setIsSuccess={setIsSuccess}
+            setMsg={setMsg}
+            closePopup={closePopup}
+          />
+        ) : (
+          <div className="loading">Loading factor data...</div>
         );
       case "editSeverityFactors":
         return (
