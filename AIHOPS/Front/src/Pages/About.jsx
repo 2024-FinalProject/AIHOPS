@@ -11,17 +11,17 @@ const About = () => {
   const [aboutText, setAboutText] = useState(" ");
 
   useEffect(() => {
-  const fetchAboutContent = async () => {
-    console.log("Fetching about content...");
-    const response = await fetchAbout();
-    if (response.data.result) {
-      setAboutText(response.data.result);  
-    } else {
-      console.error("Failed to fetch about text");
-    }
-  };
-  fetchAboutContent();
-}, []);
+    const fetchAboutContent = async () => {
+      console.log("Fetching about content...");
+      const response = await fetchAbout();
+      if (response.data.result) {
+        setAboutText(response.data.result);
+      } else {
+        console.error("Failed to fetch about text");
+      }
+    };
+    fetchAboutContent();
+  }, []);
 
   return (
     <div className="about-header">
@@ -30,7 +30,7 @@ const About = () => {
         <div className="about-card">
           <div className="about-content">
             <ReactMarkdown>{aboutText}</ReactMarkdown>
-          </div>         
+          </div>
         </div>
       </div>
     </div>
