@@ -19,7 +19,7 @@ const NavBar = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("authenticated");
+      // console.log("authenticated");
       fetchPendingRequest();
     }
   }, [location.pathname]);

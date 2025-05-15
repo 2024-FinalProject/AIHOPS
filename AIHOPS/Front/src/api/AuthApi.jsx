@@ -1,5 +1,5 @@
 import axios from "./axiosInstance";
-const API_URL = "https://aihops.cs.bgu.ac.il/api";
+import { API_URL } from "../constants";
 
 export const verify = async (userName, passwd, code) => {
   return await axios.post(`${API_URL}/verify`, {

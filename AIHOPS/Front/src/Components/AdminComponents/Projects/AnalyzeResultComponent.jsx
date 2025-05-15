@@ -9,7 +9,7 @@ const AnalyzeResultComponent = ({ closePopup, selectedProjectId }) => {
   );
 
   useEffect(() => {
-    console.log("showing results for project: %d", selectedProjectId);
+    // console.log("showing results for project: %d", selectedProjectId);
   }, []);
 
   return (

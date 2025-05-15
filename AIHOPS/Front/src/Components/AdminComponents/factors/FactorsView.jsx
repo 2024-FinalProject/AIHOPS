@@ -29,19 +29,19 @@ const FactorsView = ({ handleStartEditFactorParent }) => {
   }, []);
 
   const handleStartEditFactor = async (factor) => {
-    console.log("starting to edit factor ", factor.id);
+    // console.log("starting to edit factor ", factor.id);
     handleStartEditFactorParent(factor, FactorEditorMode.EDIT);
   };
 
   const handleRemove = async (fid) => {
-    console.log("removing factor: ", fid);
+    // console.log("removing factor: ", fid);
     const response = await removeDefaultFactor(fid);
     alert(response.data.message);
     fetchFactors();
   };
 
   const handleAdd = async () => {
-    console.log("adding factor: ");
+    // console.log("adding factor: ");
 
     const blankFactor = {
       id: null,

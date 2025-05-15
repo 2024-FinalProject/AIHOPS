@@ -25,7 +25,7 @@ const PendingRequestList = () => {
     setError(null);
 
     try {
-      console.log("Fetching pending requests...");
+      // console.log("Fetching pending requests...");
 
       const response = await getPendingRequest();
 
@@ -51,7 +51,7 @@ const PendingRequestList = () => {
 
   const handleAccept = async (e, request) => {
     e.stopPropagation(); // Stop the click from triggering ListGroup.Item's onClick
-    console.log("Accepted request:", request);
+    // console.log("Accepted request:", request);
     try {
       // Ensure the request object contains id
       if (!request?.id == undefined || request?.id == null) {
@@ -62,7 +62,7 @@ const PendingRequestList = () => {
 
       const response = await acceptProjByUser(request.id);
       if (response.data.success) {
-        console.log("Project accepted");
+        // console.log("Project accepted");
         fetchPendingRequest(); // Refresh the list after successful acceptance
       } else {
         alert("Failed to accept project");
@@ -77,7 +77,7 @@ const PendingRequestList = () => {
 
   const handleReject = async (e, request) => {
     e.stopPropagation(); // Stop the click from triggering ListGroup.Item's onClick
-    console.log("Rejected request:", request);
+    // console.log("Rejected request:", request);
 
     try {
       // Ensure the request object contains id
@@ -89,7 +89,7 @@ const PendingRequestList = () => {
 
       const response = await rejectProjByUser(request.id);
       if (response.data.success) {
-        console.log("Project rejected");
+        // console.log("Project rejected");
         fetchPendingRequest(); // Refresh the list after successful rejection
       } else {
         alert("Failed to reject project");
@@ -109,7 +109,7 @@ const PendingRequestList = () => {
   const sortRequestList = isNewFirst ? [...requestList].reverse() : requestList;
 
   useEffect(() => {
-    console.log("Location state:", location.state);
+    // console.log("Location state:", location.state);
 
     // Ensure it only fetches once per component mount
     if (location.state?.triggerFetch) {
@@ -119,7 +119,7 @@ const PendingRequestList = () => {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      console.log("Redirecting to /");
+      // console.log("Redirecting to /");
       navigate("/");
     }
   }, [isLoggedIn, navigate]);

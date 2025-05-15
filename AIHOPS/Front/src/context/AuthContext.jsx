@@ -127,7 +127,7 @@ export const AuthProvider = ({ children }) => {
   const getMyCookie = async () => {
     const cookie = localStorage.getItem("authToken");
     if (!cookie) {
-      console.log("cookie not found");
+      // console.log("cookie not found");
       logout();
       return startNewSession();
     }

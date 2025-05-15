@@ -51,7 +51,7 @@ const MyProjects = () => {
       const response = await getProjectsMember();
       if (response.data.success) {
         const fetchedProjects = response.data.projects || [];
-        console.log("Fetched projects:", fetchedProjects); // Debug logging
+        // console.log("Fetched projects:", fetchedProjects); // Debug logging
         setProjects(fetchedProjects);
 
         // Sort projects by default order (newest first)
@@ -238,7 +238,7 @@ const MyProjects = () => {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (!isLoggedIn) {
-      console.log("Redirecting to /");
+      // console.log("Redirecting to /");
       navigate("/");
     } else {
       fetchProjects();

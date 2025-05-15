@@ -82,13 +82,13 @@ const ProjectsManagement = () => {
       if (response.data.success) {
         setProjects([...response.data.projects]);
         setIsSuccess(true);
-        console.log(
-          "Fetched projects:",
-          response.data.projects.map((project) => ({
-            name: project.name,
-            description: project.description,
-          }))
-        );
+        // console.log(
+        //   "Fetched projects:",
+        //   response.data.projects.map((project) => ({
+        //     name: project.name,
+        //     description: project.description,
+        //   }))
+        // );
       } else {
         setMsg(response.data.message);
         setIsSuccess(true);
@@ -104,7 +104,7 @@ const ProjectsManagement = () => {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (!isLoggedIn) {
-      console.log("Redirecting to /");
+      // console.log("Redirecting to /");
       navigate("/");
     } else {
       // Fetch projects when the component mounts
@@ -310,8 +310,8 @@ const ProjectsManagement = () => {
     }
 
     try {
-      console.log(`Using default factors? : ${useDefaultFactors}`);
-      console.log(`is_to_research? : ${research}`);
+      // console.log(`Using default factors? : ${useDefaultFactors}`);
+      // console.log(`is_to_research? : ${research}`);
       const response = await createProject(
         newProject.name,
         newProject.description,

@@ -13,7 +13,7 @@ const getMyCookie = async () => {
     localStorage.setItem("authToken", cookie);
     localStorage.setItem("userName", "admin");
   }
-  console.log("cookie: ", cookie);
+  // console.log("cookie: ", cookie);
   return cookie;
 };
 

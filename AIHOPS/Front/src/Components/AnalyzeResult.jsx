@@ -41,7 +41,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   useEffect(() => {
     if (!weightsInited && projectFactors.length > 0) {
       setWeightsInited(true);
-      console.log("weights use Effect len: ", projectFactors.length);
+      // console.log("weights use Effect len: ", projectFactors.length);
       const initialWeights = {};
       projectFactors.forEach((factor) => {
         initialWeights[factor.id] = 1;
@@ -65,7 +65,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
       [id]: val,
     }));
 
-    console.log("changed weight for", id, "to", val);
+    // console.log("changed weight for", id, "to", val);
   };
 
   const ProjectScore = () => {

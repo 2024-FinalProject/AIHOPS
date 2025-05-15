@@ -15,7 +15,7 @@ const EditFactor = ({ factor, returnFunc, mode }) => {
   ]);
 
   const handleCancelEdit = () => {
-    console.log("canceling");
+    // console.log("canceling");
     returnFunc();
   };
 
@@ -53,7 +53,7 @@ const EditFactor = ({ factor, returnFunc, mode }) => {
   };
 
   const handleActionOnFactor = async () => {
-    console.log("performing: ", mode);
+    // console.log("performing: ", mode);
     if (mode === FactorEditorMode.EDIT) {
       await handleEdit();
     } else {

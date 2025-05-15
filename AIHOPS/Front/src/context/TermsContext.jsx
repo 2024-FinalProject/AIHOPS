@@ -4,7 +4,10 @@ import { API_URL } from "../constants";
 import { acceptNewTerms } from "../api/AuthApi";
 
 const TermsContext = createContext();
-const socket = io(API_URL);
+const socket = io("https://aihops.cs.bgu.ac.il", {
+  transports: ["websocket"], // or ["polling", "websocket"]
+  secure: true,
+});
 
 export const TermsProvider = ({ children }) => {
   const [termsText, setTermsText] = useState("");
@@ -22,18 +25,18 @@ export const TermsProvider = ({ children }) => {
 
   useEffect(() => {
     socket.on("connect", () => {
-      console.log("Socket connected (client side)");
+      // console.log("Socket connected (client side)");
       socket.emit("request_terms");
     });
 
     socket.on("get_terms", (data) => {
-      console.log("Received terms:", data);
+      // console.log("Received terms:", data);
       setTermsText(data.tac_text);
       setTermsVersion(data.version);
     });
 
     socket.on("terms_updated", (data) => {
-      console.log("Terms updated:", data);
+      // console.log("Terms updated:", data);
       setTermsText(data.tac_text);
       setTermsVersion(data.version);
       setMustAcceptNewTerms(true);

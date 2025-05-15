@@ -18,7 +18,7 @@ const SettingsPage = () => {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      console.log("Redirecting to /");
+      // console.log("Redirecting to /");
       navigate("/");
     }
   }, [isLoggedIn, navigate]);

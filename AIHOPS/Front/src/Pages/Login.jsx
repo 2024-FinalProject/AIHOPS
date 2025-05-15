@@ -51,7 +51,7 @@ const Login = () => {
 
     try {
       const response = await loginUser(userName, password);
-      console.log("is_admin value from response:", response?.data?.is_admin);
+      // console.log("is_admin value from response:", response?.data?.is_admin);
       if (response.data.success) {
         if (response.data.is_admin) {
           setIsAdmin(true);
@@ -113,17 +113,17 @@ const Login = () => {
       const response = await googleLogin(credentialToUse);
 
       if (response.data.success) {
-        console.log(
-          "must_accept_terms: %s",
-          response.data.need_to_accept_new_terms
-        );
+        // console.log(
+        //   "must_accept_terms: %s",
+        //   response.data.need_to_accept_new_terms
+        // );
         if (response.data.need_to_accept_new_terms) {
           setMustAcceptNewTerms(true);
         }
 
         setMsg(response.data.message);
         localStorage.setItem("userName", response.data.email);
-        console.log("logged in as %s", response.data.email);
+        // console.log("logged in as %s", response.data.email);
         login(response.data.email);
         localStorage.setItem("isLoggedIn", "true");
         navigate("/");

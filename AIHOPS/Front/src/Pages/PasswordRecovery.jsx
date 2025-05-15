@@ -30,14 +30,14 @@ const PasswordRecovery = () => {
 
   useEffect(() => {
     const _code = searchParams.get("token");
-    console.log("ran", _code);
+    // console.log("ran", _code);
     if (_code && _code !== code) setCode(_code);
     // setToken(searchParams.get("token")) // Get token from URL
   }, [searchParams, isLoggedIn]);
 
   useEffect(() => {
     if (isLoggedIn) {
-      console.log("Redirecting to /");
+      // console.log("Redirecting to /");
       navigate("/");
     }
   }, [isLoggedIn, navigate]);

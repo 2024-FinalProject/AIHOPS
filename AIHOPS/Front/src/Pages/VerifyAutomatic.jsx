@@ -14,7 +14,7 @@ const VerifyAutomatic = () => {
 
   useEffect(() => {
     const token = searchParams.get("token");
-    console.log("ran", token);
+    // console.log("ran", token);
     // setToken(searchParams.get("token")) // Get token from URL
     if (token) {
       handleVerify(token);
@@ -23,7 +23,7 @@ const VerifyAutomatic = () => {
 
   const handleVerify = async (token) => {
     // e.preventDefault();
-    console.log("handling", token);
+    // console.log("handling", token);
 
     // Reset state before making the request
     setMsg("");

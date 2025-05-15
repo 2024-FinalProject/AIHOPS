@@ -26,7 +26,7 @@ const ProjectsManager = () => {
         return;
       }
       setProjects(response.data.projects);
-      console.log("got %d projects", response.data.projects.length);
+      // console.log("got %d projects", response.data.projects.length);
     } catch (error) {
       console.error("Error fetching factors:", error);
       setErrorMsg(response.data.message);

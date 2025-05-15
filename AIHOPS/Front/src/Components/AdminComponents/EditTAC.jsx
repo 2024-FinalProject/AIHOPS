@@ -11,7 +11,7 @@ const EditTAC = () => {
 
   const handleSubmit = () => {
     updateTermsAndConditions(editedText);
-    console.log("Submitted terms:", editedText);
+    // console.log("Submitted terms:", editedText);
     setIsEditing(false);
   };
 
