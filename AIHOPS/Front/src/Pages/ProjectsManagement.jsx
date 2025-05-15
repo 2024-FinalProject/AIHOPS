@@ -252,8 +252,8 @@ const ProjectsManagement = () => {
 
     if (
       project.severity_factors_inited &&
-      project.factors_inited &&
-      project.to_invite.length > 0
+      project.factors_inited
+      // && project.to_invite.length > 0
     ) {
       setPublishingModalState({
         isOpen: true,
@@ -428,15 +428,31 @@ const ProjectsManagement = () => {
       )}
 
       {/* Project publish confirmation */}
-      {confirmPublishPopUp && (
-        <AlertPopup
-          message={`Are you sure you want to publish the project "${publishData.projectName}"?`}
-          title="Publish Project"
-          type="info"
-          onConfirm={handleConfirmPublish}
-          onCancel={() => setConfirmPublishPopUp(false)}
-        />
-      )}
+      {confirmPublishPopUp &&
+        selectedProject.to_invite.length === 0 &&
+        selectedProject.severity_factors_inited &&
+        selectedProject.factors_inited && (
+          <AlertPopup
+            message={`You haven't invited any assessors. Are you sure you want to publish the project "${publishData.projectName}" anyway?`}
+            title="No Assessors Invited"
+            type="warning"
+            onConfirm={handleConfirmPublish}
+            onCancel={() => setConfirmPublishPopUp(false)}
+          />
+        )}
+
+      {confirmPublishPopUp &&
+        (selectedProject.to_invite.length > 0 ||
+          !selectedProject.severity_factors_inited ||
+          !selectedProject.factors_inited) && (
+          <AlertPopup
+            message={`Are you sure you want to publish the project "${publishData.projectName}"?`}
+            title="Publish Project"
+            type="info"
+            onConfirm={handleConfirmPublish}
+            onCancel={() => setConfirmPublishPopUp(false)}
+          />
+        )}
 
       {/* Archive confirmation */}
       {showArchivePopup && (
