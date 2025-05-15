@@ -1,5 +1,5 @@
 // ProjectsView.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./ProjectsView.css";
 
 export const status = {
@@ -13,11 +13,20 @@ const ProjectsView = ({
   renderButtons,
   renderBody,
   showStatus = true,
+  selectedProjectIds = [],
+  toggleProjectSelection = null,
+  onVisibleProjectsChange = null,
 }) => {
   const [statusFilter, setStatusFilter] = useState("");
   const [isNewFirst, setIsNewFirst] = useState(true);
 
   const toggleSort = () => setIsNewFirst((prev) => !prev);
+
+  useEffect(() => {
+    if (onVisibleProjectsChange) {
+      onVisibleProjectsChange(getFilteredAndSortedProjects());
+    }
+  }, [statusFilter, isNewFirst, projects]);
 
   const filterProjectsByStatus = (projects) => {
     switch (statusFilter) {
@@ -87,6 +96,14 @@ const ProjectsView = ({
       <div className="pv-cards">
         {list.map((project) => (
           <div key={project.id} className="pv-card">
+            {selectedProjectIds && toggleProjectSelection && (
+              <input
+                type="checkbox"
+                checked={selectedProjectIds.includes(project.id)}
+                onChange={() => toggleProjectSelection(project.id)}
+                style={{ marginRight: "8px" }}
+              />
+            )}
             <div className="pv-info">
               <div className="pv-name">{project.name}</div>
               {renderBody ? (

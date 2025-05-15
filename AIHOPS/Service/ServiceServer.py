@@ -529,7 +529,7 @@ def get_research_projects():
     return jsonify({
         "message": res.msg,
         "success": res.success,
-        "projects": res.result if res.success else None
+        "projects": res.result if res.success else []
     })
 
 @app.route("/remove-research-project", methods=["GET"])
