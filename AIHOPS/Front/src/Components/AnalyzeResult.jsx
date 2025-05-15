@@ -264,14 +264,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                     Click the button below to export all project analysis data
                     to Excel.
                   </p>
-                  <ExportDataButton
-                    projectsScore={projectsScore}
-                    projectsProgress={projectsProgress}
-                    projectFactors={projectFactors}
-                    projectSeverityFactors={projectSeverityFactors}
-                    projectFactorsVotes={projectFactorsVotes}
-                    projectId={projectId}
-                  />
+                  <ExportDataButton projectId={projectId} />
                 </div>
               ) : (
                 <p className="default-text">No data available to export</p>

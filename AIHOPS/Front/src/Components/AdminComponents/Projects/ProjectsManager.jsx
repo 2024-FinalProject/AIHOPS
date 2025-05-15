@@ -7,6 +7,8 @@ import {
 } from "../../../api/AdminApi";
 import AnalyzeResultComponent from "./AnalyzeResultComponent";
 import ProjectsView from "../../ProjectsView"; // <-- the reusable view component
+import { fetchAllProjectData } from "../../../utils/fetchAllProjectData";
+import { exportProjectToExcel } from "../../../utils/exportProjectToExcel";
 
 const ProjectsManager = () => {
   const [projects, setProjects] = useState([]);
@@ -70,9 +72,8 @@ const ProjectsManager = () => {
 
   const handleDownloadAll = async () => {
     for (const projectId of selectedProjectIds) {
-      // Placeholder: replace with actual CSV export logic
-      console.log("Downloading CSV for project", projectId);
-      // Example: await exportProjectCSV(projectId);
+      const data = await fetchAllProjectData(projectId);
+      if (data) exportProjectToExcel(data);
     }
   };
 
