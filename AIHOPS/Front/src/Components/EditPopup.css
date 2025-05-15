@@ -401,25 +401,25 @@ input::placeholder {
 
 /* Enhanced Analyze Button Style */
 .action-btn.analyze-btn {
-  flex: 1;
+  flex: 1 !important;
   background: linear-gradient(to right, #afafaf, #7c7c7c);
-  color: white;
-  border: none;
-  border-radius: 0;
-  padding: 14px 5px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  white-space: nowrap;
-  text-align: center;
-  position: relative;
-  min-width: unset;
-  box-shadow: none;
-  margin: 0;
-  letter-spacing: 0.5px;
-  overflow: hidden;
-  border-right: 10px solid rgba(0, 0, 0, 0.08);
+  color: white !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 14px 5px !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  position: relative !important;
+  min-width: unset !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  letter-spacing: 0.5px !important;
+  overflow: hidden !important;
+  border-right: 10px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 .action-btn.analyze-btn:last-child {
@@ -715,7 +715,6 @@ input::placeholder {
   }
 }
 
-
 /* Blue theme styling for Edit components */
 .blue-gradient {
   background: linear-gradient(135deg, #1a73e8, #0d47a1) !important;
@@ -833,16 +832,16 @@ input::placeholder {
     width: 90% !important;
     max-width: 450px !important;
   }
-  
+
   .popup-title {
     font-size: 1.5rem !important;
   }
-  
+
   .input-container,
   .actions-container {
     padding: 20px !important;
   }
-  
+
   .action-btn {
     padding: 10px 20px !important;
     font-size: 1rem !important;
@@ -879,7 +878,7 @@ button.delete-btn:hover {
   margin-bottom: 4px !important;
   background-color: #f9f9f9 !important;
   border-radius: 8px !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Ensure buttons are properly spaced */
@@ -903,4 +902,3 @@ button[style*="margin-right: 120px"] {
   font-weight: 600 !important;
   min-width: 140px !important;
 }
-
