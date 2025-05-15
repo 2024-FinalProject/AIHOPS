@@ -1,46 +1,37 @@
-import React from 'react';
+import React from "react";
 import aihops_article from "../assets/AIHOPS.pdf";
+import { useAbout } from "../context/AboutContext";
+import ReactMarkdown from "react-markdown";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useContext } from "react";
+import { fetchAbout } from "../api/AdminApi";
 import "./About.css";
 
 const About = () => {
-  return (
-    <div className="about-container">
-      <div className="about-card">
-        <div className="about-header">
-          <h1 style={{marginTop: "-10px"}}>About AIHOPS</h1>
-        </div>
-        <div className="about-content">
-          <p>
-            AIHOPS (Adoption of Innovation by Healthcare Organizations Prerequisites Scale) 
-            is a comprehensive evaluation system designed to assess the readiness of healthcare 
-            organizations to adopt innovations.
-          </p>
-          
-          <p className="about-subtitle">The scale evaluates eight key factors:</p>
-          
-          <ul className="about-list">
-            <li>Innovation Availability</li>
-            <li>Organizational Attention</li>
-            <li>Implementation Timeline Likelihood</li>
-            <li>Stakeholder Support</li>
-            <li>Financial Feasibility</li>
-            <li>Training Requirements</li>
-            <li>Workflow Impact</li>
-            <li>Regulatory and Ethical Compliance</li>
-          </ul>
+  const [aboutText, setAboutText] = useState(" ");
 
-          <div className="about-footer">
-            <h2>Full Documentation</h2>
-            <p>For detailed information about the AIHOPS methodology and scoring system, check out our complete documentation:</p>
-            <a 
-              href={aihops_article}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="about-button"
-            >
-              View AIHOPS Documentation
-            </a>
-          </div>
+  useEffect(() => {
+  const fetchAboutContent = async () => {
+    console.log("Fetching about content...");
+    const response = await fetchAbout();
+    if (response.data.result) {
+      setAboutText(response.data.result);  
+    } else {
+      console.error("Failed to fetch about text");
+    }
+  };
+  fetchAboutContent();
+}, []);
+
+  return (
+    <div className="about-header">
+      <h1 style={{ textAlign: "center" }}>About AIHOPS </h1>
+      <div className="about-container">
+        <div className="about-card">
+          <div className="about-content">
+            <ReactMarkdown>{aboutText}</ReactMarkdown>
+          </div>         
         </div>
       </div>
     </div>

@@ -18,6 +18,7 @@ from google.auth.transport import requests as google_requests
 import json
 
 from Domain.src.Users.TACController import TACController
+from Domain.src.AdminModule.AboutController import AboutController
 
 
 class Server:
@@ -31,6 +32,8 @@ class Server:
         self.GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
         self.tac_controller = TACController(socketio)
         self.tac_controller.load()
+        self.about_controller = AboutController()
+
 
     def clear_db(self):
         self.db_access.clear_db()
@@ -779,6 +782,20 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"admin failed update terms and conditions: {e}")
 
+    def admin_update_about(self, cookie, updated_about):
+        try:
+            self._verify_admin(cookie)
+            return self.about_controller.update(updated_about)
+        except Exception as e:
+            return ResponseFailMsg(f"admin failed update about: {e}")
+
+    def fetch_about(self, cookie):
+        try:
+            print("fetching about")
+            return self.about_controller.fetch()
+        
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch about: {e}")
 
     def get_research_projects(self, cookie):
         try:
