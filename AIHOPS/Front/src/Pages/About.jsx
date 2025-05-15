@@ -1,6 +1,5 @@
 import React from "react";
 import aihops_article from "../assets/AIHOPS.pdf";
-import { useAbout } from "../context/AboutContext";
 import ReactMarkdown from "react-markdown";
 import { useEffect } from "react";
 import { useState } from "react";

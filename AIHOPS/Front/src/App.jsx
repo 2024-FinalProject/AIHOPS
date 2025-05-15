@@ -6,7 +6,6 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { SeverityMetadataProvider } from "./context/SeverityMetadataContext.jsx";
 import { ErrorProvider } from "./context/ErrorContext.jsx";
 import { TermsProvider } from "./context/TermsContext.jsx";
-import { AboutProvider } from "./context/AboutContext.jsx";
 import "./theme.css";
 
 // Importing the components
@@ -95,9 +94,7 @@ const App = () => (
       <ErrorProvider>
         <SeverityMetadataProvider>
           <TermsProvider>
-            <AboutProvider>
             <AppContent />
-            </AboutProvider>
           </TermsProvider>
         </SeverityMetadataProvider>
       </ErrorProvider>

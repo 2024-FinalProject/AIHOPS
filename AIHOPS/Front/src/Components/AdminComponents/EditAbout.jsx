@@ -1,19 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
-import { useAbout } from "../../context/AboutContext";
-import { updateAbout } from "../../api/AdminApi";
+import { updateAbout, fetchAbout} from "../../api/AdminApi";
+
 
 
 
 const EditAbout = () => {
-    const { aboutText } = useAbout();
+    const [ aboutText, setAboutText]  = useState();
     const [isEditing, setIsEditing] = useState(false);
     const [editedText, setEditedText] = useState(aboutText);
     const [showPreview, setShowPreview] = useState(false);
 
 
+    useEffect(() => {
+      const fetchAboutContent = async () => {
+        console.log("Fetching about content...");
+        const response = await fetchAbout();
+        if (response.data.result) {
+          setAboutText(response.data.result);  
+        } else {
+          console.error("Failed to fetch about text");
+        }
+      };
+      fetchAboutContent();
+    }, []);
+
+
+
     const handleSubmit = () => {
         updateAbout(editedText);
+        setAboutText(editedText);
         console.log("Submitted about:", editedText);
         setIsEditing(false);
     }
