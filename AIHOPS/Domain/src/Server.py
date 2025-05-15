@@ -7,7 +7,7 @@ from requests import session
 from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg, ResponseLogin
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from Domain.src.Session import Session
 from Domain.src.Users.MemberController import MemberController
@@ -168,7 +168,7 @@ class Server:
             # Get the session
             res = self.get_session(cookie)
             if not res.success:
-                return res
+                return ResponseLogin(res.success, res.msg)
             
             session = res.result
             
@@ -182,7 +182,7 @@ class Server:
                 register_res = self.user_controller.register_google_user(email, random_password, accepted_terms_version)
                 
                 if not register_res.success:
-                    return register_res
+                    return ResponseLogin(register_res.success, register_res.msg)
             
             # Login the user with Google authentication
             login_res = self.user_controller.login_with_google(email)

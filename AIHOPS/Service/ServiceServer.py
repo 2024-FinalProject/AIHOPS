@@ -1,3 +1,4 @@
+
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
@@ -77,7 +78,15 @@ def accept_terms():
 @app.route("/google_login", methods=["POST"])
 def google_login():
     data = request.json
-    res = server.google_login(int(data["cookie"]), data["tokenId"], int(data["acceptedTermsVersion"]))
+    print(f"google_login received: {data}")
+    try:
+        cookie = int(data.get("cookie", 0))
+        token = data["tokenId"]
+        tac_ver = int(data["acceptedTermsVersion"])
+    except (KeyError, ValueError, TypeError) as e:
+        return jsonify({"message": f"Bad input: {str(e)}", "success": False}), 400
+
+    res = server.google_login(cookie, token, tac_ver)
     response_data = {"message": res.msg, "success": res.success,
                     "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms}
     
