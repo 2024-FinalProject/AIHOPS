@@ -1,28 +1,32 @@
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
-from Service.config import app
+from Service.config import app, socketio
 from flask import Flask, request, jsonify
 from Service.config import Base, engine
 from sqlalchemy import event
+from flask_socketio import emit
 
 from flask_cors import CORS
 
-app = Flask(__name__)
-
-
-CORS(app, origins="http://aihops.cs.bgu.ac.il")
+# app = Flask(__name__)
+#
+#
+# CORS(app)
 
 
 # --------  init session and user management ---------------
 
-server = Server()
+# server = Server()
 
 @app.route("/enter", methods=["GET"])
 def start_session():
     res = server.enter()
     print("from service server: " + str(res.result.cookie))
-    return jsonify({"cookie": str(res.result.cookie)})
+    return jsonify({
+            "success": True,
+            "cookie": str(res.result.cookie)
+        })
 
 
 @app.route("/register", methods=["POST"])
@@ -30,7 +34,7 @@ def start_session():
 def register():
     data = request.json
     print("trying to register in service server")
-    res = server.register(int(data["cookie"]), data["userName"], data["passwd"])
+    res = server.register(int(data["cookie"]), data["userName"], data["passwd"], int(data["acceptedTermsVersion"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/verify", methods=["POST"])
@@ -54,7 +58,8 @@ def verify_automatic():
 def login():
     data = request.json
     res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success})
+    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin,
+                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms})
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
@@ -63,11 +68,63 @@ def logout():
     res = server.logout(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success})
 
-@app.route("/update-password", methods=["POST"])
-# expecting json with {cookie, oldPasswd, newPasswd}
+@app.route("/accept-terms", methods=["POST"])
+def accept_terms():
+    data = request.json
+    res = server.accept_terms(int(data["cookie"]), int(data["acceptedTermsVersion"]))
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/google_login", methods=["POST"])
+def google_login():
+    data = request.json
+    res = server.google_login(int(data["cookie"]), data["tokenId"], int(data["acceptedTermsVersion"]))
+    response_data = {"message": res.msg, "success": res.success,
+                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms}
+    
+    if res.success and hasattr(res, 'result') and isinstance(res.result, dict) and 'email' in res.result:
+        response_data["email"] = res.result["email"]
+    
+    return jsonify(response_data)
+
+@app.route("/check_email_exists", methods=["POST"])
+def check_email_exists():
+    data = request.json
+    res = server.check_email_exists(int(data["cookie"]), data["tokenId"])
+    response_data = {
+        "message": res.msg, 
+        "success": res.success,
+        "userExists": res.result["userExists"] if res.success else False
+    }
+    
+    if res.success and "email" in res.result:
+        response_data["email"] = res.result["email"]
+    
+    return jsonify(response_data)
+
+# @app.route("/update-password", methods=["POST"])
+# # expecting json with {cookie, oldPasswd, newPasswd}
+# def update_password():
+#     data = request.json
+#     res = server.update_password(int(data["cookie"]), data["oldPasswd"], data["newPasswd"])
+#     return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/start_password_recovery", methods=["POST"])
+def start_password_recovery():
+    data = request.json
+    res = server.start_password_recovery(int(data["cookie"]), data["email"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/update_password", methods=["POST"])
 def update_password():
     data = request.json
-    res = server.update_password(int(data["cookie"]), data["oldPasswd"], data["newPasswd"])
+    res = server.update_password(int(data["cookie"]), data["email"], data["password"], data["code"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/delete_account", methods=["POST"])
+# expecting json with {cookie}
+def delete_account():
+    data = request.json
+    res = server.delete_account(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 # -------- Project Management ---------------
@@ -76,7 +133,7 @@ def update_password():
 # expecting json with {cookie, name, description}
 def create_project():
     data = request.json
-    res = server.create_project(int(data["cookie"]), data["name"], data["description"], bool(data["defaultFactors"]))
+    res = server.create_project(int(data["cookie"]), data["name"], data["description"], bool(data["defaultFactors"]), is_to_research=bool(data["isToResearch"]))
     return jsonify({"message": res.msg, "success": res.success, "project_id": res.result if res.success else None})
 
 @app.route("/project/factor", methods=["POST"])
@@ -99,7 +156,10 @@ def set_project_factors():
 # expecting json with {cookie, fid, new_name, new_desc}
 def update_project_factor():
     data = request.json
-    res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["new_name"], data["new_desc"])
+    res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["pid"], data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"], bool(data["apply_to_all_inDesign"]))
+    # res = server.update_factor(int(data["cookie"]), int(data["fid"]), data["new_name"], data["new_desc"])
+    print(res.msg)
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/project/delete-factor", methods=["POST"])
@@ -194,6 +254,13 @@ def close_project():
 def update_project_name_and_desc():
     data = request.json
     res = server.update_project_name_and_desc(int(data["cookie"]), int(data["pid"]), data["name"], data["description"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/project/delete-project", methods=["POST"])
+# expecting JSON with { cookie, pid }
+def delete_project():
+    data = request.json
+    res = server.delete_project(int(data["cookie"]), int(data["pid"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 # -------- Project Members Management ---------------
@@ -356,12 +423,10 @@ def get_pending_requests_for_project():
 #     res = server.vote(int(data["cookie"]), int(data["pid"]), data["factorValue"])
 #     return jsonify({"message": res.msg, "success": res.success})
 
-@app.route("/project/score", methods=["GET"])
-# expecting query params: cookie, pid
+@app.route("/project/score", methods=["POST"])
 def get_score():
-    cookie = request.args.get("cookie", type=int)
-    pid = request.args.get("pid", type=int)
-    res = server.get_score(cookie, pid)
+    data = request.json
+    res = server.get_score(int(data["cookie"]), int(data["pid"]), data["weights"])
     return jsonify({"message": res.msg, "success": res.success, "score": res.result if res.success else None})
 
 
@@ -400,17 +465,119 @@ def get_project_factors_votes():
     res = server.get_project_factors_votes(cookie, pid)
     return jsonify({"message": res.msg, "success": res.success, "votes": res.result if res.success else None})
 
+@app.route("/admin/update-default-factor", methods=["POST"])
+def admin_update_default_factor():
+    data = request.json
+    res = server.admin_change_default_factor(int(data["cookie"]), int(data["fid"]), data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/add-default-factor", methods=["POST"])
+def admin_add_default_factor():
+    data = request.json
+    res = server.admin_add_default_factor(int(data["cookie"]), data["name"], data["desc"],
+                               data["scales_desc"], data["scales_explenation"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/remove-default-factor", methods=["POST"])
+def admin_remove_default_factor():
+    data = request.json
+    res = server.admin_remove_default_factor(int(data["cookie"]), int(data["fid"]))
+    return (jsonify({"message": res.msg, "success": res.success}))
+
+
+@app.route("/admin/fetch-default-factors", methods=["GET", "POST"])
+def admin_fetch_default_factors():
+    data = request.json
+    res = server.admin_fetch_default_factors(int(data["cookie"]))
+    return jsonify({"message": res.msg, "success": res.success, "factors": res.result if res.success else None})
+
+
+@app.route("/admin/fetch-default-severity-factors", methods=["GET", "POST"])
+def admin_fetch_default_severity_factors():
+    data = request.json
+    res = server.admin_fetch_default_severity_factors(int(data["cookie"]))
+    return jsonify({"message": res.msg, "success": res.success, "severity_factors": res.result if res.success else None})
+
+@app.route("/fetch-default-severity-factors-full", methods=["GET"])
+def fetch_default_severity_factors_full():
+    cookie = int(request.args.get("cookie", 0))  # fallback to 0 or raise error if missing
+    res = server.fetch_default_severity_factors_full(cookie)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success,
+        "severity_factors": res.result if res.success else None
+    })
+
+@app.route("/admin/update-default-severity-factors", methods=["POST"])
+def admin_update_default_severity_factors():
+    data = request.json
+    res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/update-terms-and-conditions", methods=["POST"])
+def admin_update_terms_and_conditions():
+    data = request.json
+    print(f"trying to update tac: {data['updatedTXT']}")
+    res = server.admin_update_terms_and_conditions(int(data["cookie"]), data["updatedTXT"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/get-research-projects", methods=["GET"])
+def get_research_projects():
+    cookie = int(request.args.get("cookie", 0))
+    res = server.get_research_projects(cookie)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success,
+        "projects": res.result if res.success else []
+    })
+
+@app.route("/remove-research-project", methods=["GET"])
+def remove_research_project():
+    cookie = int(request.args.get("cookie", 0))
+    pid = int(request.args.get("pid", -1))
+    res = server.remove_research_project(cookie, pid)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success
+    })
+
+@app.route("/is-valid-session", methods=["GET"])
+def is_valid_session():
+    cookie = int(request.args.get("cookie", 0))
+    email = request.args.get("email", None)
+    res = server.is_valid_session(cookie, email)
+    return jsonify({
+        "message": res.msg,
+        "success": res.success
+    })
+
 @app.route("/")
 def hello():
     return jsonify({"msg": "hello"})
+
+@socketio.on("connect")
+def handle_connect():
+    print("socket_connected")
+    tac_data = server.tac_controller.get_current()
+    emit("get_terms", tac_data)
+
+
+@socketio.on("request_terms")
+def handle_request_terms():
+    tac_data = server.tac_controller.get_current()
+    emit("get_terms", tac_data)
 
 # run the backed server
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     FactorsPool.insert_defaults()
 
-    server = Server()
+    server = Server(socketio)
     # running the server
-    app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    # app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
+    socketio.run(app,port=5555)  # when debug mode runs only 1 thread
     # app.run(threaded=True, port=5555)  # runs multithreaded
+
+
 

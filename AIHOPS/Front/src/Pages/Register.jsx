@@ -1,68 +1,78 @@
 import React, { useState, useEffect } from "react";
-import { startSession, register } from "../api/AuthApi";
+import { register } from "../api/AuthApi";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-
+import termsConditions from "../assets/TermsAndConditions.txt";
 import "./Register.css";
+import TermsModal from "../Components/Terms/TermsModal";
+import { useTerms } from "../context/TermsContext";
 
 const Register = () => {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
-  const [isSuccess, setIsSuccess] = useState(null); // null means no message initially
-  const [existingToken, setExistingToken] = useState(localStorage.getItem("authToken"));
-  const { login } = useAuth();
+  const [isSuccess, setIsSuccess] = useState(null);
   const navigate = useNavigate();
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
-  useEffect(() => {
-    // Update existingToken if it changes in localStorage
-    const token = localStorage.getItem("authToken");
-    if (token !== existingToken) {
-      setExistingToken(token);
-    }
-  }, [existingToken]);
+  const [showTermsConditions, setShowTermsConditions] = useState(false);
+  const [termsContent, setTermsContent] = useState("");
+  const { termsText } = useTerms();
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    
-    // Reset state before making the request
+
+    if (!termsAccepted) {
+      setMsg(
+        "Please read and accept the terms and conditions, then click on register again."
+      );
+      setIsSuccess(false);
+      await delay(3000); //3 sec
+      setShowTermsConditions(true);
+      return;
+    }
+
     setMsg("");
-    setIsSuccess(null);  // Reset before starting the registration attempt
-
+    setIsSuccess(null);
     try {
-      let cookie;
-      
-      // Use existing token if available, otherwise create a new session
-      if (existingToken) {
-        cookie = existingToken;
-        console.log("Using existing token for registration");
-      } else {
-        const session = await startSession();
-        cookie = session.data.cookie;
-        console.log("New session created for registration");
-      }
+      const response = await register(userName, password);
 
-      const response = await register(cookie, userName, password);
-      
-      // Check if registration is successful
       if (response.data.success) {
-        const frontMsg = "A verification email has been sent to you.\nIf you cant see it check the spam inbox :)";
-        // setMsg(response.data.message);
+        const frontMsg =
+          "A verification email has been sent.\nCheck your spam inbox if you don't see it.";
         setMsg(frontMsg);
         setIsSuccess(true);
-        localStorage.setItem("authToken", cookie);
         localStorage.setItem("userName", userName);
       } else {
         setMsg(response.data.message);
         setIsSuccess(false);
       }
-      
     } catch (error) {
-      console.error("Failed to register: ", error);
+      console.error("Failed to register:", error);
       setMsg("Failed to register");
       setIsSuccess(false);
     }
   };
+
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    setShowTermsConditions(false);
+  };
+
+  useEffect(() => {
+    // Redirect if already logged in
+    if (isLoggedIn) {
+      navigate("/");
+    }
+
+    // Load terms text from file
+    fetch(termsConditions)
+      .then((res) => res.text())
+      .then(setTermsContent)
+      .catch(console.error);
+  }, [isLoggedIn, navigate]);
 
   return (
     <div className="register-container">
@@ -72,7 +82,7 @@ const Register = () => {
             <input
               type="text"
               id="formUsername"
-              placeholder="Enter username"
+              placeholder="Enter email"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               required
@@ -90,18 +100,39 @@ const Register = () => {
             />
           </div>
 
+          <div style={{ textAlign: "center" }}>
+            <button
+              type="button"
+              className="term-conditions-btn"
+              onClick={() => setShowTermsConditions(true)}
+            >
+              Terms and Conditions
+            </button>
+          </div>
           <button type="submit" className="register-submit-btn">
             Register
           </button>
         </form>
 
-        {/* Display Success or Failure Message */}
         {msg && (
-          <div className={`register-alert ${isSuccess === true ? "success" : isSuccess === false ? "danger" : ""}`}>
+          <div
+            className={`register-alert ${
+              isSuccess === true
+                ? "success"
+                : isSuccess === false
+                ? "danger"
+                : ""
+            }`}
+          >
             {msg}
           </div>
         )}
       </div>
+
+      {/* Modal for Terms and Conditions */}
+      {showTermsConditions && (
+        <TermsModal text={termsText} version={0} onAccept={handleAcceptTerms} />
+      )}
     </div>
   );
 };

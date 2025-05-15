@@ -1,8 +1,10 @@
-import { confirmProjectFactors, confirmSeverityFactors} from "../api/ProjectApi";
-import React, { useState, useEffect } from "react";
+import {
+  confirmProjectFactors,
+  confirmSeverityFactors,
+} from "../api/ProjectApi";
+import React, { useEffect } from "react";
 import "./ProjectStatusPopup.css";
-import ProgressBar from '../Components/ProgressBar'; //Component for secondary popups
-
+import ProgressBar from "../Components/ProgressBar";
 
 const ProjectStatusPopup = ({
   fetch_selected_project,
@@ -15,20 +17,11 @@ const ProjectStatusPopup = ({
   handleManageAssessors,
   handleAnalyzeResult,
   handleArchive,
-  handlePublish
+  handlePublish,
 }) => {
-
-    useEffect(() => {
-        const cookie = localStorage.getItem("authToken");
-        
-        if (!cookie) {
-        setMsg("No authentication token found. Please log in again.");
-        setIsSuccess(false);
-        return;
-        }
-
-        fetch_selected_project(selectedProject);
-    }, []);
+  useEffect(() => {
+    fetch_selected_project(selectedProject);
+  }, []);
 
   return (
     <div className="popup-overlay">
@@ -36,68 +29,18 @@ const ProjectStatusPopup = ({
         <span className="close-popup" onClick={closePopup}>
           &times;
         </span>
-        <h3><u>Project's Status</u>:</h3>
         <div className="project-edit-container">
-        <ProgressBar project={selectedProject} handleAnalyzeResult = {handleAnalyzeResult} />
-        </div>
-        <h3><u>Project's Actions</u>:</h3>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditProjectsName(selectedProject.id, selectedProject.name)}
-          >
-            Edit Project's Name
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditProjectsDescription(selectedProject.id, selectedProject.name)}
-          >
-            Edit Project's Description
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditContentFactors(selectedProject.id, selectedProject.name)}
-          >
-            Edit Content Factors
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isActive || selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleEditSeveirtyFactors(selectedProject.id, selectedProject.name)}
-          >
-            Edit d-Score
-          </button>
-        </div>
-        <div>
-          <button disabled = {selectedProject.isArchived}
-            className="action-btn edit-btn"
-            onClick={() => handleManageAssessors(selectedProject.id, selectedProject.name)}
-          >
-            Manage Assessors
-          </button>
-        </div>
-        <div>
-          {selectedProject.isActive && (
-            <button
-              className="action-btn edit-btn"
-              onClick={() => handleArchive(selectedProject.id, selectedProject.name)}
-            >
-              Archive
-            </button>
-          )}
-          {!selectedProject.isActive &&  (
-            <button disabled = {selectedProject.isArchived}
-              className="action-btn edit-btn"
-              onClick={() => handlePublish(selectedProject.id, selectedProject.name)}
-            >
-              Publish
-            </button>
-          )}
+          <ProgressBar
+            project={selectedProject}
+            handleAnalyzeResult={handleAnalyzeResult}
+            handleEditProjectsName={handleEditProjectsName}
+            handleEditProjectsDescription={handleEditProjectsDescription}
+            handleEditContentFactors={handleEditContentFactors}
+            handleEditSeveirtyFactors={handleEditSeveirtyFactors}
+            handleManageAssessors={handleManageAssessors}
+            handlePublish={handlePublish}
+            handleArchive={handleArchive}
+          />
         </div>
       </div>
     </div>

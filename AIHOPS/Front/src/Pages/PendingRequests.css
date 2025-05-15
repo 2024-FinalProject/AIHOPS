@@ -1,0 +1,45 @@
+.modern-btn {
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  font-family: "Verdana", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.modern-btn:hover {
+  transform: translateY(-1px);
+}
+
+.accept-btn {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.accept-btn:hover {
+  background-color: #d0f0d6;
+}
+
+.reject-btn {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ef9a9a;
+}
+
+.reject-btn:hover {
+  background-color: #fdd8d8;
+}
+
+.pending-request-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--header-color) !important;
+  text-align: center;
+  font-family: Verdana, sans-serif !important;
+  padding-top: 3cqw;
+}

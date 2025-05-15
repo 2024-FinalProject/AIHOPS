@@ -46,9 +46,18 @@ if __name__ == '__main__':
     # vote_res = server.vote(cookie2, project_id, [1,1,1,1], [10,70,10,5,5])
 
 
-    print ("starting")
+    # print ("starting")
+    #
+    # yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
+    # yag.send("testsemailaihops@gmail.com", "hello buuddy", "Hello from Python!")
+    #
+    # print("sus")
 
-    yag = yagmail.SMTP("testsemailaihops@gmail.com", "vljh sdgy syee jizw")
-    yag.send("testsemailaihops@gmail.com", "hello buuddy", "Hello from Python!")
-
-    print("sus")
+    server = Server()
+    cookie = server.enter().result.cookie
+    server.login(cookie, "testsemailaihops@gmail.com", "123")
+    res = server.update_factor(cookie, 14, -1, 'assessment test 4', '123',
+                         ['123', '123', '123', '123', '123'],
+                         ['123', '123', '123', '123', '123'],
+                         False)
+    print(res.msg)

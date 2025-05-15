@@ -1,68 +1,179 @@
 import React, { useState, useEffect } from "react";
-import { startSession, loginUser } from "../api/AuthApi";
+import {
+  loginUser,
+  startPasswordRecovery,
+  googleLogin,
+  checkEmailExists,
+} from "../api/AuthApi";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
+import termsConditions from "../assets/TermsAndConditions.txt";
 import "./Login.css";
+import TermsModal from "../Components/Terms/TermsModal";
+import { useTerms } from "../context/TermsContext";
 
 const Login = () => {
-  const { login, isAuthenticated, isValidatingToken } = useAuth();
+  const { login, isAuthenticated, isValidatingToken, setIsAdmin } = useAuth();
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
+  const [isSuccess, setIsSuccess] = useState(false);
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+  // Google credentials storage
+  const [pendingGoogleCredential, setPendingGoogleCredential] = useState(null);
+
+  // Terms and conditions state
+  const [showTermsConditions, setShowTermsConditions] = useState(false);
+  const [termsContent, setTermsContent] = useState("");
+  const { termsText, setMustAcceptNewTerms } = useTerms();
+
+  // Load terms and conditions
+  useEffect(() => {
+    fetch(termsConditions)
+      .then((res) => res.text())
+      .then(setTermsContent)
+      .catch(console.error);
+  }, []);
 
   // Redirect if already authenticated
   useEffect(() => {
-    console.log("isAuthenticated:", isAuthenticated);
-    if (!isValidatingToken && isAuthenticated) {
-      console.log("Redirecting to /");
+    if (!isValidatingToken && (isAuthenticated || isLoggedIn)) {
       navigate("/");
     }
-  }, [isAuthenticated, isValidatingToken, navigate]);
+  }, [isAuthenticated, isValidatingToken, navigate, isLoggedIn]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("");
 
     try {
-      const existingToken = localStorage.getItem("authToken");
-      let cookie;
-      if (existingToken) {
-        // Use the existing token if available
-        cookie = existingToken;
-        console.log("Using existing token for login");
-      } else {
-        // Only start a new session if no token exists
-        const session = await startSession();
-        cookie = session.data.cookie;
-        console.log("New session created, cookie received:", cookie);
-      }
-
-
-      const response = await loginUser(cookie, userName, password);
-
+      const response = await loginUser(userName, password);
+      console.log("is_admin value from response:", response?.data?.is_admin);
       if (response.data.success) {
+        if (response.data.is_admin) {
+          setIsAdmin(true);
+          localStorage.setItem("isAdmin", "true");
+        }
+
+        if (response.data.need_to_accept_new_terms) {
+          setMustAcceptNewTerms(true);
+        }
+
         setMsg(response.data.message);
-
-        // Store auth data in localStorage
-        localStorage.setItem("authToken", cookie);
-        console.log(
-          "Cookie stored in localStorage:",
-          localStorage.getItem("authToken")
-        ); // Debug log
-
         localStorage.setItem("userName", userName);
-        login(cookie, userName);
         localStorage.setItem("isLoggedIn", "true");
-        console.log("Redirecting to /");
+        login(userName);
         navigate("/");
+        setIsSuccess(true);
       } else {
         setMsg(response.data.message);
+        setIsSuccess(false);
       }
     } catch (error) {
       console.error("Login error:", error);
       setMsg("Login failed: Invalid credentials");
+      setIsSuccess(false);
     }
+  };
+
+  const handleRecover = async (e) => {
+    e.preventDefault();
+    setMsg("");
+
+    try {
+      const response = await startPasswordRecovery(userName);
+      if (response.data.success) {
+        setIsSuccess(true);
+        setMsg(response.data.message);
+      } else {
+        setMsg(response.data.message);
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      console.error("Recovery error:", error);
+      setMsg("Recovery failed");
+      setIsSuccess(false);
+    }
+  };
+
+  // Complete Google login and save both session & persistent flags
+  const completeGoogleLogin = async (credentialParam) => {
+    const credentialToUse = credentialParam || pendingGoogleCredential;
+    if (!credentialToUse) {
+      console.error("No Google credential available");
+      setMsg("Google login failed. No credential.");
+      setIsSuccess(false);
+      return;
+    }
+
+    try {
+      const response = await googleLogin(credentialToUse);
+
+      if (response.data.success) {
+        console.log(
+          "must_accept_terms: %s",
+          response.data.need_to_accept_new_terms
+        );
+        if (response.data.need_to_accept_new_terms) {
+          setMustAcceptNewTerms(true);
+        }
+
+        setMsg(response.data.message);
+        localStorage.setItem("userName", response.data.email);
+        console.log("logged in as %s", response.data.email);
+        login(response.data.email);
+        localStorage.setItem("isLoggedIn", "true");
+        navigate("/");
+        setIsSuccess(true);
+      } else {
+        setMsg(response.data.message);
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      setMsg("Google login failed");
+      setIsSuccess(false);
+    }
+
+    setPendingGoogleCredential(null);
+  };
+
+  // First step of Google login; show modal if no session flag yet
+  const handleGoogleSuccess = async (credentialResponse) => {
+    const cred = credentialResponse.credential;
+
+    try {
+      // Call new endpoint to check if email exists
+      const checkEmailResponse = await checkEmailExists(cred);
+
+      if (checkEmailResponse.data.userExists) {
+        // User exists, proceed with Google login directly
+        completeGoogleLogin(cred);
+      } else {
+        // New user, show terms & conditions first
+        setPendingGoogleCredential(cred);
+        setShowTermsConditions(true);
+      }
+    } catch (error) {
+      console.error("Error checking email:", error);
+      setMsg("Login failed. Please try again.");
+      setIsSuccess(false);
+    }
+  };
+
+  const handleGoogleFailure = () => {
+    setMsg("Google login failed. Please try again.");
+    setIsSuccess(false);
+  };
+
+  // Handle terms acceptance
+  const handleAcceptTerms = () => {
+    setShowTermsConditions(false);
+    setPendingGoogleCredential(null);
+    completeGoogleLogin();
   };
 
   return (
@@ -76,24 +187,60 @@ const Login = () => {
             type="text"
             onChange={(e) => setUserName(e.target.value)}
             value={userName}
-            placeholder="Enter username"
+            placeholder="Enter email"
             required
           />
-
           <input
             type="password"
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             placeholder="Enter password"
-            required
           />
-
           <button type="submit" className="login-submit-btn">
             Login
           </button>
-          {msg && <div className="error-message">{msg}</div>}
         </form>
+
+        <div className="google-login-container">
+          <p>Or sign in with:</p>
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleFailure}
+            shape="rectangular"
+            text="signin_with"
+            size="large"
+          />
+        </div>
+
+        {msg && (
+          <div
+            className={`login-alert ${
+              isSuccess === true
+                ? "success"
+                : isSuccess === false
+                ? "danger"
+                : ""
+            }`}
+          >
+            {msg}
+          </div>
+        )}
+
+        <div className="forgot-password">
+          <p>
+            Forgot your password? Enter your email above and
+            <a href="#" onClick={handleRecover} className="recover-link">
+              click here
+            </a>
+            .
+          </p>
+        </div>
       </div>
+
+      {/* Modal for Terms and Conditions */}
+      {showTermsConditions && (
+        <TermsModal text={termsText} version={0} onAccept={handleAcceptTerms} />
+      )}
     </section>
   );
 };

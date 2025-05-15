@@ -7,6 +7,12 @@ class User(IUser):
 
     def update_role(self, new_roll):
         self.role = new_roll
+        
+    def is_google_user(self):
+        """Check if the user authenticated through Google"""
+        if hasattr(self.role, 'is_google_user'):
+            return self.role.is_google_user
+        return False
 
     def __getattr__(self, attr):
         # Forward method calls to the role if not found in User

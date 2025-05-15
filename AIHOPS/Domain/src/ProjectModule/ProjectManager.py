@@ -1,18 +1,28 @@
+from threading import RLock
+import json
+
+from DAL.Objects.DBFactors import DBFactors
 from DAL.Objects.DBPendingRequests import DBPendingRequests
 from DAL.Objects.DBProject import DBProject
+from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
+from DAL.Objects.DBFactorVotes import DBFactorVotes
+from DAL.Objects.DBSeverityVotes import DBSeverityVotes
 from Domain.src.DS.FactorsPool import FactorsPool
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 from Domain.src.DS.ThreadSafeDictWithListValue import ThreadSafeDictWithListValue
 from Domain.src.Loggs.Response import ResponseSuccessObj, ResponseSuccessMsg, ResponseFailMsg, Response
-from Domain.src.ProjectModule.Project import Project
+from Domain.src.ProjectModule.Project import Project, load_default_severity_factors
+
+from Domain.src.Users.Gmailor import Gmailor
+from Domain.src.Users.MemberController import ADMIN
 
 
-
-
-class ProjectManager():
+class ProjectManager:
     def __init__(self, db_access):
+        self.research_projects = {}
         self.db_access = db_access
         self.projects = ThreadSafeDict()                  # {p_id: Project}
         self.owners = ThreadSafeDictWithListValue()         # {email: [projects]}
@@ -20,6 +30,11 @@ class ProjectManager():
         self.project_id_maker = IdMaker()
         self.factor_pool = FactorsPool(self.db_access)
         self.load_from_db()
+        self.gmailor = Gmailor()
+        self.project_lock = RLock()
+        self.research_lock = RLock()
+
+
 
     def _verify_unique_project(self, actor, name, desc):
         """raises error if there is active project with same name and description"""
@@ -30,18 +45,43 @@ class ProjectManager():
             if proj.is_published() and [proj.name, proj.desc] == [name, desc]:
                 raise NameError("Duplicate Project")
 
+
+    def _check_if_research(self, pid, actor):
+        print(f"actor: {actor}")
+        if actor == ADMIN[0]:
+            print("actor is indeed admin")
+            with self.research_lock:
+                proj = self.research_projects.get(pid)
+                if proj is not None:
+                    return proj
+                print("project is not found")
+        raise NameError(f"actor {actor} not owner of project {pid}")
+
+
     def _verify_owner(self, pid, actor):
         projects = self.owners.get(actor)
         found = False
         for proj in projects:
             if proj.pid == pid:
                 return proj
-        raise NameError(f"actor {actor} not owner of project {pid}")
+        return self._check_if_research(pid, actor)
+    
+    def cleanup_member(self, member_email):
+        """Remove all in-memory traces of this user’s projects and pending requests."""
+        # Remove all projects they own from owners, projects, and research_projects
+        owned_projects = self.owners.dict.pop(member_email, [])
+        for proj in owned_projects:
+            pid = proj.pid
+            # Remove from the main projects map
+            self.projects.dict.pop(pid, None)
+            # If it was a research project, remove it too
+            self.research_projects.pop(pid, None)
 
+        return ResponseSuccessMsg(f"Cleaned up all traces of {member_email} from memory.")
 
     # ------------  Project Creation ------------------------
 
-    def create_project(self, name, description, owner, is_default_factors=True):
+    def create_project(self, name, description, owner, is_default_factors=True, is_to_research=False):
         if not name or name == "":
             return ResponseFailMsg("Name cannot be empty")
         if not description or description == "":
@@ -50,27 +90,37 @@ class ProjectManager():
         self._verify_unique_project(owner, name, description)
         # create Project
         pid = self.project_id_maker.next_id()
-        project = Project(pid, name, description, owner, self.db_access)
+        project = Project(pid, name, description, owner, self.db_access, is_to_research=is_to_research)
         # add to lists
         self.projects.insert(pid, project)
-        self.owners.insert(owner, project)
+        with self.project_lock:
+            self.owners.insert(owner, project)
         msg = f"actor: {owner} sccessfully created project: {pid, name, description}"
         # default_factors:
         if is_default_factors:
             def_facts = self.factor_pool.get_default_factor_ids()
             res_facts = self.add_factors(pid, owner, def_facts)
             msg += res_facts.msg
+
+        if is_to_research:
+            with self.research_lock:
+                self.research_projects[pid] = project
         return ResponseSuccessObj(msg, pid)
 
     def add_project_factor(self, pid, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
         """ adds of factor to a project"""
         # check valid project, and owned by owner
+        project = self._verify_owner(pid, actor)
+        factor = self._create_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
+        project.add_factor(factor)
+        return ResponseSuccessObj(f"actor: {actor} added factor {factor.name} to project {project.name}", factor)
+
+    def _create_factor(self, actor, factor_name, factor_desc, scales_desc, scales_exaplanation):
+        """ creates a new factor for actors factor pool """
         if(factor_name == "" or factor_desc == ""):
             return ResponseFailMsg("factor name and description cannot be empty")
-        project = self._verify_owner(pid, actor)
         factor = self.factor_pool.add_factor(actor, factor_name, factor_desc, scales_desc, scales_exaplanation)
-        project.add_factor(factor)
-        return ResponseSuccessMsg(f"actor: {actor} added factor {factor.name} to project {project.name}")
+        return factor
 
     def add_factors(self, pid, actor, factor_ids):
         project = self._verify_owner(pid, actor)
@@ -80,7 +130,7 @@ class ProjectManager():
         for factor_id in factor_ids:
             try:
                 # Attempt to find the factor
-                factor = self.factor_pool._find_factor(actor, factor_id)
+                factor = self.factor_pool.find_factors(actor, factor_id)
                 project.add_factor(factor)
                 success.append(f"actor: {actor} added factor {factor.name} to project {project.name}")
             except Exception as e:
@@ -161,6 +211,8 @@ class ProjectManager():
             try:
                 if project.is_published():
                     self.pending_requests.insert(member, project.pid)
+                    # send invite email
+                    self.gmailor.send_email_invitation(member, project.owner, project.name)
                 else:
                     project.add_member_to_invite(member)
             except Exception as e:
@@ -179,6 +231,7 @@ class ProjectManager():
         """ adds list of users to a project"""
         project = self._verify_owner(pid, actor)
         for member in user_names:
+            self._verify_not_duplicate_member(project, member)
             self._add_member_after_verifying_owner(project, member)
         return ResponseSuccessMsg(f"members: {user_names} pending requests added for project {pid}: {project.name}")
 
@@ -276,7 +329,6 @@ class ProjectManager():
             ret.append(proj.to_dict())
         return ResponseSuccessObj(f"projects for actor {actor} : {ret}", ret)
 
-    # TODO: add to server
     def get_projects_of_member(self, actor):
         """returns all projects actors participates in"""
         # TODO: how to return projects, maybe only active projects
@@ -320,10 +372,10 @@ class ProjectManager():
 
     def reject_member(self, pid, actor):
         self._verify_member_in_pending(pid, actor)
-        self.pending_requests.remove(pid, actor)
-        res = self.db_access.delete_obj_by_query(DBProjectMembers, {"project_id": pid, "email": actor})
+        res = self.db_access.delete_obj_by_query(DBPendingRequests, {"project_id": pid, "email": actor})
         if not res.success:
             self.pending_requests.insert(pid, actor)
+        self.pending_requests.remove(actor, pid)
         return ResponseSuccessMsg(f"member {actor} denied participation in project {pid}")
 
     def get_member_votes(self, pid, actor):
@@ -351,6 +403,7 @@ class ProjectManager():
 
     def publish_project(self, pid, actor):
         project = self._verify_owner(pid, actor)
+        self._verify_unique_project(actor, project.name, project.desc)
         res = project.publish()
         if not res.success:
             return res
@@ -370,10 +423,10 @@ class ProjectManager():
                 self.pending_requests.remove(email, pid)
         return res
 
-    def get_score(self, actor, pid):
+    def get_score(self, actor, pid, weights):
         project = self._verify_owner(pid, actor)
         pendings = self._get_pending_emails_by_projects_list(pid)
-        return project.get_score(len(pendings))
+        return project.get_score(len(pendings), weights)
 
 
     def get_factor_pool(self, actor):
@@ -391,15 +444,77 @@ class ProjectManager():
                 ps.append(project)
         return ps
 
-    def update_factor(self, actor, fid, name, desc):
-        res = self.factor_pool.update_factor(actor, fid, name, desc)
-        if not res.success:
-            return res
-        factor = res.result
-        projects = self._get_projects_containing_factor(actor, fid)
-        for project in projects:
-            project.update_factor(factor)
-        return res
+    def get_owners_projects_with_factor_per_status(self, actor, fid):
+        with self.project_lock:
+            ownersProjects = self.owners.get(actor)
+            inDesign = set()
+            Active = set()
+            Archived = set()
+            for project in ownersProjects:
+                if project.has_factor(fid):
+                    if project.archived:
+                        Archived.add(project.pid)
+                    elif project.published:
+                        Active.add(project.pid)
+                    else:
+                        inDesign.add(project.pid)
+        return inDesign, Active, Archived
+
+
+    def update_factor(self, actor, fid, pid, name, desc, scales_desc, scales_explenation, apply_to_all_inDesign):
+        """if there is an active or an archived project with the factor actr is trying to update => must change name/ or desc and a new factor will be created
+            also true id there is a project in design and apply_to_all_inDesgin = False
+            if no projects except this one exists or there are only projects in design containing this actor then
+            delete current factor and create a new one instead"""
+        # load inDesign \ pid, Active, Archived projects of actor with fid in them
+        print(f"project manage, update_factor: pid: {pid}")
+        inDesign, Active, Archived = self.get_owners_projects_with_factor_per_status(actor, fid)
+        project = None
+        deleted = False
+        if pid >= 0:
+            project = self._verify_owner(pid, actor)
+            inDesign.discard(pid)
+            self.delete_factor(pid, actor, fid)
+        try:
+            if (fid >= 0) and (len(Active) == 0 and len(Archived) == 0) and (len(inDesign) == 0 or apply_to_all_inDesign):
+                for p in inDesign:
+                    self.delete_factor(p, actor, fid)
+                old_factor = self.factor_pool.find_factors(actor, fid)
+                self.delete_factor_from_pool(actor, fid)
+                deleted = True
+
+            factor = self._create_factor(actor, name, desc, scales_desc, scales_explenation)
+
+            if project is not None:
+                project.add_factor(factor)
+            if apply_to_all_inDesign:
+                for p in inDesign:
+                    self.projects.get(p).add_factor(factor)
+        except Exception as e:
+            if deleted:
+                restored_factor = self.factor_pool.add_factor(actor, old_factor.name, old_factor.description, old_factor.scales_desc, old_factor.scales_explanation)
+                fid = restored_factor.fid
+            if pid >= 0:
+                self.add_factors(pid, actor, [fid])
+                if apply_to_all_inDesign:
+                    for p in inDesign:
+                        self.add_factors(p, actor, [fid])
+
+            return ResponseFailMsg(f"updating factor {fid} failed: {e}")
+
+        return ResponseSuccessObj(f"factor {fid} updated successfully", factor)
+
+
+
+    # def update_factor(self, actor, fid, name, desc):
+    #     res = self.factor_pool.update_factor(actor, fid, name, desc)
+    #     if not res.success:
+    #         return res
+    #     factor = res.result
+    #     projects = self._get_projects_containing_factor(actor, fid)
+    #     for project in projects:
+    #         project.update_factor(factor)
+    #     return res
 
 
     def get_projects_factor_pool(self, actor, pid):
@@ -417,6 +532,26 @@ class ProjectManager():
         """creates project NTH"""
         pass
 
+    def delete_project(self, pid, actor):
+        # 1) ownership check
+        project = self._verify_owner(pid, actor)
+        
+        # 2) let DBAccess handle every delete in one transaction
+        res = self.db_access.delete_project(pid)
+        if not res.success:
+            return res
+
+        # 3) clear in‑memory state lastly
+        with self.project_lock:
+            self.projects.pop(pid)
+            self.owners.remove(actor, project)
+            self.research_projects.pop(pid, None)
+            for entry in self.pending_requests.to_list():
+                if pid in entry["value"]:
+                    self.pending_requests.remove(entry["key"], pid)
+
+        return ResponseSuccessMsg(f"Project {pid} deleted successfully")
+        
 
     # --------------- Data Base ------------------------
 
@@ -432,6 +567,21 @@ class ProjectManager():
             for pending in pendings:
                 self.pending_requests.insert(pending.email, pid)
 
+    def _load_factors_ids(self, pid):
+        join_condition = DBProjectFactors.factor_id == DBFactors.id
+        factors_data_res = self.db_access.load_by_join_query(
+            DBProjectFactors, DBFactors,
+            [DBFactors.id],  # Only fetch ID
+            join_condition,
+            {"project_id": pid}
+        )
+
+        if not factors_data_res:
+            return []
+
+        factor_ids = [row.id for row in factors_data_res]
+        return factor_ids
+
     def load_projects_from_db(self):
         existing_projects = self.db_access.load_all(DBProject)
         if existing_projects is None or len(existing_projects) == 0:
@@ -439,13 +589,18 @@ class ProjectManager():
         last_id = 0
         published_pids = []
         for project_data in existing_projects:
+            project_factor_ids = self._load_factors_ids(project_data.id)
+            project_factors = self.factor_pool.find_factors(project_data.owner, project_factor_ids)
             project = Project(project_data.id, project_data.name, project_data.description, project_data.owner,
-                              db_access=self.db_access, db_instance=project_data)
+                              db_access=self.db_access, db_instance=project_data, project_factors=project_factors, is_to_research=project_data.is_to_research)
             last_id = max(last_id, project.pid + 1)
             self.projects.insert(project.pid, project)
             self.owners.insert(project.owner, project)
             if project.is_published():
                 published_pids.append(project.pid)
+
+            if project_data.is_to_research:
+                self.research_projects[project.pid] = project
         self.project_id_maker.start_from(last_id)
         return published_pids
     
@@ -457,7 +612,52 @@ class ProjectManager():
 
 
 
+    def admin_change_default_factor(self, fid, name, desc, scales_desc, scales_explanation):
+        """change will persist in all projects in design and also published projects"""
+        return self.factor_pool.admin_change_default_factor(fid, name, desc, scales_desc, scales_explanation)
+
+    def admin_add_default_factor(self, name, desc, scales_desc, scales_explanation):
+        """factor wont be added automatically to any project"""
+        return self.factor_pool.admin_add_default_factor(name, desc, scales_desc, scales_explanation)
+
+    def admin_remove_default_factor(self, fid):
+        """change will persist in all projects in design and also published projects"""
+        with self.project_lock:
+            for project in self.projects.getKeys():
+                p = self.projects.get(project)
+                if p.has_factor(fid):
+                    p.admin_remove_factor(fid)
+        res = self.factor_pool.admin_remove_default_factor(fid)
+        return ResponseSuccessMsg(f"factor {fid} removed successfully, from all projects")
+
+    def admin_update_default_severity_factors(self, severity_factors_full_data, filename='Domain/src/ProjectModule/severity_factors.txt'):
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(severity_factors_full_data, f, indent=2)
+        load_default_severity_factors()
+        return ResponseSuccessMsg(f"default severity factors updated successfully")
+
+    def get_default_factors(self):
+        return ResponseSuccessObj("got default factors", self.factor_pool.get_default_factors())
+
+    def get_default_severity_factors(self, filename='Domain/src/ProjectModule/severity_factors.txt'):
+        with open(filename, 'r', encoding='utf-8') as f:
+            return ResponseSuccessObj("got default severity factors", json.load(f))
+
+    def research_get_projects(self):
+        with self.research_lock:
+            projects = [proj.to_dict() for proj in self.research_projects.values()]
+            print(f"found {len(projects)} research projects")
+            return ResponseSuccessObj("got research projects", projects)
+
+    def research_remove_project(self, pid):
+        with self.research_lock:
+            project = self.research_projects.get(pid)
+            if project is None:
+                return ResponseFailMsg(f"research project {pid} not found")
+            project.stop_research()
+            self.research_projects.pop(pid)
+        return ResponseSuccessMsg(f"research project {pid} removed successfully")
 
 
-
-
+# if __name__ == '__main__':
+#     admin_update_default_severity_factors([0.5, 1, 25, 100, 400], 'severity_factors.txt')

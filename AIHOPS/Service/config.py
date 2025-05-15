@@ -2,11 +2,14 @@ from flask import Flask
 from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
+from flask_socketio import SocketIO
 
 # init server
 app = Flask(__name__)
 # wrap our app with CORS
-CORS(app, origins=["http://aihops.cs.bgu.ac.il"])
+CORS(app, supports_credentials=True)
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 
 # ----------- later for db -----------

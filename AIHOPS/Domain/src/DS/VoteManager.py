@@ -15,9 +15,9 @@ class VoteManager:
         self.pid = pid
         self.db_access = db_access
         self.factors = ThreadSafeDict()
-        self.factors_votes = {}     # {actor: {fid: score}}
+        self.factors_votes = {}  # {actor: {fid: score}}
         self.severity_votes = ThreadSafeDict()
-        self.lock = RLock() # for counting
+        self.lock = RLock()  # for counting
 
     def add_factor(self, factor):
         self.factors.insert(factor.fid, factor)
@@ -28,17 +28,26 @@ class VoteManager:
             return ResponseFailMsg(res.msg)
         return ResponseSuccessMsg(f"factor {factor.fid} added to project {self.pid}")
 
-    def update_factor(self, factor):
-        with self.lock:
-            self.factors.insert(factor.fid, factor)
-
-
     def remove_factor(self, fid):
         res = self.db_access.delete_obj_by_query(DBProjectFactors, {"project_id": self.pid, "factor_id": fid})
         if res.success:
             self.factors.pop(fid)
             return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
-        return ResponseFailMsg(res.message)
+        return ResponseFailMsg(res.msg)
+
+    def admin_remove_default_factor(self, fid):
+        with self.lock:
+            for actor, votes in self.factors_votes.items():
+                if fid in votes:
+                    self.db_access.delete_obj_by_query(
+                        DBFactorVotes,
+                        {"factor_id": fid, "member_email": actor, "project_id": self.pid}
+                    )
+                    del votes[fid]
+
+            self.factors_votes = {k: v for k, v in self.factors_votes.items() if v}  # remove empty entries
+        return self.remove_factor(fid)
+
 
     def set_factor_vote(self, actor, fid, score, persist=True):
         with self.lock:
@@ -51,7 +60,8 @@ class VoteManager:
             member_votes[fid] = score
 
             if cur_vote is not None:
-                res = self.db_access.delete_obj_by_query(DBFactorVotes, {"project_id": self.pid, "factor_id": fid, "member_email": actor})
+                res = self.db_access.delete_obj_by_query(DBFactorVotes, {"project_id": self.pid, "factor_id": fid,
+                                                                         "member_email": actor})
                 if not res.success:
                     self.factors_votes[actor] = member_votes_revert
                     return res
@@ -63,7 +73,6 @@ class VoteManager:
                     return res
             self.factors_votes[actor] = member_votes
         return ResponseSuccessMsg(f"actor {actor}, voted {fid}: {score} on project {self.pid}")
-
 
     def set_severity_vote(self, actor, severity_probs):
         with self.lock:
@@ -97,9 +106,6 @@ class VoteManager:
 
         return ResponseSuccessMsg(f"actor {actor}, voted on severities {severity_probs}")
 
-
-
-
     def get_factors(self):
         return list(self.factors.dict.values())
 
@@ -123,7 +129,8 @@ class VoteManager:
     def get_member_votes(self, actor):
         factor_votes = copy.deepcopy(self.factors_votes.get(actor, {}))
         severity_votes = list(self.severity_votes.get(actor, []))
-        return ResponseSuccessObj(f"fetching votes for {actor}", {"factor_votes": factor_votes, "severity_votes": severity_votes})
+        return ResponseSuccessObj(f"fetching votes for {actor}",
+                                  {"factor_votes": factor_votes, "severity_votes": severity_votes})
 
     def _sum_score_by_factor(self):
         factors_res = {}
@@ -136,7 +143,10 @@ class VoteManager:
                 factors_res[fid]["score"] += score
         return factors_res
 
-    def _factors_score_data(self):
+    def _factors_score_data(self, weights):
+        if len(self.factors.getKeys()) != len(weights.keys()):
+            raise Exception("invalid amount of weights")
+
         factors_res = self._sum_score_by_factor()
 
         # Calculate averages for each factor
@@ -147,13 +157,16 @@ class VoteManager:
 
         N = 0
         Sa_max = 4  # Maximum possible score is always 4 according to documentation
-        
+
         # Calculate N by summing all assessor scores
         for assessor, vote_dict in self.factors_votes.items():
             if 0 in vote_dict.values():
                 Sa = 0  # If any factor is scored 0, the assessor's total score is 0
             else:
-                Sa = sum(list(vote_dict.values())) / len(vote_dict.values())
+                weighted_votes = []
+                for fid, vote in vote_dict.items():
+                    weighted_votes.append(vote * int(weights[f'{fid}']))
+                Sa = sum(weighted_votes) / sum(int(v) for v in weights.values())
             N += Sa
 
         m = len(self.factors_votes.keys())
@@ -163,6 +176,7 @@ class VoteManager:
 
     def _severity_score_data(self, severity_factors):
         damage_avg = [0, 0, 0, 0, 0]
+        d_ass = 0
         for assessor in self.severity_votes.getKeys():
             vote_list = self.severity_votes.get(assessor, [])
             d_ass = 0
@@ -173,13 +187,13 @@ class VoteManager:
         d = d_ass / len(self.severity_votes.getKeys())
         return d, damage_avg
 
-    def get_score(self, severity_factors):
+    def get_score(self, severity_factors, weights):
         for i in range(5):
             severity_factors[i] /= 100
-        factors_res, N, D = self._factors_score_data()
+        factors_res, N, D = self._factors_score_data(weights)
         d, damage_avg = self._severity_score_data(severity_factors)
 
-        score = (N/D)**d
+        score = (N / D) ** d
 
         results = {"score": score,
                    "assessors": [],
@@ -188,7 +202,7 @@ class VoteManager:
                    "nominator": N,
                    "denominator": D,
                    "d_score": d
-                    }
+                   }
         return results
 
     def get_project_factors_votes(self):
@@ -198,30 +212,39 @@ class VoteManager:
             for fid in fids
         }
 
-    def load_factors(self):
-        join_condition = DBProjectFactors.factor_id == DBFactors.id
-        factors_data_res = self.db_access.load_by_join_query(
-            DBProjectFactors, DBFactors,
-            [DBFactors.name, DBFactors.description, DBFactors.id, DBFactors.owner, 
-            DBFactors.scales_desc_0, DBFactors.scales_desc_1, DBFactors.scales_desc_2, DBFactors.scales_desc_3, DBFactors.scales_desc_4,
-            DBFactors.scales_explanation_0, DBFactors.scales_explanation_1, DBFactors.scales_explanation_2, DBFactors.scales_explanation_3, DBFactors.scales_explanation_4],
-            join_condition,
-            {"project_id": self.pid}
-        )
+    def insert_factors_loaded_from_db(self, factors):
+        for factor in factors:
+            self.factors.insert(factor.fid, factor)
 
-        if not factors_data_res or factors_data_res is None or factors_data_res == []:
-            return False
-        else:
-            for factor_data in factors_data_res:
-                # Create lists for scales_desc and scales_explanation by combining the individual columns
-                scales_desc = [factor_data.scales_desc_0, factor_data.scales_desc_1, factor_data.scales_desc_2, factor_data.scales_desc_3, factor_data.scales_desc_4]
-                scales_explanation = [factor_data.scales_explanation_0, factor_data.scales_explanation_1, factor_data.scales_explanation_2, factor_data.scales_explanation_3, factor_data.scales_explanation_4]
-                
-                # Insert the factor with the lists
-                self.factors.insert(factor_data.id, Factor(factor_data.id, factor_data.owner, factor_data.name, factor_data.description,
-                                                        scales_desc, scales_explanation, factor_data))
-            return True
-
+    # def load_factors(self):
+    #     join_condition = DBProjectFactors.factor_id == DBFactors.id
+    #     factors_data_res = self.db_access.load_by_join_query(
+    #         DBProjectFactors, DBFactors,
+    #         [DBFactors.name, DBFactors.description, DBFactors.id, DBFactors.owner,
+    #          DBFactors.scales_desc_0, DBFactors.scales_desc_1, DBFactors.scales_desc_2, DBFactors.scales_desc_3,
+    #          DBFactors.scales_desc_4,
+    #          DBFactors.scales_explanation_0, DBFactors.scales_explanation_1, DBFactors.scales_explanation_2,
+    #          DBFactors.scales_explanation_3, DBFactors.scales_explanation_4],
+    #         join_condition,
+    #         {"project_id": self.pid}
+    #     )
+    #
+    #     if not factors_data_res or factors_data_res is None or factors_data_res == []:
+    #         return False
+    #     else:
+    #         for factor_data in factors_data_res:
+    #             # Create lists for scales_desc and scales_explanation by combining the individual columns
+    #             scales_desc = [factor_data.scales_desc_0, factor_data.scales_desc_1, factor_data.scales_desc_2,
+    #                            factor_data.scales_desc_3, factor_data.scales_desc_4]
+    #             scales_explanation = [factor_data.scales_explanation_0, factor_data.scales_explanation_1,
+    #                                   factor_data.scales_explanation_2, factor_data.scales_explanation_3,
+    #                                   factor_data.scales_explanation_4]
+    #
+    #             # Insert the factor with the lists
+    #             self.factors.insert(factor_data.id,
+    #                                 Factor(factor_data.id, factor_data.owner, factor_data.name, factor_data.description,
+    #                                        scales_desc, scales_explanation, factor_data))
+    #         return True
 
     def load_factor_votes(self):
         query_obj = {"project_id": self.pid}
@@ -240,8 +263,15 @@ class VoteManager:
             return votes_data
 
         for vote in votes_data:
-            values = [vote.severity_level1, vote.severity_level2, vote.severity_level3, vote.severity_level4, vote.severity_level5]
+            values = [vote.severity_level1, vote.severity_level2, vote.severity_level3, vote.severity_level4,
+                      vote.severity_level5]
             self.severity_votes.insert(vote.member_email, values)
+
+    def clear_all_votes(self):
+        """Purge both factor‑ and severity‑vote caches."""
+        with self.lock:
+            self.factors_votes.clear()       # plain dict
+            self.severity_votes.clear()      # ThreadSafeDict
 
 
 

@@ -8,15 +8,16 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  backdrop-filter: blur(1.5px);
   z-index: 1000;
 }
 
 .popup-content {
   width: 1500px;
   max-width: 1500px;
-  min-height: 600px;
+  min-height: 640px;  /* Increased min-height for more height */
   min-width: 1200px;
-  max-height: 95vh;  
+  max-height: 90vh;   /* Increased max-height to allow more height */
   background-color: var(--card-background) !important;
   color: var(--text-color) !important;
   border: 1px solid var(--border-color) !important;

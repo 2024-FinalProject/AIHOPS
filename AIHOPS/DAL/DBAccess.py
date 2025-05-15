@@ -9,6 +9,15 @@ from DAL.Objects.DBFactors import DBFactors
 from Domain.src.Loggs.Response import ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
 from Service.config import engine  # Make sure you have your SQLAlchemy engine defined
 
+from sqlalchemy.orm import Session as SASession  # alias so we don’t shadow your Session factory
+from DAL.Objects.DBProjectFactors import DBProjectFactors
+from DAL.Objects.DBPendingRequests import DBPendingRequests
+from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
+from DAL.Objects.DBFactorVotes import DBFactorVotes
+from DAL.Objects.DBSeverityVotes import DBSeverityVotes
+from DAL.Objects.DBProjectMembers import DBProjectMembers
+from DAL.Objects.DBProject import DBProject
+from DAL.Objects.DBMember import DBMember
 
 # Create a session factory
 Session = sessionmaker(bind=engine)
@@ -60,7 +69,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully added to the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
-                return ResponseFailMsg(f"Rolled back, failed to add to the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to add to the database")
             finally:
                 if closeSession:
                     session.close()  # Close the session
@@ -74,7 +83,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully updated the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
-                return ResponseFailMsg(f"Rolled back, failed to update the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to update the database")
             finally:
                 session.close()  # Close the session
 
@@ -93,7 +102,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully updated the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback in case of an error
-                return ResponseFailMsg(f"Rolled back, failed to update the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to update the database")
             finally:
                 session.close()  # Close the session
 
@@ -106,7 +115,7 @@ class DBAccess:
                 return ResponseSuccessMsg("Successfully deleted the object from the database.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session in case of an error
-                return ResponseFailMsg(f"Rolled back, failed to delete the object: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to delete the object")
             finally:
                 session.close()  # Ensure the session is closed
 
@@ -131,7 +140,7 @@ class DBAccess:
                     return ResponseFailMsg("Object not found.")
             except SQLAlchemyError as e:
                 session.rollback()  # Rollback the session if there's an error
-                return ResponseFailMsg(f"Rolled back, failed to delete from the database: {str(e)}")
+                return ResponseFailMsg(f"Rolled back, failed to delete from the database")
             finally:
                 session.close()  # Close the session
 
@@ -140,7 +149,7 @@ class DBAccess:
         try:
             return session.query(Obj).filter_by(**query_obj).all()
         except SQLAlchemyError as e:
-            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+            return ResponseFailMsg(f"Failed to load data from the database")
         finally:
             session.close()  # Close the session
 
@@ -157,7 +166,7 @@ class DBAccess:
 
             return query.all()
         except SQLAlchemyError as e:
-            return ResponseFailMsg(f"Failed to load data from the database: {str(e)}")
+            return ResponseFailMsg(f"Failed to load data from the database")
         finally:
             session.close()  # Close the session
 
@@ -168,6 +177,74 @@ class DBAccess:
             highest_id = session.query(func.max(DBFactors.id)).scalar()
             return highest_id
         except SQLAlchemyError as e:
-            return ResponseFailMsg(f"Failed to retrieve the highest Factor ID: {str(e)}")
+            return ResponseFailMsg(f"Failed to retrieve the highest Factor ID")
         finally:
             session.close()  # Close the session
+
+    def delete_all_by_query(self, table, query_obj):
+        with self.lock:
+            session = Session()
+            try:
+                session.query(table).filter_by(**query_obj).delete(synchronize_session=False)
+                session.commit()
+                return ResponseSuccessMsg(f"Deleted rows from {table.__tablename__}.")
+            except SQLAlchemyError as e:
+                session.rollback()
+                return ResponseFailMsg(f"Failed to delete from {table.__tablename__}: {e}")
+            finally:
+                session.close()
+
+    def delete_project(self, pid):
+        """Atomically delete project + all its child rows, or roll back on any failure."""
+        with self.lock:
+            session = Session()  # your sessionmaker
+            try:
+                # begin a transaction
+                with session.begin():
+                    # delete each child table by project_id
+                    session.query(DBProjectFactors).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBPendingRequests).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBProjectSeverityFactor).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBFactorVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBSeverityVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                    session.query(DBProjectMembers).filter_by(project_id=pid).delete(synchronize_session=False)
+
+                    # finally delete the project row itself
+                    session.query(DBProject).filter_by(id=pid).delete(synchronize_session=False)
+                # if we reach here, all deletes ran without exception, and session.begin() committed
+                return ResponseSuccessMsg(f"Project {pid} and all its dependents deleted.")
+            except SQLAlchemyError as e:
+                # any error rolls back the entire transaction
+                session.rollback()
+                return ResponseFailMsg(f"delete_project transaction failed: {e}")
+            finally:
+                session.close()
+
+    def delete_member_and_projects(self, member_email):
+        """Atomically delete a member plus every project they own, or roll back on failure."""
+        with self.lock:
+            session = Session()
+            try:
+                # begin a transaction
+                with session.begin():
+                    # 1) delete every project they own
+                    owned = session.query(DBProject).filter_by(owner=member_email).all()
+                    for proj in owned:
+                        pid = proj.id
+                        session.query(DBProjectFactors).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBPendingRequests).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBProjectSeverityFactor).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBFactorVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBSeverityVotes).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBProjectMembers).filter_by(project_id=pid).delete(synchronize_session=False)
+                        session.query(DBProject).filter_by(id=pid).delete(synchronize_session=False)
+
+                    # 3) finally delete the member row
+                    session.query(DBMember).filter_by(email=member_email).delete(synchronize_session=False)
+                # commit happens automatically on exiting session.begin()
+                return ResponseSuccessMsg(f"Member {member_email} and all owned projects deleted.")
+            except SQLAlchemyError as e:
+                session.rollback()
+                return ResponseFailMsg(f"delete_member_and_projects failed: {e}")
+            finally:
+                session.close()

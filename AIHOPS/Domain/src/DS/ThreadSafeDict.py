@@ -25,5 +25,10 @@ class ThreadSafeDict:
 
     def size(self):
         return self.dict.__len__()
+    
+    def clear(self):
+        """Remove all items."""
+        with self.lock:
+            self.dict.clear()
 
 
