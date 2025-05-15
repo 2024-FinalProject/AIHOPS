@@ -419,7 +419,7 @@ input::placeholder {
   margin: 0 !important;
   letter-spacing: 0.5px !important;
   overflow: hidden !important;
-  border-right: 10px solid rgba(0, 0, 0, 0.08) !important;
+  border-right: 10px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 .action-btn.analyze-btn:last-child {
@@ -897,8 +897,47 @@ button.delete-btn:hover {
 button[style*="margin-left: -200px"],
 button[style*="margin-right: -200px"],
 button[style*="margin-right: 120px"] {
-  padding: 8px 16px !important;
+  padding: 0 !important;
+  margin: 0 !important;
   font-size: 14px !important;
   font-weight: 600 !important;
   min-width: 140px !important;
+}
+
+.factor-button {
+  padding: 0.2rem 0.2rem !important;
+  border-radius: 0.375rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  cursor: pointer !important;
+  font-family: Verdana, sans-serif !important;
+  font-size: 15px;
+  text-align: center !important; /* Ensure text is centered */
+  display: inline-block !important; /* Proper display type */
+  line-height: normal !important; /* Reset line height */
+  white-space: nowrap !important; /* Prevent text wrapping */
+}
+
+.factor-cancel-button {
+  background: white;
+  border: 2px solid #e5e7eb !important;
+  color: #374151;
+  font-family: Verdana, sans-serif !important;
+  padding: 0.5rem 1rem !important; /* Make sure padding is equal on both sides */
+}
+
+.factor-submit-button {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important; /* Make sure padding is equal on both sides */
+}
+
+/* Fix button group alignment */
+.factor-button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-left: 4%;
+  margin-top: -1%;
 }
