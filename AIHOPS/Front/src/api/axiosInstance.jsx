@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = "http://localhost:5555";
+const API_URL = "https://aihops.cs.bgu.ac.il/api";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

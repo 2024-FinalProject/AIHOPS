@@ -1,4 +1,4 @@
-from Service.config import socketio as app
+from Service.ServiceServer import app
 
 if __name__ == "__main__":
     app.run(port=5555)

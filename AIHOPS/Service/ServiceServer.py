@@ -569,16 +569,12 @@ def handle_request_terms():
     tac_data = server.tac_controller.get_current()
     emit("get_terms", tac_data)
 
-# run the backed server
+server = Server(socketio)  # 🔥 Move this outside the __main__ block
+
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     FactorsPool.insert_defaults()
-
-    server = Server(socketio)
-    # running the server
-    # app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
-    socketio.run(app,port=5555)  # when debug mode runs only 1 thread
-    # app.run(threaded=True, port=5555)  # runs multithreaded
+    socketio.run(app, port=5555)
 
 
 
