@@ -1,10 +1,3 @@
-import {
-  getProjectProgress,
-  getProjectsScore,
-  getProjectFactors,
-  getProjectSeverityFactors,
-  getProjectFactorVotes,
-} from "../api/ProjectApi";
 import React, { useState, useEffect } from "react";
 import "./ProjectStatusPopup.css";
 import "./AnalyzeResult.css";
@@ -12,6 +5,8 @@ import Histogram from "./Histogram";
 import SeverityHistogram from "./SeverityHistogram";
 import FormulaDisplay from "./FormulaDisplay";
 import ExportDataButton from "./ExportCSVButton";
+import getProjectsInfo from "../utils/getProjectInfo";
+import getProjectScore from "../utils/getProjectScore";
 
 const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [projectsProgress, setProjectsProgress] = useState({});
@@ -28,87 +23,20 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetch_project_progress = async () => {
-    try {
-      let res = await getProjectProgress(projectId);
-      if (res.data.success) setProjectsProgress(res.data.progress);
-    } catch (error) {
-      alert(error);
-    }
-  };
-
-  const fetch_project_score = async (weightsToUse) => {
-    console.log("trying to fetch score witth weights: ", weights);
-
-    //check all weights not zero
-    const hasPositiveWeight = Object.values(weightsToUse).some(
-      (val) => parseFloat(val) > 0
-    );
-    if (!hasPositiveWeight) {
-      alert("must have at least 1 non zero weight");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      //Turn wighets into a list of weights values:
-      let res = await getProjectsScore(projectId, weightsToUse);
-      if (res.data.success) setProjectsScore(res.data.score);
-    } catch (error) {
-      alert(error);
-    }
-    setIsLoading(false);
-  };
-
-  const fetch_project_factors = async () => {
-    try {
-      let res = await getProjectFactors(projectId);
-      if (res.data.success) {
-        setProjectFactors(res.data.factors);
-      }
-    } catch (error) {
-      alert(error);
-    }
-  };
-
-  const fetch_project_severity_factors = async () => {
-    try {
-      let res = await getProjectSeverityFactors(projectId);
-      if (res.data.success) setProjectSeverityFactors(res.data.severityFactors);
-    } catch (error) {
-      alert(error);
-    }
-  };
-
-  const fetch_project_factors_votes = async () => {
-    try {
-      let res = await getProjectFactorVotes(projectId);
-      if (res.data.success) setProjectFactorsVotes(res.data.votes);
-    } catch (error) {
-      alert(error);
-    }
-  };
+  useEffect(() => {
+    handleRefresh();
+  }, []);
 
   const handleRefresh = async () => {
-    setIsLoading(true);
-    await fetch_project_factors();
-    await fetch_project_progress();
-    await fetch_project_factors_votes();
-    await fetch_project_severity_factors();
-    await fetch_project_score(weights);
-    setIsLoading(false);
+    getProjectsInfo({
+      projectId,
+      setProjectFactors,
+      setProjectSeverityFactors,
+      setProjectsProgress,
+      setProjectFactorsVotes,
+      setIsLoading,
+    });
   };
-
-  const fetchAllData = async () => {
-    await fetch_project_factors();
-    await fetch_project_progress();
-    await fetch_project_factors_votes();
-    await fetch_project_severity_factors();
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    fetchAllData();
-  }, []);
 
   useEffect(() => {
     if (!weightsInited && projectFactors.length > 0) {
@@ -119,7 +47,12 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         initialWeights[factor.id] = 1;
       });
       setWeights(initialWeights);
-      fetch_project_score(initialWeights);
+      getProjectScore({
+        projectId,
+        weightsToUse: initialWeights,
+        setProjectsScore,
+        setIsLoading,
+      });
     }
   }, [projectFactors]);
 
@@ -206,7 +139,14 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
 
               <div style={{ textAlign: "center" }}>
                 <button
-                  onClick={() => fetch_project_score(weights)}
+                  onClick={() => {
+                    getProjectScore({
+                      projectId,
+                      weightsToUse: weights,
+                      setProjectsScore,
+                      setIsLoading,
+                    });
+                  }}
                   className="calculate-button"
                 >
                   Calculate Score
@@ -324,14 +264,7 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                     Click the button below to export all project analysis data
                     to Excel.
                   </p>
-                  <ExportDataButton
-                    projectsScore={projectsScore}
-                    projectsProgress={projectsProgress}
-                    projectFactors={projectFactors}
-                    projectSeverityFactors={projectSeverityFactors}
-                    projectFactorsVotes={projectFactorsVotes}
-                    projectId={projectId}
-                  />
+                  <ExportDataButton projectId={projectId} />
                 </div>
               ) : (
                 <p className="default-text">No data available to export</p>
