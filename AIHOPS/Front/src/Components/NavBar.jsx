@@ -135,7 +135,7 @@ const NavBar = () => {
                       gap: "5px",
                     }}
                   >
-                    <IoMdNotificationsOutline size={20} />
+                    <IoMdNotificationsOutline size={16} />
                     Notifications
                     {newMessages && <span className="new-message-dot" />}
                   </Link>
