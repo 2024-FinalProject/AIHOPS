@@ -419,15 +419,15 @@ input::placeholder {
   margin: 0 !important;
   letter-spacing: 0.5px !important;
   overflow: hidden !important;
-  border-right: 10px solid rgba(0, 0, 0, 0.08) !important;
+  border-right: 10px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 .action-btn.analyze-btn:last-child {
-  border-right: none;
+  border-right: none !important;
 }
 
 .action-btn.analyze-btn:first-child {
-  border-left: none;
+  border-left: none !important;
 }
 
 /* Export button styling */
@@ -446,28 +446,28 @@ input::placeholder {
 }
 
 .action-btn.analyze-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
   background: linear-gradient(
     90deg,
     transparent,
     rgba(255, 255, 255, 0.2),
     transparent
-  );
-  transition: 0.5s;
+  ) !important;
+  transition: 0.5s !important;
 }
 
 .action-btn.analyze-btn:hover::before {
-  left: 100%;
+  left: 100% !important;
 }
 
 .action-btn.analyze-btn:hover {
-  filter: brightness(1);
-  transform: translateY(-1px);
+  filter: brightness(1) !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Active Button State */
@@ -715,7 +715,6 @@ input::placeholder {
   }
 }
 
-
 /* Blue theme styling for Edit components */
 .blue-gradient {
   background: linear-gradient(135deg, #1a73e8, #0d47a1) !important;
@@ -833,16 +832,16 @@ input::placeholder {
     width: 90% !important;
     max-width: 450px !important;
   }
-  
+
   .popup-title {
     font-size: 1.5rem !important;
   }
-  
+
   .input-container,
   .actions-container {
     padding: 20px !important;
   }
-  
+
   .action-btn {
     padding: 10px 20px !important;
     font-size: 1rem !important;
@@ -879,7 +878,7 @@ button.delete-btn:hover {
   margin-bottom: 4px !important;
   background-color: #f9f9f9 !important;
   border-radius: 8px !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Ensure buttons are properly spaced */
@@ -927,7 +926,7 @@ button[style*="margin-right: 120px"] {
 }
 
 .factor-submit-button {
-  background-color: #4CAF50 !important;
+  background-color: #4caf50 !important;
   color: white !important;
   border: none !important;
   padding: 0.5rem 1rem !important; /* Make sure padding is equal on both sides */
