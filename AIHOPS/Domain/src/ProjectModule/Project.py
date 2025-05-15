@@ -220,8 +220,8 @@ class Project:
             return ResponseFailMsg(f"projects {self.pid} factors has not been initialized")
         if not self.severity_factors_inited:
             return ResponseFailMsg(f"projects {self.pid} severity factors has not been initialized")
-        if self.to_invite_when_published.size() == 0 and self.members.size() <= 1:
-            return ResponseFailMsg(f"projects {self.pid} members has not been added")
+        # if self.to_invite_when_published.size() == 0 and self.members.size() <= 1:
+        #     return ResponseFailMsg(f"projects {self.pid} members has not been added")
         self.db_instance.published = True
         self.db_access.update(self.db_instance)
         self.published = True
