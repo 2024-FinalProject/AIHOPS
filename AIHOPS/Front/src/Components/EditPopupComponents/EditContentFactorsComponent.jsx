@@ -576,6 +576,7 @@ const EditContentFactorsComponent = ({
               <button 
                 className="confirmation-button cancel" 
                 onClick={handleCancelDelete}
+                style={{ backgroundColor: "#a9a9a9" }}
               >
                 Cancel
               </button>

@@ -401,33 +401,33 @@ input::placeholder {
 
 /* Enhanced Analyze Button Style */
 .action-btn.analyze-btn {
-  flex: 1;
+  flex: 1 !important;
   background: linear-gradient(to right, #afafaf, #7c7c7c);
-  color: white;
-  border: none;
-  border-radius: 0;
-  padding: 14px 5px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  white-space: nowrap;
-  text-align: center;
-  position: relative;
-  min-width: unset;
-  box-shadow: none;
-  margin: 0;
-  letter-spacing: 0.5px;
-  overflow: hidden;
-  border-right: 10px solid rgba(0, 0, 0, 0.08);
+  color: white !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 14px 5px !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  position: relative !important;
+  min-width: unset !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  letter-spacing: 0.5px !important;
+  overflow: hidden !important;
+  border-right: 10px solid rgba(0, 0, 0, 0.08) !important;
 }
 
 .action-btn.analyze-btn:last-child {
-  border-right: none;
+  border-right: none !important;
 }
 
 .action-btn.analyze-btn:first-child {
-  border-left: none;
+  border-left: none !important;
 }
 
 /* Export button styling */
@@ -446,28 +446,28 @@ input::placeholder {
 }
 
 .action-btn.analyze-btn::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
+  content: "" !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: -100% !important;
+  width: 100% !important;
+  height: 100% !important;
   background: linear-gradient(
     90deg,
     transparent,
     rgba(255, 255, 255, 0.2),
     transparent
-  );
-  transition: 0.5s;
+  ) !important;
+  transition: 0.5s !important;
 }
 
 .action-btn.analyze-btn:hover::before {
-  left: 100%;
+  left: 100% !important;
 }
 
 .action-btn.analyze-btn:hover {
-  filter: brightness(1);
-  transform: translateY(-1px);
+  filter: brightness(1) !important;
+  transform: translateY(-1px) !important;
 }
 
 /* Active Button State */
@@ -715,7 +715,6 @@ input::placeholder {
   }
 }
 
-
 /* Blue theme styling for Edit components */
 .blue-gradient {
   background: linear-gradient(135deg, #1a73e8, #0d47a1) !important;
@@ -833,16 +832,16 @@ input::placeholder {
     width: 90% !important;
     max-width: 450px !important;
   }
-  
+
   .popup-title {
     font-size: 1.5rem !important;
   }
-  
+
   .input-container,
   .actions-container {
     padding: 20px !important;
   }
-  
+
   .action-btn {
     padding: 10px 20px !important;
     font-size: 1rem !important;
@@ -879,7 +878,7 @@ button.delete-btn:hover {
   margin-bottom: 4px !important;
   background-color: #f9f9f9 !important;
   border-radius: 8px !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
 }
 
 /* Ensure buttons are properly spaced */
@@ -904,3 +903,40 @@ button[style*="margin-right: 120px"] {
   min-width: 140px !important;
 }
 
+.factor-button {
+  padding: 0.2rem 0.2rem !important;
+  border-radius: 0.375rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s !important;
+  cursor: pointer !important;
+  font-family: Verdana, sans-serif !important;
+  font-size: 15px;
+  text-align: center !important; /* Ensure text is centered */
+  display: inline-block !important; /* Proper display type */
+  line-height: normal !important; /* Reset line height */
+  white-space: nowrap !important; /* Prevent text wrapping */
+}
+
+.factor-cancel-button {
+  background: white;
+  border: 2px solid #e5e7eb !important;
+  color: #374151;
+  font-family: Verdana, sans-serif !important;
+  padding: 0.5rem 1rem !important; /* Make sure padding is equal on both sides */
+}
+
+.factor-submit-button {
+  background-color: #4caf50 !important;
+  color: white !important;
+  border: none !important;
+  padding: 0.5rem 1rem !important; /* Make sure padding is equal on both sides */
+}
+
+/* Fix button group alignment */
+.factor-button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-left: 4%;
+  margin-top: -1%;
+}
