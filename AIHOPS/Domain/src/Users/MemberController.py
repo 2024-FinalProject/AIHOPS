@@ -229,3 +229,4 @@ class MemberController:
             return res
         member.accepted_tac_version = version
         return ResponseSuccessMsg(f'Accepted terms for {actor} version {version}')
+    

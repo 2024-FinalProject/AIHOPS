@@ -522,7 +522,7 @@ def fetch_default_severity_factors_full():
 def admin_update_default_severity_factors():
     data = request.json
     res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
-    return jsonify({"message": res.msg, "success": res.success})
+    return jsonify({"result": res.result if res.success else None})
 
 @app.route("/admin/update-terms-and-conditions", methods=["POST"])
 def admin_update_terms_and_conditions():
@@ -530,6 +530,21 @@ def admin_update_terms_and_conditions():
     print(f"trying to update tac: {data['updatedTXT']}")
     res = server.admin_update_terms_and_conditions(int(data["cookie"]), data["updatedTXT"])
     return jsonify({"message": res.msg, "success": res.success})
+
+@app.route("/admin/update-about", methods=["POST"])
+def admin_update_about():
+    data = request.json
+    print(f"trying to update about: {data['updatedTXT']}")
+    res = server.admin_update_about(int(data["cookie"]), data["updatedTXT"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+
+@app.route("/admin/fetch-about", methods=["GET"])
+def admin_fetch_about():
+    cookie = request.args.get("cookie")
+    res = server.fetch_about(int(cookie))
+    return jsonify({"message": res.msg, "result": res.result})
+
 
 @app.route("/get-research-projects", methods=["GET"])
 def get_research_projects():
