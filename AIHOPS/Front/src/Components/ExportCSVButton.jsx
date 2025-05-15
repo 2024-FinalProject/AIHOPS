@@ -56,8 +56,8 @@ const ExportDataButton = ({
     const data = [
       ["Project Score Summary"],
       ["Metric", "Value"],
-      ["Total Score", projectsScore.score || "N/A"],
-      ["Nominator", projectsScore.nominator || "N/A"],
+      ["Total Score", projectsScore.score],
+      ["Nominator", projectsScore.nominator],
       ["Denominator", projectsScore.denominator || "N/A"],
       ["Severity Score", projectsScore.d_score ? projectsScore.d_score.toFixed(3) : "N/A"]
     ];

@@ -715,6 +715,7 @@ input::placeholder {
   }
 }
 
+
 /* Blue theme styling for Edit components */
 .blue-gradient {
   background: linear-gradient(135deg, #1a73e8, #0d47a1) !important;
@@ -832,16 +833,16 @@ input::placeholder {
     width: 90% !important;
     max-width: 450px !important;
   }
-
+  
   .popup-title {
     font-size: 1.5rem !important;
   }
-
+  
   .input-container,
   .actions-container {
     padding: 20px !important;
   }
-
+  
   .action-btn {
     padding: 10px 20px !important;
     font-size: 1rem !important;
@@ -878,7 +879,7 @@ button.delete-btn:hover {
   margin-bottom: 4px !important;
   background-color: #f9f9f9 !important;
   border-radius: 8px !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
 }
 
 /* Ensure buttons are properly spaced */
@@ -897,8 +898,7 @@ button.delete-btn:hover {
 button[style*="margin-left: -200px"],
 button[style*="margin-right: -200px"],
 button[style*="margin-right: 120px"] {
-  padding: 0 !important;
-  margin: 0 !important;
+  padding: 8px 16px !important;
   font-size: 14px !important;
   font-weight: 600 !important;
   min-width: 140px !important;
