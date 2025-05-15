@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "../EditPopup.css";
 import AlertPopup from "../AlertPopup";
 
@@ -24,6 +24,22 @@ const FactorsListComponent = ({
   setShowAlert,
   handleAlertClose
 }) => {
+  // Add state for confirmation popup
+  const [showConfirmFactorsDialog, setShowConfirmFactorsDialog] = useState(false);
+
+  const handleInitiateConfirmFactors = () => {
+    setShowConfirmFactorsDialog(true);
+  };
+
+  const handleCancelConfirmFactors = () => {
+    setShowConfirmFactorsDialog(false);
+  };
+
+  const handleFinalConfirmFactors = () => {
+    setShowConfirmFactorsDialog(false);
+    handleConfirmFactors(selectedProject.id);
+  };
+
   // Use the provided handleAlertClose function or fall back to just hiding the alert
   const onAlertClose = handleAlertClose || (() => setShowAlert(false));
 
@@ -202,7 +218,7 @@ const FactorsListComponent = ({
               <button
                 disabled={selectedProject.isActive}
                 className="action-btn confirm-btn"
-                onClick={() => handleConfirmFactors(selectedProject.id)}
+                onClick={handleInitiateConfirmFactors}
                 style={{
                   backgroundColor: "#4CAF50",
                   color: "white",
@@ -251,6 +267,38 @@ const FactorsListComponent = ({
         >
           No factors available in the project.
         </p>
+      )}
+
+      {/* Confirm Factors Popup */}
+      {showConfirmFactorsDialog && (
+        <div className="confirmation-overlay">
+          <div className="confirmation-content">
+            <div className="confirmation-icon" style={{ backgroundColor: "#d1fae5", color: "#10b981" }}>
+              <span style={{ fontSize: '28px' }}>✓</span>
+            </div>
+            <h3 className="confirmation-title">Confirm Assessment Dimensions</h3>
+            <p className="confirmation-message">
+              Are you sure you want to confirm these assessment dimensions?
+              This action will finalize the dimensions for this project.
+            </p>
+            <div className="confirmation-buttons">
+              <button 
+                className="confirmation-button cancel" 
+                onClick={handleCancelConfirmFactors}
+                style={{ backgroundColor: "#a6a6a6" }}
+              >
+                Cancel
+              </button>
+              <button 
+                className="confirmation-button confirm" 
+                onClick={handleFinalConfirmFactors}
+                style={{ backgroundColor: "#4CAF50" }}
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

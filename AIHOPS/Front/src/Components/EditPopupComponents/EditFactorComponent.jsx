@@ -109,7 +109,7 @@ const EditFactorComponent = ({
                         newExp[index] = e.target.value;
                         setEditedScaleExplanations(newExp);
                       }}
-                      placeholder={`Explanation for score ${score} (Optional)`}
+                      placeholder={`Explanation for score ${score} (</style>Optional)`}
                     />
                   </td>
                 </tr>
@@ -144,6 +144,7 @@ const EditFactorComponent = ({
             <button
               className="factor-button factor-submit-button"
               onClick={handleUpdateEditedFactor}
+              style={{ backgroundColor: "#4CAF50", color: "white" }}
             >
               Update
             </button>
