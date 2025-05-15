@@ -17,8 +17,8 @@ from flask_cors import CORS
 
 # --------  init session and user management ---------------
 
-server = Server(socketio)
-socketio.run(app,port=5555)
+# server = Server(socketio)
+# socketio.run(app,port=5555)
 
 @app.route("/enter", methods=["GET"])
 def start_session():
