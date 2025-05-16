@@ -26,6 +26,7 @@ class Session:
     def login(self, user_name):
         self.user_name = user_name
         self.is_member = True
+        self.is_admin = False
         return ResponseSuccessMsg(f'session updated with {user_name}')
 
     def logout(self):

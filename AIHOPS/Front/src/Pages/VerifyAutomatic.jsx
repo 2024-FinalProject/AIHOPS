@@ -1,56 +1,93 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
-import { verifyAutomatic, startSession } from "../api/AuthApi.jsx";
+import { verifyAutomatic } from "../api/AuthApi";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const VerifyAutomatic = () => {
-  // const [token, setToken] = useState("");
+  const [message, setMessage] = useState("Verifying your account...");
+  const [status, setStatus] = useState("processing"); // "processing", "success", "error"
   const navigate = useNavigate();
-  // const searchParams = new URLSearchParams(window.location.search);
-  const [searchParams] = useSearchParams();
-  const [msg, setMsg] = useState("");
-  const [isSuccess, setIsSuccess] = useState(null); // null means no message initially
-
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  const { getMyCookie } = useAuth();
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    console.log("ran", token);
-    // setToken(searchParams.get("token")) // Get token from URL
-    if (token) {
-      handleVerify(token);
-    }
-  }, [searchParams]);
+    const validateToken = async () => {
+      try {
+        // Get the token from URL params
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
 
-  const handleVerify = async (token) => {
-    // e.preventDefault();
-    console.log("handling", token);
+        if (!token) {
+          setMessage("No verification token found in URL.");
+          setStatus("error");
+          return;
+        }
 
-    // Reset state before making the request
-    setMsg("");
-    setIsSuccess(null); // Reset before starting the registration attempt
+        console.log("Starting automatic verification with token:", token);
 
-    try {
-      const response = await verifyAutomatic(token);
+        // Get the current session cookie
+        const cookie = await getMyCookie();
+        console.log("Using cookie for verification:", cookie);
 
-      // Check if registration is successful
-      if (response.data.success) {
-        setMsg("verified successfully");
-        setIsSuccess(true);
-        navigate("/login");
-      } else {
-        setMsg(response.data.message);
-        setIsSuccess(false);
+        // Send verification request
+        const response = await verifyAutomatic(token);
+        console.log("Verification response:", response);
+
+        if (response.data.success) {
+          setMessage("Your account has been verified successfully! Redirecting to login...");
+          setStatus("success");
+          
+          // Extract email from response if available
+          const email = response.data.email || "";
+          
+          // Wait 2 seconds then redirect to login with email parameter
+          setTimeout(() => {
+            navigate(`/login?email=${encodeURIComponent(email)}`);
+          }, 2000);
+        } else {
+          setMessage(`Verification failed: ${response.data.message}`);
+          setStatus("error");
+        }
+      } catch (error) {
+        console.error("Verification error:", error);
+        setMessage("An error occurred during verification. Please try again later.");
+        setStatus("error");
       }
-    } catch (error) {
-      setMsg("Failed to verify");
-      setIsSuccess(false);
-    }
-  };
+    };
+
+    validateToken();
+  }, [navigate, getMyCookie]);
 
   return (
-    <div>
-      <h1>verification page</h1>
-      <h1>{msg}</h1>
+    <div className="auth-container">
+      <h2>Account Verification</h2>
+      
+      {status === "processing" && (
+        <div className="verification-status processing">
+          <div className="spinner"></div>
+          <p>{message}</p>
+        </div>
+      )}
+      
+      {status === "success" && (
+        <div className="verification-status success">
+          <div className="success-icon">✓</div>
+          <p>{message}</p>
+        </div>
+      )}
+      
+      {status === "error" && (
+        <div className="verification-status error">
+          <div className="error-icon">✗</div>
+          <p>{message}</p>
+          <button 
+            className="login-submit-btn"
+            onClick={() => navigate("/login")}
+            style={{ marginTop: "20px" }}
+          >
+            Go to Login
+          </button>
+        </div>
+      )}
     </div>
   );
 };

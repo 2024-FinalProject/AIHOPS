@@ -40,6 +40,11 @@ export const AuthProvider = ({ children }) => {
   }, [userName]);
 
   const login = (username) => {
+    if (!username) {
+      console.error("Attempted to login with empty username");
+      return;
+    }
+    console.log("AuthContext login with:", username);
     setUserName(username);
     setIsAuthenticated(true);
     localStorage.setItem("userName", username);
@@ -49,6 +54,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    console.log("Logging out user:", userName);
     setIsAdmin(false);
     localStorage.removeItem("isAdmin");
     setAuthToken(null);
@@ -96,12 +102,16 @@ export const AuthProvider = ({ children }) => {
       const username = localStorage.getItem("userName");
       const admin = localStorage.getItem("isAdmin") === "true";
 
+      console.log("Validating session:", { token, isLoggedIn, username });
+
       if (
         !isLoggedIn ||
         !(await validateAuthLoggedIn(isLoggedIn)) ||
         !token ||
-        !(await validateAuthToken(token))
+        !(await validateAuthToken(token)) ||
+        !username // Add an explicit check for username presence
       ) {
+        console.log("Session validation failed, clearing auth state");
         setAuthToken(null);
         setUserName(null);
         setIsAuthenticated(false);
@@ -111,6 +121,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("userName");
         localStorage.removeItem("isAdmin");
       } else {
+        console.log("Session validation successful for user:", username);
         setAuthToken(token);
         setUserName(username);
         setIsAuthenticated(true);
@@ -140,13 +151,13 @@ export const AuthProvider = ({ children }) => {
   }, [theme]); // Added theme as dependency
 
   const startNewSession = async () => {
-    // console.log("auth context starting new seession");
+    console.log("Starting new session");
     const response = await startSession();
     if (!response.data.success) {
-      console.error("failed to start a new session %s", response.data.message);
+      console.error("Failed to start a new session:", response.data.message);
       return -1;
     } else {
-      // console.log("started a new session");
+      console.log("Started a new session");
       const cookie = response.data.cookie;
       localStorage.setItem("authToken", cookie);
       return cookie;
@@ -156,7 +167,7 @@ export const AuthProvider = ({ children }) => {
   const getMyCookie = async () => {
     const cookie = localStorage.getItem("authToken");
     if (!cookie) {
-      console.log("cookie not found");
+      console.log("Cookie not found, starting new session");
       logout();
       return startNewSession();
     }

@@ -45,6 +45,16 @@ const Login = () => {
     }
   }, [isAuthenticated, isValidatingToken, navigate, isLoggedIn]);
 
+  useEffect(() => {
+    // Check for email parameter in URL
+    const params = new URLSearchParams(window.location.search);
+    const emailFromVerification = params.get('email');
+    if (emailFromVerification) {
+      setUserName(emailFromVerification);
+      setMsg("Your account has been verified. Please log in.");
+    }
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setMsg("");
@@ -117,14 +127,30 @@ const Login = () => {
           "must_accept_terms: %s",
           response.data.need_to_accept_new_terms
         );
+        
+        // Log the email received from the server
+        console.log("Response data:", response.data);
+        
+        // Get the email from the response or use a default if not available
+        const userEmail = response.data.email || '';
+        console.log("Logged in as:", userEmail);
+        
         if (response.data.need_to_accept_new_terms) {
           setMustAcceptNewTerms(true);
         }
 
         setMsg(response.data.message);
-        localStorage.setItem("userName", response.data.email);
-        console.log("logged in as %s", response.data.email);
-        login(response.data.email);
+        
+        // Make sure we have an email before storing
+        if (userEmail) {
+          localStorage.setItem("userName", userEmail);
+          console.log("Stored userName in localStorage:", userEmail);
+          login(userEmail);
+        } else {
+          console.error("No email in response data:", response.data);
+          setMsg("Login successful but email information is missing");
+        }
+        
         localStorage.setItem("isLoggedIn", "true");
         navigate("/");
         setIsSuccess(true);
@@ -144,16 +170,20 @@ const Login = () => {
   // First step of Google login; show modal if no session flag yet
   const handleGoogleSuccess = async (credentialResponse) => {
     const cred = credentialResponse.credential;
+    console.log("Google login credential received", cred ? "✓" : "✗");
 
     try {
       // Call new endpoint to check if email exists
       const checkEmailResponse = await checkEmailExists(cred);
+      console.log("Email exists check response:", checkEmailResponse.data);
 
       if (checkEmailResponse.data.userExists) {
         // User exists, proceed with Google login directly
+        console.log("User exists, logging in directly");
         completeGoogleLogin(cred, -1);
       } else {
         // New user, show terms & conditions first
+        console.log("New user, showing terms & conditions");
         setPendingGoogleCredential(cred);
         setShowTermsConditions(true);
       }
@@ -165,6 +195,7 @@ const Login = () => {
   };
 
   const handleGoogleFailure = () => {
+    console.error("Google login failed");
     setMsg("Google login failed. Please try again.");
     setIsSuccess(false);
   };
@@ -172,9 +203,8 @@ const Login = () => {
   // Handle terms acceptance
   const handleAcceptTerms = () => {
     setShowTermsConditions(false);
-    setPendingGoogleCredential(null);
-    console.log("termsVersion: %d", termsVersion);
-    completeGoogleLogin(null, termsVersion);
+    console.log("Terms accepted, version:", termsVersion);
+    completeGoogleLogin(pendingGoogleCredential, termsVersion);
   };
 
   return (

@@ -94,18 +94,46 @@ class MemberController:
         if user == ADMIN[0] and passwd == ADMIN[1]:
             return True
 
-    def login(self, email, encrypted_passwd):
-        if self._admin_login(email, encrypted_passwd):
-            return ResponseLogin(True, "admin logged in", True)
-
-        # verify user exists
+    def login(self, email, passwd):
+        # Handle admin login
+        if self._admin_login(email, passwd):
+            response = ResponseSuccessMsg("Admin logged in successfully")
+            response.is_admin = True
+            response.accepted_tac_version = -1  # Default value
+            return response
+        
+        # Check if member exists
         member = self.members.get(email)
         if member is None:
-            return ResponseLogin(False, 'incorrect username or password')
-        # verify correct passwd
-        res = member.login(email, encrypted_passwd)
-        # return user / error
-        return ResponseLogin(res.success, res.message, accepted_tac_version=member.accepted_tac_version)
+            return ResponseFailMsg("Incorrect username or password")
+        
+        # Verify login
+        try:
+            # Check if member is verified
+            if not member.verified:
+                return ResponseFailMsg(f"{email} is not verified")
+            
+            # Check if email matches
+            if member.email != email:
+                return ResponseFailMsg("Incorrect username or password")
+            
+            # Verify password
+            member.verify_passwd(passwd)
+            
+            # Set logged in flag
+            member.logged_in = True
+            
+            # Create standardized response
+            response = ResponseSuccessMsg(f"User {email} logged in successfully")
+            
+            # Set additional attributes needed by clients
+            response.is_admin = False
+            response.accepted_tac_version = getattr(member, 'accepted_tac_version', -1)
+            
+            return response
+            
+        except Exception as e:
+            return ResponseFailMsg(str(e))
 
     def isValidMember(self, email):
         member = self.members.get(email)
@@ -166,11 +194,16 @@ class MemberController:
                 return Response(True, f'User {email} already exists', member, False)
 
             if member is not None:
-                # User exists but is not verified, delete and recreate
-                res = self.db_access.delete_obj_by_query(DBMember, {"email": email})
+                # User exists but is not verified, update the user to be verified
+                member.verify()
+                member.is_google_user = True
+                res = self.db_access.update_by_query(DBMember, {"email": email}, 
+                                                {"verified": True, "is_google_user": True})
                 if not res.success:
                     return res
+                return Response(True, f'User {email} has been verified', member, False)
 
+            # User doesn't exist, create a new one
             uid = self.id_maker.next_id()
             # Create a new member and set is_google_user to True
             member = Member(email, passwd, uid, from_db=False, verified=True, is_google_user=True, accepted_tac_version=accepted_tac_version)

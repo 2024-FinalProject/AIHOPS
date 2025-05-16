@@ -10,7 +10,47 @@ export const verify = async (userName, passwd, code) => {
 };
 
 export const verifyAutomatic = async (token) => {
-  return await axios.post(`${API_URL}/verify_automatic`, { token });
+  try {
+    console.log("Sending automatic verification request with token:", token);
+    
+    // Get the current cookie from localStorage if available
+    const cookie = localStorage.getItem("authToken");
+    
+    // Prepare the request data
+    const requestData = { token };
+    
+    // Add cookie to request if available
+    if (cookie) {
+      requestData.cookie = cookie;
+      console.log("Including cookie in verification request:", cookie);
+    } else {
+      console.log("No cookie available, server will create a new session");
+    }
+    
+    // Send the verification request
+    const response = await axios.post(`${API_URL}/verify_automatic`, requestData);
+    
+    console.log("Verification response:", response.data);
+    
+    // If verification was successful, store any returned email for login
+    if (response.data.success && response.data.email) {
+      console.log("Storing verified email:", response.data.email);
+      localStorage.setItem("verifiedEmail", response.data.email);
+    }
+    
+    return response;
+  } catch (error) {
+    console.error("Automatic verification error:", error);
+    
+    // Return a structured error response
+    return {
+      data: {
+        success: false,
+        message: error.message || "Verification failed",
+        error: error.response ? error.response.data : "Network error"
+      }
+    };
+  }
 };
 
 export const register = async (userName, passwd, acceptedTermsVersion) => {
@@ -51,7 +91,6 @@ export const updatePassword = async (email, password, code) => {
 //Google Login method:
 export const googleLogin = async (tokenId, acceptedTermsVersion) => {
   localStorage.setItem('googleToken', tokenId);
-  
   return await axios.post(`${API_URL}/google_login`, {
     tokenId,
     acceptedTermsVersion,
