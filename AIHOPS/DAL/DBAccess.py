@@ -248,3 +248,17 @@ class DBAccess:
                 return ResponseFailMsg(f"delete_member_and_projects failed: {e}")
             finally:
                 session.close()
+
+    def update_member_profile_picture(self, email, filename):
+        """Updates a member's profile picture in the database"""
+        with self.lock:
+            session = Session()  # Create a new session
+            try:
+                # Use the existing update_by_query method that you already have
+                result = self.update_by_query(DBMember, {"email": email}, {"profile_picture": filename})
+                return result.success
+            except Exception as e:
+                print(f"Failed to update profile picture in database: {e}")
+                return False
+            finally:
+                session.close()  # Close the session

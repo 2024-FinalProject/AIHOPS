@@ -1,12 +1,17 @@
-
+import traceback
 from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
 from Service.config import app, socketio
-from flask import Flask, request, jsonify
+from flask import Flask, Response, redirect, request, jsonify
 from Service.config import Base, engine
 from sqlalchemy import event
 from flask_socketio import emit
+
+import os
+from werkzeug.utils import secure_filename
+from flask import send_file
+
 
 from flask_cors import CORS
 
@@ -19,6 +24,22 @@ from flask_cors import CORS
 # --------  init session and user management ---------------
 
 # server = Server()
+
+
+# Get the project root directory (one level up from Service directory)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, 'uploads', 'profile_pictures')
+STATIC_FOLDER = os.path.join(PROJECT_ROOT, 'static')
+
+# Make sure these directories exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(STATIC_FOLDER, exist_ok=True)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/enter", methods=["GET"])
 def start_session():
@@ -591,6 +612,68 @@ def handle_connect():
 def handle_request_terms():
     tac_data = server.tac_controller.get_current()
     emit("get_terms", tac_data)
+
+@app.route("/upload_profile_picture", methods=["POST"])
+def upload_profile_picture():
+    try:
+        result = server.handle_upload_profile_picture(request.form, request.files)
+        return jsonify(result)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({"message": f"Server error: {str(e)}", "success": False}), 500
+    
+@app.route("/get_profile_picture/<email>", methods=["GET"])
+def get_profile_picture(email):
+    try:
+        result = server.handle_get_profile_picture(email)
+        
+        if result["success"]:
+            if "redirect_url" in result:
+                # Redirect to Cloudinary URL
+                return redirect(result["redirect_url"])
+            elif "default_avatar" in result:
+                # Return generated avatar
+                return send_file(result["default_avatar"], mimetype='image/png')
+        
+        # Fallback - return transparent pixel
+        transparent_pixel = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x00\x00\x02\x00\x01\xf4\xb5U\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+        return Response(transparent_pixel, mimetype='image/png')
+        
+    except Exception as e:
+        traceback.print_exc()
+        print(f"Error retrieving profile picture: {e}")
+        
+        # Return a transparent pixel as fallback
+        transparent_pixel = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x00\x00\x02\x00\x01\xf4\xb5U\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
+        return Response(transparent_pixel, mimetype='image/png')
+    
+@app.route("/fetch_google_profile_picture", methods=["POST"])
+def fetch_google_profile_picture():
+    """
+    Endpoint to fetch the user's Google profile picture
+    Expects JSON with { "cookie": "...", "tokenId": "...", "source": "..." }
+    """
+    try:
+        result = server.handle_fetch_google_profile_picture(request.json)
+        return jsonify(result)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            "message": f"Error fetching Google profile picture: {str(e)}",
+            "success": False
+        }), 500
+    
+@app.route("/get_profile_source", methods=["GET"])
+def get_profile_source():
+    try:
+        result = server.handle_get_profile_source(request.args)
+        return jsonify(result)
+    except Exception as e:
+        traceback.print_exc()
+        return jsonify({
+            "message": f"Server error: {str(e)}",
+            "success": False
+        }), 500
 
 # run the backed server
 if __name__ == "__main__":

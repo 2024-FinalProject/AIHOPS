@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { deleteAccount } from "../api/AuthApi";
 import AlertPopup from "../Components/AlertPopup";
+import ProfilePictureUpload from "../Components/ProfilePictureUpload";
 
 const SettingsPage = () => {
   const { theme, toggleTheme } = useAuth();
@@ -124,14 +125,7 @@ const SettingsPage = () => {
         />
         {openSections.profilePicture && (
           <div className="section-content">
-            <button
-              className="button button-blue"
-              onClick={() =>
-                alert("Upload Profile Picture Not Implemented Yet!")
-              }
-            >
-              Upload Profile Picture
-            </button>
+            <ProfilePictureUpload />
           </div>
         )}
       </div>

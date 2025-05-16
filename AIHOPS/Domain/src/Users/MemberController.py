@@ -4,10 +4,12 @@ from DAL.DBAccess import DBAccess
 from DAL.Objects import DBPendingRequests
 from DAL.Objects.DBMember import DBMember
 from Domain.src.DS.IdMaker import IdMaker
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseLogin
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseLogin, ResponseSuccessObj
 from Domain.src.Users.Gmailor import Gmailor
 from Domain.src.Users.Member import Member
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 
 ADMIN = ["admin@admin.com", "admin"]
@@ -21,6 +23,7 @@ class MemberController:
         self.id_maker = IdMaker()
         self.db_access = db_access
         self.get_users_from_db()
+        self.GOOGLE_CLIENT_ID = server.GOOGLE_CLIENT_ID
 
     def get_users_from_db(self):
         registered_users = self.db_access.load_all(DBMember)
@@ -230,3 +233,128 @@ class MemberController:
         member.accepted_tac_version = version
         return ResponseSuccessMsg(f'Accepted terms for {actor} version {version}')
     
+    def fetch_profile_picture_from_google(self, token_id, source='google'):
+        """
+        Fetches the profile picture from Gmail/Google account using OAuth token
+        and uploads it to Cloudinary
+        """
+        try:
+            if not hasattr(self, 'GOOGLE_CLIENT_ID') or not self.GOOGLE_CLIENT_ID:
+                # Emergency fallback if the attribute is still missing
+                self.GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
+                print(f"Using emergency fallback Google Client ID: {self.GOOGLE_CLIENT_ID}")
+                
+            print(f"Attempting to fetch Google profile picture with token of length: {len(token_id) if token_id else 0}")
+            print(f"Using Google Client ID: {self.GOOGLE_CLIENT_ID}")
+            
+            # Verify the Google token
+            id_info = id_token.verify_oauth2_token(
+                token_id, google_requests.Request(), self.GOOGLE_CLIENT_ID
+            )
+            
+            print(f"Token verification successful, issuer: {id_info.get('iss')}")
+            
+            if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                return ResponseFailMsg("Invalid token issuer")
+            
+            # Get user email from the token info
+            email = id_info['email']
+            print(f"Email from token: {email}")
+            
+            # Check if the token contains a picture URL
+            if 'picture' in id_info:
+                picture_url = id_info['picture']
+                print(f"Found picture URL in token: {picture_url}")
+                
+                # Initialize Cloudinary with credentials from config
+                from Domain.src.Users.CloudinaryProfilePictureManager import CloudinaryProfilePictureManager
+                from Service.config import CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+                
+                print(f"Initializing Cloudinary with cloud name: {CLOUDINARY_CLOUD_NAME}")
+                cloudinary_manager = CloudinaryProfilePictureManager(
+                    CLOUDINARY_CLOUD_NAME, 
+                    CLOUDINARY_API_KEY, 
+                    CLOUDINARY_API_SECRET
+                )
+                
+                # Upload the image to Cloudinary directly from Google's URL
+                print(f"Uploading image from Google URL to Cloudinary with public_id: {email}")
+                upload_result = cloudinary_manager.upload_from_url(picture_url, public_id=email)
+                
+                if upload_result.success:
+                    # Get the URL and public_id from the result
+                    cloudinary_url = upload_result.result["url"]
+                    cloudinary_public_id = upload_result.result["public_id"]
+                    
+                    print(f"Successfully uploaded to Cloudinary. URL: {cloudinary_url}, Public ID: {cloudinary_public_id}")
+                    
+                    # Update the database with the Cloudinary info and the source
+                    member = self.members.get(email)
+                    if member is not None:
+                        print(f"Updating database for member {email} with profile picture: {cloudinary_public_id}")
+                        # Update the member's profile picture information and source
+                        update_result = self.db_access.update_by_query(
+                            DBMember, 
+                            {"email": email}, 
+                            {
+                                "profile_picture": cloudinary_public_id,
+                                "profile_picture_source": source
+                            }
+                        )
+                        
+                        if update_result.success:
+                            print(f"Database updated successfully")
+                            # Important: Use ResponseSuccessObj instead of ResponseSuccessMsg for returning data
+                            return ResponseSuccessObj("Profile picture uploaded to Cloudinary", {
+                                "url": cloudinary_url,
+                                "public_id": cloudinary_public_id
+                            })
+                        else:
+                            print(f"Failed to update database: {update_result.msg}")
+                            return ResponseFailMsg(f"Failed to update database with Cloudinary info: {update_result.msg}")
+                    else:
+                        print(f"Member not found: {email}")
+                        return ResponseFailMsg(f"Member not found: {email}")
+                else:
+                    print(f"Failed to upload to Cloudinary: {upload_result.msg}")
+                    return ResponseFailMsg(f"Failed to upload to Cloudinary: {upload_result.msg}")
+            else:
+                print("No profile picture found in the Google token")
+                return ResponseFailMsg("No profile picture found in the user's Google account")
+        
+        except ValueError as e:
+            print(f"Invalid Google token: {str(e)}")
+            return ResponseFailMsg(f"Invalid Google token: {str(e)}")
+        except Exception as e:
+            import traceback
+            print(f"Failed to fetch profile picture from Gmail: {str(e)}")
+            traceback.print_exc()
+            return ResponseFailMsg(f"Failed to fetch profile picture from Gmail: {str(e)}")
+
+    def update_profile_picture(self, email, filename, source='upload'):
+        """Updates the profile picture filename and source for a member"""
+        try:
+            # Skip session validation and work directly with the email
+            member = self.members.get(email)
+            if member is None:
+                return ResponseFailMsg("Member not found")
+            
+            # Update the in-memory member object
+            member.set_profile_picture(filename)
+            
+            # Update the database with both filename and source
+            success = self.db_access.update_by_query(
+                DBMember, 
+                {"email": email}, 
+                {
+                    "profile_picture": filename,
+                    "profile_picture_source": source
+                }
+            ).success
+            
+            if success:
+                return ResponseSuccessMsg("Profile picture updated successfully")
+            else:
+                return ResponseFailMsg("Database update failed")
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to update profile picture: {e}")

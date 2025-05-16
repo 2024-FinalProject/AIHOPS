@@ -54,3 +54,8 @@ class Member:
     
     def update_password(self, passwd):
         self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()
+
+    def set_profile_picture(self, filename):
+        """Updates the profile picture for the member"""
+        self.profile_picture = filename
+        return True
