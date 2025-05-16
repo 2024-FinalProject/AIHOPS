@@ -6,7 +6,7 @@ from threading import RLock
 from DAL.Objects.DBMember import DBMember
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg
+from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg, ResponseLogin
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from Domain.src.Session import Session
 from Domain.src.Users.MemberController import MemberController
@@ -23,6 +23,7 @@ from Domain.src.Users.CloudinaryProfilePictureManager import CloudinaryProfilePi
 from Service.config import CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 from Domain.src.Users.TACController import TACController
+from Domain.src.AdminModule.AboutController import AboutController
 
 GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
 
@@ -37,6 +38,8 @@ class Server:
         self.project_manager = ProjectManager(self.db_access)
         self.tac_controller = TACController(socketio)
         self.tac_controller.load()
+        self.about_controller = AboutController()
+
 
     def clear_db(self):
         self.db_access.clear_db()
@@ -174,7 +177,7 @@ class Server:
             # Get the session
             res = self.get_session(cookie)
             if not res.success:
-                return res
+                return ResponseLogin(res.success, res.msg)
             
             session = res.result
             
@@ -188,7 +191,7 @@ class Server:
                 register_res = self.user_controller.register_google_user(email, random_password, accepted_terms_version)
                 
                 if not register_res.success:
-                    return register_res
+                    return ResponseLogin(register_res.success, register_res.msg)
             
             # Login the user with Google authentication
             login_res = self.user_controller.login_with_google(email)
@@ -785,6 +788,20 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"admin failed update terms and conditions: {e}")
 
+    def admin_update_about(self, cookie, updated_about):
+        try:
+            self._verify_admin(cookie)
+            return self.about_controller.update(updated_about)
+        except Exception as e:
+            return ResponseFailMsg(f"admin failed update about: {e}")
+
+    def fetch_about(self, cookie):
+        try:
+            print("fetching about")
+            return self.about_controller.fetch()
+        
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch about: {e}")
 
     def get_research_projects(self, cookie):
         try:

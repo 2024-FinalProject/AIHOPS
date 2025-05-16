@@ -21,6 +21,8 @@ export const TermsProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    let requested = false;
+
     socket.on("connect", () => {
       console.log("Socket connected (client side)");
       socket.emit("request_terms");
@@ -39,9 +41,18 @@ export const TermsProvider = ({ children }) => {
       setMustAcceptNewTerms(true);
     });
 
+    // Fallback if terms are not received within 2 seconds
+    const fallback = setTimeout(() => {
+      if (termsVersion === -1 && !requested && socket.connected) {
+        console.warn("Manually requesting terms fallback...");
+        socket.emit("request_terms");
+      }
+    }, 2000);
+
     return () => {
       socket.off("get_terms");
       socket.off("terms_updated");
+      clearTimeout(fallback);
     };
   }, []);
 

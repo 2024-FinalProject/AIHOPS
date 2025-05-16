@@ -111,3 +111,20 @@ export const updateTermsAndConditions = async (updatedTXT) => {
     updatedTXT: updatedTXT,
   });
 };
+
+export const updateAbout = async  (updatedTXT) => {
+  const cookie = await getMyCookie();
+  return await axios.post(`${API_URL}/admin/update-about`, {
+    cookie: cookie,
+    updatedTXT: updatedTXT,
+  });
+}
+
+export const fetchAbout = async () => {
+  const cookie = await getMyCookie();
+  return await axios.get(`${API_URL}/admin/fetch-about`, {
+    params: { cookie: cookie },
+  });
+}
+
+  

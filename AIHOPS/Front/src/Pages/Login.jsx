@@ -28,7 +28,7 @@ const Login = () => {
   // Terms and conditions state
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
-  const { termsText, setMustAcceptNewTerms } = useTerms();
+  const { termsText, setMustAcceptNewTerms, termsVersion } = useTerms();
 
   // Load terms and conditions
   useEffect(() => {
@@ -100,7 +100,7 @@ const Login = () => {
   };
 
   // Complete Google login and save both session & persistent flags
-  const completeGoogleLogin = async (credentialParam) => {
+  const completeGoogleLogin = async (credentialParam, terms) => {
     const credentialToUse = credentialParam || pendingGoogleCredential;
     if (!credentialToUse) {
       console.error("No Google credential available");
@@ -110,7 +110,7 @@ const Login = () => {
     }
 
     try {
-      const response = await googleLogin(credentialToUse);
+      const response = await googleLogin(credentialToUse, terms);
 
       if (response.data.success) {
         console.log(
@@ -151,7 +151,7 @@ const Login = () => {
 
       if (checkEmailResponse.data.userExists) {
         // User exists, proceed with Google login directly
-        completeGoogleLogin(cred);
+        completeGoogleLogin(cred, -1);
       } else {
         // New user, show terms & conditions first
         setPendingGoogleCredential(cred);
@@ -173,7 +173,8 @@ const Login = () => {
   const handleAcceptTerms = () => {
     setShowTermsConditions(false);
     setPendingGoogleCredential(null);
-    completeGoogleLogin();
+    console.log("termsVersion: %d", termsVersion);
+    completeGoogleLogin(null, termsVersion);
   };
 
   return (
@@ -239,7 +240,11 @@ const Login = () => {
 
       {/* Modal for Terms and Conditions */}
       {showTermsConditions && (
-        <TermsModal text={termsText} version={0} onAccept={handleAcceptTerms} />
+        <TermsModal
+          text={termsText}
+          version={termsVersion}
+          onAccept={handleAcceptTerms}
+        />
       )}
     </section>
   );

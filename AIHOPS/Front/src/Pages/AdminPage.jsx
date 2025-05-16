@@ -17,6 +17,8 @@ import { useError } from "../context/ErrorContext";
 import { useAuth } from "../context/AuthContext";
 import ProjectsManager from "../Components/AdminComponents/Projects/ProjectsManager";
 import EditTAC from "../Components/AdminComponents/EditTAC";
+import EditAbout from "../Components/AdminComponents/EditAbout";
+
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -28,12 +30,15 @@ const AdminPage = () => {
     useState(false);
   const [showResearch, setShowResearch] = useState(false);
   const [editTAC, setEditTAC] = useState(false);
+  const [editAbout, setEditAbout] = useState(false);
+
 
   const handleManageDefaultAssessmentDims = () => {
     setIsManagingFactors(true);
     setIsManagingSeverityFactors(false);
     setShowResearch(false);
     setEditTAC(false);
+    setEditAbout(false);
   };
 
   const handleManageDefaultSeverityFactors = () => {
@@ -41,6 +46,7 @@ const AdminPage = () => {
     setIsManagingSeverityFactors(true);
     setShowResearch(false);
     setEditTAC(false);
+    setEditAbout(false);
   };
 
   const handleResearch = () => {
@@ -48,6 +54,7 @@ const AdminPage = () => {
     setIsManagingFactors(false);
     setIsManagingSeverityFactors(false);
     setEditTAC(false);
+    setEditAbout(false);
   };
 
   const handleEditTAC = () => {
@@ -55,7 +62,17 @@ const AdminPage = () => {
     setShowResearch(false);
     setIsManagingFactors(false);
     setIsManagingSeverityFactors(false);
+    setEditAbout(false);
   };
+
+  const handleEditAbout = () => {
+    setEditAbout(true);
+    setEditTAC(false);
+    setShowResearch(false);
+    setIsManagingFactors(false);
+    setIsManagingSeverityFactors(false);
+  }
+
 
   useEffect(() => {
     if (!isValidatingToken) {
@@ -114,6 +131,15 @@ const AdminPage = () => {
                   >
                     Edit Terms & Conditions
                   </Button>
+
+                  <Button
+                    variant="outline-success"
+                    size="lg"
+                    className="px-4 py-2 rounded-3 shadow-sm mb-2"
+                    onClick={handleEditAbout}
+                    >
+                      Edit About
+                    </Button>
                 </div>
               </Col>
             </Row>
@@ -124,6 +150,7 @@ const AdminPage = () => {
               {isManagingSeverityFactors && <SeverityFactorsView />}
               {showResearch && <ProjectsManager />}
               {editTAC && <EditTAC />}
+              {editAbout && <EditAbout />}
             </Col>
           </Row>
         </Card.Body>

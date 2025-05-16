@@ -7,14 +7,16 @@ import {
 } from "../../../api/AdminApi";
 import AnalyzeResultComponent from "./AnalyzeResultComponent";
 import ProjectsView from "../../ProjectsView"; // <-- the reusable view component
+import { fetchAllProjectData } from "../../../utils/fetchAllProjectData";
+import { exportProjectToExcel } from "../../../utils/exportProjectToExcel";
 
 const ProjectsManager = () => {
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showPopup, setShowPopup] = useState(false);
-  const [isNewFirst, setIsNewFirst] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
+  const [selectedProjectIds, setSelectedProjectIds] = useState([]);
+  const [visibleProjects, setVisibleProjects] = useState([]);
 
   const fetchProjects = async () => {
     try {
@@ -25,10 +27,9 @@ const ProjectsManager = () => {
       }
       setProjects(response.data.projects);
       console.log("got %d projects", response.data.projects.length);
-      setIsSuccess(true);
     } catch (error) {
       console.error("Error fetching factors:", error);
-      setErrorMsg(response.data.message);
+      setErrorMsg("Error fetching projects");
     }
   };
 
@@ -39,10 +40,16 @@ const ProjectsManager = () => {
         setErrorMsg(response.data.message);
         return;
       }
+      setSelectedProjectIds((prev) => prev.filter((id) => id !== projectId));
       fetchProjects();
     } catch (error) {
       setErrorMsg("Error deleting project");
     }
+  };
+
+  const selectAllVisible = () => {
+    const visibleIds = visibleProjects.map((p) => p.id);
+    setSelectedProjectIds(visibleIds);
   };
 
   const openPopup = (project) => {
@@ -53,6 +60,21 @@ const ProjectsManager = () => {
   const closePopup = () => {
     setShowPopup(false);
     setSelectedProject(null);
+  };
+
+  const toggleProjectSelection = (projectId) => {
+    setSelectedProjectIds((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId]
+    );
+  };
+
+  const handleDownloadAll = async () => {
+    for (const projectId of selectedProjectIds) {
+      const data = await fetchAllProjectData(projectId);
+      if (data) exportProjectToExcel(data);
+    }
   };
 
   useEffect(() => {
@@ -69,8 +91,30 @@ const ProjectsManager = () => {
       <h2 style={{ textAlign: "center" }}>
         <u>Research</u>
       </h2>
+      <button
+        className="action-btn export-btn"
+        onClick={selectAllVisible}
+        style={{ marginBottom: "10px" }}
+      >
+        ✅ Select All
+      </button>
+      <button
+        className="action-btn export-btn"
+        onClick={() => setSelectedProjectIds([])}
+      >
+        ❌ Deselect All
+      </button>
+      {selectedProjectIds.length > 0 && (
+        <button className="action-btn export-btn" onClick={handleDownloadAll}>
+          📥 Download All
+        </button>
+      )}
+
       <ProjectsView
         projects={projects}
+        selectedProjectIds={selectedProjectIds}
+        toggleProjectSelection={toggleProjectSelection}
+        onVisibleProjectsChange={setVisibleProjects}
         renderButtons={(project) => (
           <>
             <button

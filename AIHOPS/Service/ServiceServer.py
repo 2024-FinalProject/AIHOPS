@@ -99,7 +99,15 @@ def accept_terms():
 @app.route("/google_login", methods=["POST"])
 def google_login():
     data = request.json
-    res = server.google_login(int(data["cookie"]), data["tokenId"], int(data["acceptedTermsVersion"]))
+    print(f"google_login received: {data}")
+    try:
+        cookie = int(data.get("cookie", 0))
+        token = data["tokenId"]
+        tac_ver = int(data["acceptedTermsVersion"])
+    except (KeyError, ValueError, TypeError) as e:
+        return jsonify({"message": f"Bad input: {str(e)}", "success": False}), 400
+
+    res = server.google_login(cookie, token, tac_ver)
     response_data = {"message": res.msg, "success": res.success,
                     "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms}
     
@@ -535,7 +543,7 @@ def fetch_default_severity_factors_full():
 def admin_update_default_severity_factors():
     data = request.json
     res = server.admin_update_default_severity_factors(int(data["cookie"]), data["severity_factors"])
-    return jsonify({"message": res.msg, "success": res.success})
+    return jsonify({"result": res.result if res.success else None})
 
 @app.route("/admin/update-terms-and-conditions", methods=["POST"])
 def admin_update_terms_and_conditions():
@@ -544,6 +552,21 @@ def admin_update_terms_and_conditions():
     res = server.admin_update_terms_and_conditions(int(data["cookie"]), data["updatedTXT"])
     return jsonify({"message": res.msg, "success": res.success})
 
+@app.route("/admin/update-about", methods=["POST"])
+def admin_update_about():
+    data = request.json
+    print(f"trying to update about: {data['updatedTXT']}")
+    res = server.admin_update_about(int(data["cookie"]), data["updatedTXT"])
+    return jsonify({"message": res.msg, "success": res.success})
+
+
+@app.route("/admin/fetch-about", methods=["GET"])
+def admin_fetch_about():
+    cookie = request.args.get("cookie")
+    res = server.fetch_about(int(cookie))
+    return jsonify({"message": res.msg, "result": res.result})
+
+
 @app.route("/get-research-projects", methods=["GET"])
 def get_research_projects():
     cookie = int(request.args.get("cookie", 0))
@@ -551,7 +574,7 @@ def get_research_projects():
     return jsonify({
         "message": res.msg,
         "success": res.success,
-        "projects": res.result if res.success else None
+        "projects": res.result if res.success else []
     })
 
 @app.route("/remove-research-project", methods=["GET"])

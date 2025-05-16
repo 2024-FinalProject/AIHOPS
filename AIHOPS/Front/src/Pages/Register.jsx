@@ -16,7 +16,7 @@ const Register = () => {
 
   const [showTermsConditions, setShowTermsConditions] = useState(false);
   const [termsContent, setTermsContent] = useState("");
-  const { termsText } = useTerms();
+  const { termsText, termsVersion } = useTerms();
   const [termsAccepted, setTermsAccepted] = useState(false);
 
   const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -131,7 +131,11 @@ const Register = () => {
 
       {/* Modal for Terms and Conditions */}
       {showTermsConditions && (
-        <TermsModal text={termsText} version={0} onAccept={handleAcceptTerms} />
+        <TermsModal
+          text={termsText}
+          version={termsVersion}
+          onAccept={handleAcceptTerms}
+        />
       )}
     </div>
   );
