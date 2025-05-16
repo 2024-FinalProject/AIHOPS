@@ -2,35 +2,39 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "./NavBar.css";
-import { FaUser } from "react-icons/fa"; // <-- For user icon
-import aihops_article from "../assets/AIHOPS.pdf";
-import AccessibilityMenu from "./AccessibilityMenu";
 import { getPendingRequest } from "../api/ProjectApi";
-
-import { IoMdNotificationsOutline } from "react-icons/io"; // Notification bell icon
+import { IoMdNotificationsOutline } from "react-icons/io";
+import ProfilePicture from "../Components/ProfilePicture"; // Import the new component
 
 const NavBar = () => {
-  // Pull out userName from the AuthContext
-  const { isAuthenticated, userName, logout, isAdmin } = useAuth();
-
+  const { isAuthenticated, userName, logout, isAdmin, profilePictureUrl  } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [newMessages, setNewMessages] = useState(false); // State to track new messages
+  const [newMessages, setNewMessages] = useState(false);
+  const [localProfileUrl, setLocalProfileUrl] = useState(profilePictureUrl);
+
+  // Update local state when the context value changes
+  useEffect(() => {
+    console.log("NavBar: profilePictureUrl changed:", profilePictureUrl);
+    if (profilePictureUrl !== localProfileUrl) {
+      console.log("NavBar: Updating local profile URL state");
+      setLocalProfileUrl(profilePictureUrl);
+    }
+  }, [profilePictureUrl, localProfileUrl]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("authenticated");
       fetchPendingRequest();
     }
-  }, [location.pathname]);
+  }, [isAuthenticated, location.pathname]);
 
   const fetchPendingRequest = async () => {
     try {
       const response = await getPendingRequest();
       if (response.data.success) {
-        setNewMessages(response.data.requests.length > 0); // Check if there are new messages
+        setNewMessages(response.data.requests.length > 0);
       } else {
-        setNewMessages(false); // No new messages if the request fails
+        setNewMessages(false);
       }
     } catch (error) {
       console.error("Error fetching pending requests:", error);
@@ -39,16 +43,26 @@ const NavBar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate("/"); // Redirect to homepage after logout
+    navigate("/");
   };
 
   const handleLogin = () => {
-    navigate("/"); // Redirect to homepage after login
+    navigate("/");
   };
 
   const handleAdmin = () => {
     navigate("/admin");
   };
+
+  const handleProfileClick = () => {
+    navigate("/settings");
+  };
+
+  // Force a render if needed
+  const forceUpdate = React.useReducer(() => ({}), {})[1];
+
+  console.log("NavBar rendering with profilePictureUrl:", profilePictureUrl);
+  console.log("NavBar rendering with localProfileUrl:", localProfileUrl);
 
   return (
     <nav className="navbar">
@@ -65,8 +79,12 @@ const NavBar = () => {
           </Link>
           {/* Only show if user is logged in AND userName is defined */}
           {isAuthenticated && userName && (
-            <div className="navbar-user-info">
-              <FaUser className="user-icon" />
+            <div className="navbar-user-info" onClick={handleProfileClick}>
+              <ProfilePicture 
+                userName={userName}
+                profilePictureUrl={localProfileUrl || profilePictureUrl}
+                size="small"
+              />
               <span className="user-email">{userName}</span>
             </div>
           )}

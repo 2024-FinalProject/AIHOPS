@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { startSession } from "../api/AuthApi";
+import { startSession, getProfilePictureUrl  } from "../api/AuthApi";
 
 const AuthContext = createContext(null);
 
@@ -27,12 +27,25 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
+  const [profilePictureUrl, setProfilePictureUrl] = useState(null);
   const navigate = useNavigate();
+
+  // Initialize or update profile picture URL whenever userName changes
+  useEffect(() => {
+    if (userName) {
+      updateProfilePicture();
+    } else {
+      setProfilePictureUrl(null);
+    }
+  }, [userName]);
 
   const login = (username) => {
     setUserName(username);
     setIsAuthenticated(true);
     localStorage.setItem("userName", username);
+    if (username) {
+      updateProfilePicture();
+    }
   };
 
   const logout = () => {
@@ -41,9 +54,11 @@ export const AuthProvider = ({ children }) => {
     setAuthToken(null);
     setUserName(null);
     setIsAuthenticated(false);
+    setProfilePictureUrl(null);
     localStorage.removeItem("authToken");
     localStorage.removeItem("userName");
     localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("googleToken");
     navigate("/");
   };
 
@@ -55,6 +70,16 @@ export const AuthProvider = ({ children }) => {
     // Force a background color update
     document.body.style.backgroundColor = "";
     document.documentElement.style.backgroundColor = "";
+  };
+
+  const updateProfilePicture = () => {
+    if (userName) {
+      // Add a timestamp to force cache reload
+      const timestamp = new Date().getTime();
+      const newProfileUrl = getProfilePictureUrl(userName) + `&t=${timestamp}`;
+      console.log("Updating profile picture URL to:", newProfileUrl);
+      setProfilePictureUrl(newProfileUrl);
+    }
   };
 
   useEffect(() => {
@@ -81,6 +106,7 @@ export const AuthProvider = ({ children }) => {
         setUserName(null);
         setIsAuthenticated(false);
         setIsAdmin(false);
+        setProfilePictureUrl(null);
         localStorage.removeItem("authToken");
         localStorage.removeItem("userName");
         localStorage.removeItem("isAdmin");
@@ -89,6 +115,9 @@ export const AuthProvider = ({ children }) => {
         setUserName(username);
         setIsAuthenticated(true);
         setIsAdmin(admin);
+        if (username) {
+          updateProfilePicture();
+        }
       }
       setIsValidatingToken(false);
     };
@@ -148,6 +177,8 @@ export const AuthProvider = ({ children }) => {
         isAdmin,
         setIsAdmin,
         getMyCookie,
+        profilePictureUrl, 
+        updateProfilePicture
       }}
     >
       {children}

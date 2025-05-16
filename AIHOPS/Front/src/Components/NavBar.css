@@ -166,3 +166,227 @@
     opacity: 1;
   }
 }
+
+/* Profile picture styling - fixed size matching the icon */
+.user-profile-picture {
+  width: 32px;  /* Match the size of the icon */
+  height: 32px; /* Match the size of the icon */
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 5px;
+  border: 2px solid #fff;
+  transition: all 0.2s ease;
+}
+
+/* Enhanced user icon when no profile picture */
+.user-icon {
+  margin-right: 5px;
+  font-size: 1.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  width: 32px; /* Match this size with profile picture */
+  height: 32px; /* Match this size with profile picture */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 6px;
+  border: 2px solid #fff;
+  transition: all 0.2s ease;
+}
+
+/* Make the user info clickable and visually interactive */
+.navbar-user-info {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+  font-size: 0.9rem;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.navbar-user-info:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-user-info:hover .user-profile-picture,
+.navbar-user-info:hover .user-icon {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Profile Picture Upload Component Styles */
+.profile-picture-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.profile-picture-container {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid #e0e0e0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-picture-preview,
+.current-profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+}
+
+/* Tab-style option selectors */
+.option-tabs {
+  display: flex;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+}
+
+.option-tab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.option-tab:hover {
+  background-color: #e8e8e8;
+}
+
+.option-tab.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.option-content {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* File input and buttons */
+.file-input {
+  display: none;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.select-button {
+  background-color: #6b7280;
+  color: white;
+}
+
+.upload-button {
+  background-color: #10b981;
+  color: white;
+}
+
+.google-button {
+  background-color: #4285F4;
+  color: white;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.message {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.message.error {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.message.success {
+  background-color: #d1fae5;
+  color: #10b981;
+  border: 1px solid #a7f3d0;
+}
+
+/* Option content styles */
+.google-option, 
+.upload-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.google-option p,
+.upload-option p {
+  margin-bottom: 15px;
+  text-align: center;
+  color: #4b5563;
+}

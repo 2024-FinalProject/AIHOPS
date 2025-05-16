@@ -2,9 +2,8 @@ import random
 import sys
 from threading import RLock
 
-from requests import session
 
-from Domain.src.DS.FactorsPool import FactorsPool
+from DAL.Objects.DBMember import DBMember
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg
@@ -15,10 +14,17 @@ from Domain.src.Users.MemberController import MemberController
 
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-import json
+import os
+from werkzeug.utils import secure_filename
+import io
+import traceback
+from PIL import Image, ImageDraw, ImageFont
+from Domain.src.Users.CloudinaryProfilePictureManager import CloudinaryProfilePictureManager
+from Service.config import CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET, UPLOAD_FOLDER, ALLOWED_EXTENSIONS
 
 from Domain.src.Users.TACController import TACController
 
+GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
 
 class Server:
     def __init__(self, socketio=None):
@@ -26,9 +32,9 @@ class Server:
         self.sessions = {}  # map cookies to sessions
         self.enter_lock = RLock()
         self.user_deletion_lock = RLock()
+        self.GOOGLE_CLIENT_ID = GOOGLE_CLIENT_ID
         self.user_controller = MemberController(self, self.db_access)
         self.project_manager = ProjectManager(self.db_access)
-        self.GOOGLE_CLIENT_ID = "778377563471-10slj8tsgra2g95aq2hq48um0gvua81a.apps.googleusercontent.com"
         self.tac_controller = TACController(socketio)
         self.tac_controller.load()
 
@@ -795,3 +801,363 @@ class Server:
         except Exception as e:
             return ResponseFailMsg(f"Failed to remove research project: {e}")
 
+    def fetch_profile_picture_from_google(self, token_id, source='google'):
+        """Fetches profile picture from Google via OAuth token and stores it on Cloudinary"""
+        try:
+            # Verify the Google token
+            id_info = id_token.verify_oauth2_token(
+                token_id, google_requests.Request(), self.GOOGLE_CLIENT_ID
+            )
+            
+            if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
+                return ResponseFailMsg("Invalid token issuer")
+            
+            # Get user email from the token info
+            email = id_info['email']
+            
+            # Check if user exists
+            member = self.user_controller.members.get(email)
+            if not member:
+                return ResponseFailMsg(f"User {email} not found")
+            
+            # Forward to the member controller to handle the fetch and storage
+            return self.user_controller.fetch_profile_picture_from_google(token_id, source)
+            
+        except ValueError as e:
+            return ResponseFailMsg(f"Invalid Google token: {str(e)}")
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to fetch Google profile picture: {str(e)}")
+
+    def update_profile_picture(self, cookie, filename, source='upload'):
+        """Updates the user's profile picture filename and source in the database"""
+        try:
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return res
+            session = res.result
+            return self.user_controller.update_profile_picture(session.user_name, filename, source)
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to update profile picture: {e}")
+
+    def get_member_profile_info(self, email):
+        """Gets profile information for a member, including picture source"""
+        try:
+            # Check if the user exists
+            member = self.user_controller.members.get(email)
+            if not member:
+                return ResponseFailMsg(f"User {email} not found")
+            
+            # Query the database for profile information
+            result = self.db_access.load_by_query(DBMember, {"email": email})
+            
+            if not result or not isinstance(result, list) or len(result) == 0:
+                return ResponseFailMsg(f"No database record found for {email}")
+            
+            member_record = result[0]
+            
+            # Include all relevant profile information
+            info = {
+                'email': email,
+                'has_picture': hasattr(member_record, 'profile_picture') and member_record.profile_picture is not None,
+                'profile_picture': getattr(member_record, 'profile_picture', None),
+                'profile_picture_source': getattr(member_record, 'profile_picture_source', 'none')
+            }
+            
+            return ResponseSuccessObj(f"Retrieved profile info for {email}", info)
+            
+        except Exception as e:
+            return ResponseFailMsg(f"Failed to get member profile info: {str(e)}")
+
+    def allowed_file(self, filename):
+        """Check if the file extension is allowed"""
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+    def handle_upload_profile_picture(self, request_data, files):
+        """Handler for profile picture uploads - moved from service layer"""
+        try:
+            print("==== Upload Profile Picture Request ====")
+            
+            # Get cookie from form data
+            if 'cookie' not in request_data:
+                return {"message": "Authentication required - no cookie found", "success": False}
+                
+            cookie = request_data.get('cookie')
+            
+            # Get source parameter (defaults to 'upload')
+            source = request_data.get('source', 'upload')
+            
+            # Check if there's a file part
+            if 'file' not in files:
+                return {"message": "No file part in request", "success": False}
+            
+            file = files['file']
+            
+            # If user does not select file, browser might submit an empty file without filename
+            if file.filename == '':
+                return {"message": "No file selected", "success": False}
+            
+            # Validate file extension
+            if not file or not self.allowed_file(file.filename):
+                return {"message": "File type not allowed", "success": False}
+                
+            try:
+                # Get the session using cookie
+                cookie_int = int(cookie)
+            except (ValueError, TypeError) as e:
+                return {"message": f"Invalid cookie format: {str(e)}", "success": False}
+                
+            # Get session information
+            res = self.get_session_member(cookie_int)
+            if not res.success:
+                return {"message": res.msg, "success": False}
+                
+            # Get the user email from the session
+            session = res.result
+            user_email = session.user_name
+            
+            try:
+                # First save the file locally (temporarily)
+                filename = secure_filename(file.filename)
+                ext = filename.rsplit('.', 1)[1].lower()
+                temp_filename = f"temp_{user_email}.{ext}"
+                temp_file_path = os.path.join(UPLOAD_FOLDER, temp_filename)
+                
+                # Save the file temporarily
+                file.save(temp_file_path)
+                
+                # Upload to Cloudinary
+                cloudinary_manager = CloudinaryProfilePictureManager(
+                    CLOUDINARY_CLOUD_NAME, 
+                    CLOUDINARY_API_KEY, 
+                    CLOUDINARY_API_SECRET
+                )
+                
+                # Upload to Cloudinary
+                cloudinary_result = cloudinary_manager.upload_image(temp_file_path, public_id=user_email)
+                
+                # Clean up the temporary file regardless of upload result
+                if os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+                
+                if cloudinary_result.success:
+                    # Get the URL and public_id from the result
+                    cloudinary_url = cloudinary_result.result["url"]
+                    cloudinary_public_id = cloudinary_result.result["public_id"]
+                    
+                    # Update the database with the Cloudinary info and the source
+                    update_result = self.update_profile_picture(cookie_int, cloudinary_public_id, source)
+                    
+                    if update_result.success:
+                        return {
+                            "message": "Profile picture uploaded to Cloudinary successfully", 
+                            "success": True,
+                            "url": cloudinary_url,
+                            "public_id": cloudinary_public_id,
+                            "email": user_email,
+                            "source": source
+                        }
+                    else:
+                        return {"message": update_result.msg, "success": False}
+                else:
+                    return {
+                        "message": f"Failed to upload to Cloudinary: {cloudinary_result.msg}", 
+                        "success": False
+                    }
+                    
+            except Exception as e:
+                # Clean up any temporary files
+                if 'temp_file_path' in locals() and os.path.exists(temp_file_path):
+                    os.remove(temp_file_path)
+                    
+                return {"message": f"Error saving file: {str(e)}", "success": False}
+        
+        except Exception as e:
+            traceback.print_exc()
+            return {"message": f"Server error: {str(e)}", "success": False}
+
+    def handle_get_profile_picture(self, email):
+        """Handler for getting profile pictures - moved from service layer"""
+        try:
+            print(f"Received request for profile picture of: {email}")
+            
+            # Query the database to get the profile picture ID for this user
+            member_info = self.get_member_profile_info(email)
+            
+            if member_info.success and member_info.result and member_info.result.get('profile_picture'):
+                # Get the Cloudinary public_id from the database
+                cloudinary_public_id = member_info.result.get('profile_picture')
+                print(f"Found profile picture ID in database: {cloudinary_public_id}")
+                
+                # Initialize Cloudinary with credentials
+                cloudinary_manager = CloudinaryProfilePictureManager(
+                    CLOUDINARY_CLOUD_NAME, 
+                    CLOUDINARY_API_KEY, 
+                    CLOUDINARY_API_SECRET
+                )
+                
+                # Get the URL from Cloudinary
+                cloudinary_url = cloudinary_manager.get_profile_picture_url(cloudinary_public_id)
+                
+                if cloudinary_url:
+                    print(f"Redirecting to Cloudinary URL: {cloudinary_url}")
+                    # Return the Cloudinary URL for redirect
+                    return {"success": True, "redirect_url": cloudinary_url}
+                else:
+                    print(f"Failed to generate Cloudinary URL for: {cloudinary_public_id}")
+            else:
+                print(f"No profile picture found for {email} or database query failed")
+                if not member_info.success:
+                    print(f"Database query error: {member_info.msg}")
+            
+            # If no Cloudinary profile picture found, generate a default avatar
+            try:
+                print(f"Generating default avatar for: {email}")
+                
+                # Create a simple colored square with the first letter of the email
+                img_size = 200
+                img = Image.new('RGB', (img_size, img_size), color=(73, 109, 137))
+                
+                # Add a letter if possible
+                if email and len(email) > 0:
+                    draw = ImageDraw.Draw(img)
+                    letter = email[0].upper()
+                    
+                    # Try to load a font, fall back to default if not available
+                    try:
+                        font = ImageFont.truetype("arial.ttf", 100)
+                    except IOError:
+                        font = ImageFont.load_default()
+                    
+                    # Get text size to center it
+                    try:
+                        text_width = draw.textlength(letter, font=font)
+                        text_height = font.getbbox(letter)[3]
+                    except AttributeError:
+                        # Fallback for older PIL versions
+                        text_width = font.getsize(letter)[0]
+                        text_height = font.getsize(letter)[1]
+                    
+                    position = ((img_size - text_width) / 2, (img_size - text_height) / 2)
+                    draw.text(position, letter, font=font, fill=(255, 255, 255))
+                
+                # Convert PIL Image to bytes
+                img_io = io.BytesIO()
+                img.save(img_io, 'PNG')
+                img_io.seek(0)
+                
+                print(f"Generated default avatar successfully")
+                return {"success": True, "default_avatar": img_io}
+                
+            except Exception as e:
+                print(f"Error generating default avatar: {e}")
+                # If PIL fails, return a transparent pixel as fallback
+                return {"success": False, "error": str(e)}
+            
+        except Exception as e:
+            traceback.print_exc()
+            print(f"Error retrieving profile picture: {e}")
+            return {"success": False, "error": str(e)}
+
+    def handle_fetch_google_profile_picture(self, request_data):
+        """Handler for fetching Google profile pictures - moved from service layer"""
+        try:
+            print(f"Received fetch_google_profile_picture request: {request_data.keys()}")
+            
+            if 'cookie' not in request_data or 'tokenId' not in request_data:
+                return {
+                    "message": "Missing required fields (cookie, tokenId)",
+                    "success": False
+                }
+            
+            # Get the source parameter (defaults to 'google')
+            source = request_data.get('source', 'google')
+            print(f"Using source: {source}")
+            
+            try:
+                cookie = int(request_data["cookie"])
+                print(f"Converted cookie to int: {cookie}")
+            except (ValueError, TypeError) as e:
+                print(f"Failed to convert cookie to int: {str(e)}")
+                return {
+                    "message": f"Invalid cookie format: {str(e)}",
+                    "success": False
+                }
+            
+            # Get the session to verify it's valid
+            session_res = self.get_session_member(cookie)
+            if not session_res.success:
+                print(f"Invalid session: {session_res.msg}")
+                return {
+                    "message": f"Invalid session: {session_res.msg}",
+                    "success": False
+                }
+                
+            email = session_res.result.user_name
+            print(f"Session validated for user: {email}")
+            
+            # Use the server method to fetch the profile picture
+            print(f"Calling fetch_profile_picture_from_google with token length: {len(request_data['tokenId']) if request_data['tokenId'] else 0}")
+            result = self.fetch_profile_picture_from_google(request_data["tokenId"], source)
+            
+            if result.success:
+                print(f"Successfully fetched profile picture: {result.result}")
+                return {
+                    "message": "Profile picture fetched successfully",
+                    "success": True,
+                    "url": result.result.get("url"),
+                    "public_id": result.result.get("public_id"),
+                    "email": email,
+                    "source": source
+                }
+            
+            print(f"Failed to fetch profile picture: {result.msg}")
+            return {
+                "message": result.msg,
+                "success": False
+            }
+            
+        except Exception as e:
+            print(f"Error fetching Google profile picture: {str(e)}")
+            traceback.print_exc()
+            return {
+                "message": f"Error fetching Google profile picture: {str(e)}",
+                "success": False
+            }
+
+    def handle_get_profile_source(self, request_args):
+        """Handler for getting profile source - moved from service layer"""
+        try:
+            # Get cookie from query parameters
+            if 'cookie' not in request_args:
+                return {"message": "Authentication required", "success": False}
+                
+            try:
+                cookie = int(request_args.get("cookie"))
+            except (ValueError, TypeError) as e:
+                return {"message": f"Invalid cookie format: {str(e)}", "success": False}
+                
+            # Get session information
+            res = self.get_session_member(cookie)
+            if not res.success:
+                return {"message": res.msg, "success": False}
+                
+            # Get the user email from the session
+            session = res.result
+            user_email = session.user_name
+            
+            # Get the profile source from the database
+            profile_info = self.get_member_profile_info(user_email)
+            
+            if profile_info.success:
+                return {
+                    "message": "Profile source retrieved successfully",
+                    "success": True,
+                    "source": profile_info.result.get('profile_picture_source', 'none'),
+                    "has_picture": profile_info.result.get('has_picture', False)
+                }
+            else:
+                return {"message": profile_info.msg, "success": False}
+                
+        except Exception as e:
+            traceback.print_exc()
+            return {"message": f"Server error: {str(e)}", "success": False}
