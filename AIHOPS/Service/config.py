@@ -1,10 +1,13 @@
+import os
+import dotenv
 from flask import Flask
 from flask_cors import CORS
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from flask_socketio import SocketIO
-import os
 
+# Load environment variables from .env file
+dotenv.load_dotenv()
 
 # init server
 app = Flask(__name__)
@@ -48,7 +51,12 @@ os.makedirs(STATIC_FOLDER, exist_ok=True)
 # Define allowed file extensions
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# Cloudinary configuration
-CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME", "dsqosyj2t")
-CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY", "845561785672887")
-CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET", "P1MWRMY7UTGumBmFlc4bbpjO9Ms")
+# Cloudinary configuration - load from environment variables
+CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
+
+# Print a warning if any Cloudinary credential is missing
+if not all([CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET]):
+    print("WARNING: One or more Cloudinary credentials are missing from environment variables.")
+    print("Profile picture functionality may not work correctly.")
