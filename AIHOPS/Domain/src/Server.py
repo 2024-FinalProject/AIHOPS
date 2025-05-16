@@ -6,7 +6,7 @@ from threading import RLock
 from DAL.Objects.DBMember import DBMember
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from DAL.DBAccess import DBAccess
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg, ResponseLogin
+from Domain.src.Loggs.Response import Response as CustomResponse, ResponseFailMsg, ResponseSuccessObj, ResponseSuccessMsg, ResponseLogin
 from Domain.src.ProjectModule.ProjectManager import ProjectManager
 from Domain.src.Session import Session
 from Domain.src.Users.MemberController import MemberController
@@ -61,9 +61,9 @@ class Server:
                 cookie = int(str(self.generateNextCookie()))
                 new_session = Session(cookie)
                 self.sessions[cookie] = new_session
-            return Response(True, f"session: {cookie} has been added", new_session, False)
+            return CustomResponse(True, f"session: {cookie} has been added", new_session, False)
         except Exception as e:
-            return Response(False, f"Failed to enter: {e}", None, False)
+            return CustomResponse(False, f"Failed to enter: {e}", None, False)
         
     def get_session(self, cookie):
         try:
@@ -120,34 +120,79 @@ class Server:
 
     def verify_automatic(self, cookie, token):
         try:
+            # Check session
             res = self.get_session_not_member(cookie)
             if not res.success:
-                return res
+                return res  # Already a ResponseFailMsg
+            
+            # Verify the token
             res = self.user_controller.verify_automatic(token)
-            return res
+            if not res.success:
+                return res  # Already a ResponseFailMsg
+            
+            # Get the email from the result
+            email = res.result
+            
+            # Update database
+            db_res = self.db_access.update_by_query(DBMember, {"email": email}, {"verified": True})
+            if not db_res.success:
+                return ResponseFailMsg(db_res.msg)
+            
+            # Update member object
+            member = self.user_controller.members.get(email)
+            if member:
+                member.verify()
+            
+            # Create standardized success response
+            response = ResponseSuccessMsg("Email verified successfully")
+            response.email = email  # Include email in the response
+            
+            return response
+            
         except Exception as e:
-            return ResponseFailMsg(f"Failed to register: {e}")
+            return ResponseFailMsg(f"Failed to verify: {e}")
 
     def _is_need_to_accept_new_terms_anc_conditions(self, version):
         return self.tac_controller.current_version > version
 
     def login(self, cookie, name, passwd):
         try:
+            # Get session
             res = self.get_session(cookie)
             if not res.success:
-                return res
+                return res  # Already a ResponseFailMsg
+            
             session = res.result
-            res = self.user_controller.login(name, passwd)
-            if not res.success:
-                return res
-
-            if res.is_admin:
+            
+            # Call user controller login
+            login_res = self.user_controller.login(name, passwd)
+            
+            # If login failed, just return the fail message
+            if not login_res.success:
+                # Create a standardized fail response
+                response = ResponseFailMsg(login_res.msg)
+                return response
+            
+            # Otherwise, we have a successful login
+            # Create a standardized success response
+            response = ResponseSuccessMsg(f"Login successful for {name}")
+            
+            # Add additional fields that may be needed by the client
+            response.is_admin = getattr(login_res, 'is_admin', False)
+            
+            if response.is_admin:
                 session.admin_login()
             else:
-                res.need_to_accept_new_terms = self._is_need_to_accept_new_terms_anc_conditions(res.accepted_tac_version)
+                # Add terms acceptance info
+                accepted_tac_version = getattr(login_res, 'accepted_tac_version', -1)
+                response.accepted_tac_version = accepted_tac_version
+                response.need_to_accept_new_terms = self._is_need_to_accept_new_terms_anc_conditions(accepted_tac_version)
+                
+                # Update session
                 session.login(name)
-
-            return res
+            
+            return response
+            
         except Exception as e:
             return ResponseFailMsg(f"Failed to login: {e}")
 
@@ -168,42 +213,56 @@ class Server:
                 token_id, google_requests.Request(), self.GOOGLE_CLIENT_ID
             )
             
+            # Check if the token is from a valid issuer
             if id_info['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:
                 return ResponseFailMsg("Invalid token issuer")
             
-            # Get user email from the token info
+            # Get user email from token info
             email = id_info['email']
             
-            # Get the session
+            # Get session
             res = self.get_session(cookie)
             if not res.success:
-                return ResponseLogin(res.success, res.msg)
+                return res  # Already a ResponseFailMsg
             
             session = res.result
             
-            # Check if user exists
+            # Check if user exists, create if not
             member_exists = self.user_controller.members.get(email) is not None
             
             if not member_exists:
-                # User doesn't exist, create one with a random password
+                # Create a random password for the new user
                 import secrets
                 random_password = secrets.token_hex(16)
+                
+                # Register the user
                 register_res = self.user_controller.register_google_user(email, random_password, accepted_terms_version)
                 
                 if not register_res.success:
-                    return ResponseLogin(register_res.success, register_res.msg)
+                    return ResponseFailMsg(register_res.msg)
             
-            # Login the user with Google authentication
+            # Login the user with Google auth
             login_res = self.user_controller.login_with_google(email)
-            login_res.need_to_accept_new_terms= self._is_need_to_accept_new_terms_anc_conditions(login_res.accepted_tac_version)
-            print(f"{email} accepted: {login_res.accepted_tac_version}, current version: {self.tac_controller.current_version}")
             
-            if login_res.success:
-                session.login(email)
-                login_res.result = {"email": email}
-
-            return login_res
-        
+            if not login_res.success:
+                return ResponseFailMsg(login_res.msg)
+            
+            # Create standardized response
+            response = ResponseSuccessMsg(f"Google login successful for {email}")
+            
+            # Add additional fields
+            response.is_admin = getattr(login_res, 'is_admin', False)
+            response.accepted_tac_version = getattr(login_res, 'accepted_tac_version', -1)
+            response.need_to_accept_new_terms = self._is_need_to_accept_new_terms_anc_conditions(response.accepted_tac_version)
+            
+            # IMPORTANT: Always include the email in the response
+            response.result = {"email": email}
+            
+            # Update session
+            session.login(email)
+            
+            return response
+            
         except ValueError as e:
             return ResponseFailMsg(f"Invalid Google token: {str(e)}")
         except Exception as e:
@@ -225,7 +284,7 @@ class Server:
             # Check if user exists
             user_exists = self.user_controller.members.get(email) is not None
             
-            return Response(True, "Email check completed", {"userExists": user_exists, "email": email}, False)
+            return CustomResponse(True, "Email check completed", {"userExists": user_exists, "email": email}, False)
         
         except ValueError as e:
             return ResponseFailMsg(f"Invalid Google token: {str(e)}")
@@ -277,11 +336,16 @@ class Server:
             session = self.sessions.get(cookie, None)
             if session is None:
                 return ResponseFailMsg(f"Session not found: {cookie}")
-            if email is None:
+            
+            if email is None or email == 'undefined' or email == '':
+                # Just check if the session exists
                 return ResponseSuccessMsg(f"Session found: {cookie}")
-            if session.is_logged_in() is False or session.user_name != email:
-                return ResponseFailMsg(f"session not logged in: {email}")
-            return ResponseSuccessMsg(f"session found: {cookie}, logged in as {email}")
+            
+            # Check if the session is logged in and matches the email
+            if not session.is_member or session.user_name != email:
+                return ResponseFailMsg(f"Session not logged in as: {email}")
+            
+            return ResponseSuccessMsg(f"Session found: {cookie}, logged in as {email}")
         except Exception as e:
             return ResponseFailMsg(f"Failed to check session: {e}")
 

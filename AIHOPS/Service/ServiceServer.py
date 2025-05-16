@@ -3,7 +3,8 @@ from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
 from Service.config import app, socketio
-from flask import Flask, Response, redirect, request, jsonify
+from flask import Flask, redirect, request, jsonify
+from flask.wrappers import Response as FlaskResponse
 from Service.config import Base, engine
 from sqlalchemy import event
 from flask_socketio import emit
@@ -11,6 +12,9 @@ from flask_socketio import emit
 import os
 from werkzeug.utils import secure_filename
 from flask import send_file
+
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 
 
 from flask_cors import CORS
@@ -56,7 +60,9 @@ def start_session():
 def register():
     data = request.json
     print("trying to register in service server")
-    res = server.register(int(data["cookie"]), data["userName"], data["passwd"], int(data["acceptedTermsVersion"]))
+    acceptedTermsVersion = data.get("acceptedTermsVersion", 0)
+    
+    res = server.register(int(data["cookie"]), data["userName"], data["passwd"], int(acceptedTermsVersion))
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/verify", methods=["POST"])
@@ -68,20 +74,93 @@ def verify():
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/verify_automatic", methods=["POST"])
-# excpecting json with {cookie, token}
+# excpecting json with {token}
 def verify_automatic():
-    data = request.json
-    print("trying to verifyAutomatic in service server")
-    res = server.verify_automatic(int(data["cookie"]), data["token"])
-    return jsonify({"message": res.msg, "success": res.success})
+    try:
+        data = request.json
+        print("Attempting automatic verification with data:", data)
+        
+        # Get a cookie from the request or create a new session if none provided
+        cookie = None
+        if "cookie" in data:
+            cookie = int(data["cookie"])
+        else:
+            # Start a new session if no cookie provided
+            enter_res = server.enter()
+            if enter_res.success and enter_res.result:
+                cookie = enter_res.result.cookie
+                print(f"Created new session with cookie: {cookie}")
+            else:
+                return jsonify({
+                    "message": "Failed to create session for verification", 
+                    "success": False
+                }), 500
+        
+        # Check that we have a token
+        if "token" not in data:
+            return jsonify({
+                "message": "No verification token provided",
+                "success": False
+            }), 400
+        
+        # Attempt verification
+        res = server.verify_automatic(cookie, data["token"])
+        
+        # Create response data
+        response_data = {
+            "message": res.msg, 
+            "success": res.success
+        }
+        
+        # If verification was successful and the result contains an email, include it
+        if res.success and res.result:
+            response_data["email"] = res.result
+        
+        return jsonify(response_data)
+    
+    except Exception as e:
+        print(f"Error in verify_automatic: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            "message": f"Server error: {str(e)}",
+            "success": False
+        }), 500
 
 @app.route("/login", methods=["POST"])
-# excpecting json with {cookie, user_name, passwd}
+# expecting json with {cookie, user_name, passwd}
 def login():
-    data = request.json
-    res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
-    return jsonify({"message": res.msg, "success": res.success, "is_admin": res.is_admin,
-                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms})
+    try:
+        data = request.json
+        res = server.login(int(data["cookie"]), data["userName"], data["passwd"])
+        
+        # Create a base response dictionary with message and success
+        response_data = {
+            "message": res.msg,
+            "success": res.success
+        }
+        
+        # Only add additional fields if login was successful
+        if res.success:
+            # Add these fields only if they exist on the response object
+            if hasattr(res, 'is_admin'):
+                response_data["is_admin"] = res.is_admin
+            else:
+                response_data["is_admin"] = False
+                
+            if hasattr(res, 'accepted_tac_version'):
+                response_data["accepted_tac_version"] = res.accepted_tac_version
+                
+            if hasattr(res, 'need_to_accept_new_terms'):
+                response_data["need_to_accept_new_terms"] = res.need_to_accept_new_terms
+        
+        return jsonify(response_data)
+    except Exception as e:
+        print(f"Error in login route: {str(e)}")
+        return jsonify({
+            "message": f"Server error: {str(e)}",
+            "success": False
+        }), 500
 
 @app.route("/logout", methods=["POST"])
 # expecting json with {cookie}
@@ -108,14 +187,32 @@ def google_login():
         return jsonify({"message": f"Bad input: {str(e)}", "success": False}), 400
 
     res = server.google_login(cookie, token, tac_ver)
-    response_data = {"message": res.msg, "success": res.success,
-                    "accepted_tac_version": res.accepted_tac_version, "need_to_accept_new_terms": res.need_to_accept_new_terms}
     
-    if res.success and hasattr(res, 'result') and isinstance(res.result, dict) and 'email' in res.result:
-        response_data["email"] = res.result["email"]
+    # Create a response data dictionary
+    response_data = {
+        "message": res.msg,
+        "success": res.success,
+        "accepted_tac_version": getattr(res, 'accepted_tac_version', -1),
+        "need_to_accept_new_terms": getattr(res, 'need_to_accept_new_terms', False)
+    }
+    
+    # Always include the email in the response if available
+    if res.success:
+        # First try to get email from result dictionary
+        if hasattr(res, 'result') and isinstance(res.result, dict) and 'email' in res.result:
+            response_data["email"] = res.result["email"]
+        # Fallback: try to extract from Google token if not in result
+        elif not "email" in response_data:
+            try:
+                id_info = id_token.verify_oauth2_token(
+                    token, google_requests.Request(), server.GOOGLE_CLIENT_ID
+                )
+                response_data["email"] = id_info.get('email')
+                print(f"Added email from token: {response_data['email']}")
+            except Exception as e:
+                print(f"Failed to extract email from token: {e}")
     
     return jsonify(response_data)
-
 @app.route("/check_email_exists", methods=["POST"])
 def check_email_exists():
     data = request.json
@@ -589,13 +686,36 @@ def remove_research_project():
 
 @app.route("/is-valid-session", methods=["GET"])
 def is_valid_session():
-    cookie = int(request.args.get("cookie", 0))
-    email = request.args.get("email", None)
-    res = server.is_valid_session(cookie, email)
-    return jsonify({
-        "message": res.msg,
-        "success": res.success
-    })
+    try:
+        cookie = int(request.args.get("cookie", 0))
+        email = request.args.get("email", None)
+        
+        # Handle empty or "undefined" email values
+        if email in ["undefined", ""]:
+            email = None
+            
+        print(f"Checking session validity - Cookie: {cookie}, Email: {email}")
+        
+        res = server.is_valid_session(cookie, email)
+        
+        print(f"Session check result: {res.success} - {res.msg}")
+        
+        return jsonify({
+            "message": res.msg,
+            "success": res.success
+        })
+    except ValueError as e:
+        print(f"Invalid cookie format: {str(e)}")
+        return jsonify({
+            "message": f"Invalid cookie format: {str(e)}",
+            "success": False
+        }), 400
+    except Exception as e:
+        print(f"Session check error: {str(e)}")
+        return jsonify({
+            "message": f"Server error: {str(e)}",
+            "success": False
+        }), 500
 
 @app.route("/")
 def hello():
@@ -637,7 +757,7 @@ def get_profile_picture(email):
         
         # Fallback - return transparent pixel
         transparent_pixel = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x00\x00\x02\x00\x01\xf4\xb5U\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
-        return Response(transparent_pixel, mimetype='image/png')
+        return FlaskResponse(transparent_pixel, mimetype='image/png')
         
     except Exception as e:
         traceback.print_exc()
@@ -645,7 +765,7 @@ def get_profile_picture(email):
         
         # Return a transparent pixel as fallback
         transparent_pixel = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\nIDATx\x9cc\x00\x00\x00\x02\x00\x01\xf4\xb5U\xb4\x00\x00\x00\x00IEND\xaeB`\x82'
-        return Response(transparent_pixel, mimetype='image/png')
+        return FlaskResponse(transparent_pixel, mimetype='image/png')
     
 @app.route("/fetch_google_profile_picture", methods=["POST"])
 def fetch_google_profile_picture():
