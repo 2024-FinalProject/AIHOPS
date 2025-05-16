@@ -50,6 +50,8 @@ export const updatePassword = async (email, password, code) => {
 
 //Google Login method:
 export const googleLogin = async (tokenId, acceptedTermsVersion) => {
+  localStorage.setItem('googleToken', tokenId);
+  
   return await axios.post(`${API_URL}/google_login`, {
     tokenId,
     acceptedTermsVersion,
