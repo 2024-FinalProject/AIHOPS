@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Settings.css"; // Import the CSS
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { deleteAccount } from "../api/AuthApi";
 import AlertPopup from "../Components/AlertPopup";
 import ProfilePictureUpload from "../Components/ProfilePictureUpload";
@@ -9,6 +9,7 @@ import ProfilePictureUpload from "../Components/ProfilePictureUpload";
 const SettingsPage = () => {
   const { theme, toggleTheme } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
   const { logout } = useAuth();
   const [alertVerifyPopup, setAlertVerifyPopup] = useState(false);
@@ -17,19 +18,29 @@ const SettingsPage = () => {
       "This action cannot be undone - all of your data will be permenantely deleted."
   );
 
+  // Check if we should open the profile picture section automatically
+  // based on the state passed from the NavBar
+  const [openSections, setOpenSections] = useState({
+    security: false,
+    deleteAccount: false,
+    appearance: false,
+    profilePicture: location.state?.openProfilePicture || false,
+  });
+
   useEffect(() => {
     if (!isLoggedIn) {
       console.log("Redirecting to /");
       navigate("/");
     }
-  }, [isLoggedIn, navigate]);
 
-  const [openSections, setOpenSections] = useState({
-    security: false,
-    deleteAccount: false,
-    appearance: false,
-    profilePicture: false,
-  });
+    // Check if the location state has openProfilePicture flag
+    if (location.state?.openProfilePicture) {
+      setOpenSections(prev => ({
+        ...prev,
+        profilePicture: true
+      }));
+    }
+  }, [isLoggedIn, navigate, location.state]);
 
   const toggleSection = (section) => {
     setOpenSections((prev) => ({
@@ -88,7 +99,6 @@ const SettingsPage = () => {
             />
             {openSections.deleteAccount && (
               <div className="inner-section-content">
-                {/* Modified the button class to use delete-button for smaller sizing */}
                 <button
                   className="button button-red delete-button"
                   onClick={() => setAlertVerifyPopup(true)}
@@ -130,6 +140,7 @@ const SettingsPage = () => {
           </div>
         )}
       </div>
+      
       {alertVerifyPopup && (
         <AlertPopup
           message={alertyVerifyMessage}
