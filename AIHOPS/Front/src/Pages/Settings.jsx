@@ -88,8 +88,9 @@ const SettingsPage = () => {
             />
             {openSections.deleteAccount && (
               <div className="inner-section-content">
+                {/* Modified the button class to use delete-button for smaller sizing */}
                 <button
-                  className="button button-red"
+                  className="button button-red delete-button"
                   onClick={() => setAlertVerifyPopup(true)}
                 >
                   Delete Account
@@ -117,14 +118,14 @@ const SettingsPage = () => {
           </div>
         )}
 
-        {/* Profile Picture Section (Simplified from Personalization) */}
+        {/* Profile Picture Section */}
         <SectionHeader
           title="Profile Picture"
           section="profilePicture"
           isOpen={openSections.profilePicture}
         />
         {openSections.profilePicture && (
-          <div className="section-content">
+          <div className="section-content profile-section-content">
             <ProfilePictureUpload />
           </div>
         )}
