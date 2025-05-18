@@ -288,3 +288,67 @@
   color: #10b981;
   border: 1px solid #a7f3d0;
 }
+
+/* Smaller Delete Button */
+.button-red.delete-button {
+  padding: 6px 12px; /* Smaller padding */
+  font-size: 0.8rem; /* Smaller font */
+  max-width: 150px; /* Limit width */
+  margin: 0 auto; /* Center in container */
+  display: block;
+}
+
+/* Improved Profile Picture Section */
+.profile-section-content {
+  padding: 12px !important;
+}
+
+/* Modify the existing profile picture upload container to fit better */
+.profile-picture-upload {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+/* Make profile picture container slightly smaller */
+.profile-picture-container {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 15px;
+}
+
+/* Make option tabs more compact */
+.option-tabs {
+  max-width: 350px;
+  margin: 0 auto 15px;
+}
+
+.option-tab {
+  padding: 8px;
+  font-size: 0.9rem;
+}
+
+/* Make buttons more compact */
+.upload-buttons .button,
+.google-button {
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  max-width: 350px;
+  margin: 0 auto;
+}
+
+/* Space content better */
+.option-content {
+  max-width: 350px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+/* Space-saving for messages */
+.message {
+  max-width: 350px;
+  margin: 15px auto 0;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+}

@@ -54,8 +54,9 @@ const NavBar = () => {
     navigate("/admin");
   };
 
+  // Modified to pass state to automatically open the profile picture section
   const handleProfileClick = () => {
-    navigate("/settings");
+    navigate("/settings", { state: { openProfilePicture: true } });
   };
 
   // Force a render if needed

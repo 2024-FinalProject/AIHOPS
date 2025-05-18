@@ -390,3 +390,31 @@
   text-align: center;
   color: #4b5563;
 }
+
+/* Increase spacing between profile picture and username */
+.navbar-user-info {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+  gap: 12px; /* Adds consistent spacing between items */
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Makes profile picture component in navbar properly sized with margin */
+.navbar-user-info .profile-picture-component {
+  margin-right: 4px; /* Extra spacing if needed */
+}
+
+/* If you're using FaUser with a specific class */
+.user-icon {
+  margin-right: 12px; /* Increased spacing */
+}
+
+/* Ensure the email text is properly spaced */
+.user-email {
+  font-size: 1rem;
+  margin-left: 4px; /* Extra left margin */
+}
