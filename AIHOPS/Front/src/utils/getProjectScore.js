@@ -21,7 +21,7 @@ const getProjectScore = async ({
     if (res.data.success) {
       setProjectsScore(res.data.score);
     } else {
-      alert("Failed to fetch score");
+      // alert("Failed to fetch score");
     }
   } catch (err) {
     console.error("Failed fetching score:", err);

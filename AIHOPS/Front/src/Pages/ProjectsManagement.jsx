@@ -112,23 +112,24 @@ const ProjectsManagement = () => {
     }
   }, []);
 
-  const fetch_selected_project = async (project) => {
+  // Fetch all projects, then pick out and set the one with the given ID
+  const fetch_selected_project = async (projectId) => {
     try {
-      {
-        await fetchProjects();
-        let prj = "";
-        for (prj in projects) {
-          if (prj.id === project.id) {
-            setSelectedProject(prj);
-            break;
-          }
-        }
-        setIsSuccess(true);
+      await fetchProjects();
+      const fresh = projects.find((p) => p.id === projectId);
+      if (fresh) {
+        setSelectedProject(fresh);
+      } else {
+        console.warn(`Project with ID ${projectId} not found after fetch.`);
       }
+      setIsSuccess(true);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message;
-      console.error("Error:", errorMessage);
-      setMsg(`Error fetching project: ${errorMessage}`);
+      console.error("Error refreshing selected project:", error);
+      setMsg(
+        `Error fetching project: ${
+          error.response?.data?.message || error.message
+        }`
+      );
       setIsSuccess(false);
     }
   };
@@ -239,6 +240,7 @@ const ProjectsManagement = () => {
   };
 
   const handlePublish = async (projectID, projectName) => {
+    await fetch_selected_project(projectID);
     setPublishData({ projectID, projectName });
     setConfirmPublishPopUp(true);
   };
