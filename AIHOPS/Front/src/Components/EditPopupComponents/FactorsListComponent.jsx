@@ -22,10 +22,11 @@ const FactorsListComponent = ({
   alertMessage,
   alertType,
   setShowAlert,
-  handleAlertClose
+  handleAlertClose,
 }) => {
   // Add state for confirmation popup
-  const [showConfirmFactorsDialog, setShowConfirmFactorsDialog] = useState(false);
+  const [showConfirmFactorsDialog, setShowConfirmFactorsDialog] =
+    useState(false);
 
   const handleInitiateConfirmFactors = () => {
     setShowConfirmFactorsDialog(true);
@@ -48,7 +49,13 @@ const FactorsListComponent = ({
       {showAlert && (
         <div style={{ margin: "10px 0", textAlign: "center" }}>
           <AlertPopup
-            title={alertType === "success" ? "Success" : alertType === "info" ? "Information" : "Input Validation"}
+            title={
+              alertType === "success"
+                ? "Success"
+                : alertType === "info"
+                ? "Information"
+                : "Input Validation"
+            }
             message={alertMessage}
             type={alertType}
             onClose={onAlertClose}
@@ -56,7 +63,7 @@ const FactorsListComponent = ({
           />
         </div>
       )}
-      
+
       <div
         style={{
           alignItems: "center",
@@ -273,24 +280,28 @@ const FactorsListComponent = ({
       {showConfirmFactorsDialog && (
         <div className="confirmation-overlay">
           <div className="confirmation-content">
-            <div className="confirmation-icon" style={{ backgroundColor: "#d1fae5", color: "#10b981" }}>
-              <span style={{ fontSize: '28px' }}>✓</span>
+            <div
+              className="confirmation-icon"
+              style={{ backgroundColor: "#d1fae5", color: "#10b981" }}
+            >
+              <span style={{ fontSize: "28px" }}>✓</span>
             </div>
-            <h3 className="confirmation-title">Confirm Assessment Dimensions</h3>
+            <h3 className="confirmation-title">
+              Confirm Assessment Dimensions
+            </h3>
             <p className="confirmation-message">
-              Are you sure you want to confirm these assessment dimensions?
-              This action will finalize the dimensions for this project.
+              You can still make changes later before publishing the project.
             </p>
             <div className="confirmation-buttons">
-              <button 
-                className="confirmation-button cancel" 
+              <button
+                className="confirmation-button cancel"
                 onClick={handleCancelConfirmFactors}
                 style={{ backgroundColor: "#a6a6a6" }}
               >
                 Cancel
               </button>
-              <button 
-                className="confirmation-button confirm" 
+              <button
+                className="confirmation-button confirm"
                 onClick={handleFinalConfirmFactors}
                 style={{ backgroundColor: "#4CAF50" }}
               >

@@ -159,6 +159,7 @@ const ManageAssessors = ({
         await fetchProjects(); // Refresh projects after adding the member
         await fetch_pending_invites(selectedProject.id);
         await fetch_pending_requests(selectedProject.id);
+        await fetch_selected_project(selectedProject);
         // Clear the input field after adding
         setNewMemberName("");
         setIsSuccess(true);
