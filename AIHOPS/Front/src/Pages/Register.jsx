@@ -11,15 +11,25 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState("");
   const [isSuccess, setIsSuccess] = useState(null);
+  const [showTermsConditions, setShowTermsConditions] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const { termsText, termsVersion } = useTerms();
+
+  // new state to track in-flight registration
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const navigate = useNavigate();
   const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
-  const [showTermsConditions, setShowTermsConditions] = useState(false);
-  const [termsContent, setTermsContent] = useState("");
-  const { termsText, termsVersion } = useTerms();
-  const [termsAccepted, setTermsAccepted] = useState(false);
-
-  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+  // redirect & load T&C on mount
+  useEffect(() => {
+    if (isLoggedIn) navigate("/");
+    fetch(termsConditions)
+      .then((r) => r.text())
+      .then(() => {}) // TermsModal uses context
+      .catch(console.error);
+  }, [isLoggedIn, navigate]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -29,20 +39,22 @@ const Register = () => {
         "Please read and accept the terms and conditions, then click on register again."
       );
       setIsSuccess(false);
-      await delay(3000); //3 sec
+      await delay(3000);
       setShowTermsConditions(true);
       return;
     }
 
     setMsg("");
     setIsSuccess(null);
+    setIsProcessing(true); // <-- show overlay
+
     try {
       const response = await register(userName, password);
 
       if (response.data.success) {
-        const frontMsg =
-          "A verification email has been sent.\nCheck your spam inbox if you don't see it.";
-        setMsg(frontMsg);
+        setMsg(
+          "A verification email has been sent. Check your spam inbox if you don't see it."
+        );
         setIsSuccess(true);
         localStorage.setItem("userName", userName);
       } else {
@@ -51,8 +63,10 @@ const Register = () => {
       }
     } catch (error) {
       console.error("Failed to register:", error);
-      setMsg("Failed to register");
+      setMsg("Failed to register. Please try again.");
       setIsSuccess(false);
+    } finally {
+      setIsProcessing(false); // <-- hide overlay
     }
   };
 
@@ -61,19 +75,6 @@ const Register = () => {
     setShowTermsConditions(false);
   };
 
-  useEffect(() => {
-    // Redirect if already logged in
-    if (isLoggedIn) {
-      navigate("/");
-    }
-
-    // Load terms text from file
-    fetch(termsConditions)
-      .then((res) => res.text())
-      .then(setTermsContent)
-      .catch(console.error);
-  }, [isLoggedIn, navigate]);
-
   return (
     <div className="register-container">
       <div className="register-card">
@@ -81,7 +82,6 @@ const Register = () => {
           <div className="register-form-group">
             <input
               type="text"
-              id="formUsername"
               placeholder="Enter email"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
@@ -92,7 +92,6 @@ const Register = () => {
           <div className="register-form-group">
             <input
               type="password"
-              id="formPassword"
               placeholder="Enter password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -109,33 +108,43 @@ const Register = () => {
               Terms and Conditions
             </button>
           </div>
+
           <button type="submit" className="register-submit-btn">
             Register
           </button>
-        </form>
 
-        {msg && (
-          <div
-            className={`register-alert ${
-              isSuccess === true
-                ? "success"
-                : isSuccess === false
-                ? "danger"
-                : ""
-            }`}
-          >
-            {msg}
-          </div>
-        )}
+          {msg && (
+            <div
+              className={`register-alert ${
+                isSuccess === true
+                  ? "success"
+                  : isSuccess === false
+                  ? "danger"
+                  : ""
+              }`}
+            >
+              {msg}
+            </div>
+          )}
+        </form>
       </div>
 
-      {/* Modal for Terms and Conditions */}
       {showTermsConditions && (
         <TermsModal
           text={termsText}
           version={termsVersion}
           onAccept={handleAcceptTerms}
         />
+      )}
+
+      {/* BLOCKING “Processing…” OVERLAY */}
+      {isProcessing && (
+        <div className="processing-overlay">
+          <div className="processing-box">
+            <div className="spinner" />
+            <p>Processing your registration…</p>
+          </div>
+        </div>
       )}
     </div>
   );
