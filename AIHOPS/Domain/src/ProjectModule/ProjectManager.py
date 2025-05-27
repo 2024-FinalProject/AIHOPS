@@ -474,7 +474,8 @@ class ProjectManager:
         if pid >= 0:
             project = self._verify_owner(pid, actor)
             inDesign.discard(pid)
-            self.delete_factor(pid, actor, fid)
+            res = self.delete_factor(pid, actor, fid)
+            
         try:
             if (fid >= 0) and (len(Active) == 0 and len(Archived) == 0) and (len(inDesign) == 0 or apply_to_all_inDesign):
                 for p in inDesign:

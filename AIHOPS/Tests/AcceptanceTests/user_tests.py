@@ -3,8 +3,10 @@ from unittest.mock import patch
 
 from Service.config import Base, engine
 from Domain.src.Server import Server
+from Domain.src.Users.MemberController import MemberController
 from Tests.AcceptanceTests.Facade import Facade
 from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+from Tests.AcceptanceTests.mocks.MockTACController import MockTACController
 
 
 # How to run the tests:
@@ -16,6 +18,7 @@ class UserTests(unittest.TestCase):
 
     # ------------- Base ------------------
     @patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor)
+    @patch("Domain.src.Server.TACController", new=MockTACController)
 
     def setUp(self) -> None:
         Base.metadata.create_all(engine)        # must init db

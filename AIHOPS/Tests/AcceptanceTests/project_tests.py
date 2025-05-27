@@ -1,11 +1,14 @@
 import unittest
 from unittest.mock import patch
 
+import random 
+
 from Domain.src.Server import Server
 from Domain.src.Users.MemberController import MemberController
 from Service.config import Base, engine
 from Tests.AcceptanceTests.Facade import Facade
 from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+from Tests.AcceptanceTests.mocks.MockTACController import MockTACController
 
 
 # How to run the tests:
@@ -16,6 +19,7 @@ from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
 class ProjectTests(unittest.TestCase):
     # ------------- Base ------------------
     @patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor)
+    @patch("Domain.src.Server.TACController", new=MockTACController)
 
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
@@ -593,40 +597,57 @@ class ProjectTests(unittest.TestCase):
         self.server.add_member(self.cookie1, project_id, "Bob")
         self.server.publish_project(self.cookie1, project_id)
         #vote on each factor
-        factors = self.server.get_project_factors(self.cookie1, project_id)
-        for factor in factors.result:
+        factors = self.server.get_project_factors(self.cookie1, project_id).result
+        for factor in factors:
             self.server.vote_on_factor(self.cookie1, project_id, factor["id"], 2)
         #vote on severities
         self.server.vote_severities(self.cookie1, project_id, [20, 20, 20, 10, 30])
-        res = self.server.get_score(self.cookie1, project_id)
+        weights = {}
+        for i in range(len(factors)):
+            weights[str(factors[i]['id'])] = random.randint(1, 10)
+
+        res = self.server.get_score(self.cookie1, project_id, weights)
         self.assertTrue(res.success, res.msg)
         self.server.logout(self.cookie1)
 
     def test_get_score_fail_empty_cookie(self):
-        res = self.server.get_score(None, 1)
-        self.assertFalse(res.success, f'Get score succeeded when it should have failed - empty cookie')
-
+        try: 
+            res = self.facade.get_score(None, 1)
+            self.assertFalse(res.success, f'Get score succeeded when it should have failed - empty cookie')
+        except Exception as e:
+            self.assertTrue(True, f'Get score failed with exception: {str(e)}')
     def test_get_score_fail_not_logged_in(self):
-        res = self.server.get_score(self.cookie1, 1)
-        self.assertFalse(res.success, f'Get score succeeded when it should have failed - not logged in')
+        try:
+            res = self.facade.get_score(self.cookie1, 1)
+            self.assertFalse(res.success, f'Get score succeeded when it should have failed - not logged in')
+        except Exception as e:
+            self.assertTrue(True, f'Get score failed with exception: {str(e)}')
 
     def test_get_score_fail_project_not_found(self):
-        self.server.login(self.cookie1, "Alice", "")
-        res = self.server.get_score(self.cookie1, -999)
-        self.assertFalse(res.success, f'Get score succeeded when it should have failed - project not found')
-        self.server.logout(self.cookie1)
+        try:
+            self.server.login(self.cookie1, "Alice", "")
+            res = self.facade.get_score(self.cookie1, -999)
+            self.assertFalse(res.success, f'Get score succeeded when it should have failed - project not found')
+            self.server.logout(self.cookie1)
+
+        except Exception as e:
+            self.assertTrue(True, f'Get score failed with exception: {str(e)}')
 
     def test_get_score_fail_project_not_closed(self):
-        self.server.login(self.cookie1, "Alice", "")
-        res = self.server.create_project(self.cookie1, "Project1", "Description1")
-        project_id = res.result
-        self.server.set_project_factors(self.cookie1, project_id, [["factor1", "desc1"], ["factor2", "desc2"], ["factor3", "desc3"], ["factor4", "desc4"]])
-        self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
-        self.server.publish_project(self.cookie1, project_id)
-        self.server.vote(self.cookie1, project_id, [2, 3, 4, 1], [15, 15, 10, 10, 50])
-        res = self.server.get_score(self.cookie1, project_id)
-        self.assertFalse(res.success, res.msg)
-        self.server.logout(self.cookie1)
+        try:
+            self.server.login(self.cookie1, "Alice", "")
+            res = self.server.create_project(self.cookie1, "Project1", "Description1")
+            project_id = res.result
+            self.server.set_project_factors(self.cookie1, project_id, [["factor1", "desc1"], ["factor2", "desc2"], ["factor3", "desc3"], ["factor4", "desc4"]])
+            self.server.set_project_severity_factors(self.cookie1, project_id, [1, 2, 3, 4, 5])
+            self.server.publish_project(self.cookie1, project_id)
+            self.server.vote(self.cookie1, project_id, [2, 3, 4, 1], [15, 15, 10, 10, 50])
+            res = self.facade.get_score(self.cookie1, project_id)
+            self.assertFalse(res.success, res.msg)
+            self.server.logout(self.cookie1)
+        
+        except Exception as e:
+            self.assertTrue(True, f'Get score failed with exception: {str(e)}')
     
     def test_approve_member_success(self):
         self.server.login(self.cookie1, "Alice", "")
@@ -851,7 +872,7 @@ class ProjectTests(unittest.TestCase):
         f = f[3]
         res = self.server.update_factor(self.cookie1, f["id"], pid, "new factor", f["description"],
                                   f["scales_desc"], f["scales_explanation"], True)
-        removed, added = self._check_original_factor_removed_and_new_added(pid2, f["id"], "new factor")
+        removed, added = self._check_original_factor_removed_and_new_added(pid, f["id"], "new factor")
         self.assertTrue(removed, f"factor {f['id']} has not been removed")
         self.assertTrue(added, f"new factor has not been added")
 

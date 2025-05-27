@@ -7,6 +7,7 @@ from Domain.src.Users.MemberController import MemberController
 from Service.config import Base, engine
 from Tests.AcceptanceTests.Facade import Facade
 from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+from Tests.AcceptanceTests.mocks.MockTACController import MockTACController
 
 scales = ['1', '1', '1', '1', '1']
 
@@ -30,13 +31,10 @@ factors2 = [
     ["f2", "d2", scales, scales],
 ]
 
+@patch("Domain.src.Server.TACController", new=MockTACController)
 class ProjectTests(unittest.TestCase):
     # ------------- Base ------------------
     @patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor)
-
-
-
-
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
         self.facade = Facade()

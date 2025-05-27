@@ -6,6 +6,7 @@ from Domain.src.Server import Server
 from Service.config import Base, engine
 from Tests.AcceptanceTests.Facade import Facade
 from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+from Tests.AcceptanceTests.mocks.MockTACController import MockTACController
 
 
 class DBProjectTests(unittest.TestCase):
@@ -17,6 +18,7 @@ class DBProjectTests(unittest.TestCase):
         print(os.getcwd())
 
 
+    @patch("Domain.src.Server.TACController", new=MockTACController)
     def setUp(self) -> None:
         Base.metadata.create_all(engine)
         self.server = None

@@ -1,5 +1,7 @@
 from Domain.src.Server import Server
 
+import random
+
 
 class Facade:
     def __init__(self, server=None):
@@ -110,7 +112,7 @@ class Facade:
     def vote(self, actor, pid, factor_vote, severity_vote):
         cookie = self._find_cookie(actor)
         factors = self.server.get_project_factors(cookie, pid)
-        for idx, factor in factors:
+        for idx, factor in enumerate(factors.result):
             res = self.server.vote_on_factor(cookie, pid, factor.fid, factor_vote[idx])
             self._check_res(res, f"failed to vote on factor {factor_vote[idx]}: {res.msg}")
         res = self.server.vote_severities(cookie, pid, severity_vote)
@@ -120,8 +122,15 @@ class Facade:
     def get_score(self, actor, pid, weights=None):
         cookie = self._find_cookie(actor)
         if not weights:
-            amount = len(self.get_projects_factors(actor, pid))
-            weights = [1 for _ in range(amount)]
+            weights = {}
+            factors = self.server.get_project_factors(cookie, pid).result
+            if not factors:
+                raise Exception(f"failed to get factors for project {pid}")
+            if not factors.success:
+                for i in range(len(factors)):
+                    weights[str(factors[i]['id'])] = random.randint(1, 10)
+        
         res = self.server.get_score(cookie, pid, weights)
         self._check_res(res, f"failed to get score: {res.msg}")
         return res.result
+

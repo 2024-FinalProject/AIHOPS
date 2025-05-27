@@ -93,7 +93,9 @@ class Project:
     def remove_factor(self, fid):
         self._verify_in_design()
         self._set_factors_inited_false()
-        self.vote_manager.remove_factor(fid)
+        res = self.vote_manager.remove_factor(fid)
+        if  not res.success:
+            return res
         return ResponseSuccessMsg(f"factor {fid} removed from project {self.pid}")
 
     def admin_remove_factor(self, fid):

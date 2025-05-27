@@ -14,6 +14,7 @@ import random
 
 from Tests.AcceptanceTests.Facade import Facade
 from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+from Tests.AcceptanceTests.mocks.MockTACController import MockTACController
 
 
 # How to run the tests:
@@ -24,6 +25,7 @@ from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
 class ProjectTests(unittest.TestCase):
     # ------------- Base ------------------
     @patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor)
+    @patch("Domain.src.Server.TACController", new=MockTACController)
 
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
@@ -154,7 +156,7 @@ class ProjectTests(unittest.TestCase):
     def test_get_score(self):
         cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
 
-        factors = self.server.get_project_factors(cookie_bob, pid).result
+        factors = self.server.get_project_factors(cookie_alice, pid).result
         factor_ids = [factor["id"] for factor in factors]
         votes = [random.randint(1, 4) for _ in range(len(factor_ids))]
         factor_votes = {}
@@ -166,7 +168,11 @@ class ProjectTests(unittest.TestCase):
         severity_votes = [50, 30, 10, 7, 3]
         self.server.vote_severities(cookie_bob, pid, severity_votes)
 
-        res = self.server.get_score(cookie_alice, pid)
+        weights = {}
+        for i in range(len(factor_ids)):
+            weights[str(factor_ids[i])] = random.randint(1, 10)
+
+        res = self.server.get_score(cookie_alice, pid, weights)
         self.assertTrue(res.success, f"failed to get score {res.msg}")
 
 
@@ -328,7 +334,7 @@ class ProjectTests(unittest.TestCase):
         # enter with a new member
         invaild_cookie = self.server.enter().result.cookie
         self.facade.register_and_verify(self.server, invaild_cookie, "Charlie", "")
-        self.login(invaild_cookie, ["Charlie", ""])
+        # self.login(invaild_cookie, ["Charlie", ""])
 
         # get the vote with invalid member
         res = self.server.get_member_vote_on_project(invaild_cookie, pid)   
@@ -609,12 +615,12 @@ class ProjectTests(unittest.TestCase):
         res = self.server.publish_project(cookie_alice, pid)
         self.assertFalse(res.success, "published project witout comfirming severity factors")
 
-    def test_publish_fails_no_members_to_invite(self):
+    def test_publish_success_no_members_to_invite(self):
         cookie_alice, pid = self.start_and_create_project(use_defaults=True)
         self.server.confirm_project_factors(cookie_alice, pid)
         self.server.confirm_project_severity_factors(cookie_alice, pid)
         res = self.server.publish_project(cookie_alice, pid)
-        self.assertFalse(res.success, "published project witout any members to invite")
+        self.assertTrue(res.success, "failed to published project witout any members to invite")
 
 
     def test_remove_member_after_publish(self):

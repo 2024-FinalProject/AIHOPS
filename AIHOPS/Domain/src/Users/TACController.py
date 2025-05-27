@@ -35,10 +35,10 @@ class TACController:
         with open(path, 'r', encoding='utf-8') as f:
             self.current_text = f.read()
 
-        self.socketio.emit("get_terms", {
-            "version": self.current_version,
-            "tac_text": self.current_text
-        })
+        # self.socketio.emit("get_terms", {
+        #     "version": self.current_version,
+        #     "tac_text": self.current_text
+        # })
 
         print(f"Loaded terms v{self.current_version}: {latest_file}")
 
