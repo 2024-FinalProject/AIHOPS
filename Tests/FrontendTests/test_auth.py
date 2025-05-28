@@ -13,9 +13,11 @@ logger = logging.getLogger(__name__)
 
 class TestAuthentication(BaseTest):
     # Encrypted credentials
-    TEST_EMAIL = "testuser_selenium@example.com"
+    TEST_EMAIL = "testuser_selenium_2@example.com"
     # Remove encrypted password and Gmail info
     TEST_PASSWORD = "TestPassword123!"
+
+    TEST_EMAIL_SUCCESS = "testuser_selenium@example.com"
 
     def go_to_register(self):
         logger.debug("Navigating to register page")
@@ -112,7 +114,7 @@ class TestAuthentication(BaseTest):
         logger.debug("Starting login test")
         self.go_to_login()
         email_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter email']"))
-        email_input.send_keys(self.TEST_EMAIL)
+        email_input.send_keys(self.TEST_EMAIL_SUCCESS)
         password_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter password']"))
         password_input.send_keys(self.TEST_PASSWORD)
         submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
@@ -138,7 +140,7 @@ class TestAuthentication(BaseTest):
         logger.debug("Starting logout test")
         self.go_to_login()
         email_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter email']"))
-        email_input.send_keys(self.TEST_EMAIL)
+        email_input.send_keys(self.TEST_EMAIL_SUCCESS)
         password_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter password']"))
         password_input.send_keys(self.TEST_PASSWORD)
         submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))

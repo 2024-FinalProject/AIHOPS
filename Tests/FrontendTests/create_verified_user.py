@@ -25,13 +25,19 @@ def main():
     email = "testuser_selenium@example.com"
     password = "TestPassword123!"
     print(f"Registering and verifying user: {email}")
+
     with patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor):
         facade = Facade()
         try:
             facade.register_and_verify_self(email, password)
             print(f"User {email} registered and verified successfully.")
         except Exception as e:
-            print(f"Failed to register/verify user: {e}")
+            error_message = str(e)
+            if "is taken" in error_message or "already exists" in error_message:
+                print(f"User {email} already exists. Skipping registration.")
+            else:
+                print(f"Failed to register/verify user: {e}")
+
 
 if __name__ == "__main__":
     main() 
