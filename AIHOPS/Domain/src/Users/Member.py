@@ -1,18 +1,28 @@
 import hashlib
 
-from Domain.src.Loggs.Response import Response, ResponseSuccessObj, ResponseLogin
+from Domain.src.Loggs.Response import (
+    Response,
+    ResponseSuccessObj,
+    ResponseLogin,
+)
 
 
 class Member:
-    def __init__(self, email, passwd, uid, from_db=False, verified=False, is_google_user=False, accepted_tac_version=-1):
+    def __init__(self, email, passwd, uid, from_db=False, verified=False,
+                 is_google_user=False,
+                 accepted_tac_version=-1):
         self.id = uid
         self.email = email
         if from_db:
             self.encrypted_passwd = passwd
         else:
-            self.encrypted_passwd = hashlib.sha256(passwd.encode('utf8')).hexdigest()
+            self.encrypted_passwd = hashlib.sha256(
+                passwd.encode('utf8')
+            ).hexdigest()
         self.logged_in = False
-        self.verified = verified
+        self.verified = (
+            verified
+        )
         self.is_google_user = is_google_user
         self.accepted_tac_version = accepted_tac_version
 

@@ -9,7 +9,7 @@ class Facade:
         if self.server is None:
             self.server = Server()
 
-        self.map = {} # username: cookie
+        self.map = {}  # username: cookie
 
     def register_and_verify(self, server, cookie, email, passwd):
         res = server.register(cookie, email, passwd)
@@ -35,13 +35,30 @@ class Facade:
         res = self.server.register(cookie, email, passwd)
         self.map[email] = cookie
         if not res.success:
+            # Check if user already exists but is not verified
+            if "is taken" in res.msg:
+                # Try to login instead - user might already exist
+                login_res = self.server.login(cookie, email, passwd)
+                if login_res.success:
+                    return  # User already exists and can login
             raise Exception(f"failed to register {email}: {res.msg}")
         verify_res = self.server.verify(cookie, email, passwd, "1234")
         if not verify_res.success:
             raise Exception(f"failed to verify {email}: {verify_res.msg}")
 
     def register_verify_login(self, email, passwd):
-        self.register_and_verify_self(email, passwd)
+        try:
+            self.register_and_verify_self(email, passwd)
+        except Exception as e:
+            # If registration fails because user exists, try to just login
+            if "is taken" in str(e):
+                cookie = self.get_cookie()
+                self.map[email] = cookie
+                res = self.server.login(cookie, email, passwd)
+                if res.success:
+                    return  # Successfully logged in existing user
+            raise e  # Re-raise if it's a different error
+
         res = self.server.login(self._find_cookie(email), email, passwd)
         if not res.success:
             raise Exception(f"failed to login {email}: {res.msg}")
@@ -54,17 +71,40 @@ class Facade:
         # need to return projects id
         return res.result
 
-    def add_factor(self, actor, pid, factor_name, factor_desc, scales_desc, scales_explanation):
+    def add_factor(
+        self, actor, pid, factor_name, factor_desc, scales_desc, scales_explanation
+    ):
         cookie = self._find_cookie(actor)
-        res = self.server.add_project_factor(cookie, pid, factor_name, factor_desc, scales_desc, scales_explanation)
+        res = self.server.add_project_factor(
+            cookie, pid, factor_name, factor_desc, scales_desc, scales_explanation
+        )
         if not res.success:
             raise Exception(f"failed to update factor: {res.msg}")
         # need to return factors id
         return res.result.fid
 
-    def update_factor(self, actor, fid, pid, apply_to_all_inDesign, name, desc, scales_desc, scales_explenation):
+    def update_factor(
+        self,
+        actor,
+        fid,
+        pid,
+        apply_to_all_inDesign,
+        name,
+        desc,
+        scales_desc,
+        scales_explenation,
+    ):
         cookie = self._find_cookie(actor)
-        res = self.server.update_factor(cookie, fid, pid, name, desc, scales_desc, scales_explenation, apply_to_all_inDesign)
+        res = self.server.update_factor(
+            cookie,
+            fid,
+            pid,
+            name,
+            desc,
+            scales_desc,
+            scales_explenation,
+            apply_to_all_inDesign,
+        )
         if not res.success:
             raise Exception(f"failed to update factor: {res.msg}")
         # need to return updated factors id
@@ -81,7 +121,9 @@ class Facade:
         cookie = self._find_cookie(actor)
         res = self.server.get_project_factors(cookie, pid)
         if not res.success:
-            raise Exception(f"failed to get {actor}'s projects: {pid}, factors: {res.msg}")
+            raise Exception(
+                f"failed to get {actor}'s projects: {pid}, factors: {res.msg}"
+            )
         return res.result
 
     def clear_db(self):
@@ -91,7 +133,9 @@ class Facade:
         cookie = self._find_cookie(actor)
         res = self.server.set_project_factors(cookie, pid, [fid])
         if not res.success:
-            raise Exception(f"failed to set {actor}'s projects: {pid}, factors: {res.msg}")
+            raise Exception(
+                f"failed to set {actor}'s projects: {pid}, factors: {res.msg}"
+            )
         return True
 
     def create_and_publish_project_def_factors(self, actor, name, desc, members):
@@ -113,8 +157,12 @@ class Facade:
         cookie = self._find_cookie(actor)
         factors = self.server.get_project_factors(cookie, pid)
         for idx, factor in enumerate(factors.result):
-            res = self.server.vote_on_factor(cookie, pid, factor.fid, factor_vote[idx])
-            self._check_res(res, f"failed to vote on factor {factor_vote[idx]}: {res.msg}")
+            res = self.server.vote_on_factor(
+                cookie, pid, factor["id"], factor_vote[idx]
+            )
+            self._check_res(
+                res, f"failed to vote on factor {factor_vote[idx]}: {res.msg}"
+            )
         res = self.server.vote_severities(cookie, pid, severity_vote)
         self._check_res(res, f"failed to vote on severities {severity_vote}: {res.msg}")
         return True
@@ -126,11 +174,16 @@ class Facade:
             factors = self.server.get_project_factors(cookie, pid).result
             if not factors:
                 raise Exception(f"failed to get factors for project {pid}")
-            if not factors.success:
-                for i in range(len(factors)):
-                    weights[str(factors[i]['id'])] = random.randint(1, 10)
-        
+            # Check if factors is a response object or a list
+            if hasattr(factors, "success") and not factors.success:
+                raise Exception(
+                    f"failed to get factors for project {pid}: {factors.msg}"
+                )
+            # Handle case where factors might be a response object
+            factor_list = factors if isinstance(factors, list) else factors
+            for i in range(len(factor_list)):
+                weights[str(factor_list[i]["id"])] = random.randint(1, 10)
+
         res = self.server.get_score(cookie, pid, weights)
         self._check_res(res, f"failed to get score: {res.msg}")
         return res.result
-
