@@ -1,5 +1,4 @@
 import traceback
-from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
 from Service.config import app, socketio
@@ -18,6 +17,7 @@ from google.auth.transport import requests as google_requests
 
 
 from flask_cors import CORS
+
 
 # app = Flask(__name__)
 #
@@ -172,7 +172,7 @@ def logout():
 @app.route("/accept-terms", methods=["POST"])
 def accept_terms():
     data = request.json
-    res = server.accept_terms(int(data["cookie"]), int(data["acceptedTermsVersion"]))
+    res = server.accept_terms(int(data["cookie"]))
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/google_login", methods=["POST"])

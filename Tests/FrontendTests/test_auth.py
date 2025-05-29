@@ -9,30 +9,25 @@ from base_test import BaseTest
 import pytest
 import time
 import logging
-import uuid
 import sys
+import uuid
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.DEBUG)
+handler.setFormatter(logging.Formatter('%(asctime)s [%(levelname)s] %(message)s'))
 
 if logger.hasHandlers():
     logger.handlers.clear()
 
-console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-console_handler.setFormatter(formatter)
-
-logger.addHandler(console_handler)
+logger.addHandler(handler)
 
 class TestAuthentication(BaseTest):
     TEST_EMAIL = f"test_{uuid.uuid4().hex[:6]}@example.com"
     TEST_PASSWORD = "TestPassword123!"
     TEST_EMAIL_SUCCESS = "testuser_selenium@example.com"
-
-    
-
 
     def go_to_register(self):
         logger.debug("Navigating to register page")

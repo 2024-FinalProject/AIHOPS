@@ -6,11 +6,12 @@ from DAL.Objects.DBMember import DBMember
 from Domain.src.DS.IdMaker import IdMaker
 from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseLogin, ResponseSuccessObj
 from Domain.src.Users.Gmailor import Gmailor
+from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
 from Domain.src.Users.Member import Member
 from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-
+import os
 
 ADMIN = ["admin@admin.com", "admin"]
 
@@ -18,12 +19,16 @@ ADMIN = ["admin@admin.com", "admin"]
 class MemberController:
     def __init__(self, server, db_access):
         self.members = ThreadSafeDict()     # name: user
-        self.gmailor = Gmailor()
+        if os.getenv("TEST_MODE") == "true":
+            self.gmailor = MockGmailor()
+        else:
+            self.gmailor = Gmailor()
         self.register_lock = RLock()
         self.id_maker = IdMaker()
         self.db_access = db_access
         self.get_users_from_db()
         self.GOOGLE_CLIENT_ID = server.GOOGLE_CLIENT_ID
+
 
     def get_users_from_db(self):
         registered_users = self.db_access.load_all(DBMember)

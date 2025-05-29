@@ -1,3 +1,5 @@
+from pathlib import Path
+import sys
 from threading import RLock
 import json
 
@@ -20,6 +22,12 @@ from Domain.src.Users.Gmailor import Gmailor
 from Domain.src.Users.MemberController import ADMIN
 
 
+import os
+from Domain.src.Users.MemberController import ADMIN
+
+from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
+
+
 class ProjectManager:
     def __init__(self, db_access):
         self.research_projects = {}
@@ -30,7 +38,10 @@ class ProjectManager:
         self.project_id_maker = IdMaker()
         self.factor_pool = FactorsPool(self.db_access)
         self.load_from_db()
-        self.gmailor = Gmailor()
+        if os.getenv("TEST_MODE") == "true":
+            gmailor = MockGmailor()
+        else:
+            gmailor = Gmailor()
         self.project_lock = RLock()
         self.research_lock = RLock()
 
