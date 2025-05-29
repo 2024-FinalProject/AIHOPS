@@ -117,7 +117,7 @@ def create_verified_user():
     # Step 4: Accept terms (if needed)
     print("4. Accepting terms...")
     terms_data = {
-        "cookie": cookie,
+        "email": EMAIL,
     }
     
     terms_response = make_request("POST", "/accept-terms", terms_data)

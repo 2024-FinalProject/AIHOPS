@@ -49,59 +49,61 @@ class TestAuthentication(BaseTest):
 
     def scroll_and_accept_terms(self):
         try:
+            logger.debug("Waiting for Terms & Conditions modal...")
             tac_modal_content = WebDriverWait(self.driver, 5).until(
                 EC.visibility_of_element_located((By.CLASS_NAME, "tac-modal-content"))
             )
-            logger.debug("Scrolling Terms & Conditions content")
+
+            logger.debug("Scrolling Terms & Conditions content to bottom...")
             self.driver.execute_script("""
-                var element = arguments[0];
-                var step = 50;
-                function scrollStep() {
-                    if (element.scrollTop + element.clientHeight < element.scrollHeight) {
-                        element.scrollTop += step;
-                        setTimeout(scrollStep, 50);
-                    }
-                }
-                scrollStep();
+                arguments[0].scrollTop = arguments[0].scrollHeight;
             """, tac_modal_content)
 
-            tac_modal_content.click()
-            for _ in range(10):
-                tac_modal_content.send_keys(Keys.PAGE_DOWN)
-                time.sleep(0.1)
+            time.sleep(0.5) 
 
-            accept_button = self.wait_for_clickable(
-                (By.XPATH, "//button[normalize-space()='I Accept' or contains(text(), 'accept')]")
+            accept_button = WebDriverWait(self.driver, 5).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//button[normalize-space()='I Accept' or contains(text(), 'accept')]")
+                )
             )
+
+            logger.debug("Clicking Accept button...")
             accept_button.click()
+
+            WebDriverWait(self.driver, 5).until(
+                EC.invisibility_of_element(tac_modal_content)
+            )
+            logger.debug("Terms accepted successfully.")
+
         except TimeoutException:
-            logger.debug("No Terms modal appeared — skipping acceptance.")
+            logger.warning("No Terms modal appeared — skipping acceptance.")
         except Exception as e:
             logger.error(f"Unexpected error while handling terms modal: {str(e)}", exc_info=True)
 
-    
-    # def test_register_success(self):
-    #     logger.debug("Starting registration test")
-    #     self.go_to_register()
-    #     email_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter email']"))
-        # email_input.send_keys(self.TEST_EMAIL)
-        # password_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter password']"))
-        # password_input.send_keys(self.TEST_PASSWORD)
-        # terms_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Terms and Conditions')]"))
-        # terms_button.click()
-        # self.scroll_and_accept_terms()
-        # submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-        # submit_button.click()
-        # WebDriverWait(self.driver, 15).until(
-        #     EC.text_to_be_present_in_element((By.CLASS_NAME, "register-alert"), "verification email")
-        # )
 
-    # def test_register_fail_empty_fields(self):
-    #     logger.debug("Starting empty fields test")
-    #     self.go_to_register()
-    #     submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-    #     submit_button.click()
-    #     assert not self.driver.find_elements(By.CLASS_NAME, "register-alert")
+    
+    def test_register_success(self):
+        logger.debug("Starting registration test")
+        self.go_to_register()
+        email_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter email']"))
+        email_input.send_keys(self.TEST_EMAIL)
+        password_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter password']"))
+        password_input.send_keys(self.TEST_PASSWORD)
+        terms_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Terms and Conditions')]"))
+        terms_button.click()
+        self.scroll_and_accept_terms()
+        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
+        submit_button.click()
+        WebDriverWait(self.driver, 15).until(
+            EC.text_to_be_present_in_element((By.CLASS_NAME, "register-alert"), "verification email")
+        )
+
+    def test_register_fail_empty_fields(self):
+        logger.debug("Starting empty fields test")
+        self.go_to_register()
+        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
+        submit_button.click()
+        assert not self.driver.find_elements(By.CLASS_NAME, "register-alert")
 
     def test_login_success(self):
         logger.debug("Starting login test")
@@ -116,18 +118,18 @@ class TestAuthentication(BaseTest):
         logout_button = self.wait_for_element((By.XPATH, "//button[contains(text(), 'Logout')]"))
         assert logout_button.is_displayed()
 
-    # def test_login_fail_invalid_credentials(self):
-    #     logger.debug("Starting invalid credentials test")
-    #     self.go_to_login()
-    #     email_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter email']"))
-    #     email_input.send_keys("wronguser@example.com")
-    #     password_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter password']"))
-    #     password_input.send_keys("WrongPass123!")
-    #     submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-    #     submit_button.click()
-    #     WebDriverWait(self.driver, 10).until(
-    #         EC.visibility_of_element_located((By.CLASS_NAME, "login-alert"))
-    #     )
+    def test_login_fail_invalid_credentials(self):
+        logger.debug("Starting invalid credentials test")
+        self.go_to_login()
+        email_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter email']"))
+        email_input.send_keys("wronguser@example.com")
+        password_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter password']"))
+        password_input.send_keys("WrongPass123!")
+        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
+        submit_button.click()
+        WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, "login-alert"))
+        )
 
     def test_logout(self):
         logger.debug("Starting logout test")

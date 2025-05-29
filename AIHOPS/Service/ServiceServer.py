@@ -172,7 +172,7 @@ def logout():
 @app.route("/accept-terms", methods=["POST"])
 def accept_terms():
     data = request.json
-    res = server.accept_terms(int(data["cookie"]))
+    res = server.accept_terms(data["email"])
     return jsonify({"message": res.msg, "success": res.success})
 
 @app.route("/google_login", methods=["POST"])
