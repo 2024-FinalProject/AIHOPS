@@ -4,9 +4,28 @@ from base_test import BaseTest
 import pytest
 import time
 
+import logging
+import uuid
+import sys
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+if logger.hasHandlers():
+    logger.handlers.clear()
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+console_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+
 class TestProjects(BaseTest):
     def login(self):
-        self.driver.get(f"{self.base_url}/")
+        logger.debug("Logging in with test user credentials")
+        self.driver.get(self.base_url)
         login_link = self.wait_for_clickable((By.LINK_TEXT, "Login"))
         login_link.click()
         time.sleep(1)
@@ -18,11 +37,15 @@ class TestProjects(BaseTest):
         submit_button.click()
         time.sleep(2)
 
-    def setup_method(self, method):
-        # Ensure driver is initialized and login before each test
-        self.login()
+    # def setup(self, method):
+    #     super().setup(method)
+
+    #     # Ensure driver is initialized and login before each test
+    #     self.login()
 
     def test_create_project_success(self):
+        self.login()
+        logger.debug("Testing project creation with valid data")
         self.driver.get(f"{self.base_url}/projects/create")
         name_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter project name']"))
         name_input.send_keys("Test Project")
@@ -36,6 +59,7 @@ class TestProjects(BaseTest):
         assert any("Test Project" in item.text for item in project_list)
 
     def test_create_project_fail_empty_fields(self):
+        logger.debug("Testing project creation with empty fields")
         self.driver.get(f"{self.base_url}/projects/create")
         submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
         submit_button.click()
@@ -43,7 +67,7 @@ class TestProjects(BaseTest):
         assert len(error_messages) > 0
 
     def test_add_project_factor(self):
-        """Test adding a factor to a project"""
+        logger.debug("Test adding a factor to a project")
         # First create a project
         self.driver.get(f"{self.base_url}/projects/create")
         name_input = self.wait_for_element((By.NAME, "projectName"))

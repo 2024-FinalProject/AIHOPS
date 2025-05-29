@@ -39,12 +39,25 @@ class Facade:
         verify_res = self.server.verify(cookie, email, passwd, "1234")
         if not verify_res.success:
             raise Exception(f"failed to verify {email}: {verify_res.msg}")
+        
+    def accept_terms(self, email):
+        res = self.server.accept_terms(email)
+        if not res.success:
+            raise Exception(f"failed to accept terms: {res.msg}")
+        return res
 
     def register_verify_login(self, email, passwd):
         self.register_and_verify_self(email, passwd)
         res = self.server.login(self._find_cookie(email), email, passwd)
         if not res.success:
             raise Exception(f"failed to login {email}: {res.msg}")
+        
+    def login(self, email, passwd):
+        cookie = self._find_cookie(email)
+        res = self.server.login(cookie, email, passwd)
+        if not res.success:
+            raise Exception(f"failed to login {email}: {res.msg}")
+        return res.result
 
     def create_project(self, actor, use_def_factors, p_name, p_desc):
         cookie = self._find_cookie(actor)

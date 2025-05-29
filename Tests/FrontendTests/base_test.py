@@ -4,13 +4,28 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+
 import pytest
 import time
-import os
+import uuid
 import logging
+import sys
 
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+
+if logger.hasHandlers():
+    logger.handlers.clear()
+
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+console_handler.setFormatter(formatter)
+
+
+logger.addHandler(console_handler)
 
 class BaseTest:
     @pytest.fixture(autouse=True)
@@ -25,7 +40,10 @@ class BaseTest:
             # Use manually downloaded ChromeDriver
             driver_path = "C:\\WebDriver\\bin\\chromedriver.exe"
             logger.debug(f"ChromeDriver path: {driver_path}")
-            service = Service(executable_path=driver_path)
+            # service = Service(executable_path=driver_path)
+
+            service = Service(ChromeDriverManager().install())
+
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
             logger.debug("ChromeDriver initialized successfully")
             

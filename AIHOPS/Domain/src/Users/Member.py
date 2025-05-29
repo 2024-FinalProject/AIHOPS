@@ -59,3 +59,5 @@ class Member:
         """Updates the profile picture for the member"""
         self.profile_picture = filename
         return True
+
+    

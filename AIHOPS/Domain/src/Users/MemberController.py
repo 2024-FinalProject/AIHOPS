@@ -105,7 +105,9 @@ class MemberController:
         # Check if member exists
         member = self.members.get(email)
         if member is None:
-            return ResponseFailMsg("Incorrect username or password")
+            return ResponseFailMsg(f"Member {email} not found - {self.members.size()} members registered")
+            # return ResponseFailMsg("Incorrect Member")
+        # TODO
         
         # Verify login
         try:
@@ -257,14 +259,16 @@ class MemberController:
         self.members.pop(email)
         return ResponseSuccessMsg(f"Member {email} and all their projects have been deleted.")
 
-    def accept_terms(self, actor, version):
-        self._verify_valid_member(actor)
-        member = self.members.get(actor)
-        res = self.db_access.update_by_query(DBMember, {"email": actor}, {"accepted_tac_version": version})
+    def accept_terms(self, email, version):
+        self._verify_valid_member(email)
+        member = self.members.get(email)
+        # print(f"Member!!!!!! {email}")
+        # print(f"Version!!!!!! {version}")
+        res = self.db_access.update_by_query(DBMember, {"email": email}, {"accepted_tac_version": version})
         if not res.success:
             return res
         member.accepted_tac_version = version
-        return ResponseSuccessMsg(f'Accepted terms for {actor} version {version}')
+        return ResponseSuccessMsg(f'Accepted terms for {email} version {version}')
     
     def fetch_profile_picture_from_google(self, token_id, source='google'):
         """
@@ -391,3 +395,14 @@ class MemberController:
                 return ResponseFailMsg("Database update failed")
         except Exception as e:
             return ResponseFailMsg(f"Failed to update profile picture: {e}")
+
+    def get_terms_and_conditions_version(self, email):
+        """
+        Returns the current version of the Terms and Conditions.
+        This is a placeholder method that should be implemented to return the actual version.
+        """
+        # For now, we return a hardcoded version number
+        actor = self.members.get(email)
+        if actor is None:
+            return ResponseFailMsg(f"Member {email} not found")
+        return ResponseSuccessObj("Terms and Conditions version", actor.accepted_tac_version)

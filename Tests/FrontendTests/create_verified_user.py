@@ -30,6 +30,8 @@ def main():
         facade = Facade()
         try:
             facade.register_and_verify_self(email, password)
+            facade.accept_terms(email)
+            # facade.login(email, password)
             print(f"User {email} registered and verified successfully.")
         except Exception as e:
             error_message = str(e)
