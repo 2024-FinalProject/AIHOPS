@@ -25,7 +25,7 @@ const CreateProjectPopup = ({
               <u>Name</u>:
             </b>
           </label>
-          <input
+          <input className="create-project-name-input"
             type="text"
             value={newProject.name}
             onChange={(e) =>
@@ -43,7 +43,7 @@ const CreateProjectPopup = ({
               <u>Description</u>:
             </b>
           </label>
-          <textarea
+          <textarea className="create-project-description-input"
             value={newProject.description}
             onChange={(e) =>
               setNewProject((prev) => ({

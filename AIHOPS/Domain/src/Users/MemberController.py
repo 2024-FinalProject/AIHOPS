@@ -110,9 +110,7 @@ class MemberController:
         # Check if member exists
         member = self.members.get(email)
         if member is None:
-            return ResponseFailMsg(f"Member {email} not found - {self.members.size()} members registered")
-            # return ResponseFailMsg("Incorrect Member")
-        # TODO
+            return ResponseFailMsg("Incorrect Member")
         
         # Verify login
         try:
