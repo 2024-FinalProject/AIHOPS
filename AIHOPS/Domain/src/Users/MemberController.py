@@ -12,8 +12,16 @@ from Domain.src.DS.ThreadSafeDict import ThreadSafeDict
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import os
+import re
+
 
 ADMIN = ["admin@admin.com", "admin"]
+
+
+def _verify_valid_email_address(email):
+    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+    if re.match(pattern, email) is None:
+        raise Exception("Invalid email address")
 
 
 class MemberController:
@@ -42,6 +50,7 @@ class MemberController:
         self.id_maker.start_from(last_id)
 
     def register(self, email, passwd, accepted_tac_version=-1):
+        _verify_valid_email_address(email)
         # verify username is available
         # add to users
         with self.register_lock:
