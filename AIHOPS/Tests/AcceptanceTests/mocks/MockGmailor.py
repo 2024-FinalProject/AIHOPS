@@ -8,7 +8,6 @@ from Domain.src.Loggs.Response import (
     ResponseSuccessObj,
 )
 
-
 class MockGmailor:
     """Simplified mock that always succeeds for testing"""
 
@@ -17,15 +16,13 @@ class MockGmailor:
 
     def register(self, email, length=6):
         """Mock registration - always succeeds"""
-        return ResponseSuccessMsg(f"Mock registration for {email}")
+        return "000000"
 
     def verify(self, email, code):
-        """Mock verification - always succeeds with any code"""
-        return ResponseSuccessMsg(f"Mock verification for {email}")
+        return ResponseSuccessMsg("")  # Always return successful verification
 
     def verify_automatic(self, code):
-        """Mock automatic verification - always succeeds"""
-        return ResponseSuccessObj("Mock auto verification", "test@example.com")
+        return True  # Always return successful verification
 
     def is_member_verifiable(self, email):
         """Always return True for testing"""
