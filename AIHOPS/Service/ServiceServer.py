@@ -1,5 +1,4 @@
 import traceback
-from DAL.Objects.DBFactors import DBFactors
 from Domain.src.DS import FactorsPool
 from Domain.src.Server import Server
 from Service.config import app, socketio
@@ -18,6 +17,7 @@ from google.auth.transport import requests as google_requests
 
 
 from flask_cors import CORS
+
 
 # app = Flask(__name__)
 #

@@ -172,6 +172,20 @@ class Server:
 
     def _is_need_to_accept_new_terms_anc_conditions(self, version):
         return self.tac_controller.current_version > version
+    
+    # def get_terms_and_conditions(self, cookie):
+    #     try:
+    #         res = self.get_session(cookie)
+    #         if not res.success:
+    #             return res
+    #         session = res.result
+    #         # Get the current terms and conditions version
+    #         actor = self.user_controller.members.get(session.user_name)
+    #         if not actor:
+    #             return ResponseFailMsg("User not found")
+    #         current_version = self.member_controller.get_terms_and_conditions_version(actor.email)
+            
+
 
     def login(self, cookie, name, passwd):
         try:

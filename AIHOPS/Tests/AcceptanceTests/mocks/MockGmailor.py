@@ -8,7 +8,6 @@ from Domain.src.Loggs.Response import (
     ResponseSuccessObj,
 )
 
-
 class MockGmailor:
     """Simplified mock that always succeeds for testing"""
 
