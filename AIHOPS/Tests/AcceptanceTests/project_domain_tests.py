@@ -22,11 +22,11 @@ from Tests.AcceptanceTests.mocks.MockTACController import MockTACController
 #   cd AIHOPS
 #   python3 -m unittest test_project
 
+
 class ProjectTests(unittest.TestCase):
     # ------------- Base ------------------
     @patch("Domain.src.Users.MemberController.Gmailor", new=MockGmailor)
     @patch("Domain.src.Server.TACController", new=MockTACController)
-
     def setUp(self) -> None:
         Base.metadata.create_all(engine)  # must initialize the database
         FP.insert_defaults()
@@ -43,7 +43,7 @@ class ProjectTests(unittest.TestCase):
 
     def text_enter(self):
         res = self.server.enter()
-        self.assertTrue(res.success, f'Enter failed')
+        self.assertTrue(res.success, f"Enter failed")
 
     def create_server(self):
         self.server = Server()
@@ -55,8 +55,21 @@ class ProjectTests(unittest.TestCase):
         self.p2_data = ["project2", "desc2"]
         self.cookie = self.server.enter().result.cookie
 
-        #factors have name, desc, scales_Desc0 - scales_Desc4, scales_explanation0 - scales_explanation4 - all of which are strings
-        self.factors = ("factor1", "desc1", ["scale0", "scale1", "scale2", "scale3", "scale4"], ["explanation0", "explanation1", "explanation2", "explanation3", "explanation4"]),
+        # factors have name, desc, scales_Desc0 - scales_Desc4, scales_explanation0 - scales_explanation4 - all of which are strings
+        self.factors = (
+            (
+                "factor1",
+                "desc1",
+                ["scale0", "scale1", "scale2", "scale3", "scale4"],
+                [
+                    "explanation0",
+                    "explanation1",
+                    "explanation2",
+                    "explanation3",
+                    "explanation4",
+                ],
+            ),
+        )
         self.severities = [1, 2, 3, 4, 5]
 
     def register_alice_bob(self):
@@ -69,14 +82,21 @@ class ProjectTests(unittest.TestCase):
         self.server.register(self.cookie, *self.EveCred)
 
     def create_project(self, cookie, user, project_name, project_desc, use_defaults):
-        res = self.server.create_project(cookie, project_name, project_desc, use_defaults)
-        self.assertTrue(res.success, f"failed to create project {project_name} user: {user}, {res.msg}")
+        res = self.server.create_project(
+            cookie, project_name, project_desc, use_defaults
+        )
+        self.assertTrue(
+            res.success,
+            f"failed to create project {project_name} user: {user}, {res.msg}",
+        )
         return res.result
 
     def create_project_fail(self, cookie, user, project_name, project_desc):
         res = self.server.create_project(cookie, project_name, project_desc)
-        self.assertFalse(res.success,
-                         f"created project {project_name}, {project_desc} user: {user}, when should have failed")
+        self.assertFalse(
+            res.success,
+            f"created project {project_name}, {project_desc} user: {user}, when should have failed",
+        )
 
     def login(self, cookie, user):
         res = self.server.login(cookie, *user)
@@ -114,11 +134,7 @@ class ProjectTests(unittest.TestCase):
         pid = self.create_project(cookie1, self.AliceCred, *self.p1_data, use_defaults)
         return cookie1, pid
 
-
-
-  
-
-    def start_project_with_bob_member(self, publish= True):
+    def start_project_with_bob_member(self, publish=True):
         cookie, pid = self.start_and_create_project()
         self.server.add_member(cookie, pid, self.BobCred[0])
         self.set_default_factors_for_project(cookie, pid)
@@ -130,7 +146,9 @@ class ProjectTests(unittest.TestCase):
             cookie_bob = self.server.enter().result.cookie
             self.login(cookie_bob, self.BobCred)
             res = self.server.approve_member(cookie_bob, pid)
-            self.assertTrue(res.success, f"user bob failed to be approved member {res.msg}")
+            self.assertTrue(
+                res.success, f"user bob failed to be approved member {res.msg}"
+            )
             return cookie, cookie_bob, pid
         return cookie, pid
 
@@ -150,8 +168,6 @@ class ProjectTests(unittest.TestCase):
     def test_create_project_failure_no_desc(self):
         cookie1, pid = self.start_and_create_project()
         self.create_project_fail(cookie1, pid, "sus", None)
-
-
 
     def test_get_score(self):
         cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
@@ -175,7 +191,6 @@ class ProjectTests(unittest.TestCase):
         res = self.server.get_score(cookie_alice, pid, weights)
         self.assertTrue(res.success, f"failed to get score {res.msg}")
 
-
     def test_project_default_factors_success(self):
         self.create_server()
         self.register_all()
@@ -188,23 +203,33 @@ class ProjectTests(unittest.TestCase):
         factors = self.server.get_project_factors(cookie1, pid).result
         severity_factors = self.server.get_project_severity_factors(cookie1, pid).result
 
-        self.assertTrue(factors == default_factors_list_dicts, f"default factors not entered")
-        self.assertTrue(severity_factors == DEFAULT_SEVERITY_FACTORS, f"default severity factors not entered")
+        self.assertTrue(
+            factors == default_factors_list_dicts, f"default factors not entered"
+        )
+        self.assertTrue(
+            severity_factors == DEFAULT_SEVERITY_FACTORS,
+            f"default severity factors not entered",
+        )
 
         self.server = Server()
         cookie1 = self.server.enter().result.cookie
         self.login(cookie1, self.AliceCred)
 
         factors = self.server.get_project_factors(cookie1, pid).result
-        self.assertTrue(len(factors) == len(DEFAULT_FACTORS), f"number of factors loaded: {len(factors)}, expected {len(DEFAULT_FACTORS)}")
+        self.assertTrue(
+            len(factors) == len(DEFAULT_FACTORS),
+            f"number of factors loaded: {len(factors)}, expected {len(DEFAULT_FACTORS)}",
+        )
         for factor in default_factors_list_dicts:
             self.assertTrue(factor in factors, f"factor {factor} not loaded")
 
         severity_factors = self.server.get_project_severity_factors(cookie1, pid).result
-        self.assertTrue(severity_factors == DEFAULT_SEVERITY_FACTORS, f"default severity factors not loaded correctly")
+        self.assertTrue(
+            severity_factors == DEFAULT_SEVERITY_FACTORS,
+            f"default severity factors not loaded correctly",
+        )
 
-
-    #Not implemented yet!
+    # Not implemented yet!
 
     # def test_update_factor(self):
     #     cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
@@ -225,30 +250,33 @@ class ProjectTests(unittest.TestCase):
     #     self._check_factor_updated(factors, cookie_alice, factor_old, new_fields)
 
     def _check_factor_updated(self, factors, cookie_alice, factor_old, new_fields):
-        self.assertFalse(factor_old in factors, f"old factor is still in factors pool for alice")
+        self.assertFalse(
+            factor_old in factors, f"old factor is still in factors pool for alice"
+        )
         found = False
         for f in factors:
             if f["id"] == factor_old["id"]:
-                self.assertTrue(f["description"] == new_fields[1], f"factor desc not updated")
+                self.assertTrue(
+                    f["description"] == new_fields[1], f"factor desc not updated"
+                )
                 self.assertTrue(f["name"] == new_fields[0], f"factor name not updated")
                 found = True
                 break
         self.assertTrue(found, f"factor not found")
 
+        # Not implemented yet!
+        # def test_update_factor_after_db_loaded(self):
+        #     cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
+        #     factors = self.server.get_project_factors(cookie_alice, pid).result
 
-    # Not implemented yet!
-    # def test_update_factor_after_db_loaded(self):
-    #     cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
-    #     factors = self.server.get_project_factors(cookie_alice, pid).result
+        #     factor_old = copy.deepcopy(random.choice(factors))
+        #     new_fields = ["new name", "new desc"]
 
-    #     factor_old = copy.deepcopy(random.choice(factors))
-    #     new_fields = ["new name", "new desc"]
+        #     self.server = Server()
+        #     cookie_alice = self.enter_login(self.AliceCred)
 
-    #     self.server = Server()
-    #     cookie_alice = self.enter_login(self.AliceCred)
-
-    #     res = self.server.update_factor(cookie_alice, factor_old["id"], *new_fields)
-    #     self.assertTrue(res.success, f"failed to update factor {res.msg}")
+        #     res = self.server.update_factor(cookie_alice, factor_old["id"], *new_fields)
+        #     self.assertTrue(res.success, f"failed to update factor {res.msg}")
 
         # check factor updated in factor pool
         factors = self.server.get_factor_pool_of_member(cookie_alice).result
@@ -295,9 +323,6 @@ class ProjectTests(unittest.TestCase):
     #     res = self.server.update_factor(cookieBob, 0, "new name", "new desc")
     #     self.assertFalse(res.success, f"updated factor in project that bob is not owner")
 
-
-
-        
     def test_get_member_vote_success(self):
         c, cookie, pid = self.start_project_with_bob_member()
         factors = self.server.get_project_factors(cookie, pid).result
@@ -309,7 +334,7 @@ class ProjectTests(unittest.TestCase):
             factor_votes[factor_ids[i]] = votes[i]
 
         # vote on severities
-        severity_votes = [50,30,10,7,3]
+        severity_votes = [50, 30, 10, 7, 3]
         self.server.vote_severities(cookie, pid, severity_votes)
 
         # reload server so everything loaded from db
@@ -319,49 +344,54 @@ class ProjectTests(unittest.TestCase):
         cookie = self.server.enter().result.cookie
         self.login(cookie, self.BobCred)
         res = self.server.get_member_vote_on_project(cookie, pid)
-        self.assertTrue(res.success, f"user {pid} failed to get vote on project {pid}, {res.msg}")
+        self.assertTrue(
+            res.success, f"user {pid} failed to get vote on project {pid}, {res.msg}"
+        )
 
         fetched_factor_votes = res.result["factor_votes"]
         fetched_severity_votes = res.result["severity_votes"]
 
-        self.assertTrue(factor_votes == fetched_factor_votes, f"factor votes: expected: {factor_votes}, actual: {fetched_factor_votes}")
-        self.assertTrue(severity_votes == fetched_severity_votes, f"severity votes: expected: {severity_votes}, actual: {fetched_severity_votes}")
+        self.assertTrue(
+            factor_votes == fetched_factor_votes,
+            f"factor votes: expected: {factor_votes}, actual: {fetched_factor_votes}",
+        )
+        self.assertTrue(
+            severity_votes == fetched_severity_votes,
+            f"severity votes: expected: {severity_votes}, actual: {fetched_severity_votes}",
+        )
 
-    
     def test_get_member_vote_no_member(self):
         cooike, pid = self.start_and_create_project()
-        
+
         # enter with a new member
         invaild_cookie = self.server.enter().result.cookie
         self.facade.register_and_verify(self.server, invaild_cookie, "Charlie", "")
         # self.login(invaild_cookie, ["Charlie", ""])
 
         # get the vote with invalid member
-        res = self.server.get_member_vote_on_project(invaild_cookie, pid)   
+        res = self.server.get_member_vote_on_project(invaild_cookie, pid)
 
-        self.assertFalse(res.success, f"Actor Charlie not in project {pid}" )
-    
+        self.assertFalse(res.success, f"Actor Charlie not in project {pid}")
+
     def test_get_member_vote_no_project(self):
         c, cookie, pid = self.start_project_with_bob_member()
 
         res = self.server.get_member_vote_on_project(cookie, pid + 1)
         self.assertFalse(res.success, f"Got vote on project that doesn't exist")
-    
 
     def test_get_member_vote_no_vote(self):
         c, cookie, pid = self.start_project_with_bob_member()
 
         # get the vote with invalid member
-        res = self.server.get_member_vote_on_project(cookie, pid)  
+        res = self.server.get_member_vote_on_project(cookie, pid)
 
         self.assertTrue(res.success, f"Got vote on project that has no votes")
 
-        factors_votes = res.result["factor_votes"] 
+        factors_votes = res.result["factor_votes"]
         severity_votes = res.result["severity_votes"]
 
         self.assertTrue(factors_votes == {}, f"Got vote on project that has no votes")
         self.assertTrue(severity_votes == [], f"Got vote on project that has no votes")
-
 
     def test_create_project_failure_duplicate_published(self):
         c, cookie, pid1 = self.start_project_with_bob_member()
@@ -371,13 +401,14 @@ class ProjectTests(unittest.TestCase):
         self.server.publish_project(cookie, pid1)
         res = self.server.publish_project(cookie, pid2)
 
-        self.assertFalse(res.success, f"Can not publish 2 projects with the same name and desc")
-
+        self.assertFalse(
+            res.success, f"Can not publish 2 projects with the same name and desc"
+        )
 
     def test_add_project_factor_success(self):
         cookie1, pid = self.start_and_create_project()
         self.set_default_factors_for_project(cookie1, pid)
-        
+
         # reload server
         self.server = Server()
         cookie1 = self.server.enter().result.cookie
@@ -387,33 +418,67 @@ class ProjectTests(unittest.TestCase):
         self.assertTrue(projects is not None)
         project = projects.get(pid)
         res = project.get_factors(self.AliceCred[0])
-        self.assertTrue(len(res.result) == len(self.factors), f"failed to add factor {self.factors}")
+        self.assertTrue(
+            len(res.result) == len(self.factors), f"failed to add factor {self.factors}"
+        )
 
         factors = res.result
 
         for i in range(len(factors)):
             self.assertTrue(factors[i].name == self.factors[i][0])
             self.assertTrue(factors[i].description == self.factors[i][1])
-
 
     def test_add_project_factor_fail_not_owner(self):
         c, cookie, pid = self.start_project_with_bob_member()
         cookie2 = self.server.enter().result.cookie
         self.login(cookie2, self.BobCred)
-        res = self.server.add_project_factor(cookie2, pid, "factor1", "desc1", ["scale0", "scale1", "scale2", "scale3", "scale4"], ["explanation0", "explanation1", "explanation2", "explanation3", "explanation4"])
+        res = self.server.add_project_factor(
+            cookie2,
+            pid,
+            "factor1",
+            "desc1",
+            ["scale0", "scale1", "scale2", "scale3", "scale4"],
+            [
+                "explanation0",
+                "explanation1",
+                "explanation2",
+                "explanation3",
+                "explanation4",
+            ],
+        )
         self.assertFalse(res.success, f"Bob added factor to alices project")
 
     def test_add_project_factor_fail_project_doesnt_exists(self):
         c, cookie, pid = self.start_project_with_bob_member()
-        res = self.server.add_project_factor(cookie, pid + 1, "factor1", "desc1", ["scale0", "scale1", "scale2", "scale3", "scale4"], ["explanation0", "explanation1", "explanation2", "explanation3", "explanation4"])
-        self.assertFalse(res.success, f"Added factor to project that doesn't exist") 
-    
+        res = self.server.add_project_factor(
+            cookie,
+            pid + 1,
+            "factor1",
+            "desc1",
+            ["scale0", "scale1", "scale2", "scale3", "scale4"],
+            [
+                "explanation0",
+                "explanation1",
+                "explanation2",
+                "explanation3",
+                "explanation4",
+            ],
+        )
+        self.assertFalse(res.success, f"Added factor to project that doesn't exist")
+
     def test_add_project_factors_multiple_success(self):
         cookie1, pid = self.start_and_create_project()
         for i in range(len(self.factors)):
-            res = self.server.add_project_factor(cookie1, pid, self.factors[i][0], self.factors[i][1], self.factors[i][2], self.factors[i][3])
+            res = self.server.add_project_factor(
+                cookie1,
+                pid,
+                self.factors[i][0],
+                self.factors[i][1],
+                self.factors[i][2],
+                self.factors[i][3],
+            )
             self.assertTrue(res.success, f"failed to add factor {self.factors[i]}")
-        
+
         # reload server
         self.server = Server()
         cookie1 = self.server.enter().result.cookie
@@ -426,9 +491,7 @@ class ProjectTests(unittest.TestCase):
         for i in range(len(factors)):
             self.assertTrue(factors[i].name == self.factors[i][0])
             self.assertTrue(factors[i].description == self.factors[i][1])
-    
 
-        
     def test_remove_project_factor_success(self):
         cookie1, pid = self.start_and_create_project()
         self.set_default_factors_for_project(cookie1, pid)
@@ -447,7 +510,7 @@ class ProjectTests(unittest.TestCase):
         res = project.get_factors(self.AliceCred[0])
         factors = res.result
         self.assertFalse(factor in factors, f"factor {factor} still in project")
-    
+
     def test_remove_project_factor_fail_no_factor(self):
         cookie1, pid = self.start_and_create_project()
         res = self.server.delete_project_factor(cookie1, pid, 0)
@@ -462,7 +525,6 @@ class ProjectTests(unittest.TestCase):
         res = self.server.delete_project_factor(cookie2, pid, factor["id"])
         self.assertFalse(res.success, f"Bob removed factor from alices project")
 
-    
     def test_set_severity_factors_success(self):
         cookie1, pid = self.start_and_create_project()
         self.set_default_severity_factors_for_project(cookie1, pid)
@@ -478,7 +540,6 @@ class ProjectTests(unittest.TestCase):
         res = project.get_severity_factors()
         self.assertTrue(res.result == self.severities)
 
-    
     def test_update_project_name_and_desc_Serializable_success(self):
         cookie, pid = self.start_project_with_bob_member(False)
         new_name = "new name"
@@ -503,52 +564,77 @@ class ProjectTests(unittest.TestCase):
         new_desc = "new desc2"
         res = self.server.update_project_name_and_desc(cookie, pid, new_name, new_desc)
         self.assertFalse(res.success, f"updated project name or desc after publish")
-        
-    
+
     def _get_all_project_members_lists(self, pid):
         pendings = self.server.project_manager._get_pending_emails_by_projects_list(pid)
-        project_to_invite = self.server.project_manager.projects.get(pid).to_invite_when_published.list
+        project_to_invite = self.server.project_manager.projects.get(
+            pid
+        ).to_invite_when_published.list
         project_members = self.server.project_manager.projects.get(pid).members.list
         return pendings, project_to_invite, project_members
 
     def test_add_member_b4_publish_fail_no_project(self):
         cookie_alice, pid = self.start_and_create_project()
         res = self.server.add_member(cookie_alice, 12, "bob")
-        self.assertFalse(res.success, f"failed to fail add member \n res: {res.msg} \n pid is invalid: 12")
+        self.assertFalse(
+            res.success,
+            f"failed to fail add member \n res: {res.msg} \n pid is invalid: 12",
+        )
         self._assert_member_not_added_in_any_way_to_project(pid, "bob")
 
-
     def _assert_member_not_added_in_any_way_to_project(self, pid, member):
-        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
-        self.assertFalse("bob" in pendings, "bob added to pending even tho invalid project")
-        self.assertFalse("bob" in project_to_invite, "bob added to to_invite even tho invalid project")
-        self.assertFalse("bob" in project_members, "bob added to members even tho invalid project")
+        pendings, project_to_invite, project_members = (
+            self._get_all_project_members_lists(pid)
+        )
+        self.assertFalse(
+            "bob" in pendings, "bob added to pending even tho invalid project"
+        )
+        self.assertFalse(
+            "bob" in project_to_invite,
+            "bob added to to_invite even tho invalid project",
+        )
+        self.assertFalse(
+            "bob" in project_members, "bob added to members even tho invalid project"
+        )
 
     def test_add_member_b4_publish_fail_wrong_cookie(self):
         cookie_alice, pid = self.start_and_create_project()
         cookie = self.server.enter().result.cookie
         res = self.server.add_member(cookie, pid, "bob")
-        self.assertFalse(res.success, f"failed to fail add member, cookie is not project owners")
+        self.assertFalse(
+            res.success, f"failed to fail add member, cookie is not project owners"
+        )
         self._assert_member_not_added_in_any_way_to_project(pid, "bob")
-
 
     def test_add_member_b4_publish_success(self):
         cookie_alice, pid = self.start_and_create_project()
         # try to add member b4 publish
         res = self.server.add_member(cookie_alice, pid, "bob")
         # verify it only added into the to_invite list inside project, not in members and not in invited
-        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
+        pendings, project_to_invite, project_members = (
+            self._get_all_project_members_lists(pid)
+        )
 
-        self.assertFalse("bob" in pendings, "bob added to pending, project not published")
+        self.assertFalse(
+            "bob" in pendings, "bob added to pending, project not published"
+        )
         self.assertTrue("bob" in project_to_invite, "bob not added to to_invite")
-        self.assertFalse("bob" in project_members, "bob added to members, project not published")
+        self.assertFalse(
+            "bob" in project_members, "bob added to members, project not published"
+        )
 
         self.server = Server()
-        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
+        pendings, project_to_invite, project_members = (
+            self._get_all_project_members_lists(pid)
+        )
 
-        self.assertFalse("bob" in pendings, "bob added to pending, project not published")
+        self.assertFalse(
+            "bob" in pendings, "bob added to pending, project not published"
+        )
         self.assertTrue("bob" in project_to_invite, "bob not added to to_invite")
-        self.assertFalse("bob" in project_members, "bob added to members, project not published")
+        self.assertFalse(
+            "bob" in project_members, "bob added to members, project not published"
+        )
 
     def test_remove_member_b4_publish(self):
         cookie_alice, pid = self.start_and_create_project()
@@ -572,11 +658,18 @@ class ProjectTests(unittest.TestCase):
         cookie_alice, pid = self._enter_create_project_defaults_publish()
 
         # self.server.publish_project(cookie_alice, pid)
-        pendings, project_to_invite, project_members = self._get_all_project_members_lists(pid)
+        pendings, project_to_invite, project_members = (
+            self._get_all_project_members_lists(pid)
+        )
 
-        self.assertTrue("bob" in pendings, "bob not added to pending, project published")
+        self.assertTrue(
+            "bob" in pendings, "bob not added to pending, project published"
+        )
         self.assertFalse("bob" in project_to_invite, "bob in to_invite")
-        self.assertFalse("bob" in project_members, "bob added to members, project published but bob not approved")
+        self.assertFalse(
+            "bob" in project_members,
+            "bob added to members, project published but bob not approved",
+        )
 
     def test_add_member_fail_duplicate_member_b4_publish(self):
         cookie_alice, pid = self.start_and_create_project(use_defaults=True)
@@ -588,7 +681,6 @@ class ProjectTests(unittest.TestCase):
         cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
         res = self.server.add_member(cookie_alice, pid, self.BobCred[0])
         self.assertFalse(res.success, "added duplicate member")
-
 
     def test_add_member_fail_duplicate_member_after_publish_member_approved(self):
         cookie_alice, cookie_bob, pid = self.start_project_with_bob_member()
@@ -613,22 +705,24 @@ class ProjectTests(unittest.TestCase):
         self.server.add_member(cookie_alice, pid, "bob")
         self.server.confirm_project_factors(cookie_alice, pid)
         res = self.server.publish_project(cookie_alice, pid)
-        self.assertFalse(res.success, "published project witout comfirming severity factors")
+        self.assertFalse(
+            res.success, "published project witout comfirming severity factors"
+        )
 
     def test_publish_success_no_members_to_invite(self):
         cookie_alice, pid = self.start_and_create_project(use_defaults=True)
         self.server.confirm_project_factors(cookie_alice, pid)
         self.server.confirm_project_severity_factors(cookie_alice, pid)
         res = self.server.publish_project(cookie_alice, pid)
-        self.assertTrue(res.success, "failed to published project witout any members to invite")
-
+        self.assertTrue(
+            res.success, "failed to published project witout any members to invite"
+        )
 
     def test_remove_member_after_publish(self):
         cookie_alice, pid = self._enter_create_project_defaults_publish()
         res = self.server.remove_member(cookie_alice, pid, "bob")
         self.assertTrue(res.success, "failed to removed member")
         self._assert_member_not_added_in_any_way_to_project(pid, "bob")
-
 
     # def test_remove_dactors/set_severity_factors after test_remove_member_b4_publish()
     #
@@ -644,16 +738,3 @@ class ProjectTests(unittest.TestCase):
     # def test_vote_on_severity
     #
     # def test_archive_project
-
-
-
-
-
-
-
-
-
-
-
-
-
