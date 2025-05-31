@@ -1,27 +1,27 @@
 [
   {
     "level": "Level 1",
-    "description": "12",
-    "severity": 0.5
+    "description": "Minimal impact",
+    "severity": 0.1
   },
   {
     "level": "Level 2",
-    "description": "sussss",
-    "severity": 1
+    "description": "Low impact",
+    "severity": 1.0
   },
   {
     "level": "Level 3",
-    "description": "sssssssssss",
-    "severity": 30
+    "description": "Medium impact",
+    "severity": 5.0
   },
   {
     "level": "Level 4",
-    "description": "Impacts are substantial, disrupting core activities significantly. Recovery demands considerable resources and time, posing challenges to operational continuity.",
-    "severity": 200
+    "description": "High impact",
+    "severity": 25.0
   },
   {
-    "level": "1232123123",
-    "description": "idi suda",
-    "severity": 1000
+    "level": "Level 5",
+    "description": "Critical impact",
+    "severity": 100.0
   }
 ]

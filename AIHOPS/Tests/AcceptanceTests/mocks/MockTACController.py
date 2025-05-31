@@ -1,43 +1,42 @@
-from Domain.src.Users.TACController import TACController
-import os
-import re
+"""
+Mock implementation of TACController for testing
+"""
 
-class MockTACController(TACController):
-    def __init__(self, socketio=None, folder_name="Domain/src/Users/terms_and_conditions"):
-        super().__init__(socketio, folder_name)
-        self.socketio = self  # Replace socketio with self to handle emit calls
-        
-    def emit(self, event, data):
-        # Mock implementation of emit that does nothing
-        pass
-        
+from Domain.src.Loggs.Response import ResponseSuccessMsg
+
+
+class MockTACController:
+    """Mock Terms and Conditions controller for testing"""
+
+    def __init__(self, socketio=None, folder_name=None):
+        self.socketio = socketio
+        self.current_version = 1
+        self.current_text = "Mock Terms and Conditions - Test Version"
+        print("🔧 MockTACController initialized")
+
     def load(self):
-        print("Looking for T&C files in:", self.folder)
-        files = [f for f in os.listdir(self.folder) if f.startswith("terms_and_conditions_v")]
-        if not files:
-            raise FileNotFoundError("No terms and conditions file found.")
+        """Mock load - always succeeds"""
+        print(f"🔧 MockTACController: Loaded terms v{self.current_version}")
+        return ResponseSuccessMsg("Mock terms loaded successfully")
 
-        versioned_files = []
-        for f in files:
-            match = re.search(r'_v(\d+)$', f)  # stricter: ends with _v{n}
-            if match:
-                versioned_files.append((f, int(match.group(1))))
-            else:
-                print(f"Skipping invalid filename: {f}")
+    def update(self, tac_text):
+        """Mock update - always succeeds"""
+        self.current_version += 1
+        self.current_text = tac_text
+        print(f"🔧 MockTACController: Updated to v{self.current_version}")
 
-        if not versioned_files:
-            raise ValueError("No valid terms file with version suffix found.")
+        # Mock socket emission
+        if self.socketio:
+            try:
+                self.socketio.emit(
+                    "terms_updated",
+                    {"version": self.current_version, "tac_text": self.current_text},
+                )
+            except Exception as e:
+                print(f"🔧 MockTACController: Could not emit socket event: {e}")
 
-        latest_file, self.current_version = max(versioned_files, key=lambda x: x[1])
-        path = os.path.join(self.folder, latest_file)
+        return ResponseSuccessMsg("Mock terms updated successfully")
 
-        with open(path, 'r', encoding='utf-8') as f:
-            self.current_text = f.read()
-
-        # Call emit on self instead of socketio
-        self.emit("get_terms", {
-            "version": self.current_version,
-            "tac_text": self.current_text
-        })
-
-        print(f"Loaded terms v{self.current_version}: {latest_file}") 
+    def get_current(self):
+        """Return current mock terms"""
+        return {"version": self.current_version, "tac_text": self.current_text}

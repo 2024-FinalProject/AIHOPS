@@ -158,5 +158,45 @@
       "Small adjustments needed; approvals are likely to be granted.",
       "Meets all regulatory requirements and ethical standards; no additional approvals needed."
     ]
+  },
+  {
+    "fid": -9,
+    "owner": "DEFAULT",
+    "name": "Test New Factor",
+    "description": "Test factor description",
+    "scales_desc": [
+      "Low",
+      "Medium",
+      "High",
+      "Very High",
+      "Critical"
+    ],
+    "scales_explanation": [
+      "Low impact",
+      "Medium impact",
+      "High impact",
+      "Very High impact",
+      "Critical impact"
+    ]
+  },
+  {
+    "fid": -10,
+    "owner": "DEFAULT",
+    "name": "Test New Factor",
+    "description": "Test factor description",
+    "scales_desc": [
+      "Low",
+      "Medium",
+      "High",
+      "Very High",
+      "Critical"
+    ],
+    "scales_explanation": [
+      "Low impact",
+      "Medium impact",
+      "High impact",
+      "Very High impact",
+      "Critical impact"
+    ]
   }
 ]

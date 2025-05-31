@@ -12,9 +12,17 @@ from DAL.Objects.DBProjectFactors import DBProjectFactors
 from DAL.Objects.DBProjectMembers import DBProjectMembers
 from DAL.Objects.DBProjectSeverityFactor import DBProjectSeverityFactor
 from DAL.Objects.DBSeverityVotes import DBSeverityVotes
-from Domain.src.Loggs.Response import Response, ResponseFailMsg, ResponseSuccessMsg, ResponseSuccessObj
+from Domain.src.Loggs.Response import (
+    Response,
+    ResponseFailMsg,
+    ResponseSuccessMsg,
+    ResponseSuccessObj,
+)
 from Domain.src.DS.ThreadSafeList import ThreadSafeList
-from Domain.src.DS.ThreadSafeDictWithListPairValue import ThreadSafeDictWithListPairValue
+from Domain.src.DS.ThreadSafeDictWithListPairValue import (
+    ThreadSafeDictWithListPairValue,
+)
+
 
 class Factor:
     def __init__(self, name, description):
@@ -22,13 +30,11 @@ class Factor:
         self.description = description
 
     def to_dict(self):
-        return {
-            "name": self.name,
-            "description": self.description
-        }
-    
+        return {"name": self.name, "description": self.description}
+
     def __str__(self):
         return f"Factor Name: {self.name}, Factor Description: {self.description}"
+
 
 # TODO: need to add the DB logic and implementation
 # TODO change the factors instead of a lost to a dict so we can identify the -1 factor and its value wont be calculated in the formula!!
@@ -48,11 +54,13 @@ class Project:
         # Initialize with 5 zeros
         for _ in range(5):
             self.severity_factors.append(0)
-        self.members = ThreadSafeDictWithListPairValue()  # Maps user_name to (factors_values, severity_factors_values)
+        self.members = (
+            ThreadSafeDictWithListPairValue()
+        )  # Maps user_name to (factors_values, severity_factors_values)
         self.members.insert(founder, ([], []))
 
         self.db_access = DBAccess()
-        
+
         activate = False
         if fromDB:
             self._load_inner_data()
@@ -68,7 +76,11 @@ class Project:
         factor_votes, black_list = self.load_factor_votes()
 
         for member in self.members.getKeys():
-            if factor_votes[member] is not None and member not in black_list and severities.get(member) is not None:
+            if (
+                factor_votes[member] is not None
+                and member not in black_list
+                and severities.get(member) is not None
+            ):
                 # TODO: msg to member if hes in the black list meaning hes vote was unregistered
                 factor_votes[member].pop(-1)
                 self.members.insert(member, [factor_votes[member], severities[member]])
@@ -83,8 +95,13 @@ class Project:
             self.factors_inited = False
             return
         s_f_data = s_f_data[0]
-        severity_factors = [s_f_data.severity_level1, s_f_data.severity_level2, s_f_data.severity_level3,
-                            s_f_data.severity_level4, s_f_data.severity_level5]
+        severity_factors = [
+            s_f_data.severity_level1,
+            s_f_data.severity_level2,
+            s_f_data.severity_level3,
+            s_f_data.severity_level4,
+            s_f_data.severity_level5,
+        ]
         i = 0
         for severity_factor_data in severity_factors:
             self.severity_factors[i] = severity_factor_data
@@ -100,7 +117,13 @@ class Project:
         votes = {}
 
         for vote in votes_data:
-            votes[vote.member_email] = [vote.severity_level1, vote.severity_level2, vote.severity_level3, vote.severity_level4, vote.severity_level5]
+            votes[vote.member_email] = [
+                vote.severity_level1,
+                vote.severity_level2,
+                vote.severity_level3,
+                vote.severity_level4,
+                vote.severity_level5,
+            ]
         return votes
 
     def load_factor_votes(self):
@@ -121,12 +144,15 @@ class Project:
 
         return grouped_votes, black_list
 
-
     def load_factors(self):
         join_condition = DBProjectFactors.factor_id == DBFactors.id
-        factors_data_res = self.db_access.load_by_join_query(DBProjectFactors, DBFactors,[DBFactors.name, DBFactors.description]
-                                                            ,join_condition,
-                                                         {"project_id": self.id})
+        factors_data_res = self.db_access.load_by_join_query(
+            DBProjectFactors,
+            DBFactors,
+            [DBFactors.name, DBFactors.description],
+            join_condition,
+            {"project_id": self.id},
+        )
 
         if not factors_data_res or factors_data_res is None:
             self.isActive = False
@@ -138,7 +164,9 @@ class Project:
             self.factors_inited = True
 
     def load_project_members_from_db(self):
-        members_data = self.db_access.load_by_query(DBProjectMembers, {"project_id": self.id})
+        members_data = self.db_access.load_by_query(
+            DBProjectMembers, {"project_id": self.id}
+        )
         for member_data in members_data:
             # member =
             self.members.insert(member_data.member_email, ([], []))
@@ -153,8 +181,13 @@ class Project:
         with self.lock:
             if not self.is_initialized_project() or not self.isActive:
                 raise Exception("Can't vote on an unfinalized project")
-            if len(factor_votes.keys()) != self.factors.size() or len(severity_factors_values) != self.severity_factors.size():
-                raise Exception("Invalid vote - count mismatch with factors or severity factors")
+            if (
+                len(factor_votes.keys()) != self.factors.size()
+                or len(severity_factors_values) != self.severity_factors.size()
+            ):
+                raise Exception(
+                    "Invalid vote - count mismatch with factors or severity factors"
+                )
             self.members.insert(user_name, (factor_votes, severity_factors_values))
 
     # Expecting a list of factor objects
@@ -184,7 +217,7 @@ class Project:
                 self.members.insert(user_name, None)
             else:
                 raise Exception(f"User {user_name} is already a member of this project")
-        
+
     def remove_member(self, asking, user_name):
         if self.founder != asking:
             raise Exception("Only the founder can remove members from the project")
@@ -192,23 +225,27 @@ class Project:
             if user_name not in self.get_members():
                 raise Exception(f"User {user_name} is not a member of this project")
             self.members.pop(user_name)
-        return ResponseSuccessMsg(f"User {user_name} has been removed from project {self.id}")
+        return ResponseSuccessMsg(
+            f"User {user_name} has been removed from project {self.id}"
+        )
 
     def is_initialized_project(self):
         return self.factors_inited and self.severity_factors_inited
-    
+
     def get_members(self):
         with self.lock:
             return self.members.getKeys()
-        
+
     def publish_project(self):
         if not self.is_initialized_project():
-            raise Exception("Can't publish project without initializing factors and severity factors")
+            raise Exception(
+                "Can't publish project without initializing factors and severity factors"
+            )
         if self.isActive:
             raise Exception("Project has already been published")
         with self.lock:
             self.isActive = True
-    
+
     def hide_project(self):
         if not self.isActive:
             raise Exception("Project is not published; can't hide it")
@@ -247,7 +284,10 @@ class Project:
     def get_d_assessors(self):
         d_assessors = []
         for _, (_, severity_probs) in self.members.getItems():
-            d_ass = sum(self.severity_factors.get(i) * severity_probs[i] for i in range(self.severity_factors.size()))
+            d_ass = sum(
+                self.severity_factors.get(i) * severity_probs[i]
+                for i in range(self.severity_factors.size())
+            )
             d_assessors.append(d_ass)
         return d_assessors
 
@@ -258,17 +298,22 @@ class Project:
             and self.description == other.description
             and self.founder == other.founder
         )
-    
-    def to_dict(self): 
+
+    def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "description": self.description,
             "founder": self.founder,
             "isActive": self.isActive,
-            "factors": [f.to_dict() if hasattr(f, 'to_dict') else str(f) for f in self.factors.to_list()],
+            "factors": [
+                f.to_dict() if hasattr(f, "to_dict") else str(f)
+                for f in self.factors.to_list()
+            ],
             "factors_inited": self.factors_inited,
             "severity_factors_inited": self.severity_factors_inited,
-            "severity_factors": self.severity_factors.to_list() if self.severity_factors else [],
+            "severity_factors": (
+                self.severity_factors.to_list() if self.severity_factors else []
+            ),
             "members": self.members.to_list() if self.members else [],
         }
