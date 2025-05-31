@@ -198,5 +198,85 @@
       "Very High impact",
       "Critical impact"
     ]
+  },
+  {
+    "fid": -11,
+    "owner": "DEFAULT",
+    "name": "Test New Factor",
+    "description": "Test factor description",
+    "scales_desc": [
+      "Low",
+      "Medium",
+      "High",
+      "Very High",
+      "Critical"
+    ],
+    "scales_explanation": [
+      "Low impact",
+      "Medium impact",
+      "High impact",
+      "Very High impact",
+      "Critical impact"
+    ]
+  },
+  {
+    "fid": -12,
+    "owner": "DEFAULT",
+    "name": "Test New Factor",
+    "description": "Test factor description",
+    "scales_desc": [
+      "Low",
+      "Medium",
+      "High",
+      "Very High",
+      "Critical"
+    ],
+    "scales_explanation": [
+      "Low impact",
+      "Medium impact",
+      "High impact",
+      "Very High impact",
+      "Critical impact"
+    ]
+  },
+  {
+    "fid": -13,
+    "owner": "DEFAULT",
+    "name": "Test New Factor",
+    "description": "Test factor description",
+    "scales_desc": [
+      "Low",
+      "Medium",
+      "High",
+      "Very High",
+      "Critical"
+    ],
+    "scales_explanation": [
+      "Low impact",
+      "Medium impact",
+      "High impact",
+      "Very High impact",
+      "Critical impact"
+    ]
+  },
+  {
+    "fid": -14,
+    "owner": "DEFAULT",
+    "name": "Test New Factor",
+    "description": "Test factor description",
+    "scales_desc": [
+      "Low",
+      "Medium",
+      "High",
+      "Very High",
+      "Critical"
+    ],
+    "scales_explanation": [
+      "Low impact",
+      "Medium impact",
+      "High impact",
+      "Very High impact",
+      "Critical impact"
+    ]
   }
 ]
