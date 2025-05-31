@@ -49,7 +49,8 @@ const Register = () => {
     setIsProcessing(true); // <-- show overlay
 
     try {
-      const response = await register(userName, password);
+      console.log("current terms version: %d", termsVersion);
+      const response = await register(userName, password, termsVersion);
 
       if (response.data.success) {
         setMsg(
