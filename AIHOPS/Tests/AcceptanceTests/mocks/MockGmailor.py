@@ -1,5 +1,5 @@
 """
-Mock implementation of Gmailor for testing
+Mock implementation of Gmailor for testing - Simple version that always works
 """
 
 from Domain.src.Loggs.Response import (
@@ -7,71 +7,38 @@ from Domain.src.Loggs.Response import (
     ResponseFailMsg,
     ResponseSuccessObj,
 )
-from threading import RLock
-from datetime import datetime, timedelta
 
 
 class MockGmailor:
-    """Mock email service that always succeeds for testing purposes"""
+    """Simplified mock that always succeeds for testing"""
 
     def __init__(self):
-        self.codes_users = {}
-        self.password_recovery = {}
-        self.lock = RLock()
-        self.TIME_DELTA = timedelta(minutes=5)
-        print("🔧 MockGmailor initialized")
+        pass
 
     def register(self, email, length=6):
-        """Mock registration - always succeeds and uses '1234' as verification code"""
-        with self.lock:
-            # Always use '1234' as the mock verification code
-            code = "1234"
-            time = datetime.now()
-            self.codes_users[code] = [email, time]
-            print(f"🔧 MockGmailor: Registered {email} with code {code}")
-            return ResponseSuccessMsg(
-                f"Mock email sent to {email} with verification code"
-            )
+        """Mock registration - always succeeds"""
+        return ResponseSuccessMsg(f"Mock registration for {email}")
 
     def verify(self, email, code):
-        """Mock verification - succeeds if code is '1234'"""
-        with self.lock:
-            if code == "1234" or code in self.codes_users:
-                if code in self.codes_users:
-                    info = self.codes_users[code]
-                    stored_email = info[0]
-                    time = info[1]
-
-                    # Check if code has expired
-                    if datetime.now() - time > self.TIME_DELTA:
-                        return ResponseFailMsg("Code has expired, register again")
-
-                    # Remove the used code
-                    del self.codes_users[code]
-                    print(f"🔧 MockGmailor: Verified {stored_email} with code {code}")
-                    return ResponseSuccessMsg(f"Code verified for {stored_email}")
-                else:
-                    # For the default '1234' code
-                    print(f"🔧 MockGmailor: Verified {email} with default code")
-                    return ResponseSuccessMsg(f"Code verified for {email}")
-            else:
-                print(f"🔧 MockGmailor: Invalid code {code} for {email}")
-                return ResponseFailMsg("Invalid code -> try again")
+        """Mock verification - always succeeds with any code"""
+        return ResponseSuccessMsg(f"Mock verification for {email}")
 
     def verify_automatic(self, code):
-        """Mock automatic verification"""
-        with self.lock:
-            if code in self.codes_users:
-                info = self.codes_users[code]
-                email = info[0]
-                time = info[1]
+        """Mock automatic verification - always succeeds"""
+        return ResponseSuccessObj("Mock auto verification", "test@example.com")
 
-                if datetime.now() - time > self.TIME_DELTA:
-                    raise Exception("Code has expired, register again")
+    def is_member_verifiable(self, email):
+        """Always return True for testing"""
+        return True
 
-                del self.codes_users[code]
-                print(f"🔧 MockGmailor: Automatically verified {email}")
-                return ResponseSuccessObj(f"Code verified for {email}", email)
-            else:
-                print(f"🔧 MockGmailor: Invalid code {code} for automatic verification")
-                raise Exception("Invalid code -> try again")
+    def send_email_invitation(self, email, inviting_member, project_name):
+        """Mock email invitation"""
+        return ResponseSuccessMsg("Mock invitation sent")
+
+    def start_password_recovery(self, email, length=6):
+        """Mock password recovery start"""
+        pass
+
+    def recover_password(self, email, code):
+        """Mock password recovery"""
+        pass

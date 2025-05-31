@@ -9,8 +9,8 @@ from Tests.AcceptanceTests.mocks.MockGmailor import MockGmailor
 from Tests.AcceptanceTests.mocks.MockTACController import MockTACController
 
 
-class FixedFacade:
-    """Fixed Facade that handles user registration and session management"""
+class UnifiedFacade:
+    """Unified Facade that handles user registration and session management"""
 
     def __init__(self):
         self.server = None
@@ -164,6 +164,30 @@ class FixedFacade:
         cookie = self._find_cookie(actor)
         return self.server.vote_severities(cookie, pid, severity_votes)
 
+    def admin_add_default_factor(self, name, desc, scales_desc, scales_explanation):
+        """Admin action to add default factor"""
+        admin_cookie = self._find_cookie("Admin")
+        return self.server.admin_add_default_factor(
+            admin_cookie, name, desc, scales_desc, scales_explanation
+        )
+
+    def admin_update_default_severity_factors(self, severity_data):
+        """Admin action to update default severity factors"""
+        admin_cookie = self._find_cookie("Admin")
+        return self.server.admin_update_default_severity_factors(
+            admin_cookie, severity_data
+        )
+
+    def admin_fetch_default_severity_factors(self):
+        """Admin action to fetch default severity factors"""
+        admin_cookie = self._find_cookie("Admin")
+        return self.server.admin_fetch_default_severity_factors(admin_cookie)
+
+    def clear_db(self):
+        """Clear database"""
+        if self.server:
+            self.server.clear_db()
+
 
 class AdminTests(unittest.TestCase):
 
@@ -182,7 +206,7 @@ class AdminTests(unittest.TestCase):
         FP.insert_defaults()
 
         # Initialize facade
-        self.facade = FixedFacade()
+        self.facade = UnifiedFacade()
         self.facade.setup_server()
 
         print("✅ Admin test setup completed")
@@ -191,7 +215,7 @@ class AdminTests(unittest.TestCase):
         print("🧹 Admin test cleanup...")
         if hasattr(self, "facade") and self.facade and self.facade.server:
             try:
-                self.facade.server.clear_db()
+                self.facade.clear_db()
             except Exception as e:
                 print(f"Error during cleanup: {e}")
         FP.insert_defaults()
@@ -226,39 +250,48 @@ class AdminTests(unittest.TestCase):
 
             # Have Bob approve membership and vote
             bob_cookie = self.facade._find_cookie("Bob")
-            approve_res = self.facade.server.approve_member(pid, "Bob")
-            if approve_res.success:
-                print("✅ Bob approved membership")
 
-                # Bob votes on factors (assuming there are default factors)
-                try:
-                    # Get project factors to vote on
-                    factors_res = self.facade.server.get_project_factors(
-                        bob_cookie, pid
-                    )
-                    if factors_res.success and len(factors_res.result) > 0:
-                        # Vote on each factor
-                        for factor in factors_res.result:
-                            vote_res = self.facade.vote_on_factor(
-                                "Bob", pid, factor["fid"], 3
-                            )
-                            if vote_res.success:
-                                print(f"✅ Bob voted on factor {factor['fid']}")
+            # Get pending requests for Bob and approve
+            pending_res = self.facade.server.get_pending_requests(bob_cookie)
+            if pending_res.success and len(pending_res.result) > 0:
+                # Approve the first pending request
+                approve_res = self.facade.server.approve_member(
+                    bob_cookie, pending_res.result[0]["id"]
+                )
+                if approve_res.success:
+                    print("✅ Bob approved membership")
 
-                        # Vote on severities
-                        severity_votes = [20, 20, 20, 20, 20]  # Must sum to 100
-                        severity_res = self.facade.vote_severities(
-                            "Bob", pid, severity_votes
+                    # Bob votes on factors
+                    try:
+                        # Get project factors to vote on
+                        factors_res = self.facade.server.get_project_factors(
+                            bob_cookie, pid
                         )
-                        if severity_res.success:
-                            print("✅ Bob voted on severities")
-                    else:
-                        print("⚠️ No factors found to vote on")
+                        if factors_res.success and len(factors_res.result) > 0:
+                            # Vote on each factor
+                            for factor in factors_res.result:
+                                vote_res = self.facade.vote_on_factor(
+                                    "Bob", pid, factor["id"], 3
+                                )
+                                if vote_res.success:
+                                    print(f"✅ Bob voted on factor {factor['id']}")
 
-                except Exception as e:
-                    print(f"⚠️ Voting failed: {e}")
+                            # Vote on severities
+                            severity_votes = [20, 20, 20, 20, 20]  # Must sum to 100
+                            severity_res = self.facade.vote_severities(
+                                "Bob", pid, severity_votes
+                            )
+                            if severity_res.success:
+                                print("✅ Bob voted on severities")
+                        else:
+                            print("⚠️ No factors found to vote on")
+
+                    except Exception as e:
+                        print(f"⚠️ Voting failed: {e}")
+                else:
+                    print(f"⚠️ Bob approval failed: {approve_res.msg}")
             else:
-                print(f"⚠️ Bob approval failed: {approve_res.msg}")
+                print("⚠️ No pending requests found for Bob")
 
             # Get initial project score
             try:
@@ -340,13 +373,17 @@ class AdminTests(unittest.TestCase):
             initial_count = len(initial_factors_res.result)
 
             # Admin adds a new default factor
-            admin_cookie = self.facade._find_cookie("Admin")
-            add_res = self.facade.server.admin_add_default_factor(
-                admin_cookie,
+            add_res = self.facade.admin_add_default_factor(
                 "Test New Factor",
                 "Test factor description",
-                ["Low", "Medium", "High"],
-                ["Low impact", "Medium impact", "High impact"],
+                ["Low", "Medium", "High", "Very High", "Critical"],
+                [
+                    "Low impact",
+                    "Medium impact",
+                    "High impact",
+                    "Very High impact",
+                    "Critical impact",
+                ],
             )
 
             if add_res.success:
@@ -371,8 +408,6 @@ class AdminTests(unittest.TestCase):
         print("\n🔍 Testing admin update severity factors...")
 
         try:
-            admin_cookie = self.facade._find_cookie("Admin")
-
             # New severity factors data
             new_severity_data = [
                 {"level": "Level 1", "description": "Minimal impact", "severity": 0.1},
@@ -387,8 +422,8 @@ class AdminTests(unittest.TestCase):
             ]
 
             # Update severity factors
-            update_res = self.facade.server.admin_update_default_severity_factors(
-                admin_cookie, new_severity_data
+            update_res = self.facade.admin_update_default_severity_factors(
+                new_severity_data
             )
 
             if update_res.success:
@@ -397,9 +432,7 @@ class AdminTests(unittest.TestCase):
                 print(f"⚠️ Failed to update severity factors: {update_res.msg}")
 
             # Verify severity factors were updated
-            fetch_res = self.facade.server.admin_fetch_default_severity_factors(
-                admin_cookie
-            )
+            fetch_res = self.facade.admin_fetch_default_severity_factors()
             if fetch_res.success:
                 updated_data = fetch_res.result
                 self.assertEqual(len(updated_data), 5, "Should have 5 severity levels")
