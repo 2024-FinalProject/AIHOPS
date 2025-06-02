@@ -8,6 +8,8 @@ BASE_URL = "http://localhost:5555"  # Adjust if your server runs on a different 
 EMAIL = "testuser_selenium@example.com"
 PASSWORD = "TestPassword123!"
 VERIFICATION_CODE = "1234"  # MockGmailor returns "1234"
+TAC_VERSION = 2
+
 
 def make_request(method, endpoint, data=None, params=None):
     """Make HTTP request with error handling"""
@@ -56,7 +58,7 @@ def create_verified_user():
         "cookie": cookie,
         "userName": EMAIL,
         "passwd": PASSWORD,
-        "acceptedTermsVersion": 1  # Assuming version 1
+        "acceptedTermsVersion": TAC_VERSION
     }
     
     register_response = make_request("POST", "/register", register_data)
@@ -117,7 +119,8 @@ def create_verified_user():
     # Step 4: Accept terms (if needed)
     print("4. Accepting terms...")
     terms_data = {
-        "email": EMAIL,
+        "cookie": cookie,
+        "acceptedTermsVersion": TAC_VERSION
     }
     
     terms_response = make_request("POST", "/accept-terms", terms_data)

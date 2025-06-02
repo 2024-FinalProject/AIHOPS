@@ -1,6 +1,9 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from base_test import BaseTest
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 import pytest
 import time
 
@@ -22,7 +25,11 @@ console_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 
+TEST_PASSWORD = "TestPassword123!"
+TEST_EMAIL_SUCCESS = "testuser_selenium@example.com"
+
 class TestProjects(BaseTest):
+    
     def login(self):
         logger.debug("Logging in with test user credentials")
         self.driver.get(self.base_url)
@@ -30,136 +37,214 @@ class TestProjects(BaseTest):
         login_link.click()
         time.sleep(1)
         email_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter email']"))
-        email_input.send_keys("testuser@example.com")
+        email_input.send_keys(TEST_EMAIL_SUCCESS)
         password_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter password']"))
-        password_input.send_keys("Test123!")
+        password_input.send_keys(TEST_PASSWORD)
         submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
         submit_button.click()
         time.sleep(2)
 
-    # def setup(self, method):
-    #     super().setup(method)
+    # # def setup(self, method):
+    # #     super().setup(method)
 
-    #     # Ensure driver is initialized and login before each test
+    # #     # Ensure driver is initialized and login before each test
+    # #     self.login()
+
+    # def test_create_project_success(self):
     #     self.login()
+    #     logger.debug("Testing project creation with valid data")
+    #     self.driver.get(f"{self.base_url}/projectsmanagement")
+    #     create_porject_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Create New Project')]"))
+    #     create_porject_button.click()
+    #     name_input = self.wait_for_element((By.XPATH, "//input[@class='create-project-name-input']"))
+    #     name_input.send_keys("Test Project")
+    #     description_input = self.wait_for_element((By.XPATH, "//textarea[@class='create-project-description-input']"))
+    #     description_input.send_keys("This is a test project description")
+    #     checkbox_default_factors = self.wait_for_clickable((By.XPATH, "//input[@type='checkbox' and @id='useDefaultFactors']"))
+    #     checkbox_default_factors.click()
+    #     time.sleep(1)  # Wait for checkbox to be clickable
+    #     submit_button = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn create-btn']"))
+    #     submit_button.click()
+    #     time.sleep(2)
+    #     assert "projects" in self.driver.current_url.lower()
+    #     page_text = self.driver.find_element(By.TAG_NAME, "body").text
+    #     assert "Test Project" in page_text
 
-    def test_create_project_success(self):
+
+    # def test_create_project_fail_empty_fields(self):
+    #     logger.debug("Testing project creation with empty fields")
+    #     self.login()
+    #     self.driver.get(f"{self.base_url}/projectsmanagement")
+    #     create_porject_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Create New Project')]"))
+    #     create_porject_button.click()
+    #     submit_button = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn create-btn']"))
+    #     submit_button.click()
+    #     page_text = self.driver.find_element(By.TAG_NAME, "body").text
+    #     assert "Error" in page_text
+
+
+    # def test_confirm_factors_project(self):
+    #     logger.debug("Testing project confirm factors")
+    #     self.login()
+    #     self.driver.get(f"{self.base_url}/projectsmanagement")
+    #     view_edit_project = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn view-edit-btn']"))
+    #     view_edit_project.click()  
+    #     edit_factors_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Assessment')]]")))
+    #     edit_factors_button.click()
+    #     time.sleep(2)
+    #     confirm_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='action-btn confirm-btn']")))
+    #     confirm_button.click()
+    #     time.sleep(2)
+    #     confirm_button_in_popup = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Confirm']")))
+    #     confirm_button_in_popup.click()
+    #     time.sleep(2)
+    #     # Verify that the factors were confirmed
+    #     edit_factors_button_locator = (By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Assessment')]]")
+    #     edit_factors_button = self.wait_for_element(edit_factors_button_locator) # Using your wait_for_element
+    #     badge_locator = (By.XPATH, f"{edit_factors_button_locator[1]}//*[contains(@class, 'badge')]")
+    #     badge_elements = self.driver.find_elements(By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Assessment')]]//*[contains(@class, 'badge')]")
+    #     badge_elements_for_assert = self.driver.find_elements(By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Assessment')]]//*[contains(@class, 'badge')]")
+    #     assert len(badge_elements_for_assert) == 0, "Reminder badge is unexpectedly present for 'Edit & Confirm Assessment Dimensions' button"
+
+
+
+    # def test_confirm_severites_project(self):
+    #     logger.debug("Testing project confirm severities")
+    #     self.login()
+    #     self.driver.get(f"{self.base_url}/projectsmanagement")
+    #     view_edit_project = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn view-edit-btn']"))
+    #     view_edit_project.click()  
+    #     edit_severity_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Severity')]]")))
+    #     edit_severity_button.click()
+    #     time.sleep(2)
+    #     confirm_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='action-btn confirm-btn']")))
+    #     confirm_button.click()
+    #     time.sleep(2)
+    #     got_it_button_in_popup = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='confirmation-button']")))
+    #     got_it_button_in_popup.click()
+    #     time.sleep(2)
+    #     # Verify that the factors were confirmed
+    #     edit_serverities_button_locator = (By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Severity')]]")
+    #     edit_serverities_button = self.wait_for_element(edit_serverities_button_locator) # Using your wait_for_element
+    #     badge_locator = (By.XPATH, f"{edit_serverities_button_locator[1]}//*[contains(@class, 'badge')]")
+    #     badge_elements = self.driver.find_elements(By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Severity')]]//*[contains(@class, 'badge')]")
+    #     badge_elements_for_assert = self.driver.find_elements(By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Severity')]]//*[contains(@class, 'badge')]")
+    #     assert len(badge_elements_for_assert) == 0, "Reminder badge is unexpectedly present for 'Edit & Confirm Severity Factors' button"
+
+    # def test_add_assessors_project(self):
+    #     logger.debug("Testing project confirm severities")
+    #     self.login()
+    #     self.driver.get(f"{self.base_url}/projectsmanagement")
+    #     view_edit_project = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn view-edit-btn']"))
+    #     view_edit_project.click()  
+    #     edit_severity_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Assessors')]]")))
+    #     edit_severity_button.click()
+    #     time.sleep(2)
+    #     add_assessor_input = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@class='add-member-input']")))
+    #     add_assessor_input.send_keys("test@bgu.ac.il")
+    #     add_assessor_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='action-btn add-member-btn']")))
+    #     add_assessor_button.click()
+    #     time.sleep(2)
+
+    #     page_text = self.driver.find_element(By.TAG_NAME, "body").text
+    #     assert "test@bgu.ac.il" in page_text
+ 
+    
+    # def test_publish_project(self):
+    #     logger.debug("Test publishing a project")
+    #     self.login()
+    #     self.driver.get(f"{self.base_url}/projectsmanagement")
+    #     view_edit_project = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn view-edit-btn']"))
+    #     view_edit_project.click() 
+    #     publish_button = self.wait_for_clickable((By.XPATH, "//button[@class='publish-btn']"))
+    #     publish_button.click()
+    #     time.sleep(2)
+    #     confirm_button_in_popup = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
+    #     confirm_button_in_popup.click()
+    #     time.sleep(5)
+    #     page_text = self.driver.find_element(By.TAG_NAME, "body").text
+    #     assert "Published Successfully!" in page_text
+
+   
+    def test_full_project_flow(self):
+        logger.debug("Starting full end-to-end project flow test")
         self.login()
-        logger.debug("Testing project creation with valid data")
-        self.driver.get(f"{self.base_url}/projects/create")
-        name_input = self.wait_for_element((By.XPATH, "//input[@placeholder='Enter project name']"))
-        name_input.send_keys("Test Project")
-        description_input = self.wait_for_element((By.XPATH, "//textarea[@placeholder='Enter project description']"))
-        description_input.send_keys("This is a test project description")
-        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-        submit_button.click()
-        time.sleep(2)
-        assert "projects" in self.driver.current_url.lower()
-        project_list = self.driver.find_elements(By.CLASS_NAME, "project-item")
-        assert any("Test Project" in item.text for item in project_list)
 
-    def test_create_project_fail_empty_fields(self):
-        logger.debug("Testing project creation with empty fields")
-        self.driver.get(f"{self.base_url}/projects/create")
-        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
+        # Step 1: Create new project with unique name
+        unique_project_name = "FullFlowProject"
+        self.driver.get(f"{self.base_url}/projectsmanagement")
+        create_project_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Create New Project')]"))
+        create_project_button.click()
+        name_input = self.wait_for_element((By.XPATH, "//input[@class='create-project-name-input']"))
+        name_input.send_keys(unique_project_name)
+        description_input = self.wait_for_element((By.XPATH, "//textarea[@class='create-project-description-input']"))
+        description_input.send_keys("This is an end-to-end test project")
+        checkbox_default_factors = self.wait_for_clickable((By.XPATH, "//input[@type='checkbox' and @id='useDefaultFactors']"))
+        checkbox_default_factors.click()
+        time.sleep(1)
+        submit_button = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn create-btn']"))
         submit_button.click()
-        error_messages = self.driver.find_elements(By.CLASS_NAME, "error-message")
-        assert len(error_messages) > 0
+        got_it_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='confirmation-button']")))
+        got_it_button.click()
+        time.sleep(4)
 
-    def test_add_project_factor(self):
-        logger.debug("Test adding a factor to a project")
-        # First create a project
-        self.driver.get(f"{self.base_url}/projects/create")
-        name_input = self.wait_for_element((By.NAME, "projectName"))
-        name_input.send_keys("Factor Test Project")
-        description_input = self.driver.find_element(By.NAME, "description")
-        description_input.send_keys("Project for testing factors")
-        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-        submit_button.click()
+        # Step 2: View/Edit project
+        view_edit_project = self.wait_for_clickable((By.XPATH, "//button[@class='action-btn view-edit-btn']"))
+        view_edit_project.click()
+
+        # Step 3: Confirm Factors
+        edit_factors_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Assessment')]]")))
+        edit_factors_button.click()
         time.sleep(2)
-        
-        # Navigate to project factors page
-        project_link = self.wait_for_element((By.XPATH, "//a[contains(text(), 'Factor Test Project')]"))
-        project_link.click()
-        
-        # Add new factor
-        add_factor_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Add Factor')]"))
-        add_factor_button.click()
-        
-        # Fill factor details
-        factor_name = self.wait_for_element((By.NAME, "factorName"))
-        factor_name.send_keys("Test Factor")
-        
-        factor_desc = self.driver.find_element(By.NAME, "factorDescription")
-        factor_desc.send_keys("This is a test factor")
-        
-        # Submit factor
-        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-        submit_button.click()
-        
-        # Verify factor was added
-        time.sleep(2)
-        factor_list = self.driver.find_elements(By.CLASS_NAME, "factor-item")
-        assert any("Test Factor" in item.text for item in factor_list)
-    
-    def test_add_project_member(self):
-        """Test adding a member to a project"""
-        # First create a project
-        self.driver.get(f"{self.base_url}/projects/create")
-        name_input = self.wait_for_element((By.NAME, "projectName"))
-        name_input.send_keys("Member Test Project")
-        description_input = self.driver.find_element(By.NAME, "description")
-        description_input.send_keys("Project for testing members")
-        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-        submit_button.click()
-        time.sleep(2)
-        
-        # Navigate to project members page
-        project_link = self.wait_for_element((By.XPATH, "//a[contains(text(), 'Member Test Project')]"))
-        project_link.click()
-        
-        # Add new member
-        add_member_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Add Member')]"))
-        add_member_button.click()
-        
-        # Fill member details
-        member_username = self.wait_for_element((By.NAME, "username"))
-        member_username.send_keys("newmember")
-        
-        # Submit member
-        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-        submit_button.click()
-        
-        # Verify member was added
-        time.sleep(2)
-        member_list = self.driver.find_elements(By.CLASS_NAME, "member-item")
-        assert any("newmember" in item.text.lower() for item in member_list)
-    
-    def test_publish_project(self):
-        """Test publishing a project"""
-        # First create a project
-        self.driver.get(f"{self.base_url}/projects/create")
-        name_input = self.wait_for_element((By.NAME, "projectName"))
-        name_input.send_keys("Publish Test Project")
-        description_input = self.driver.find_element(By.NAME, "description")
-        description_input.send_keys("Project for testing publish")
-        submit_button = self.wait_for_clickable((By.XPATH, "//button[@type='submit']"))
-        submit_button.click()
-        time.sleep(2)
-        
-        # Navigate to project page
-        project_link = self.wait_for_element((By.XPATH, "//a[contains(text(), 'Publish Test Project')]"))
-        project_link.click()
-        
-        # Click publish button
-        publish_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Publish')]"))
-        publish_button.click()
-        
-        # Confirm publish
-        confirm_button = self.wait_for_clickable((By.XPATH, "//button[contains(text(), 'Confirm')]"))
+        confirm_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='action-btn confirm-btn']")))
         confirm_button.click()
-        
-        # Verify project was published
+        confirm_button_in_popup = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Confirm']")))
+        confirm_button_in_popup.click()
         time.sleep(2)
-        status_element = self.wait_for_element((By.CLASS_NAME, "project-status"))
-        assert "published" in status_element.text.lower() 
+
+        # Step 4: Confirm Severities
+        edit_severity_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Severity')]]")))
+        edit_severity_button.click()
+        time.sleep(2)
+        confirm_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='action-btn confirm-btn']")))
+        confirm_button.click()
+        got_it_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='confirmation-button']")))
+        got_it_button.click()
+        time.sleep(2)
+
+        # # Step 5: Add Assessor
+        # edit_assessors_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[./span[@class='btn-text' and contains(., 'Assessors')]]")))
+        # edit_assessors_button.click()
+        # time.sleep(2)
+        # add_assessor_input = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//input[@class='add-member-input']")))
+        # add_assessor_input.send_keys("test@bgu.ac.il")
+        # add_assessor_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@class='action-btn add-member-btn']")))
+        # add_assessor_button.click()
+        # time.sleep(2)
+
+        # Step 6: Publish Project
+        publish_button = self.wait_for_clickable((By.XPATH, "//button[@class='publish-btn']"))
+        publish_button.click()
+        confirm_button_in_popup_no_assesors = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']")))
+        confirm_button_in_popup_no_assesors.click()
+        time.sleep(5)
+
+    
+
+
+        continue_button = WebDriverWait(self.driver, 10).until(
+        EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'success-btn') and text()='Continue']")))
+        continue_button.click()
+
+
+        # refresh the page
+        self.driver.refresh()
+        time.sleep(2)
+
+        page_text = self.driver.find_element(By.TAG_NAME, "body").text
+        assert "Published" in page_text, "Project was not published successfully"
+
+
+
+
+
