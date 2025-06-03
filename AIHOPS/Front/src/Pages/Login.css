@@ -136,6 +136,10 @@
   border-top: 1px solid #eee;
 }
 
+.sign-in-text-color {
+  color: var(--text-color) !important;
+}
+
 .google-login-container p {
   margin-bottom: 15px;
   color: #666;

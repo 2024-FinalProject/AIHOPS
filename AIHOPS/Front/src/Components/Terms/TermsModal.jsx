@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import "./TermsModal.css";
 
-const TermsModal = ({ text, version, onAccept }) => {
+const TermsModal = ({ text, version, onAccept, onClose }) => {
   const contentRef = useRef(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
 
@@ -24,6 +24,11 @@ const TermsModal = ({ text, version, onAccept }) => {
   return (
     <div className="tac-modal-overlay">
       <div className="tac-modal">
+        {onClose && (
+          <button className="tac-modal-close" onClick={() => onClose()}>
+            &times;
+          </button>
+        )}
         <h2>Terms and Conditions (v{version})</h2>
         <div className="tac-modal-content" ref={contentRef}>
           <ReactMarkdown>{text}</ReactMarkdown>

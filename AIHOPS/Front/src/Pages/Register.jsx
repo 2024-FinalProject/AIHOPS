@@ -135,6 +135,7 @@ const Register = () => {
           text={termsText}
           version={termsVersion}
           onAccept={handleAcceptTerms}
+          onClose={() => setShowTermsConditions(false)}
         />
       )}
 
