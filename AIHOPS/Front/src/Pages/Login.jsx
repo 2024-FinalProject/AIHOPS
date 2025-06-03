@@ -48,7 +48,7 @@ const Login = () => {
   useEffect(() => {
     // Check for email parameter in URL
     const params = new URLSearchParams(window.location.search);
-    const emailFromVerification = params.get('email');
+    const emailFromVerification = params.get("email");
     if (emailFromVerification) {
       setUserName(emailFromVerification);
       setMsg("Your account has been verified. Please log in.");
@@ -127,20 +127,20 @@ const Login = () => {
           "must_accept_terms: %s",
           response.data.need_to_accept_new_terms
         );
-        
+
         // Log the email received from the server
         console.log("Response data:", response.data);
-        
+
         // Get the email from the response or use a default if not available
-        const userEmail = response.data.email || '';
+        const userEmail = response.data.email || "";
         console.log("Logged in as:", userEmail);
-        
+
         if (response.data.need_to_accept_new_terms) {
           setMustAcceptNewTerms(true);
         }
 
         setMsg(response.data.message);
-        
+
         // Make sure we have an email before storing
         if (userEmail) {
           localStorage.setItem("userName", userEmail);
@@ -150,7 +150,7 @@ const Login = () => {
           console.error("No email in response data:", response.data);
           setMsg("Login successful but email information is missing");
         }
-        
+
         localStorage.setItem("isLoggedIn", "true");
         navigate("/");
         setIsSuccess(true);
@@ -233,7 +233,7 @@ const Login = () => {
         </form>
 
         <div className="google-login-container">
-          <p>Or sign in with:</p>
+          <p className="sign-in-text-color">Or sign in with:</p>
           <GoogleLogin
             onSuccess={handleGoogleSuccess}
             onError={handleGoogleFailure}
@@ -274,6 +274,7 @@ const Login = () => {
           text={termsText}
           version={termsVersion}
           onAccept={handleAcceptTerms}
+          onClose={() => setShowTermsConditions(false)}
         />
       )}
     </section>

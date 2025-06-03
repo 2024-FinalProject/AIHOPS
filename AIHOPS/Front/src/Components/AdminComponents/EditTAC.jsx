@@ -66,9 +66,10 @@ const EditTAC = () => {
               border: "1px solid #ccc",
               borderRadius: "5px",
               padding: "15px",
-              backgroundColor: "#f9f9f9",
+              backgroundColor: "white",
               whiteSpace: "pre-wrap",
               minHeight: "300px",
+              color: "black",
             }}
           >
             <ReactMarkdown>{termsText}</ReactMarkdown>
