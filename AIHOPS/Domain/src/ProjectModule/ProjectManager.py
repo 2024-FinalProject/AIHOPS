@@ -41,9 +41,9 @@ class ProjectManager:
         self.factor_pool = FactorsPool(self.db_access)
         self.load_from_db()
         if os.getenv("TEST_MODE") == "true":
-            gmailor = MockGmailor()
+            self.gmailor = MockGmailor()
         else:
-            gmailor = Gmailor()
+            self.gmailor = Gmailor()
         self.project_lock = RLock()
         self.research_lock = RLock()
 
