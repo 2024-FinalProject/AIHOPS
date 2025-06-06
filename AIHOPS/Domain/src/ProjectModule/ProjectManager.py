@@ -241,7 +241,6 @@ class ProjectManager:
             )
 
     def _add_member_after_verifying_owner(self, project, member, persist=True):
-        import pdb; pdb.set_trace()
         if project.archived:
             raise Exception("project already archived")
         db_instance = DBPendingRequests(project.pid, member)
