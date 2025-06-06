@@ -41,9 +41,9 @@ class ProjectManager:
         self.factor_pool = FactorsPool(self.db_access)
         self.load_from_db()
         if os.getenv("TEST_MODE") == "true":
-            gmailor = MockGmailor()
+            self.gmailor = MockGmailor()
         else:
-            gmailor = Gmailor()
+            self.gmailor = Gmailor()
         self.project_lock = RLock()
         self.research_lock = RLock()
 
@@ -241,6 +241,7 @@ class ProjectManager:
             )
 
     def _add_member_after_verifying_owner(self, project, member, persist=True):
+        import pdb; pdb.set_trace()
         if project.archived:
             raise Exception("project already archived")
         db_instance = DBPendingRequests(project.pid, member)
