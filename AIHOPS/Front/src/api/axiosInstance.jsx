@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:5555";
+import { API_URL } from "../constants";
 
 console.log('Initializing axios instance with API_URL:', API_URL);
 

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { startSession } from "../api/AuthApi";
+import { startSession } from "./AuthApi.jsx";
 import { API_URL } from "../constants";
 
 const getMyCookie = async () => {

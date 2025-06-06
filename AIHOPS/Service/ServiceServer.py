@@ -795,16 +795,13 @@ def get_profile_source():
             "success": False
         }), 500
 
-# run the backed server
+
+server = Server(socketio)
+
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
     FactorsPool.insert_defaults()
-
-    server = Server(socketio)
-    # running the server
-    # app.run(debug=True, port=5555)  # when debug mode runs only 1 thread
-    socketio.run(app,port=5555)  # when debug mode runs only 1 thread
-    # app.run(threaded=True, port=5555)  # runs multithreaded
+    socketio.run(app,port=5555)
 
 
 
