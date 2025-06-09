@@ -1,83 +1,101 @@
 .score-bar-container {
   position: relative;
   width: 100%;
-  max-width: 1400px; /* Made much wider */
-  margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  max-width: 650px;
+  font-family: Verdana, sans-serif !important;
 }
 
-.score-display {
-  margin-bottom: 8px;
+/* inside the SB root */
+.score-bar-container .score-display {
+  margin-bottom: 0px;
   text-align: right;
-  font-size: 28px;
+  font-size: 13px;
   font-weight: bold;
   color: #333;
+  background-color: #cbd5e0 !important;
+  position: relative;
+  overflow: hidden;
 }
 
-.current-level {
-  margin-bottom: 16px;
-  text-align: right;
-  font-size: 14px;
-  color: #666;
-  font-style: italic;
+.score-bar-container .score-display::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shine 1.5s infinite;
+  pointer-events: none;
 }
 
-.bar-container {
+@keyframes shine {
+  0% {
+    left: -75%;
+  }
+  100% {
+    left: 125%;
+  }
+}
+
+.score-bar-container .bar-container {
   position: relative;
   margin-bottom: 8px;
 }
 
-.score-bar {
+.score-bar-container .score-bar {
   display: flex;
-  height: 50px; /* Made taller too */
+  height: 50px;
   border-radius: 2px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   border: 1px solid #ddd;
 }
 
-.score-section {
+.score-bar-container .score-section {
   cursor: pointer;
   transition: opacity 0.2s;
 }
 
-.score-section:hover {
+.score-bar-container .score-section:hover {
   opacity: 0.8;
 }
 
-.score-labels {
+.score-bar-container .score-labels {
   position: relative;
   margin-top: 8px;
-  height: 16px; /* just enough to hold the labels */
+  height: 16px;
 }
 
-.score-labels span {
+.score-bar-container .score-labels span {
   position: absolute;
   top: 0;
   transform: translateX(-50%);
   font-size: 14px;
   color: #666;
 }
-
-/* Now explicitly place each one */
-.score-labels span:nth-child(1) {
+.score-bar-container .score-labels span:nth-child(1) {
   left: 0%;
 }
-.score-labels span:nth-child(2) {
+.score-bar-container .score-labels span:nth-child(2) {
   left: 50%;
 }
-.score-labels span:nth-child(3) {
+.score-bar-container .score-labels span:nth-child(3) {
   left: 70%;
 }
-.score-labels span:nth-child(4) {
+.score-bar-container .score-labels span:nth-child(4) {
   left: 90%;
 }
-.score-labels span:nth-child(5) {
+.score-bar-container .score-labels span:nth-child(5) {
   left: 100%;
 }
 
-.arrow-container {
+.score-bar-container .arrow-container {
   position: absolute;
   top: -15px;
   transform: translateX(-50%);
@@ -88,7 +106,7 @@
   z-index: 10;
 }
 
-.arrow {
+.score-bar-container .arrow {
   width: 0;
   height: 0;
   border-left: 10px solid transparent;
@@ -97,21 +115,31 @@
   margin-bottom: 0;
 }
 
-.arrow-line {
+.score-bar-container .arrow-line {
   width: 3px;
   height: 50px;
   background-color: black;
 }
 
-.tooltip {
+/* keep arrow’s score display perched above it */
+.score-bar-container .arrow-container .score-display {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.score-bar-container .tooltip {
   position: fixed;
   z-index: 1000;
   background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
   color: white;
-  padding: 12px 24px; /* a bit less vertical, more horizontal */
+  padding: 12px 24px;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  max-width: 450px; /* wider tooltip */
+  width: 25% !important;
+  height: fit-content !important;
   transform: translate(-50%, calc(-100% - 15px));
   pointer-events: none;
   font-size: 14px;
@@ -120,31 +148,32 @@
   backdrop-filter: blur(10px);
 }
 
-.tooltip-title {
+.score-bar-container .tooltip-title {
   font-weight: bold;
-  font-size: 16px;
-  margin-bottom: 10px;
-  color: #e2e8f0;
+  font-size: 14px;
+  margin-bottom: 0px;
+  color: #e2e8f0 !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 8px;
+  padding-bottom: 0px;
 }
 
-.tooltip-description {
-  margin-bottom: 10px;
-  color: #cbd5e0;
-  font-size: 13px;
+.score-bar-container .tooltip-description {
+  margin-bottom: 0px;
+  color: #cbd5e0 !important;
+  font-size: 12px;
   line-height: 1.6;
 }
 
-.tooltip-range {
-  font-size: 12px;
-  color: #a0aec0;
+.score-bar-container .tooltip-range {
+  font-size: 11px;
+  color: #a0aec0 !important;
   font-style: italic;
   padding-top: 8px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center !important;
 }
 
-.tooltip-arrow {
+.score-bar-container .tooltip-arrow {
   position: absolute;
   top: 100%;
   left: 50%;
@@ -154,14 +183,4 @@
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-top: 8px solid #2d3748;
-}
-
-/* when score-display is inside the arrow-container, absolutely position it above the arrow */
-.arrow-container .score-display {
-  position: absolute;
-  top: -42px; /* tweak this to sit just above the black arrow tip */
-  left: 50%;
-  transform: translateX(-50%);
-  margin: 0; /* remove any default margins */
-  /* reuse the existing font-size, weight, color */
 }

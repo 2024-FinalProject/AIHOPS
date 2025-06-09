@@ -92,12 +92,6 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         }
         return (
           <div className="analyze-content-container">
-            {Object.keys(projectsScore).length > 0 && (
-              <div className="score-bar-container">
-                <ScoreBar score={projectsScore.score} />
-              </div>
-            )}
-
             <div className="score-display">
               {Object.keys(projectsScore).length > 0 ? (
                 <FormulaDisplay
@@ -110,6 +104,12 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 "No score available"
               )}
             </div>
+
+            {Object.keys(projectsScore).length > 0 && (
+              <div className="score-bar-container">
+                <ScoreBar score={projectsScore.score} />
+              </div>
+            )}
 
             <div style={{ margin: "25px 0 15px", width: "100%" }}>
               {/* Weight factor toggle section */}

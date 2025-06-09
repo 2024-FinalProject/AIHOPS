@@ -5,7 +5,6 @@ const ScoreBar = ({ score = 0.931 }) => {
   const [hoveredSection, setHoveredSection] = useState(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  // Score interpretation data
   const scoreRanges = [
     {
       min: 0,
@@ -41,25 +40,8 @@ const ScoreBar = ({ score = 0.931 }) => {
     },
   ];
 
-  // Get current score level
-  const getCurrentLevel = () => {
-    for (let range of scoreRanges) {
-      if (
-        score >= range.min &&
-        (score < range.max || (range.max === 1.0 && score <= range.max))
-      ) {
-        return range;
-      }
-    }
-    return scoreRanges[0]; // fallback
-  };
+  const getScorePosition = () => score * 100;
 
-  // Calculate position of the score arrow
-  const getScorePosition = () => {
-    return score * 100;
-  };
-
-  // Handle mouse enter for tooltip
   const handleMouseEnter = (section, event) => {
     setHoveredSection(section);
     const rect = event.currentTarget.getBoundingClientRect();
@@ -68,45 +50,36 @@ const ScoreBar = ({ score = 0.931 }) => {
       y: rect.top - 10,
     });
   };
-
-  // Handle mouse leave
-  const handleMouseLeave = () => {
-    setHoveredSection(null);
-  };
+  const handleMouseLeave = () => setHoveredSection(null);
 
   return (
     <div className="score-bar-container">
-      {/* Main score bar container */}
       <div className="bar-container">
-        {/* Score sections */}
         <div className="score-bar">
-          {scoreRanges.map((section, index) => (
+          {scoreRanges.map((s, i) => (
             <div
-              key={index}
+              key={i}
               className="score-section"
               style={{
-                backgroundColor: section.color,
-                width: `${(section.max - section.min) * 100}%`,
+                backgroundColor: s.color,
+                width: `${(s.max - s.min) * 100}%`,
               }}
-              onMouseEnter={(e) => handleMouseEnter(section, e)}
+              onMouseEnter={(e) => handleMouseEnter(s, e)}
               onMouseLeave={handleMouseLeave}
             />
           ))}
         </div>
 
-        {/* Score indicator arrow */}
         <div
           className="arrow-container"
           style={{ left: `${getScorePosition()}%` }}
         >
-          {/* Score display */}
           <div className="score-display">{score.toFixed(3)}</div>
           <div className="arrow"></div>
           <div className="arrow-line"></div>
         </div>
       </div>
 
-      {/* Score labels */}
       <div className="score-labels">
         <span>0.0</span>
         <span>0.5</span>
@@ -115,14 +88,10 @@ const ScoreBar = ({ score = 0.931 }) => {
         <span>1.0</span>
       </div>
 
-      {/* Tooltip */}
       {hoveredSection && (
         <div
           className="tooltip"
-          style={{
-            left: tooltipPosition.x,
-            top: tooltipPosition.y,
-          }}
+          style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
         >
           <div className="tooltip-title">{hoveredSection.level}</div>
           <div className="tooltip-description">
