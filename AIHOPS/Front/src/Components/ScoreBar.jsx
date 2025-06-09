@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import "./ScoreBar.css";
 
 const ScoreBar = ({ score = 0.931 }) => {
-  const [hoveredSection, setHoveredSection] = useState(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [hoveredIdx, setHoveredIdx] = useState(null);
 
   const scoreRanges = [
     {
@@ -42,16 +41,6 @@ const ScoreBar = ({ score = 0.931 }) => {
 
   const getScorePosition = () => score * 100;
 
-  const handleMouseEnter = (section, event) => {
-    setHoveredSection(section);
-    const rect = event.currentTarget.getBoundingClientRect();
-    setTooltipPosition({
-      x: rect.left + rect.width / 2,
-      y: rect.top - 10,
-    });
-  };
-  const handleMouseLeave = () => setHoveredSection(null);
-
   return (
     <div className="score-bar-container">
       <div className="bar-container">
@@ -63,10 +52,29 @@ const ScoreBar = ({ score = 0.931 }) => {
               style={{
                 backgroundColor: s.color,
                 width: `${(s.max - s.min) * 100}%`,
+                position: "relative", // anchor for tooltip
               }}
-              onMouseEnter={(e) => handleMouseEnter(s, e)}
-              onMouseLeave={handleMouseLeave}
-            />
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
+            >
+              {hoveredIdx === i && (
+                <div
+                  className="tooltip"
+                  style={{
+                    left: "50%",
+                    top: 0,
+                    transform: "translate(calc(-50% + 10px), -110%)", // +10px nudges right
+                  }}
+                >
+                  <div className="tooltip-title">{s.level}</div>
+                  <div className="tooltip-description">{s.description}</div>
+                  <div className="tooltip-range">
+                    Score Range: {s.min} ≤ score {"<"} {s.max}
+                  </div>
+                  <div className="tooltip-arrow"></div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
@@ -87,22 +95,6 @@ const ScoreBar = ({ score = 0.931 }) => {
         <span>0.9</span>
         <span>1.0</span>
       </div>
-
-      {hoveredSection && (
-        <div
-          className="tooltip"
-          style={{ left: tooltipPosition.x, top: tooltipPosition.y }}
-        >
-          <div className="tooltip-title">{hoveredSection.level}</div>
-          <div className="tooltip-description">
-            {hoveredSection.description}
-          </div>
-          <div className="tooltip-range">
-            Score Range: {hoveredSection.min} ≤ score {"<"} {hoveredSection.max}
-          </div>
-          <div className="tooltip-arrow"></div>
-        </div>
-      )}
     </div>
   );
 };
