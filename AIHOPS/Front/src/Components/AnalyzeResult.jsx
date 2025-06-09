@@ -7,6 +7,7 @@ import FormulaDisplay from "./FormulaDisplay";
 import ExportDataButton from "./ExportCSVButton";
 import getProjectsInfo from "../utils/getProjectInfo";
 import getProjectScore from "../utils/getProjectScore";
+import ScoreBar from "./ScoreBar";
 
 const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [projectsProgress, setProjectsProgress] = useState({});
@@ -103,6 +104,12 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
                 "No score available"
               )}
             </div>
+
+            {Object.keys(projectsScore).length > 0 && (
+              <div className="score-bar-container">
+                <ScoreBar score={projectsScore.score} />
+              </div>
+            )}
 
             <div style={{ margin: "25px 0 15px", width: "100%" }}>
               {/* Weight factor toggle section */}

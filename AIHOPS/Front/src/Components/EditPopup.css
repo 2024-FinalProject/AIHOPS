@@ -332,6 +332,7 @@ input::placeholder {
   max-width: 1100px;
   min-width: 1000px;
   margin: 0 auto;
+  margin-bottom: -20% !important;
   padding: 10px 10px;
   overflow: hidden;
   margin-top: -1% !important;

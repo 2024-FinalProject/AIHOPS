@@ -1,0 +1,186 @@
+.score-bar-container {
+  position: relative;
+  width: 100%;
+  max-width: 650px;
+  font-family: Verdana, sans-serif !important;
+}
+
+/* inside the SB root */
+.score-bar-container .score-display {
+  margin-bottom: 0px;
+  text-align: right;
+  font-size: 13px;
+  font-weight: bold;
+  color: #333;
+  background-color: #cbd5e0 !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.score-bar-container .score-display::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shine 1.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes shine {
+  0% {
+    left: -75%;
+  }
+  100% {
+    left: 125%;
+  }
+}
+
+.score-bar-container .bar-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.score-bar-container .score-bar {
+  display: flex;
+  height: 50px;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+}
+
+.score-bar-container .score-section {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.score-bar-container .score-section:hover {
+  opacity: 0.8;
+}
+
+.score-bar-container .score-labels {
+  position: relative;
+  margin-top: 8px;
+  height: 16px;
+}
+
+.score-bar-container .score-labels span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: #666;
+}
+.score-bar-container .score-labels span:nth-child(1) {
+  left: 0%;
+}
+.score-bar-container .score-labels span:nth-child(2) {
+  left: 50%;
+}
+.score-bar-container .score-labels span:nth-child(3) {
+  left: 70%;
+}
+.score-bar-container .score-labels span:nth-child(4) {
+  left: 90%;
+}
+.score-bar-container .score-labels span:nth-child(5) {
+  left: 100%;
+}
+
+.score-bar-container .arrow-container {
+  position: absolute;
+  top: -15px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.score-bar-container .arrow {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 15px solid black;
+  margin-bottom: 0;
+}
+
+.score-bar-container .arrow-line {
+  width: 3px;
+  height: 50px;
+  background-color: black;
+}
+
+/* keep arrow’s score display perched above it */
+.score-bar-container .arrow-container .score-display {
+  position: absolute;
+  top: -42px;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+}
+
+.score-bar-container .tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  width: 25% !important;
+  height: fit-content !important;
+  transform: translate(-50%, calc(-100% - 15px));
+  pointer-events: none;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.score-bar-container .tooltip-title {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 0px;
+  color: #e2e8f0 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 0px;
+}
+
+.score-bar-container .tooltip-description {
+  margin-bottom: 0px;
+  color: #cbd5e0 !important;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.score-bar-container .tooltip-range {
+  font-size: 11px;
+  color: #a0aec0 !important;
+  font-style: italic;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center !important;
+}
+
+.score-bar-container .tooltip-arrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #2d3748;
+}

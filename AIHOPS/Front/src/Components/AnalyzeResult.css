@@ -412,3 +412,7 @@ button:hover {
   outline: none;
   border-color: #4a90e2;
 }
+
+.score-bar-container {
+  margin-top: 3% !important;
+}
