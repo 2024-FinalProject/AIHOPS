@@ -7,6 +7,7 @@ import FormulaDisplay from "./FormulaDisplay";
 import ExportDataButton from "./ExportCSVButton";
 import getProjectsInfo from "../utils/getProjectInfo";
 import getProjectScore from "../utils/getProjectScore";
+import ScoreBar from "./ScoreBar";
 
 const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
   const [projectsProgress, setProjectsProgress] = useState({});
@@ -91,6 +92,12 @@ const AnalyzeResult = ({ analyzePopupType, closePopup, projectId }) => {
         }
         return (
           <div className="analyze-content-container">
+            {Object.keys(projectsScore).length > 0 && (
+              <div className="score-bar-container">
+                <ScoreBar score={projectsScore.score} />
+              </div>
+            )}
+
             <div className="score-display">
               {Object.keys(projectsScore).length > 0 ? (
                 <FormulaDisplay

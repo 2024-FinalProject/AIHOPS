@@ -1,0 +1,167 @@
+.score-bar-container {
+  position: relative;
+  width: 100%;
+  max-width: 1400px; /* Made much wider */
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.score-display {
+  margin-bottom: 8px;
+  text-align: right;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}
+
+.current-level {
+  margin-bottom: 16px;
+  text-align: right;
+  font-size: 14px;
+  color: #666;
+  font-style: italic;
+}
+
+.bar-container {
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.score-bar {
+  display: flex;
+  height: 50px; /* Made taller too */
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ddd;
+}
+
+.score-section {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.score-section:hover {
+  opacity: 0.8;
+}
+
+.score-labels {
+  position: relative;
+  margin-top: 8px;
+  height: 16px; /* just enough to hold the labels */
+}
+
+.score-labels span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: #666;
+}
+
+/* Now explicitly place each one */
+.score-labels span:nth-child(1) {
+  left: 0%;
+}
+.score-labels span:nth-child(2) {
+  left: 50%;
+}
+.score-labels span:nth-child(3) {
+  left: 70%;
+}
+.score-labels span:nth-child(4) {
+  left: 90%;
+}
+.score-labels span:nth-child(5) {
+  left: 100%;
+}
+
+.arrow-container {
+  position: absolute;
+  top: -15px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.arrow {
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 15px solid black;
+  margin-bottom: 0;
+}
+
+.arrow-line {
+  width: 3px;
+  height: 50px;
+  background-color: black;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 1000;
+  background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+  color: white;
+  padding: 12px 24px; /* a bit less vertical, more horizontal */
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  max-width: 450px; /* wider tooltip */
+  transform: translate(-50%, calc(-100% - 15px));
+  pointer-events: none;
+  font-size: 14px;
+  line-height: 1.5;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.tooltip-title {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 8px;
+}
+
+.tooltip-description {
+  margin-bottom: 10px;
+  color: #cbd5e0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tooltip-range {
+  font-size: 12px;
+  color: #a0aec0;
+  font-style: italic;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tooltip-arrow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid #2d3748;
+}
+
+/* when score-display is inside the arrow-container, absolutely position it above the arrow */
+.arrow-container .score-display {
+  position: absolute;
+  top: -42px; /* tweak this to sit just above the black arrow tip */
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0; /* remove any default margins */
+  /* reuse the existing font-size, weight, color */
+}
