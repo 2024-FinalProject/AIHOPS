@@ -1,0 +1,7 @@
+.custom-tooltip{
+    border: 1px solid var(--border-color) !important;
+}
+
+.default-text {
+    color: var(--header-color) !important;
+}

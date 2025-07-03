@@ -1,0 +1,90 @@
+/* WelcomePage.css */
+
+/* Make sure the html and body elements take up the full height */
+html, body {
+  height: 100%;
+  width: 100%;
+  margin: 0; /* Remove default margin */
+}
+
+/* And for the outer div */
+.welcome-page-wrapper {
+  width: 100%;  /* Changed from 100vw */
+  height: 100%;  /* Changed from 100vh */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  margin-top: 70px;
+}
+
+welcome-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 60px); /* Assuming your navbar is ~60px tall */
+  background-color: var(--background) !important;
+  color: var(--text-color) !important;
+  /* Remove the border */
+  padding-top: 10%;
+  font-family: Verdana, sans-serif !important;
+  box-sizing: border-box; /* Add this to include padding in the width/height calculation */
+}
+
+.welcome-header {
+  text-align: center;
+  margin-bottom: 5%;
+  /* Remove height: 100% and width: 100% as they're unnecessary */
+}
+
+.welcome-title {
+  font-size: 500%; /* Adjusted font size to percentage */
+  font-weight: bold;
+}
+
+.welcome-subtitle {
+  font-size: 230%; /* Adjusted font size to percentage */
+  margin-top: 2%;
+  
+}
+
+.upper-subtitle-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0%;
+}
+
+.lower-subtitle {
+  font-size: 100%;
+  text-align: center;
+  width: 80%;
+  max-width: 60%;
+  color: var(--text-color) !important;
+  padding-bottom: 5%;
+  margin: 0 auto;  /* Add this to ensure centering */
+  margin-top: 60px;
+}
+
+.pdf-link-container {
+  margin-top: 60px;
+  text-align: center;
+}
+
+.pdf-headline {
+  font-size: 1.3em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: var(--text-color) !important;
+  cursor: pointer;
+}
+
+.pdf-headline a {
+  text-decoration: underline;
+  color: inherit;
+}
+
+.pdf-headline a:hover {
+  color: #0056b3;
+}

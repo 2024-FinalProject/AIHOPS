@@ -1,0 +1,204 @@
+.pending-request-title,
+.email-subject,
+.email-sender,
+.email-actions button {
+  font-family: Verdana, sans-serif !important;
+}
+
+
+
+
+.pending-request-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: var(--header-color) !important;
+  text-align: center;
+  font-family: Verdana, sans-serif !important;
+  padding-top: 3cqw;
+}
+
+
+/* Container to center the content */
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+
+
+/* Sort Button Container */
+.sort-container {
+  position: absolute;
+  right: 80px; /* Align to the far right */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Sort Button Styling */
+.sort-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #333;
+  transition: color 0.3s;
+}
+
+.sort-button:hover {
+  color: #0078d7; /* Highlight on hover */
+}
+
+/* Sort Status Text */
+.sort-status {
+  font-size: 16px;
+  color: #555;
+}
+
+
+.email-list-container {
+  width: 70%;
+  margin: auto;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--card-background) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--border-color) !important;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.email-subject {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  font-family: Verdana, sans-serif !important;
+}
+
+.email-sender {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  font-family: Verdana, sans-serif !important;
+}
+
+
+.email-item {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.email-item:last-child {
+  border-bottom: none;
+}
+
+.email-item:hover {
+  background-color: var(--pop-up-background) !important;
+}
+
+.email-item.selected {
+  background-color: #e6f7ff;
+}
+
+.email-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: space-between; /* This ensures the buttons are aligned on opposite sides */
+  align-items: center;
+  font-size: 12px;
+  color: #777;
+}
+
+.email-actions {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%; /* Make sure it takes up the full width */
+}
+
+.email-actions button {
+  margin-left: 10px;
+  padding: 5px 10px;
+  font-size: 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.email-button.accept {
+  background-color: #4caf50;
+  color: white;
+}
+
+.email-button.reject {
+  background-color: #a02424;
+  color: white;
+}
+
+.email-button.accept:hover {
+  background-color: #388e3c;
+  zoom: 1.2;
+}
+
+.email-button.reject:hover {
+  background-color: #b92828;
+  zoom: 1.2;
+}
+
+/* Container to center the loading text */
+.loading-container {
+  position: fixed;  /* Fixed position to center in the viewport */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);  /* Centers the container */
+  text-align: center;  /* Centers the text inside the container */
+}
+
+/* Stylish loading text */
+.loading-text {
+  font-size: 24px;
+  font-family: Verdana, sans-serif !important;
+  font-weight: bold;
+  color: #333;
+  letter-spacing: 2px;
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(45deg, #e58181, #ec82a8);
+  color: #fff;
+  border-radius: 50px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+/* Animation for the loading text */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.pending-request-wrapper {
+  padding-bottom: 20px; /* Adjust the value as needed */
+}

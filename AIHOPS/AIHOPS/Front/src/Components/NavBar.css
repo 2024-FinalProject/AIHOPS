@@ -1,0 +1,420 @@
+/* General Navbar Styling */
+.navbar {
+  background-color: #343a40; /* Dark grey background */
+  padding: 6px 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow for depth */
+  font-family: "Verdana", sans-serif; /* Modern font */
+  transition: background-color 0.3s ease-in-out; /* Smooth transition */
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+}
+
+/* Group the AIHOPS text and user info in the left section */
+.navbar-left {
+  display: flex;
+  align-items: center;
+}
+
+/* Home Link */
+.navbar-home {
+  color: white;
+  font-size: 28px;
+  font-weight: bold;
+  text-decoration: none;
+  padding: 6px 12px; /* Reduced padding */
+  transition: all 0.3s ease;
+  border-radius: 6px; /* Slightly rounded corners */
+}
+
+.navbar-home:hover {
+  background-color: #495057; /* Lighten background on hover */
+  transform: translateY(-2px);
+}
+
+.navbar-home.active {
+  background-color: #495057; /* Match the active state color */
+  color: #f8f9fa; /* Ensure text contrast */
+}
+
+/* Navbar Items Container */
+.navbar-nav {
+  list-style-type: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-item {
+  margin-left: 15px; /* Slightly reduced spacing */
+}
+
+/* Unified Button Styling */
+.nav-link {
+  color: white !important;
+  text-decoration: none;
+  font-size: 20px; /* Made buttons slightly larger */
+  padding: 10px 18px; /* Increased button size */
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Hover Effects */
+.nav-link:hover {
+  background-color: #495057; /* Lighten background */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Button-Specific Styles */
+.nav-button {
+  background-color: rgba(73, 80, 87, 0.2);
+  color: white;
+  font-size: 14px !important; /* Slightly larger */
+  font-family: "Verdana", sans-serif;
+  padding: 10px 18px; /* Increased button size */
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.nav-button:hover {
+  background-color: rgba(73, 80, 87, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Active Link Styling */
+.nav-link.active,
+.nav-button.active {
+  background-color: #495057 !important; /* Highlight active item */
+  color: #f8f9fa; /* Light text color */
+  font-weight: bold;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Subtle depth effect */
+}
+
+/* Ensure "Aihops" button displays as active */
+.nav-button:focus,
+.nav-link:focus {
+  outline: none;
+  background-color: #495057; /* Matches active state */
+}
+
+/* Mobile-Friendly Styling */
+@media (max-width: 768px) {
+  .navbar-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-item {
+    margin-left: 0;
+    margin-bottom: 8px;
+  }
+}
+
+/* Adjust spacing between AIHOPS and user info */
+.navbar-user-info {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+  font-size: 0.9rem; /* slightly smaller text */
+  color: #fff; /* or whatever text color you prefer */
+}
+
+.user-icon {
+  margin-right: 5px;
+  font-size: 1rem;
+}
+
+.user-email {
+  font-size: 1rem;
+}
+
+.new-message-dot {
+  position: absolute;
+  top: 0px;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  background-color: red;
+  border-radius: 50%;
+  box-shadow: 0 0 10px red;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Profile picture styling - fixed size matching the icon */
+.user-profile-picture {
+  width: 32px;  /* Match the size of the icon */
+  height: 32px; /* Match the size of the icon */
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 5px;
+  border: 2px solid #fff;
+  transition: all 0.2s ease;
+}
+
+/* Enhanced user icon when no profile picture */
+.user-icon {
+  margin-right: 5px;
+  font-size: 1.25rem;
+  background: rgba(255, 255, 255, 0.2);
+  width: 32px; /* Match this size with profile picture */
+  height: 32px; /* Match this size with profile picture */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 6px;
+  border: 2px solid #fff;
+  transition: all 0.2s ease;
+}
+
+/* Make the user info clickable and visually interactive */
+.navbar-user-info {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+  font-size: 0.9rem;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.navbar-user-info:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-user-info:hover .user-profile-picture,
+.navbar-user-info:hover .user-icon {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Profile Picture Upload Component Styles */
+.profile-picture-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: var(--card-background);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.profile-picture-container {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid #e0e0e0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-picture-preview,
+.current-profile-picture {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-picture-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+}
+
+/* Tab-style option selectors */
+.option-tabs {
+  display: flex;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid #e0e0e0;
+}
+
+.option-tab {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.option-tab:hover {
+  background-color: #e8e8e8;
+}
+
+.option-tab.active {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.option-content {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* File input and buttons */
+.file-input {
+  display: none;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.select-button {
+  background-color: #6b7280;
+  color: white;
+}
+
+.upload-button {
+  background-color: #10b981;
+  color: white;
+}
+
+.google-button {
+  background-color: #4285F4;
+  color: white;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.message {
+  margin-top: 15px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.message.error {
+  background-color: #fee2e2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+}
+
+.message.success {
+  background-color: #d1fae5;
+  color: #10b981;
+  border: 1px solid #a7f3d0;
+}
+
+/* Option content styles */
+.google-option, 
+.upload-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.google-option p,
+.upload-option p {
+  margin-bottom: 15px;
+  text-align: center;
+  color: #4b5563;
+}
+
+/* Increase spacing between profile picture and username */
+.navbar-user-info {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+  gap: 12px; /* Adds consistent spacing between items */
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Makes profile picture component in navbar properly sized with margin */
+.navbar-user-info .profile-picture-component {
+  margin-right: 4px; /* Extra spacing if needed */
+}
+
+/* If you're using FaUser with a specific class */
+.user-icon {
+  margin-right: 12px; /* Increased spacing */
+}
+
+/* Ensure the email text is properly spaced */
+.user-email {
+  font-size: 1rem;
+  margin-left: 4px; /* Extra left margin */
+}

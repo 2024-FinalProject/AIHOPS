@@ -1,0 +1,371 @@
+* {
+  box-sizing: border-box;
+}
+
+/* General Styles */
+body {
+  font-family: Verdana, sans-serif !important;
+}
+
+/* Container Styles */
+.my-projects-container {
+  padding: 20px 20px 0;
+  background-color: transparent;
+  font-family: Verdana, sans-serif !important;
+}
+
+/* Page Heading */
+.page-heading {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  font-family: Verdana, sans-serif !important;
+}
+
+/* Popup Styles */
+.popup-overlay,
+.description-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: Verdana, sans-serif !important;
+}
+
+.popup-content,
+.description-popup-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-out;
+  transform: scale(0.9);
+  position: relative;
+  font-family: Verdana, sans-serif !important;
+}
+
+.popup-content.open,
+.description-popup-content.open {
+  transform: scale(1);
+}
+
+.close-popup {
+  color: var(--text-color) !important;
+}
+
+.close-popup:hover {
+  color: #db1616 !important;
+}
+
+.close-popup,
+.close-description-popup {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  font-family: Verdana, sans-serif !important;
+}
+
+.popup-content h2 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #333;
+  font-family: Verdana, sans-serif !important;
+}
+
+.popup-content p,
+.description-popup-content p {
+  font-size: 1.1rem;
+  color: #555;
+  margin-bottom: 10px;
+  font-family: Verdana, sans-serif !important;
+}
+
+/* Popup Content - Flexbox Layout */
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Align items from top to bottom */
+  /* height: 100%; Ensure the content stretches to take the full height */
+  padding: 30px;
+  font-family: Verdana, sans-serif !important;
+}
+
+/* Start Voting Button Container */
+.start-vote-container {
+  margin-top: auto; /* Push the button to the bottom */
+  display: flex;
+  justify-content: flex-end; /* Align the button to the right */
+  font-family: Verdana, sans-serif !important;
+}
+
+/* Start Voting Button */
+.start-vote-btn {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  justify-content: right;
+  font-family: Verdana, sans-serif !important;
+}
+
+.start-vote-btn:hover {
+  background-color: #45a049;
+}
+
+/* Factor Navigation */
+.factor-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+  font-family: Verdana, sans-serif !important;
+}
+
+.prev-factor-btn,
+.next-factor-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: Verdana, sans-serif !important;
+}
+
+.prev-factor-btn:disabled,
+.next-factor-btn:disabled {
+  background-color: #ccc;
+}
+
+.prev-factor-btn:hover,
+.next-factor-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Checkboxes */
+.checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+  font-family: Verdana, sans-serif !important;
+}
+
+.checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-family: Verdana, sans-serif !important;
+}
+
+.checkmark {
+  font-size: 2rem;
+  color: green;
+  font-weight: bold;
+  position: relative;
+  top: 10px;
+  right: 10px;
+  font-family: Verdana, sans-serif !important;
+  margin-top: -15px;
+}
+
+/* Voting Type Selector Styles */
+.voting-type-selector {
+  background: linear-gradient(145deg, #ffffff, #f5f7ff);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  font-family: Verdana, sans-serif !important;
+}
+
+.voting-type-title {
+  font-size: 1.8rem;
+  color: #2d3748;
+  text-align: center;
+  margin-bottom: 30px;
+  font-weight: 700;
+  font-family: Verdana, sans-serif !important;
+}
+
+.voting-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+  font-family: Verdana, sans-serif !important;
+}
+
+.voting-type-btn {
+  padding: 15px 25px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(145deg, #4a90e2, #357abd);
+  color: white;
+  text-align: center;
+  font-family: Verdana, sans-serif !important;
+}
+
+.voting-type-btn:not(.disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+.voting-type-btn.disabled {
+  background: #e2e8f0;
+  color: #a0aec0;
+  cursor: not-allowed;
+}
+
+.voting-type-btn:first-child {
+  background: linear-gradient(145deg, #6366f1, #4f46e5);
+}
+
+.voting-type-btn:last-child {
+  background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+}
+
+.popup-content.wide {
+  width: 90%;
+  max-width: 1200px;
+  height: 80vh;
+  overflow-y: auto;
+  font-family: Verdana, sans-serif !important;
+}
+
+.chart-container {
+  height: 400px;
+  width: 100%;
+  font-family: Verdana, sans-serif !important;
+}
+
+.voting-options {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  font-family: Verdana, sans-serif !important;
+}
+
+.vote-progress-container {
+  margin-top: 20px;
+  width: 100%;
+  font-family: Verdana, sans-serif !important;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background-color: #e0e0e0; /* Light grey background */
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: Verdana, sans-serif !important;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: green !important; /* Force color */
+  transition: width 0.5s ease-in-out;
+}
+
+.default-text {
+  color: var(--header-color) !important;
+  font-family: Verdana, sans-serif !important;
+}
+
+/* Container to center the loading text */
+.loading-container {
+  position: fixed; /* Fixed position to center in the viewport */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centers the container */
+  text-align: center; /* Centers the text inside the container */
+}
+
+/* Stylish loading text */
+.loading-text {
+  font-size: 24px;
+  font-family: Verdana, sans-serif !important;
+  font-weight: bold;
+  color: #333;
+  letter-spacing: 2px;
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(45deg, #e58181, #ec82a8);
+  color: #fff;
+  border-radius: 50px;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.vote-btn {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  background-color: #f4f6fa;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vote-btn input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #4caf50;
+}
+
+.vote-btn:hover {
+  background-color: #e6ecf5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.vote-btn.voted {
+  background-color: #dff0d8;
+  border-color: #c3e6cb;
+  color: #2e7031;
+}
+
+/* Animation for the loading text */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

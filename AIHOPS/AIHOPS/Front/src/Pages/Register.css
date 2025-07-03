@@ -1,0 +1,211 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  margin: 0 auto;
+}
+
+.register-card {
+  background-color: var(--card-background) !important;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 375px;
+  text-align: center;
+  margin: -150px auto 0;
+}
+
+.register-card h2 {
+  margin-bottom: 1rem;
+}
+
+.register-card p {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  color: var(--text-color) !important;
+}
+
+.register-form-group {
+  margin-bottom: 0.5rem;
+  font-family: Verdana, sans-serif !important;
+}
+
+.register-form-group input {
+  width: 93%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  font-family: Verdana, sans-serif !important;
+}
+
+.register-submit-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1.2rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-family: Verdana, sans-serif !important;
+}
+
+.register-submit-btn:hover {
+  background-color: #0056b3;
+}
+
+.register-alert {
+  padding: 1rem;
+  margin-top: 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.success {
+  background-color: #28a745;
+  color: white;
+}
+
+.danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.term-conditions-btn {
+  background: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-decoration: underline;
+  margin-bottom: 10px;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent dark background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.terms-modal {
+  position: relative;
+  max-width: 800px;
+  background-color: var(--card-background) !important;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.terms-content {
+  height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  white-space: pre-wrap;
+  font-size: 20px;
+  line-height: 1.5;
+  font-weight: bold;
+}
+
+.accept-terms-btn {
+  display: block;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 1rem auto 0 auto;
+}
+
+.accept-terms-btn:disabled {
+  background-color: #aaa;
+  cursor: not-allowed;
+}
+
+.close-terms-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.close-terms-btn:hover {
+  color: #ff0000;
+}
+
+/* full-screen block */
+.processing-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+/* white box */
+.processing-box {
+  background: #fff;
+  padding: 24px 32px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* simple CSS spinner */
+.processing-box .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ddd;
+  border-top-color: #888;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the processing message */
+.processing-box p {
+  margin: 0;
+  font-size: 16px;
+  color: #333;
+}

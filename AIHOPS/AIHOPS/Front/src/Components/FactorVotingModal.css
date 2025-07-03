@@ -1,0 +1,895 @@
+/* Styles for option values in table */
+.factor-option-0 {
+  background-color: #fee2e2;
+  border: 2px solid #ef4444;
+  color: #991b1b;
+}
+
+.factor-option-0.selected {
+  background-color: #fecaca;
+  border-color: #dc2626;
+  box-shadow: 0 0 0 2px #fca5a5;
+  color: white;
+}
+
+.factor-option-1 {
+  background-color: #ffedd5;
+  border: 2px solid #f97316;
+  color: #c2410c;
+}
+
+.factor-option-1.selected {
+  background-color: #fed7aa;
+  border-color: #ea580c;
+  box-shadow: 0 0 0 2px #fdba74;
+  color: white;
+}
+
+.factor-option-2 {
+  background-color: #d6e139e8;
+  border: 2px solid #adbb2f;
+  color: #065f46;
+}
+
+.factor-option-2.selected {
+  background-color: #d7e81be8;
+  border-color: #adbb2f;
+  box-shadow: 0 0 0 2px #e5e76e;
+  color: white;
+}
+
+.factor-option-3 {
+  background-color: #86e3b3e8;
+  border: 2px solid #10b981;
+  color: #065f46;
+}
+
+.factor-option-3.selected {
+  background-color: #1fe488e8;
+  border-color: #059669;
+  box-shadow: 0 0 0 2px #6ee7b7;
+  color: white;
+}
+
+.factor-option-4 {
+  background-color: #25f41ee8;
+  border: 2px solid #2bce26e8 !important;
+  color: #000000;
+}
+
+.factor-option-4.selected {
+  background-color: #09ff00e9;
+  border: 2px solid #2bce26e8;
+  color: white;
+  box-shadow: 0 0 0 2px #27a323e8;
+} /* Improved Factor Voting Modal Styles */
+
+/* Modal overlay and content */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: transparent;
+  backdrop-filter: blur(1.5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--voting-on-factor-page-background) !important;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh; /* Limit height to 90% of viewport height */
+  padding: 20px;
+  position: relative;
+  overflow-y: auto; /* Enable vertical scrolling */
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+}
+
+/* Custom scrollbar for the modal content */
+.modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 8px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #3b82f6;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: #2563eb;
+}
+
+.close-modal {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: white;
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #666;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.close-modal:hover {
+  background-color: #f0f0f0;
+  color: #333;
+  transform: scale(1.1);
+}
+
+.modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 14px;
+  color: #1a365d !important;
+}
+
+/* Tabs styling */
+.factor-tabs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  color: black !important;
+}
+
+.tabs-nav-button {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background-color: #e1effe;
+  color: #3b82f6;
+  cursor: pointer;
+  margin: 0 8px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.tabs-nav-button.active:hover {
+  background-color: #bfdbfe;
+  transform: scale(1.1);
+}
+
+.tabs-nav-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #e5e7eb;
+  color: #9ca3af;
+}
+
+.factor-tabs-container {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px 4px;
+  padding-bottom: 16px; /* Add extra padding to make room for the scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+  position: relative;
+}
+
+/* Make the scrollbar container visible */
+.factor-tabs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px; /* Extra space below to prevent overflow issues */
+  border-bottom: 1px solid #e5e7eb; /* Add a bottom border to make it obvious there's a scrollable area */
+  padding-bottom: 6px;
+}
+
+/* Custom scrollbar for Webkit browsers (Chrome, Safari, newer Edge) */
+.factor-tabs-container::-webkit-scrollbar {
+  height: 10px; /* Increased height for better visibility */
+  width: 10px;
+}
+
+.factor-tabs-container::-webkit-scrollbar-track {
+  background: #ebeae5; /* Light gray track */
+  border-radius: 10px;
+}
+
+.factor-tabs-container::-webkit-scrollbar-thumb {
+  background-color: #3b82f6; /* Bright blue thumb */
+  border-radius: 10px;
+  border: 2px solid #e5e7eb; /* Creates a nice border effect */
+}
+
+/* Add hover state for scrollbar thumb */
+.factor-tabs-container::-webkit-scrollbar-thumb:hover {
+  background-color: #2563eb; /* Darker blue on hover */
+}
+
+.factor-tab:hover {
+  background-color: #f3f4f6;
+  transform: translateY(-2px);
+}
+
+.factor-tab.selected {
+  background-color: #e1effe;
+  color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.vote-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+}
+
+.vote-indicator-0 {
+  background-color: #ef4444;
+}
+
+.vote-indicator-1 {
+  background-color: #f97316;
+}
+
+.vote-indicator-2 {
+  background-color: #10b981;
+}
+
+.vote-indicator-3 {
+  background-color: #3b82f6;
+}
+
+.vote-indicator-4 {
+  background-color: #6366f1;
+}
+
+/* Factor tabs wrapper */
+.factor-tabs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.tabs-nav-button {
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background-color: #e1effe;
+  color: #3b82f6;
+  cursor: pointer;
+  margin: 0 6px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.factor-tabs-container {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 6px 4px;
+  padding-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 #e5e7eb;
+  position: relative;
+}
+
+.factor-tab {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background-color: white;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  font-size: 14px;
+}
+
+/* Progress bar */
+.progress-bar-container {
+  height: 6px;
+  background-color: #e5e7eb;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #3b82f6;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  min-width: 5px;
+}
+
+/* Progress text inside scroll indicator container */
+.scroll-indicator-container {
+  width: 100%;
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.scroll-indicator-track {
+  width: 100%;
+  height: 4px;
+  background-color: #e5e7eb;
+  border-radius: 2px;
+  position: relative;
+}
+
+.scroll-indicator-thumb {
+  position: absolute;
+  height: 100%;
+  background-color: #3b82f6;
+  border-radius: 2px;
+  top: 0;
+  min-width: 30px;
+  transition: left 0.1s ease;
+}
+
+.progress-text {
+  text-align: center;
+  font-size: 13px;
+  font-weight: bolder;
+  color: black;
+  margin-top: -5px;
+}
+
+/* Make factor content more compact */
+.factor-content {
+  background-color: var(--voting-on-factor-page-background2);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.factor-content:last-child {
+  margin-bottom: 0;
+}
+
+.factor-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.factor-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+  background-color: #2563eb;
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.factor-description {
+  color: white;
+  background-color: #3b82f6;
+  padding: 8px;
+  border-radius: 6px;
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Factor table styling - more compact */
+.factor-table-container {
+  margin-bottom: 0px;
+  overflow-x: auto;
+}
+
+.factor-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-size: 13px;
+}
+
+.factor-table th {
+  background-color: #f3f4f6;
+  padding: 8px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.factor-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  border-right: 1px solid #f0f0f0;
+  vertical-align: middle;
+  text-align: left; /* Ensure text is aligned to the left */
+}
+
+.factor-table tr:last-child td {
+  border-bottom: none;
+}
+
+.factor-table tr:last-child td {
+  border-bottom: none;
+}
+
+.factor-table .vote-cell {
+  width: 80px; /* Reduced from original 50px */
+  padding: 12px 10px; /* Increased horizontal padding */
+  text-align: center; /* Center align the vote option */
+  vertical-align: middle;
+}
+
+.factor-table .description-cell {
+  width: 25%;
+  color: black;
+  text-align: center;
+}
+
+.factor-table .explanation-cell {
+  color: #4b5563;
+  width: 55%;
+  text-align: center;
+}
+
+.factor-table tr.selected-row {
+  background-color: #f0f9ff;
+}
+
+.factor-table tr:hover:not(.selected-row) {
+  background-color: #f9fafb;
+}
+
+/* Make entire row clickable */
+.factor-table .vote-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.factor-table .vote-row:hover {
+  background-color: #f9fafb;
+}
+
+.factor-table .vote-row.selected-row {
+  background-color: #f0f9ff;
+}
+
+.factor-table .vote-row.selected-row:hover {
+  background-color: #e0f2fe;
+}
+
+/* Option in table styling */
+.factor-table .factor-option {
+  width: 36px;
+  height: 36px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  align-self: flex-start !important;
+}
+
+.factor-table .factor-option:hover:not(.selected) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Navigation buttons with submit button in center */
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  gap: 10px;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  flex: 0 0 auto;
+}
+
+.prev-button {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.prev-button:hover:not(.disabled) {
+  background-color: #e5e7eb;
+}
+
+.next-button {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.next-button:hover:not(.disabled) {
+  background-color: #bfdbfe;
+}
+
+.nav-button.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+/* Submit factor button changed to Vote for this Factor */
+.vote-factor-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  max-width: 250px;
+  text-align: center;
+}
+
+.vote-factor-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 3px 5px rgba(59, 130, 246, 0.25);
+}
+
+.vote-factor-button:active {
+  transform: translateY(0);
+}
+
+.factor-tabs-scroll-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.submit-button:hover:not(.disabled) {
+  background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+}
+
+.submit-button:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.submit-button.disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  padding: 20px 20px 10px 20px; /* Reduce bottom padding */
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 1200px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    padding: 16px;
+    width: 95%;
+  }
+
+  .voting-options-grid {
+    gap: 6px;
+  }
+
+  .factor-option {
+    padding: 8px 4px;
+  }
+
+  .option-value {
+    font-size: 20px;
+  }
+
+  .option-label {
+    font-size: 10px;
+  }
+
+  .nav-button {
+    padding: 6px 12px;
+    font-size: 14px;
+  }
+
+  .submit-button {
+    width: 100%;
+  }
+}
+
+.vote-option-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center the option and label */
+  gap: 6px;
+  margin: 0 auto; /* Center in cell */
+}
+
+.vote-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #4b5563;
+  word-break: break-word;
+  text-align: center;
+  white-space: nowrap; /* Prevent wrapping for short labels */
+  max-width: 100%;
+}
+
+/* Adjust the vote cell to accommodate the label */
+.factor-table .vote-cell {
+  width: 20px;
+  padding: 12px 6px;
+  text-align: left;
+  vertical-align: top;
+}
+
+/* Submit button disabled state */
+.vote-factor-button:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Adjust the popup message styling for multi-line text */
+.confirmation-message {
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+/* Table headers */
+.factor-table th {
+  background-color: #f3f6f4;
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.vote-header {
+  text-align: center !important;
+  width: 60px;
+}
+
+/* Table rows */
+.factor-table-row {
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.factor-table-row:hover {
+  background-color: #f9fafb;
+}
+
+.factor-table-row.selected-row {
+  background-color: #f0f9ff;
+}
+
+/* Option cells */
+.vote-cell {
+  width: 50px;
+  text-align: left;
+  vertical-align: middle;
+  padding: 12px 8px;
+}
+
+.description-cell,
+.explanation-cell {
+  padding: 12px;
+  vertical-align: top;
+}
+
+/* Vote option styling */
+.vote-option-container {
+  display: flex;
+  flex-direction: flex-start;
+  align-items: center;
+  gap: 4px;
+}
+
+.vote-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #4b5563;
+  text-align: center;
+  white-space: normal; /* allow wrapping */
+  max-width: 70px; /* optional: increase size */
+}
+
+/* Alternating row colors for better readability */
+.factor-table-row:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+.factor-table-row:nth-child(even).selected-row,
+.factor-table-row:nth-child(odd).selected-row {
+  background-color: #f0f9ff;
+}
+
+/* ─── Fully reset button appearance ─── */
+.nav-button,
+.tabs-nav-button {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  outline: none !important;
+  border: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Restore actual colors ─── */
+.prev-button {
+  background-color: #f3f4f6 !important;
+  color: #4b5563 !important;
+}
+.prev-button:active {
+  background-color: #e5e7eb !important;
+}
+
+.next-button {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+}
+.next-button:active {
+  background-color: #bfdbfe !important;
+}
+
+.tabs-nav-button {
+  background-color: #e1effe !important;
+  color: #3b82f6 !important;
+}
+.tabs-nav-button:active {
+  background-color: #bfdbfe !important;
+}
+
+.pyramid-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.factor-tabs-pyramid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 900px;
+  margin: 0 auto;
+  margin-bottom: 16px;
+}
+
+.factor-button {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  max-width: 160px;
+  min-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.factor-button .factor-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factor-button .vote-indicator {
+  margin-left: 8px;
+  background-color: #7fc68d;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.factor-button.selected {
+  border: 2px solid #333;
+}
