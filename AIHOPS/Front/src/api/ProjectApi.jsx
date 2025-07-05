@@ -1,5 +1,5 @@
 import axios from "./axiosInstance";
-const API_URL = "http://localhost:5555";
+import { API_URL } from "../constants";
 
 export const getProjects = async () => {
   return await axios.get(`${API_URL}/projects`, {

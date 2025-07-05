@@ -15,8 +15,8 @@ class Gmailor:
         self.codes_users = ThreadSafeDict()
         self.password_recovery = ThreadSafeDict()
         self.lock = RLock()
-        self.local = 'http://localhost:5173/'
-        self.public = 'https://aihops.cs.bgu.ac.il/'
+        # self.local = 'http://localhost:5173/'
+        self.local = 'https://aihops.cs.bgu.ac.il/'
 
     def register(self, email, length=6):
         with self.lock:
